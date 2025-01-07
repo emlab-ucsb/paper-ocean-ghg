@@ -1,6 +1,9 @@
 \documentclass{article}
 
+\usepackage[margin=1in]{geometry}
 \usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{float}
 
 \title{Quantifying environmental trends: Disentangling changes in  impact from changes in monitoring}
 \author{emLab and GFW}
@@ -10,13 +13,21 @@
 \maketitle
 
 \begin{abstract}
-Quantifying environmental trends is a fundamental aspect of assessing and managing environmental impacts. This requires a monitoring scheme for measuring changes over time. As technology improves, monitoring itself may also change over time, making it challenging to disentangle actual environmental changes from changes in monitoring. As improved technology allows for more and more comprehensive monitoring over time, this may lead to overestimates in the trends of environmental problems. Combining multiple monitoring data sources has the potential to reduce this bias in assessing trends. Here we develop a novel method for assessing trends in global ocean-based greenhouse gas (GHG) emissions by combining two unique satellite-based monitoring sources: 1) Automatic Identification System (AIS) to estimate vessel-level emissions for boats that broadcast their positions using AIS; and 2) synthetic aperture radar (SAR) data from the Sentinel-1 satellite constellation to estimate emissions for boats that do not use AIS. When only using AIS, which is the currently accepted best practice for measuring global ocean-based GHG emissions, emissions appear to be increasing steadily over time, showing a  \textbf{X\%} increase in global CO2 emissions from 2016-2024. However, when also adding in emissions from vessels that don't use AIS, the global trend in CO2 emissions appears to be more stable, showing only a \textbf{Y\%} increase from 2016-2024. Our approach therefore not only provides a robust method for quantifying high-resolution spatiotemporal emissions data that could be used for a variety of interventions for mitigation emissions, but also provides an example of how multiple data sources can be used to disentangle actual environmental changes from improved monitoring.
+
+ Quantifying environmental trends is a fundamental aspect of assessing and managing environmental impacts. This requires a monitoring scheme for measuring changes over time. As technology improves, monitoring itself may also change over time, making it challenging to disentangle actual environmental changes from changes in monitoring. As improved technology allows for more and more comprehensive monitoring over time, this may lead to overestimates in the trends of environmental problems. Combining multiple monitoring data sources has the potential to reduce this bias in assessing trends. Here we develop a novel method for assessing trends in global ocean-based greenhouse gas (GHG) emissions by combining two unique satellite-based monitoring sources: 1) Automatic Identification System (AIS) to estimate vessel-level emissions for boats that broadcast their positions using AIS; and 2) synthetic aperture radar (SAR) data from the Sentinel-1 satellite constellation to estimate emissions for boats that do not use AIS. When only using AIS, which is the currently accepted best practice for measuring global ocean-based GHG emissions, emissions appear to be increasing steadily over time, showing a  33\% increase in global CO2 emissions from 2016-2023. However, when also adding in emissions from vessels that don't use AIS, the global trend in CO2 emissions appears to be more stable, showing only a 21\% increase from 2016-203. Our approach therefore not only provides a robust method for quantifying high-resolution spatiotemporal emissions data that could be used for a variety of interventions for mitigation emissions, but also provides an example of how multiple data sources can be used to disentangle actual environmental changes from improved monitoring.
 
 \end{abstract}
 
 \section{Introduction}
 
 \section{Results}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{qmd/quantifying_ghg_emissions_files/figure-pdf/fig-total-annual-emissions-by-fleet-1.png}
+    \caption{Total global annual CO2 emissions by fleet. The percent change from 2016 to 2023 for each fleet is shown next to its line.}
+    \label{fig:fig-total-annual-emissions-by-fleet}
+\end{figure}
 
 \section{Discussion}
 
