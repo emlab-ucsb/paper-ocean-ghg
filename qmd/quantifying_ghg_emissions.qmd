@@ -1,0 +1,96 @@
+---
+title: "Quantifying environmental trends: Disentangling changes in  impact from changes in monitoring"
+author: "emLab, UCSB and GFW"
+date: last-modified
+date-format: "[Last Updated on] MMMM DD, YYYY"
+format:
+  pdf:
+    toc: true
+    number-sections: true
+    colorlinks: true
+editor_options: 
+  chunk_output_type: console
+execute: 
+  cache: true
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+```{r, echo = FALSE, results = FALSE, message = FALSE, warning = FALSE, cache = FALSE}
+#| label: document-setup
+
+# Set default chunk options
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, echo = FALSE, dev = "png")
+
+# Load librariers
+library(ggplot2)
+
+# Set consistent theme for all plots
+theme_plot <- function(){
+  theme_minimal() %+replace%
+    theme(axis.title.x = element_text(face = "bold"),
+          axis.title.y = element_text(angle = 90,
+                                      face = "bold",
+                                      vjust = 3),
+          strip.text.x = element_text(angle = 0,
+                                      face = "bold"),
+          strip.text.y = element_text(angle = 0,
+                                      face = "bold"))}
+```
+
+```{r}
+#| label: load-data
+
+# Annual CO2 emissions data for AIS-broadcasting fleet and dark fleet
+annual_co2_emissions <- here::here("data/processed/annual_co2_emissions.csv") |>
+  readr::read_csv() |>
+  dplyr::mutate(total_co2_emissions = emissions_co2_mt + emissions_co2_dark_mt) |>
+  tidyr::pivot_longer(cols = -year,
+                      names_to = "fleet",
+                      values_to = "co2_emissions") |>
+  dplyr::mutate(fleet = dplyr::case_when(stringr::str_detect(fleet,"dark") ~ "Non-broadcasting",
+                                         stringr::str_detect(fleet,"total") ~ "Both fleets",
+                                  TRUE ~ "AIS-broadcasting"))|>
+  dplyr::filter(year < 2024)
+```
+
+# Paper figures
+
+```{r}
+#| label: fig-total-annual-emissions-by-fleet
+#| fig-cap: Total global annual CO2 emissions by fleet. The percent change from 2016 to 2023 for each fleet is shown next to its line.
+#| fig-width: 7.5
+#| fig-height: 4
+
+# Calculate the total percent change in emissions by fleet
+total_percent_change_by_fleet <- annual_co2_emissions |>
+  dplyr::filter(year %in% c(2016,2023)) |>
+  tidyr::pivot_wider(names_from = year,
+                     values_from = co2_emissions) |>
+  dplyr::mutate(percent_change = round(100*(`2023` - `2016`)/`2016`),
+                percent_change = ifelse(percent_change>0,
+                                        glue::glue("+{percent_change}%"),
+                                        glue::glue("{percent_change}%")))
+
+annual_co2_emissions |>
+  ggplot(aes(x = year, y = co2_emissions, color = fleet)) +
+  geom_line() +
+  geom_text(data = total_percent_change_by_fleet,
+            aes(label = percent_change,
+                y = `2023`,
+                x = 2023.5),
+            show.legend = FALSE) +
+  scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6),
+                     limits = c(0,NA)) + 
+  scale_x_continuous(breaks = unique(annual_co2_emissions$year)) +
+  scale_color_brewer(type = "qual",
+                     palette = "Dark2",
+                     breaks = c("Both fleets","AIS-broadcasting","Non-broadcasting")) +
+  theme_plot() +
+  labs(x = "",
+       y = "Annual global CO2 emissions\n(millions metric tonnes)",
+       color = "Fleet") +
+  theme(panel.grid.minor.x = element_blank())
+```
+
