@@ -66,7 +66,7 @@ annual_co2_emissions <- glue::glue("{project_directory}/data/processed/annual_co
                       values_to = "co2_emissions") |>
   dplyr::mutate(fleet = dplyr::case_when(stringr::str_detect(fleet,"dark") ~ "Non-broadcasting",
                                          stringr::str_detect(fleet,"total") ~ "Both fleets",
-                                  TRUE ~ "AIS-broadcasting")) |>
+                                         TRUE ~ "AIS-broadcasting")) |>
   dplyr::filter(year < 2024)
 
 annual_ais_co2_emissions_by_vessel <- glue::glue("{project_directory}/data/processed/annual_ais_co2_emissions_by_vessel.csv") |>
@@ -128,74 +128,8 @@ total_percent_change_by_fleet |>
 ```
 
 ```{r}
-#| label: fig-total-annual-emissions-by-earliest-operation-year
-#| fig-cap: Total global annual CO2 emissions by the set of vessels that have been operating since a given year, where each line is colored by the earliest operation year. The percent change from the earliest year to 2023 is shown next to its line.
-#| fig-width: 7.5
-#| fig-height: 4
-
-
-# For vessels that have been in operation since a given year, calculate their annual emissions
-# Do this for every where from 2015 to 2022
-annual_emissions_by_fleet_year <- purrr::map_df(seq(min(annual_ais_co2_emissions_by_vessel$year),
-               max(annual_ais_co2_emissions_by_vessel$year)-1),
-               function(year_tmp){
-                # Find those vessels that have been operating since this
-                year_fleet <- annual_ais_co2_emissions_by_vessel |>
-                  dplyr::filter(year == year_tmp) |>
-                  dplyr::select(ssvid)
-                # For these vessels, calculate annual emissions
-                annual_ais_co2_emissions_by_vessel |>
-                  dplyr::filter(year >= year_tmp) |>
-                  dplyr::inner_join(year_fleet, by = "ssvid") |>
-                  dplyr::group_by(year) |>
-                  dplyr::summarize(emissions_co2_mt = sum(emissions_co2_mt),
-                                  n_distinct_vessels = dplyr::n_distinct(ssvid)) |>
-                  dplyr::ungroup() |>
-                  dplyr::mutate(fleet_year = year_tmp)
-               } )
-
-# Calculate the total percent change in emissions by each operation year fleet
-total_percent_change_by_fleet_year <- annual_emissions_by_fleet_year |>
-  dplyr::group_by(fleet_year) |>
-  dplyr::filter(year %in% max(year) | year %in% min(year)) |>
-  dplyr::arrange(year) |>
-  dplyr::mutate(year_order = dplyr::row_number()) |>
-  dplyr::ungroup() |>
-  dplyr::select(-year) |>
-  tidyr::pivot_wider(names_from = year_order,
-                     values_from = c(emissions_co2_mt,n_distinct_vessels)) |>
-  dplyr::mutate(percent_change_emissions = round(100*(emissions_co2_mt_2 - emissions_co2_mt_1)/emissions_co2_mt_1),
-                percent_change_emissions = ifelse(percent_change_emissions>0,
-                                        glue::glue("+{percent_change_emissions}%"),
-                                        glue::glue("{percent_change_emissions}%"))) |>
-  dplyr::mutate(percent_change_n_distinct_vessels = round(100*(n_distinct_vessels_2 - n_distinct_vessels_1)/n_distinct_vessels_1),
-                percent_change_n_distinct_vessels = ifelse(percent_change_n_distinct_vessels>0,
-                                        glue::glue("+{percent_change_n_distinct_vessels}%"),
-                                        glue::glue("{percent_change_n_distinct_vessels}%")))
-
-annual_emissions_by_fleet_year |>
-  ggplot(aes(x = year, y = emissions_co2_mt, color = as.factor(fleet_year), group = fleet_year)) +
-  geom_line() +
-    geom_text(data = total_percent_change_by_fleet_year,
-            aes(label = percent_change_emissions,
-                y = emissions_co2_mt_2,
-                x = 2023.5),
-            show.legend = FALSE) +
-  paletteer::scale_color_paletteer_d(palette = "jcolors::pal10",
-  guide = guide_legend(reverse = TRUE)) +
-  scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6),
-                     limits = c(0,1.2e9)) + 
-  scale_x_continuous(breaks = unique(annual_emissions_by_fleet_year$year)) +
-  theme_plot() +
-  labs(x = "",
-       y = "Annual CO2 emissions by vessels\noperating since a given year\n(millions metric tonnes)",
-       color = "Earliest\noperation\nyear") +
-  theme(panel.grid.minor.x = element_blank())
-```
-
-```{r}
 #| label: fig-total-annual-unique-vessels-engine-power
-#| fig-cap: Annual unique number of operating vessels (top panel); and annual total engine power for those vessels (killowatt). The percent change from 2015 to 2023 is shown next to each line.
+#| fig-cap: Annual unique number of AIS-broadcasting vessels (top panel); and annual total engine power for those vessels (killowatt). The percent change from 2015 to 2023 is shown next to each line.
 #| fig-width: 7.5
 #| fig-height: 4
 
@@ -221,7 +155,7 @@ total_percent_change_vessel_summary  <-annual_vessel_summary_by_year |>
 annual_vessel_summary_by_year|>
   ggplot(aes(x = year, y = value)) +
   geom_line() +
-    geom_text(data = total_percent_change_vessel_summary,
+  geom_text(data = total_percent_change_vessel_summary,
             aes(label = percent_change,
                 y = end_value,
                 x = 2023.5),
@@ -237,21 +171,85 @@ annual_vessel_summary_by_year|>
 ```
 
 ```{r}
+#| label: fig-total-annual-emissions-by-earliest-operation-year
+#| fig-cap: Total global annual CO2 emissions by the set of AIS-broadcasting vessels that have been operating since a given year, where each line is colored by the earliest operation year. The percent change from the earliest year to 2023 is shown next to its line.
+#| fig-width: 7.5
+#| fig-height: 4
+
+
+# For vessels that have been in operation since a given year, calculate their annual emissions
+# Do this for every where from 2015 to 2022
+annual_emissions_by_fleet_year <- purrr::map_df(seq(min(annual_ais_co2_emissions_by_vessel$year),
+                                                    max(annual_ais_co2_emissions_by_vessel$year)-1),
+                                                function(year_tmp){
+                                                  # Find those vessels that have been operating since this
+                                                  year_fleet <- annual_ais_co2_emissions_by_vessel |>
+                                                    dplyr::filter(year == year_tmp) |>
+                                                    dplyr::select(ssvid)
+                                                  # For these vessels, calculate annual emissions
+                                                  annual_ais_co2_emissions_by_vessel |>
+                                                    dplyr::filter(year >= year_tmp) |>
+                                                    dplyr::inner_join(year_fleet, by = "ssvid") |>
+                                                    dplyr::group_by(year) |>
+                                                    dplyr::summarize(emissions_co2_mt = sum(emissions_co2_mt),
+                                                                     n_distinct_vessels = dplyr::n_distinct(ssvid)) |>
+                                                    dplyr::ungroup() |>
+                                                    dplyr::mutate(fleet_year = year_tmp)
+                                                } )
+
+# Calculate the total percent change in emissions by each operation year fleet
+total_percent_change_by_fleet_year  <-annual_emissions_by_fleet_year  |>
+  tidyr::pivot_longer(-c(fleet_year,year)) |>
+  dplyr::group_by(fleet_year) |>
+  dplyr::filter(year %in% max(year) | year %in% min(year)) |>
+  dplyr::arrange(year) |> 
+  dplyr::ungroup() |>
+  dplyr::group_by(name,fleet_year) |> 
+  dplyr::summarize(end_value = value[2],
+                   percent_change = round(100*(value[2] - value[1])/value[1])) |>
+  dplyr::ungroup() |>
+  dplyr::mutate(percent_change = ifelse(percent_change>0,
+                                        glue::glue("+{percent_change}%"),
+                                        glue::glue("{percent_change}%")))
+
+annual_emissions_by_fleet_year |>
+  ggplot(aes(x = year, y = emissions_co2_mt, color = as.factor(fleet_year), group = fleet_year)) +
+  geom_line() +
+  geom_text(data = total_percent_change_by_fleet_year |>
+              dplyr::filter(name == "emissions_co2_mt"),
+            aes(label = percent_change,
+                y = end_value,
+                x = 2023.5),
+            show.legend = FALSE) +
+  paletteer::scale_color_paletteer_d(palette = "jcolors::pal10",
+                                     guide = guide_legend(reverse = TRUE)) +
+  scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6),
+                     limits = c(0,1.2e9)) + 
+  scale_x_continuous(breaks = unique(annual_emissions_by_fleet_year$year)) +
+  theme_plot() +
+  labs(x = "",
+       y = "Annual CO2 emissions by vessels\noperating since a given year\n(millions metric tonnes)",
+       color = "Earliest\noperation\nyear") +
+  theme(panel.grid.minor.x = element_blank())
+```
+
+```{r}
 #| label: fig-total-annual-unique-vessels-by-earliest-operation-year
-#| fig-cap: Annual unique number of operating vessels, where each line is colored by the earliest operation year. The percent change from the earliest year to 2023 is shown next to its line.
+#| fig-cap: Annual unique number of AIS-broadcasting vessels, where each line is colored by the earliest operation year. The percent change from the earliest year to 2023 is shown next to its line.
 #| fig-width: 7.5
 #| fig-height: 4
 
 annual_emissions_by_fleet_year |>
   ggplot(aes(x = year, y = n_distinct_vessels, color = as.factor(fleet_year), group = fleet_year)) +
   geom_line() +
-    geom_text(data = total_percent_change_by_fleet_year,
-            aes(label = percent_change_n_distinct_vessels,
-                y = n_distinct_vessels_2,
+  geom_text(data = total_percent_change_by_fleet_year |>
+              dplyr::filter(name == "n_distinct_vessels"),
+            aes(label = percent_change,
+                y = end_value,
                 x = 2023.5),
             show.legend = FALSE) +
   paletteer::scale_color_paletteer_d(palette = "jcolors::pal10",
-  guide = guide_legend(reverse = TRUE)) +
+                                     guide = guide_legend(reverse = TRUE)) +
   scale_y_continuous(labels = scales::comma,
                      limits = c(0,NA)) + 
   scale_x_continuous(breaks = unique(annual_emissions_by_fleet_year$year)) +
