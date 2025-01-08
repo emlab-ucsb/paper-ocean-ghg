@@ -128,18 +128,21 @@ total_percent_change_by_fleet |>
 ```
 
 ```{r}
-#| label: fig-total-annual-unique-vessels-engine-power
-#| fig-cap: Annual unique number of AIS-broadcasting vessels (top panel); and annual total engine power for those vessels (killowatt). The percent change from 2015 to 2023 is shown next to each line.
+#| label: fig-total-annual-unique-vessels-hours-power
+#| fig-cap: Annual unique number of AIS-broadcasting vessels (top panel); annual number of operating hours for AIS-broadcasting vessels (middle panel); and annual total engine power for those vessels (killowatt). The percent change from 2015 to 2023 is shown next to each line.
 #| fig-width: 7.5
 #| fig-height: 4
 
 annual_vessel_summary_by_year <- annual_ais_co2_emissions_by_vessel |>
   dplyr::group_by(year) |>
   dplyr::summarize(n_distinct_vessels = dplyr::n_distinct(ssvid),
-                   main_engine_power_kw = sum(main_engine_power_kw)) |>
+                   main_engine_power_kw = sum(main_engine_power_kw),
+                   hours = sum(hours)) |>
   dplyr::ungroup()   |>
   tidyr::pivot_longer(-year) |>
-  dplyr::mutate(name = ifelse(stringr::str_detect(name,"power"),"Total main engine power for AIS-broadcasting vessels(kW)","Number unique AIS-broadcasting vessels"))
+  dplyr::mutate(name = dplyr::case_when(stringr::str_detect(name,"power") ~ "Total main engine power for AIS-broadcasting vessels (kW)",
+                                        stringr::str_detect(name,"vessels") ~ "Number unique AIS-broadcasting vessels",
+                TRUE ~ "Operating hours for AIS-broadcasting vessels"))
 
 total_percent_change_vessel_summary  <-annual_vessel_summary_by_year |>
   dplyr::filter(year %in% max(year) | year %in% min(year)) |>
