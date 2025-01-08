@@ -1,4 +1,19 @@
-# This function pulls the necessary GFW data and saves it locally as a CSVs
+data_directory_base <-  ifelse(Sys.info()["nodename"] == "quebracho" | Sys.info()["nodename"] == "sequoia",
+                               "/home/emlab",
+                               # Otherwise, set the directory for local machines based on the OS
+                               # If using Mac OS, the directory will be automatically set as follows
+                               ifelse(Sys.info()["sysname"]=="Darwin",
+                                      "/Users/Shared/nextcloud/emLab",
+                                      # If using Windows, the directory will be automatically set as follows
+                                      ifelse(Sys.info()["sysname"]=="Windows",
+                                             "G:/Shared\ drives/nextcloud/emLab",
+                                             # If using Linux, will need to manually modify the following directory path based on their user name
+                                             # Replace your_username with your local machine user name
+                                             "/home/your_username/Nextcloud")))
+
+project_directory <- glue::glue("{data_directory_base}/projects/current-projects/paper-ocean-ghg")
+
+#This function pulls the necessary GFW data and saves it locally as a CSVs
 # This requires special BigQuery permissions to run, so it is not included in the main analysis pipeline
 
 bq_project <- "world-fishing-827" # BQ project where data lives
@@ -21,8 +36,7 @@ download_gfw_data <- function(query_file_name,file_output_name) {
   
   bigrquery::bq_project_query(billing_project, query) |>
     bigrquery::bq_table_download(n_max = Inf) |>
-    arrow::write_parquet(here::here(glue::glue("data/processed/{file_output_name}.parquet")),
-  compression = "gzip")
+    readr::write_csv(glue::glue("{project_directory}/data/processed/{file_output_name}.csv"))
 }
 
 # Annual CO2 emissions data for AIS-broadcasting fleet and dark fleet

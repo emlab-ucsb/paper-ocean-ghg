@@ -37,14 +37,29 @@ theme_plot <- function(){
                                       face = "bold"),
           strip.text.y = element_text(angle = 0,
                                       face = "bold"))}
+
+data_directory_base <-  ifelse(Sys.info()["nodename"] == "quebracho" | Sys.info()["nodename"] == "sequoia",
+                               "/home/emlab",
+                               # Otherwise, set the directory for local machines based on the OS
+                               # If using Mac OS, the directory will be automatically set as follows
+                               ifelse(Sys.info()["sysname"]=="Darwin",
+                                      "/Users/Shared/nextcloud/emLab",
+                                      # If using Windows, the directory will be automatically set as follows
+                                      ifelse(Sys.info()["sysname"]=="Windows",
+                                             "G:/Shared\ drives/nextcloud/emLab",
+                                             # If using Linux, will need to manually modify the following directory path based on their user name
+                                             # Replace your_username with your local machine user name
+                                             "/home/your_username/Nextcloud")))
+
+project_directory <- glue::glue("{data_directory_base}/projects/current-projects/paper-ocean-ghg")                           
 ```
 
 ```{r}
 #| label: load-data
 
 # Annual CO2 emissions data for AIS-broadcasting fleet and dark fleet
-annual_co2_emissions <- here::here("data/processed/annual_co2_emissions.parquet") |>
-  arrow::read_parquet() |>
+annual_co2_emissions <- glue::glue("{project_directory}/data/processed/annual_co2_emissions.csv") |>
+  readr::read_csv() |>
   dplyr::mutate(total_co2_emissions = emissions_co2_mt + emissions_co2_dark_mt) |>
   tidyr::pivot_longer(cols = -year,
                       names_to = "fleet",
@@ -54,8 +69,8 @@ annual_co2_emissions <- here::here("data/processed/annual_co2_emissions.parquet"
                                   TRUE ~ "AIS-broadcasting")) |>
   dplyr::filter(year < 2024)
 
-annual_ais_co2_emissions_by_vessel <- here::here("data/processed/annual_ais_co2_emissions_by_vessel.parquet") |>
-  arrow::read_parquet() |>
+annual_ais_co2_emissions_by_vessel <- glue::glue("{project_directory}/data/processed/annual_ais_co2_emissions_by_vessel.csv") |>
+  readr::read_csv() |>
   dplyr::filter(year < 2024)
 ```
 
