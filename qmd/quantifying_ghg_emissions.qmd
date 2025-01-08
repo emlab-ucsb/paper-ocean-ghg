@@ -139,7 +139,7 @@ annual_vessel_summary_by_year <- annual_ais_co2_emissions_by_vessel |>
                    main_engine_power_kw = sum(main_engine_power_kw)) |>
   dplyr::ungroup()   |>
   tidyr::pivot_longer(-year) |>
-  dplyr::mutate(name = ifelse(stringr::str_detect(name,"power"),"Total engine power (kW)","Number unique vessels"))
+  dplyr::mutate(name = ifelse(stringr::str_detect(name,"power"),"Total main engine power for AIS-broadcasting vessels(kW)","Number unique AIS-broadcasting vessels"))
 
 total_percent_change_vessel_summary  <-annual_vessel_summary_by_year |>
   dplyr::filter(year %in% max(year) | year %in% min(year)) |>
