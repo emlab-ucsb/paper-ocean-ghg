@@ -194,42 +194,45 @@ annual_emissions_by_fleet_year |>
 ```
 
 ```{r}
-#| label: fig-total-annual-unique-vessels
-#| fig-cap: Annual unique number of operating vessels. The percent change from 2015 to 2023 is shown next to its line.
+#| label: fig-total-annual-unique-vessels-engine-power
+#| fig-cap: Annual unique number of operating vessels (top panel); and annual total engine power for those vessels (killowatt). The percent change from 2015 to 2023 is shown next to each line.
 #| fig-width: 7.5
 #| fig-height: 4
 
-annual_n_distinct_vessels_by_year <- annual_ais_co2_emissions_by_vessel |>
+annual_vessel_summary_by_year <- annual_ais_co2_emissions_by_vessel |>
   dplyr::group_by(year) |>
-  dplyr::summarize(n_distinct_vessels = dplyr::n_distinct(ssvid)) |>
-  dplyr::ungroup()
+  dplyr::summarize(n_distinct_vessels = dplyr::n_distinct(ssvid),
+                   main_engine_power_kw = sum(main_engine_power_kw)) |>
+  dplyr::ungroup()   |>
+  tidyr::pivot_longer(-year) |>
+  dplyr::mutate(name = ifelse(stringr::str_detect(name,"power"),"Total engine power (kW)","Number unique vessels"))
 
-total_percent_change_n_distinct_vessels  <- annual_n_distinct_vessels_by_year |>
+total_percent_change_vessel_summary  <-annual_vessel_summary_by_year |>
   dplyr::filter(year %in% max(year) | year %in% min(year)) |>
-  dplyr::arrange(year) |>
-  dplyr::mutate(year_order = dplyr::row_number()) |>
-  dplyr::select(-year) |>
-  tidyr::pivot_wider(names_from = year_order,
-                     values_from = c(n_distinct_vessels)) |>
-  dplyr::mutate(percent_change_n_distinct_vessels = round(100*(`2` - `1`)/`1`),
-                percent_change_n_distinct_vessels = ifelse(percent_change_n_distinct_vessels>0,
-                                        glue::glue("+{percent_change_n_distinct_vessels}%"),
-                                        glue::glue("{percent_changpercent_change_n_distinct_vesselse_emissions}%"))) 
+  dplyr::arrange(year) |> 
+  dplyr::group_by(name) |> 
+  dplyr::summarize(end_value = value[2],
+                   percent_change = round(100*(value[2] - value[1])/value[1])) |>
+  dplyr::ungroup() |>
+  dplyr::mutate(percent_change = ifelse(percent_change>0,
+                                        glue::glue("+{percent_change}%"),
+                                        glue::glue("{percent_change}%")))
 
-annual_n_distinct_vessels_by_year |>
-  ggplot(aes(x = year, y = n_distinct_vessels)) +
+annual_vessel_summary_by_year|>
+  ggplot(aes(x = year, y = value)) +
   geom_line() +
-    geom_text(data = total_percent_change_n_distinct_vessels,
-            aes(label = percent_change_n_distinct_vessels,
-                y = `2`,
+    geom_text(data = total_percent_change_vessel_summary,
+            aes(label = percent_change,
+                y = end_value,
                 x = 2023.5),
-            show.legend = FALSE) +
+            show.legend = FALSE)+
+  facet_wrap(name~., ncol = 1, scales = "free_y") +
   scale_y_continuous(labels = scales::comma,
                      limits = c(0,NA)) + 
-  scale_x_continuous(breaks = unique(annual_n_distinct_vessels_by_year$year)) +
+  scale_x_continuous(breaks = unique(annual_vessel_summary_by_year$year)) +
   theme_plot() +
   labs(x = "",
-       y = "Annual number of unique vessels") +
+       y = "") +
   theme(panel.grid.minor.x = element_blank())
 ```
 

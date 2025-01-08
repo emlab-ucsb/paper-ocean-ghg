@@ -43,6 +43,6 @@ download_gfw_data <- function(query_file_name,file_output_name) {
 download_gfw_data("sql/annual_co2_emissions.sql",
                   "annual_co2_emissions")
 
-# Annual AIS-based CO2 emissions by vessel
+# Annual AIS-based CO2 emissions, hours, and main engine power by vessel
 download_gfw_data("sql/annual_ais_co2_emissions_by_vessel.sql",
                   "annual_ais_co2_emissions_by_vessel")
