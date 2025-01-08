@@ -70,8 +70,7 @@ annual_co2_emissions <- glue::glue("{project_directory}/data/processed/annual_co
   dplyr::filter(year < 2024)
 
 annual_ais_co2_emissions_by_vessel <- glue::glue("{project_directory}/data/processed/annual_ais_co2_emissions_by_vessel.csv") |>
-  readr::read_csv() |>
-  dplyr::filter(year < 2024)
+  readr::read_csv()
 ```
 
 # Paper figures
@@ -129,7 +128,7 @@ total_percent_change_by_fleet |>
 
 ```{r}
 #| label: fig-total-annual-unique-vessels-hours-power
-#| fig-cap: Annual unique number of AIS-broadcasting vessels (top panel); annual number of operating hours for AIS-broadcasting vessels (middle panel); and annual total engine power for those vessels (killowatt). The percent change from 2015 to 2023 is shown next to each line.
+#| fig-cap: Annual unique number of AIS-broadcasting vessels (top panel); annual number of operating hours for AIS-broadcasting vessels (middle panel); and annual total engine power for those vessels (killowatt). The percent change from 2015 to 2024 is shown next to each line.
 #| fig-width: 7.5
 #| fig-height: 6
 
@@ -161,7 +160,7 @@ annual_vessel_summary_by_year|>
   geom_text(data = total_percent_change_vessel_summary,
             aes(label = percent_change,
                 y = end_value,
-                x = 2023.5),
+                x = max(annual_vessel_summary_by_year$year)+.5),
             show.legend = FALSE)+
   facet_wrap(name~., ncol = 1, scales = "free_y") +
   scale_y_continuous(labels = scales::comma,
@@ -179,6 +178,9 @@ annual_vessel_summary_by_year|>
 #| fig-width: 7.5
 #| fig-height: 9
 
+# Standard error function
+# https://www.r-bloggers.com/2022/03/calculate-standard-error-in-r/
+std <- function(x) sd(x)/sqrt(length(x))
 
 # For vessels that have been in operation since a given year, calculate their annual emissions
 # Do this for every where from 2015 to 2022
@@ -194,18 +196,14 @@ annual_emissions_by_fleet_year <- purrr::map_df(seq(min(annual_ais_co2_emissions
                                                     dplyr::filter(year >= year_tmp) |>
                                                     dplyr::inner_join(year_fleet, by = "ssvid") |>
                                                     dplyr::group_by(year) |>
-                                                    dplyr::summarize(emissions_co2_mt = sum(emissions_co2_mt),
-                                                                     n_distinct_vessels = dplyr::n_distinct(ssvid),
-                                                                     main_engine_power_kw = sum(main_engine_power_kw),
-                                                                     hours = sum(hours)) |>
+                                                    dplyr::summarize(dplyr::across(c(emissions_co2_mt,
+                                                                            main_engine_power_kw,
+                                                                            hours), c(mean = mean,sum = sum,std = std)),
+                                                                     n_distinct_vessels = dplyr::n_distinct(ssvid)) |>
                                                     dplyr::ungroup() |>
                                                     dplyr::mutate(fleet_year = year_tmp)
                                                 } )   |>
-  tidyr::pivot_longer(-c(fleet_year,year)) |>
-  dplyr::mutate(name = dplyr::case_when(stringr::str_detect(name,"emissions") ~ "CO2 emissions by AIS-broadcasting vessels",
-                                        stringr::str_detect(name,"power") ~ "Total main engine power for AIS-broadcasting vessels (kW)",
-                                        stringr::str_detect(name,"vessels") ~ "Number unique AIS-broadcasting vessels",
-                                        TRUE ~ "Operating hours for AIS-broadcasting vessels"))
+  tidyr::pivot_longer(-c(fleet_year,year)) 
 
 # Calculate the total percent change in emissions by each operation year fleet
 total_percent_change_by_fleet_year  <-annual_emissions_by_fleet_year |>
@@ -222,13 +220,15 @@ total_percent_change_by_fleet_year  <-annual_emissions_by_fleet_year |>
                                         glue::glue("{percent_change}%")))
 
 annual_emissions_by_fleet_year   |>
+  dplyr::filter(stringr::str_detect(name,"sum") | stringr::str_detect(name,"vessels")) |>
   ggplot(aes(x = year, y = value, color = as.factor(fleet_year), group = fleet_year)) +
   geom_line() +
   facet_wrap(name~., ncol = 1, scales = "free_y") +
-  geom_text(data = total_percent_change_by_fleet_year,
+  geom_text(data = total_percent_change_by_fleet_year|>
+  dplyr::filter(stringr::str_detect(name,"sum") | stringr::str_detect(name,"vessels")),
             aes(label = percent_change,
                 y = end_value,
-                x = 2023.5),
+                x = max(annual_emissions_by_fleet_year$year)+.5),
             show.legend = FALSE) +
   scale_y_continuous(labels = scales::comma,
                      limits = c(0,NA)) +
@@ -244,18 +244,12 @@ annual_emissions_by_fleet_year   |>
 
 ```{r}
 #| label: fig-individual-distribution-annual-emissions-hours-power
-#| fig-cap: Annual distributions of individual vessel-level CO2 emissions (top panel); operating hours (middle panel); and main engine power (panel). The point shows the mean value, and the error bars show +/- two standard errors.
+#| fig-cap: Annual distributions of individual vessel-level CO2 emissions (metric tonnes, top panel); operating hours (middle panel); and main engine power (panel). The point shows the mean value, and the error bars show +/- two standard errors.
 #| fig-width: 7.5
 #| fig-height: 5
 
 annual_ais_co2_emissions_by_vessel |>
-  # dplyr::inner_join(annual_ais_co2_emissions_by_vessel |>
-  #                     dplyr::filter(year == 2015) |>
-  #                     dplyr::select(ssvid), by = "ssvid") |>
-   tidyr::pivot_longer(-c(year,ssvid)) |>
-  dplyr::mutate(name = dplyr::case_when(stringr::str_detect(name,"emissions") ~ "CO2 emissions by individual AIS-broadcasting vessels",
-                                        stringr::str_detect(name,"power") ~ "Main engine power for individual AIS-broadcasting vessels (kW)",
-                                        TRUE ~ "Operating hours for individual AIS-broadcasting vessels")) |>
+   tidyr::pivot_longer(-c(year,ssvid))|>
   ggplot(aes(x = year, y = value, group = year))+ 
   stat_summary(fun = mean, geom = "point") + 
   stat_summary(fun.data = mean_se, geom = "errorbar", fun.args = list(mult = 2), width = 0.5)+
@@ -266,5 +260,33 @@ annual_ais_co2_emissions_by_vessel |>
   theme_plot() +
   labs(x = "",
        y = "") 
+```
+
+
+```{r}
+#| label: fig-individual-distribution-annual-emissions-hours-power-by-earliest-operation-year
+#| fig-cap: Annual mean vessel-level CO2 emissions (metric tonnes, top panel); operating hours (middle panel); and main engine power (panel) for the set of AIS-broadcasting vessels that have been operating since a given year, where each line is colored by the earliest operation year. The percent change from the earliest year to 2023 is shown next to its line..
+#| fig-width: 7.5
+#| fig-height: 8
+
+annual_emissions_by_fleet_year  |>
+  dplyr::filter(stringr::str_detect(name,"mean")) |>
+  ggplot(aes(x = year, y = value, group = fleet_year, color = as.factor(fleet_year)))+ 
+  geom_line()  +
+  geom_text(data = total_percent_change_by_fleet_year|>
+  dplyr::filter(stringr::str_detect(name,"mean")),
+            aes(label = percent_change,
+                y = end_value,
+                x = max(annual_emissions_by_fleet_year$year)+.5),
+            show.legend = FALSE) +
+  facet_wrap(name~.,scales="free_y",ncol=1) +
+  theme_plot()  +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(breaks = unique(annual_emissions_by_fleet_year$year)) +
+  theme_plot() +
+  labs(x = "",
+       y = "",
+       color = "Earliest\noperation\nyear") +
+  paletteer::scale_color_paletteer_d(palette = "jcolors::pal10") 
 ```
 

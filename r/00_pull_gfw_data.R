@@ -20,7 +20,7 @@ bq_project <- "world-fishing-827" # BQ project where data lives
 billing_project <- "emlab-gcp" # emLab's billing project
 bq_dataset <- "proj_ocean_ghg" # The dataset name for this project
 
-run_version_ais <- "v20241121"# Define the version of the AIS dataset to pull
+run_version_ais <- "v20250108"# Define the version of the AIS dataset to pull
 run_version_dark <- "v20241125" # Define the version of the dark fleet dataset to pull
 
 
