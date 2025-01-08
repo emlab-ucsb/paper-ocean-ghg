@@ -249,15 +249,15 @@ annual_emissions_by_fleet_year   |>
 #| fig-height: 5
 
 annual_ais_co2_emissions_by_vessel |>
-  dplyr::inner_join(annual_ais_co2_emissions_by_vessel |>
-                      dplyr::filter(year == 2015) |>
-                      dplyr::select(ssvid), by = "ssvid") |>
-  tidyr::pivot_longer(-c(year,ssvid)) |>
+  # dplyr::inner_join(annual_ais_co2_emissions_by_vessel |>
+  #                     dplyr::filter(year == 2015) |>
+  #                     dplyr::select(ssvid), by = "ssvid") |>
+   tidyr::pivot_longer(-c(year,ssvid)) |>
   dplyr::mutate(name = dplyr::case_when(stringr::str_detect(name,"emissions") ~ "CO2 emissions by individual AIS-broadcasting vessels",
                                         stringr::str_detect(name,"power") ~ "Main engine power for individual AIS-broadcasting vessels (kW)",
                                         TRUE ~ "Operating hours for individual AIS-broadcasting vessels")) |>
   ggplot(aes(x = year, y = value, group = year))+ 
-  stat_summary(fun.y = mean, geom = "point") + 
+  stat_summary(fun = mean, geom = "point") + 
   stat_summary(fun.data = mean_se, geom = "errorbar", fun.args = list(mult = 2), width = 0.5)+
   facet_wrap(name~.,scales="free_y",ncol=1) +
   theme_plot()  +
