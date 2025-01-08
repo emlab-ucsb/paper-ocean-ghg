@@ -131,7 +131,7 @@ total_percent_change_by_fleet |>
 #| label: fig-total-annual-unique-vessels-hours-power
 #| fig-cap: Annual unique number of AIS-broadcasting vessels (top panel); annual number of operating hours for AIS-broadcasting vessels (middle panel); and annual total engine power for those vessels (killowatt). The percent change from 2015 to 2023 is shown next to each line.
 #| fig-width: 7.5
-#| fig-height: 4
+#| fig-height: 6
 
 annual_vessel_summary_by_year <- annual_ais_co2_emissions_by_vessel |>
   dplyr::group_by(year) |>
