@@ -179,6 +179,46 @@ annual_emissions_by_fleet_year |>
 ```
 
 ```{r}
+#| label: fig-total-annual-unique-vessels
+#| fig-cap: Annual unique number of operating vessels. The percent change from 2015 to 2023 is shown next to its line.
+#| fig-width: 7.5
+#| fig-height: 4
+
+annual_n_distinct_vessels_by_year <- annual_ais_co2_emissions_by_vessel |>
+  dplyr::group_by(year) |>
+  dplyr::summarize(n_distinct_vessels = dplyr::n_distinct(ssvid)) |>
+  dplyr::ungroup()
+
+total_percent_change_n_distinct_vessels  <- annual_n_distinct_vessels_by_year |>
+  dplyr::filter(year %in% max(year) | year %in% min(year)) |>
+  dplyr::arrange(year) |>
+  dplyr::mutate(year_order = dplyr::row_number()) |>
+  dplyr::select(-year) |>
+  tidyr::pivot_wider(names_from = year_order,
+                     values_from = c(n_distinct_vessels)) |>
+  dplyr::mutate(percent_change_n_distinct_vessels = round(100*(`2` - `1`)/`1`),
+                percent_change_n_distinct_vessels = ifelse(percent_change_n_distinct_vessels>0,
+                                        glue::glue("+{percent_change_n_distinct_vessels}%"),
+                                        glue::glue("{percent_changpercent_change_n_distinct_vesselse_emissions}%"))) 
+
+annual_n_distinct_vessels_by_year |>
+  ggplot(aes(x = year, y = n_distinct_vessels)) +
+  geom_line() +
+    geom_text(data = total_percent_change_n_distinct_vessels,
+            aes(label = percent_change_n_distinct_vessels,
+                y = `2`,
+                x = 2023.5),
+            show.legend = FALSE) +
+  scale_y_continuous(labels = scales::comma,
+                     limits = c(0,NA)) + 
+  scale_x_continuous(breaks = unique(annual_n_distinct_vessels_by_year$year)) +
+  theme_plot() +
+  labs(x = "",
+       y = "Annual number of unique vessels") +
+  theme(panel.grid.minor.x = element_blank())
+```
+
+```{r}
 #| label: fig-total-annual-unique-vessels-by-earliest-operation-year
 #| fig-cap: Annual unique number of operating vessels, where each line is colored by the earliest operation year. The percent change from the earliest year to 2023 is shown next to its line.
 #| fig-width: 7.5
@@ -203,3 +243,5 @@ annual_emissions_by_fleet_year |>
        color = "Earliest\noperation\nyear") +
   theme(panel.grid.minor.x = element_blank())
 ```
+
+
