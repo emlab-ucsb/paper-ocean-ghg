@@ -198,7 +198,7 @@ annual_emissions_by_fleet_year <- purrr::map_df(seq(min(annual_ais_co2_emissions
                                                     dplyr::group_by(year) |>
                                                     dplyr::summarize(dplyr::across(c(emissions_co2_mt,
                                                                             main_engine_power_kw,
-                                                                            hours), c(mean = mean,sum = sum,std = std)),
+                                                                            hours), c(mean = mean,sum = sum,std = std, median = median)),
                                                                      n_distinct_vessels = dplyr::n_distinct(ssvid)) |>
                                                     dplyr::ungroup() |>
                                                     dplyr::mutate(fleet_year = year_tmp)
@@ -244,7 +244,7 @@ annual_emissions_by_fleet_year   |>
 
 ```{r}
 #| label: fig-individual-distribution-annual-emissions-hours-power
-#| fig-cap: Annual distributions of individual vessel-level CO2 emissions (metric tonnes, top panel); operating hours (middle panel); and main engine power (panel). The point shows the mean value, and the error bars show +/- two standard errors.
+#| fig-cap: Annual distributions of individual per-vessel CO2 emissions (metric tonnes, top panel); operating hours (middle panel); and main engine power (panel). The point shows the mean value, and the error bars show +/- two standard errors.
 #| fig-width: 7.5
 #| fig-height: 5
 
@@ -265,16 +265,16 @@ annual_ais_co2_emissions_by_vessel |>
 
 ```{r}
 #| label: fig-individual-distribution-annual-emissions-hours-power-by-earliest-operation-year
-#| fig-cap: Annual mean vessel-level CO2 emissions (metric tonnes, top panel); operating hours (middle panel); and main engine power (panel) for the set of AIS-broadcasting vessels that have been operating since a given year, where each line is colored by the earliest operation year. The percent change from the earliest year to 2023 is shown next to its line..
+#| fig-cap: Annual median of individual per-vessel CO2 emissions (metric tonnes, top panel); operating hours (middle panel); and main engine power (panel) for the set of AIS-broadcasting vessels that have been operating since a given year, where each line is colored by the earliest operation year. The percent change from the earliest year to 2023 is shown next to its line.
 #| fig-width: 7.5
 #| fig-height: 8
 
 annual_emissions_by_fleet_year  |>
-  dplyr::filter(stringr::str_detect(name,"mean")) |>
+  dplyr::filter(stringr::str_detect(name,"median")) |>
   ggplot(aes(x = year, y = value, group = fleet_year, color = as.factor(fleet_year)))+ 
   geom_line()  +
   geom_text(data = total_percent_change_by_fleet_year|>
-  dplyr::filter(stringr::str_detect(name,"mean")),
+  dplyr::filter(stringr::str_detect(name,"median")),
             aes(label = percent_change,
                 y = end_value,
                 x = max(annual_emissions_by_fleet_year$year)+.5),
