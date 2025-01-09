@@ -290,3 +290,111 @@ annual_emissions_by_fleet_year  |>
   paletteer::scale_color_paletteer_d(palette = "jcolors::pal10") 
 ```
 
+```{r}
+#| label: fig-first-last-operation-year-histogram
+#| fig-cap: Histograms showing the distribution of the first and last operation year of each vessel.
+#| 
+# Determine entry and exit year for each vessel
+first_last_year_by_vessel <- annual_ais_co2_emissions_by_vessel |>
+  dplyr::group_by(ssvid) |>
+  dplyr::summarize(first_operation_year = min(year),
+                   last_operation_year = max(year)) |>
+  dplyr::ungroup()
+
+first_last_year_by_vessel |>
+  tidyr::pivot_longer(-ssvid) |>
+  ggplot(aes(x = value)) +
+  geom_histogram(bins = length(unique(annual_ais_co2_emissions_by_vessel$year)), color = "black") +
+  facet_wrap(name~., ncol = 1) +
+  facet_wrap(name~.,scales="free_y",ncol=1) +
+  theme_plot()  +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(breaks = unique(annual_ais_co2_emissions_by_vessel$year)) +
+  theme_plot() +
+  labs(x = "",
+       y = "Number vessels")+
+  theme(panel.grid.minor = element_blank())
+```
+
+
+```{r}
+#| label: fig-individual-distribution-annual-emissions-hours-power-by-first-year
+#| fig-cap: Annual mean of individual per-vessel CO2 emissions (metric tonnes); mean per-vessel operating hours; mean per-vessel main engine power; and number of distinct vessels for the set of AIS-broadcasting vessels for each first year of operation, where each line is colored by the first operation year.
+#| fig-width: 7.5
+#| fig-height: 8
+
+indicators_by_first_operation_year <- purrr::map_df(seq(min(first_last_year_by_vessel$first_operation_year),
+                                                    max(first_last_year_by_vessel$first_operation_year)),
+                                                function(year_tmp){
+                                                  
+                                                  year_fleet <- first_last_year_by_vessel |>
+                                                    dplyr::filter(first_operation_year == year_tmp) 
+                                                  # For these vessels, calculate annual emissions
+                                                  annual_ais_co2_emissions_by_vessel |>
+                                                    dplyr::inner_join(year_fleet, by = "ssvid") |>
+                                                    dplyr::group_by(year) |>
+                                                    dplyr::summarize(dplyr::across(c(emissions_co2_mt,
+                                                                            main_engine_power_kw,
+                                                                            hours), c(mean = mean,sum = sum,std = std, median = median)),
+                                                                     n_distinct_vessels = dplyr::n_distinct(ssvid)) |>
+                                                    dplyr::ungroup() |>
+                                                    dplyr::mutate(fleet_year = year_tmp)
+                                                }) |>
+  tidyr::pivot_longer(-c(year,fleet_year))
+
+indicators_by_first_operation_year  |>
+  dplyr::filter(stringr::str_detect(name,"mean") |
+                  stringr::str_detect(name,"vessel")) |>
+  ggplot(aes(x = year, y = value, group = fleet_year, color = as.factor(fleet_year)))+ 
+  geom_line()  +
+  facet_wrap(name~.,scales="free_y",ncol=1) +
+  theme_plot()  +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(breaks = unique(annual_emissions_by_fleet_year$year)) +
+  theme_plot() +
+  labs(x = "",
+       y = "",
+       color = "First\noperation\nyear") +
+  paletteer::scale_color_paletteer_d(palette = "jcolors::pal10") 
+```
+
+```{r}
+#| label: fig-individual-distribution-annual-emissions-hours-power-by-last-year
+#| fig-cap: Annual mean of individual per-vessel CO2 emissions (metric tonnes); mean per-vessel operating hours; mean per-vessel main engine power; and number of distinct vessels for the set of AIS-broadcasting vessels for each last year of operation, where each line is colored by the last operation year.
+#| fig-width: 7.5
+#| fig-height: 8
+
+indicators_by_last_operation_year <- purrr::map_df(seq(min(first_last_year_by_vessel$last_operation_year),
+                                                    max(first_last_year_by_vessel$last_operation_year)),
+                                                function(year_tmp){
+                                                  
+                                                  year_fleet <- first_last_year_by_vessel |>
+                                                    dplyr::filter(last_operation_year == year_tmp) 
+                                                  # For these vessels, calculate annual emissions
+                                                  annual_ais_co2_emissions_by_vessel |>
+                                                    dplyr::inner_join(year_fleet, by = "ssvid") |>
+                                                    dplyr::group_by(year) |>
+                                                    dplyr::summarize(dplyr::across(c(emissions_co2_mt,
+                                                                            main_engine_power_kw,
+                                                                            hours), c(mean = mean,sum = sum,std = std, median = median)),
+                                                                     n_distinct_vessels = dplyr::n_distinct(ssvid)) |>
+                                                    dplyr::ungroup() |>
+                                                    dplyr::mutate(fleet_year = year_tmp)
+                                                }) |>
+  tidyr::pivot_longer(-c(year,fleet_year))
+
+indicators_by_last_operation_year  |>
+  dplyr::filter(stringr::str_detect(name,"mean") |
+                  stringr::str_detect(name,"vessel")) |>
+  ggplot(aes(x = year, y = value, group = fleet_year, color = as.factor(fleet_year)))+ 
+  geom_line()  +
+  facet_wrap(name~.,scales="free_y",ncol=1) +
+  theme_plot()  +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(breaks = unique(annual_emissions_by_fleet_year$year)) +
+  theme_plot() +
+  labs(x = "",
+       y = "",
+       color = "Last\noperation\nyear") +
+  paletteer::scale_color_paletteer_d(palette = "jcolors::pal10") 
+```
