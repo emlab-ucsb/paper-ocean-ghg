@@ -10,8 +10,6 @@ format:
     colorlinks: true
 editor_options: 
   chunk_output_type: console
-execute: 
-  cache: true
 editor: 
   markdown: 
     wrap: 72
@@ -265,16 +263,16 @@ annual_ais_co2_emissions_by_vessel |>
 
 ```{r}
 #| label: fig-individual-distribution-annual-emissions-hours-power-by-earliest-operation-year
-#| fig-cap: Annual median of individual per-vessel CO2 emissions (metric tonnes, top panel); operating hours (middle panel); and main engine power (panel) for the set of AIS-broadcasting vessels that have been operating since a given year, where each line is colored by the earliest operation year. The percent change from the earliest year to 2023 is shown next to its line.
+#| fig-cap: Annual mean of individual per-vessel CO2 emissions (metric tonnes, top panel); operating hours (middle panel); and main engine power (panel) for the set of AIS-broadcasting vessels that have been operating since a given year, where each line is colored by the earliest operation year. The percent change from the earliest year to 2023 is shown next to its line.
 #| fig-width: 7.5
 #| fig-height: 8
 
 annual_emissions_by_fleet_year  |>
-  dplyr::filter(stringr::str_detect(name,"median")) |>
+  dplyr::filter(stringr::str_detect(name,"mean")) |>
   ggplot(aes(x = year, y = value, group = fleet_year, color = as.factor(fleet_year)))+ 
   geom_line()  +
   geom_text(data = total_percent_change_by_fleet_year|>
-  dplyr::filter(stringr::str_detect(name,"median")),
+  dplyr::filter(stringr::str_detect(name,"mean")),
             aes(label = percent_change,
                 y = end_value,
                 x = max(annual_emissions_by_fleet_year$year)+.5),
