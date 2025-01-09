@@ -250,6 +250,7 @@ annual_emissions_by_fleet_year   |>
 
 annual_ais_co2_emissions_by_vessel |>
    tidyr::pivot_longer(-c(year,ssvid))|>
+  dplyr::mutate(name = glue::glue("{name}_mean")) |>
   ggplot(aes(x = year, y = value, group = year))+ 
   stat_summary(fun = mean, geom = "point") + 
   stat_summary(fun.data = mean_se, geom = "errorbar", fun.args = list(mult = 2), width = 0.5)+
@@ -355,7 +356,8 @@ indicators_by_first_operation_year  |>
   labs(x = "",
        y = "",
        color = "First\noperation\nyear") +
-  paletteer::scale_color_paletteer_d(palette = "jcolors::pal10") 
+  paletteer::scale_color_paletteer_d(palette = "jcolors::pal10")  +
+  theme(panel.grid.minor = element_blank())
 ```
 
 ```{r}
@@ -396,5 +398,6 @@ indicators_by_last_operation_year  |>
   labs(x = "",
        y = "",
        color = "Last\noperation\nyear") +
-  paletteer::scale_color_paletteer_d(palette = "jcolors::pal10") 
+  paletteer::scale_color_paletteer_d(palette = "jcolors::pal10") +
+  theme(panel.grid.minor = element_blank())
 ```
