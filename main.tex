@@ -49,7 +49,7 @@ In Fig. \ref{fig:fig-total-annual-unique-vessels-by-earliest-operation-year},  w
     \label{fig:fig-total-annual-unique-vessels-by-earliest-operation-year}
 \end{figure}
 
-In Fig. \ref{fig:fig-individual-distribution-annual-emissions-hours-power}, we look at how the distribution of individual vessel-level indicators have changed over time. Since 2015, the general trend of annual average emissions of individual vessels has been decreasing. This is since even though the average operating hours of individual vessels has been fluctuating over time, the average main engine power for individual vessels has been steadily decreasing.
+In Fig. \ref{fig:fig-individual-distribution-annual-emissions-hours-power}, we look at how the distribution of individual vessel-level indicators have changed over time. Since 2015, the general trend of annual average emissions of individual vessels has been decreasing. This is because even though the average operating hours of individual vessels has been fluctuating over time and has been increasing steadily since the low-point during COVID in 2020, the average main engine power for individual vessels has been steadily decreasing since 2015.
 
 \begin{figure}[H]
     \centering
@@ -58,15 +58,27 @@ In Fig. \ref{fig:fig-individual-distribution-annual-emissions-hours-power}, we l
     \label{fig:fig-individual-distribution-annual-emissions-hours-power}
 \end{figure}
 
-In Fig. \ref{fig:fig-individual-distribution-annual-emissions-hours-power-by-earliest-operation-year}, ...
+% In Fig. \ref{fig:fig-individual-distribution-annual-emissions-hours-power-by-earliest-operation-year}, we look at how the trend of mean individual per-vessel emissions, operating hours, and main engine power would change over time if we only included the vessels that have been operating since a given earliest operation year. Regardless of which earliest year is used, operating hours consistently increases over time. Meanwhile, main engine power is decreasing (for earlier years) or stable (for later years). Combined, this means a modest increase in emissions over time.
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=\columnwidth]{qmd/quantifying_ghg_emissions_files/figure-pdf/fig-individual-distribution-annual-emissions-hours-power-by-earliest-operation-year-1.png}
+%     \caption{Annual mean vessel-level CO2 emissions (metric tonnes, top panel); operating hours (middle panel); and main engine power (panel) for the set of AIS-broadcasting vessels that have been operating since a given year, where each line is colored by the earliest operation year. The percent change from the earliest year to 2023 is shown next to its line.}
+%     \label{fig:fig-individual-distribution-annual-emissions-hours-power-by-earliest-operation-year}
+% \end{figure}
+
+Finally, we turn to Oliver's idea from Slack:
+
+"One idea for Gavin: do a "box-plot" of annual emission against calendar year by entry cohort: all vessels entering in 2015 (or earlier), all vessels entering in 2016 (this will be a much smaller N), all vessels entering in 2017, etc.  You could imagine doing the same for leavers (all vessels leaving in 2015, 2016, ...) This will produce 2 figures per year (only 1 in 2015) with new entrants and leavers that should summarize very well the trends in the AIS data"
+
+First we look at histograms showing the distribution of the first and last operation year of each vessel (Fig. \ref{fig-first-last-operation-year-histogram}). Most vessels started operations in 2015, although some vessels came on board during each following years. Meanwhile, most vessels have continued operating up through 2024, although some stop operating in each of the previous years.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{qmd/quantifying_ghg_emissions_files/figure-pdf/fig-individual-distribution-annual-emissions-hours-power-by-earliest-operation-year-1.png}
-    \caption{Annual mean vessel-level CO2 emissions (metric tonnes, top panel); operating hours (middle panel); and main engine power (panel) for the set of AIS-broadcasting vessels that have been operating since a given year, where each line is colored by the earliest operation year. The percent change from the earliest year to 2023 is shown next to its line.}
-    \label{fig:fig-individual-distribution-annual-emissions-hours-power-by-earliest-operation-year}
+    \includegraphics[width=\columnwidth]{qmd/quantifying_ghg_emissions_files/figure-pdf/fig-first-last-operation-year-histogram-1.png}
+    \caption{Histograms showing the distribution of the first and last operation year of each vessel.}
+    \label{fig:fig-first-last-operation-year-histogram}
 \end{figure}
-
 
 \section{Discussion}
 
