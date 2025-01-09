@@ -10,6 +10,8 @@ format:
     colorlinks: true
 editor_options: 
   chunk_output_type: console
+execute: 
+  cache: true
 editor: 
   markdown: 
     wrap: 72
@@ -52,7 +54,7 @@ data_directory_base <-  ifelse(Sys.info()["nodename"] == "quebracho" | Sys.info(
 project_directory <- glue::glue("{data_directory_base}/projects/current-projects/paper-ocean-ghg")                           
 ```
 
-```{r}
+```{r cache = FALSE}
 #| label: load-data
 
 # Annual CO2 emissions data for AIS-broadcasting fleet and dark fleet
