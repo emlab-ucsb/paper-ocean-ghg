@@ -4,6 +4,7 @@
 \usepackage{hyperref}
 \usepackage{graphicx}
 \usepackage{float}
+\usepackage{quoting}
 
 \title{Quantifying environmental trends: Disentangling changes in  impact from changes in monitoring}
 \author{emLab and GFW}
@@ -69,15 +70,35 @@ In Fig. \ref{fig:fig-individual-distribution-annual-emissions-hours-power}, we l
 
 Finally, we turn to Oliver's idea from Slack:
 
+\begin{quoting}
 "One idea for Gavin: do a "box-plot" of annual emission against calendar year by entry cohort: all vessels entering in 2015 (or earlier), all vessels entering in 2016 (this will be a much smaller N), all vessels entering in 2017, etc.  You could imagine doing the same for leavers (all vessels leaving in 2015, 2016, ...) This will produce 2 figures per year (only 1 in 2015) with new entrants and leavers that should summarize very well the trends in the AIS data"
+\end{quoting}
 
-First we look at histograms showing the distribution of the first and last operation year of each vessel (Fig. \ref{fig-first-last-operation-year-histogram}). Most vessels started operations in 2015, although some vessels came on board during each following years. Meanwhile, most vessels have continued operating up through 2024, although some stop operating in each of the previous years.
+First we look at histograms showing the distribution of the first and last operation year of each vessel (Fig. \ref{fig:fig-first-last-operation-year-histogram}). Most vessels started operations in 2015, although some vessels came on board during each following years. Meanwhile, most vessels have continued operating up through 2024, although some stop operating in each of the previous years.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\columnwidth]{qmd/quantifying_ghg_emissions_files/figure-pdf/fig-first-last-operation-year-histogram-1.png}
     \caption{Histograms showing the distribution of the first and last operation year of each vessel.}
     \label{fig:fig-first-last-operation-year-histogram}
+\end{figure}
+
+Next we look at time series trends of mean per-vessel emissions, mean per-vessel operating hours, mean per-vessel main engine power, and number of unique vessels, by subsetting the data to each year that vessels first started operating (Fig. \ref{fig:fig-individual-distribution-annual-emissions-hours-power-by-first-year}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{qmd/quantifying_ghg_emissions_files/figure-pdf/fig-individual-distribution-annual-emissions-hours-power-by-first-year-1.png}
+    \caption{Annual mean of individual per-vessel CO2 emissions (metric tonnes); mean per-vessel operating hours; mean per-vessel main engine power; and number of distinct vessels for the set of AIS-broadcasting vessels for each first year of operation, where each line is colored by the first operation year.}
+    \label{fig:fig-individual-distribution-annual-emissions-hours-power-by-first-year}
+\end{figure}
+
+Next we look at time series trends of mean per-vessel emissions, mean per-vessel operating hours, mean per-vessel main engine power, and number of unique vessels, by subsetting the data to each year that vessels last operated (Fig. \ref{fig:fig-individual-distribution-annual-emissions-hours-power-by-last-year}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{qmd/quantifying_ghg_emissions_files/figure-pdf/fig-individual-distribution-annual-emissions-hours-power-by-last-year-1.png}
+    \caption{Annual mean of individual per-vessel CO2 emissions (metric tonnes); mean per-vessel operating hours; mean per-vessel main engine power; and number of distinct vessels for the set of AIS-broadcasting vessels for each last year of operation, where each line is colored by the last operation year.}
+    \label{fig:fig-individual-distribution-annual-emissions-hours-power-by-last-year}
 \end{figure}
 
 \section{Discussion}
