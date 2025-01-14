@@ -3,7 +3,8 @@ year,
 ssvid,
 emissions_co2_mt,
 hours,
-main_engine_power_kw
+main_engine_power_kw,
+distance_nm/hours speed_knots
 FROM
 `{bq_project}.{bq_dataset}.annual_emissions_by_vessel_{run_version_ais}`
 JOIN(
