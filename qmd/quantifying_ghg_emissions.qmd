@@ -38,6 +38,30 @@ theme_plot <- function(){
           strip.text.y = element_text(angle = 0,
                                       face = "bold"))}
 
+# Set consistent theme for maps
+# Based loosely off fishwatchr::theme_gfw_map()
+# https://github.com/GlobalFishingWatch/fishwatchr/blob/master/R/theme_gfw_map.R
+theme_map <- function(){
+  theme_minimal() %+replace%
+    theme(panel.background = element_rect(fill = "black"),
+          legend.position = "bottom",
+          legend.direction = "horizontal",
+          plot.title = element_text(hjust = 0.5),
+          panel.grid.minor = element_line(color = "black"),
+          panel.grid.major = element_line(color = "black"),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          axis.title.y = element_blank(),
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          strip.background = element_rect(fill=NA,color=NA),
+          plot.margin = unit(c(0.25,0,0,0), "cm"))
+}
+
+land <- rnaturalearth::ne_countries(returnclass = "sf") |>
+  dplyr::select(geometry)
+
+
 data_directory_base <-  ifelse(Sys.info()["nodename"] == "quebracho" | Sys.info()["nodename"] == "sequoia",
                                "/home/emlab",
                                # Otherwise, set the directory for local machines based on the OS
@@ -69,7 +93,12 @@ annual_co2_emissions <- glue::glue("{project_directory}/data/processed/annual_co
                                          TRUE ~ "AIS-broadcasting")) |>
   dplyr::filter(year < 2024)
 
+# Annual AIS-based CO2 emissions, hours, average speed, and main engine power by vessel
 annual_ais_co2_emissions_by_vessel <- glue::glue("{project_directory}/data/processed/annual_ais_co2_emissions_by_vessel.csv") |>
+  readr::read_csv()
+
+# Annual spatial CO2 emissions, for AIS and dark fleets
+annual_spatial_co2_emissions_ais_dark <-  glue::glue("{project_directory}/data/processed/annual_spatial_co2_emissions_ais_dark.csv") |>
   readr::read_csv()
 ```
 
@@ -125,6 +154,58 @@ total_percent_change_by_fleet |>
   dplyr::mutate(across(c(`2016`,`2023`), ~signif(./1e6,3))) |>
   knitr::kable()
 ```
+
+
+
+```{r}
+#| label: fig-co2-emissions-change-ais-dark-map
+#| fig-cap: Spatial change in CO2 emissions between 2016 and 2023 (metric tonnes) for the AIS-broadcasting fleet (top panel), non-broadcasting fleet (middle panel), and both fleets combined (bottom panel) at a 1x1 degree spatial resolution.
+#| fig-width: 7.5
+#| fig-height: 8
+
+annual_spatial_co2_emissions_ais_dark  |>
+  dplyr::filter(year %in% c(2016,2023)) |>
+  dplyr::mutate(across(c(emissions_co2_mt,emissions_co2_dark_mt), ~tidyr::replace_na(.,0))) |>
+  dplyr::mutate(`Both fleets` = emissions_co2_mt + emissions_co2_dark_mt) |>
+  dplyr::rename(`AIS-broadcasting` = emissions_co2_mt,
+                `Non-broadcasting` = emissions_co2_dark_mt) |>
+  tidyr::pivot_longer(cols = -c(year,lon_bin,lat_bin)) |>
+  tidyr::pivot_wider(names_from = year,
+                     values_from = value) |>
+  dplyr::mutate(change_emissions_co2 = `2023`-`2016`) |>
+  dplyr::mutate(name = forcats::fct_relevel(name,
+                                            c("AIS-broadcasting",
+                                              "Non-broadcasting"))) |>
+  ggplot() +
+  geom_tile(aes(x = lon_bin,
+                y = lat_bin,
+                fill = change_emissions_co2)) +
+ geom_sf(data = land,
+          color = "#374a6d",
+          fill = "#374a6d") +
+  facet_wrap(name~., ncol=1) +
+  scico::scale_fill_scico("Change in CO2 emissions\nfrom 2016 to 2023\n(MT)",
+                          palette = "berlin",
+                          midpoint = 0,
+                          trans = ggallin::pseudolog10_trans,
+                          na.value = "black",
+                          breaks = c(-1e6,-1e3,0,1e3,1e6),
+                          labels = scales::comma) +
+  labs(x = '',
+       y= '') +
+  theme_map() +
+  theme(legend.position = "right",
+        legend.direction = "vertical") +
+  guides(fill = guide_colorbar(title.position = "top",
+                               title.hjust = 0.5,
+                               frame.colour = "black",
+                               ticks.colour = "black",
+                               barwidth = unit(1, "cm"),
+                               barheight = unit(5, "cm"))) +
+  scale_x_continuous(expand = c(0, 1)) +
+  scale_y_continuous(expand = c(0, 1)) 
+```
+
 
 ```{r}
 #| label: fig-total-annual-unique-vessels-hours-power
