@@ -401,7 +401,7 @@ first_last_year_by_vessel |>
 
 ```{r}
 #| label: fig-individual-distribution-annual-emissions-hours-power-by-first-year
-#| fig-cap: Annual mean of individual per-vessel CO2 emissions (metric tonnes); mean per-vessel operating hours; mean per-vessel main engine power (killowatts); mean speed per-vessel (knots); and total number of distinct vessels for the set of AIS-broadcasting vessels for each first year of operation, where each line is colored by the first operation year.
+#| fig-cap: Annual mean of individual per-vessel CO2 emissions (metric tonnes); mean per-vessel operating hours; mean per-vessel main engine power (killowatts); mean per-vessel speed (knots); and total number of distinct vessels for the set of AIS-broadcasting vessels for each first year of operation, where each line is colored by the first operation year.
 #| fig-width: 7.5
 #| fig-height: 8
 
@@ -445,7 +445,7 @@ indicators_by_first_operation_year  |>
 
 ```{r}
 #| label: fig-individual-distribution-annual-emissions-hours-power-by-last-year
-#| fig-cap: Annual mean of individual per-vessel CO2 emissions (metric tonnes); mean per-vessel operating hours; mean per-vessel main engine power (killowatts); mean speed per-vessel (knots); and total number of distinct vessels for the set of AIS-broadcasting vessels for each last year of operation, where each line is colored by the last operation year.
+#| fig-cap: Annual mean of individual per-vessel CO2 emissions (metric tonnes); mean per-vessel operating hours; mean per-vessel main engine power (killowatts); mean per-vessel speed (knots); and total number of distinct vessels for the set of AIS-broadcasting vessels for each last year of operation, where each line is colored by the last operation year.
 #| fig-width: 7.5
 #| fig-height: 8
 
