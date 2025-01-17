@@ -279,6 +279,7 @@ annual_emissions_by_fleet_year <- purrr::map_df(seq(min(annual_ais_co2_emissions
                                                     dplyr::summarize(dplyr::across(c(emissions_co2_mt,
                                                                             main_engine_power_kw,
                                                                             hours), c(mean = mean,sum = sum,std = std, median = median)),
+                                                                            dplyr::across(speed_knots, c(mean = mean, median = median)),
                                                                      n_distinct_vessels = dplyr::n_distinct(ssvid)) |>
                                                     dplyr::ungroup() |>
                                                     dplyr::mutate(fleet_year = year_tmp)
@@ -324,7 +325,7 @@ annual_emissions_by_fleet_year   |>
 
 ```{r}
 #| label: fig-individual-distribution-annual-emissions-hours-power
-#| fig-cap: Annual distributions of individual per-vessel CO2 emissions (metric tonnes, top panel); operating hours (middle panel); and main engine power (panel). The point shows the mean value, and the error bars show +/- two standard errors.
+#| fig-cap: Annual distributions of individual per-vessel CO2 emissions (metric tonnes); operating hours; main engine power (killowatts); and average speed (knots). The point shows the mean value, and the error bars show +/- two standard errors.
 #| fig-width: 7.5
 #| fig-height: 5
 
@@ -346,7 +347,7 @@ annual_ais_co2_emissions_by_vessel |>
 
 ```{r}
 #| label: fig-individual-distribution-annual-emissions-hours-power-by-earliest-operation-year
-#| fig-cap: Annual mean of individual per-vessel CO2 emissions (metric tonnes, top panel); operating hours (middle panel); and main engine power (panel) for the set of AIS-broadcasting vessels that have been operating since a given year, where each line is colored by the earliest operation year. The percent change from the earliest year to 2024 is shown next to its line.
+#| fig-cap: Annual mean of individual per-vessel CO2 emissions (metric tonnes); operating hours; main engine power (killowatts); and average speed (knots) for the set of AIS-broadcasting vessels that have been operating since a given year, where each line is colored by the earliest operation year. The percent change from the earliest year to 2024 is shown next to its line.
 #| fig-width: 7.5
 #| fig-height: 8
 
@@ -400,7 +401,7 @@ first_last_year_by_vessel |>
 
 ```{r}
 #| label: fig-individual-distribution-annual-emissions-hours-power-by-first-year
-#| fig-cap: Annual mean of individual per-vessel CO2 emissions (metric tonnes); mean per-vessel operating hours; mean per-vessel main engine power; and number of distinct vessels for the set of AIS-broadcasting vessels for each first year of operation, where each line is colored by the first operation year.
+#| fig-cap: Annual mean of individual per-vessel CO2 emissions (metric tonnes); mean per-vessel operating hours; mean per-vessel main engine power (killowatts); mean speed per-vessel (knots); and total number of distinct vessels for the set of AIS-broadcasting vessels for each first year of operation, where each line is colored by the first operation year.
 #| fig-width: 7.5
 #| fig-height: 8
 
@@ -417,6 +418,7 @@ indicators_by_first_operation_year <- purrr::map_df(seq(min(first_last_year_by_v
                                                     dplyr::summarize(dplyr::across(c(emissions_co2_mt,
                                                                             main_engine_power_kw,
                                                                             hours), c(mean = mean,sum = sum,std = std, median = median)),
+                                                                     dplyr::across(speed_knots, c(mean = mean, median = median)),
                                                                      n_distinct_vessels = dplyr::n_distinct(ssvid)) |>
                                                     dplyr::ungroup() |>
                                                     dplyr::mutate(fleet_year = year_tmp)
@@ -425,7 +427,8 @@ indicators_by_first_operation_year <- purrr::map_df(seq(min(first_last_year_by_v
 
 indicators_by_first_operation_year  |>
   dplyr::filter(stringr::str_detect(name,"mean") |
-                  stringr::str_detect(name,"vessel")) |>
+                  stringr::str_detect(name,"vessel"))  |>
+  dplyr::mutate(name = forcats::fct_relevel(name,"main_engine_power_kw_mean", after = Inf)) |>
   ggplot(aes(x = year, y = value, group = fleet_year, color = as.factor(fleet_year)))+ 
   geom_line()  +
   facet_wrap(name~.,scales="free_y",ncol=1) +
@@ -442,7 +445,7 @@ indicators_by_first_operation_year  |>
 
 ```{r}
 #| label: fig-individual-distribution-annual-emissions-hours-power-by-last-year
-#| fig-cap: Annual mean of individual per-vessel CO2 emissions (metric tonnes); mean per-vessel operating hours; mean per-vessel main engine power; and number of distinct vessels for the set of AIS-broadcasting vessels for each last year of operation, where each line is colored by the last operation year.
+#| fig-cap: Annual mean of individual per-vessel CO2 emissions (metric tonnes); mean per-vessel operating hours; mean per-vessel main engine power (killowatts); mean speed per-vessel (knots); and total number of distinct vessels for the set of AIS-broadcasting vessels for each last year of operation, where each line is colored by the last operation year.
 #| fig-width: 7.5
 #| fig-height: 8
 
@@ -459,6 +462,7 @@ indicators_by_last_operation_year <- purrr::map_df(seq(min(first_last_year_by_ve
                                                     dplyr::summarize(dplyr::across(c(emissions_co2_mt,
                                                                             main_engine_power_kw,
                                                                             hours), c(mean = mean,sum = sum,std = std, median = median)),
+                                                                     dplyr::across(speed_knots, c(mean = mean, median = median)),
                                                                      n_distinct_vessels = dplyr::n_distinct(ssvid)) |>
                                                     dplyr::ungroup() |>
                                                     dplyr::mutate(fleet_year = year_tmp)
@@ -468,6 +472,7 @@ indicators_by_last_operation_year <- purrr::map_df(seq(min(first_last_year_by_ve
 indicators_by_last_operation_year  |>
   dplyr::filter(stringr::str_detect(name,"mean") |
                   stringr::str_detect(name,"vessel")) |>
+  dplyr::mutate(name = forcats::fct_relevel(name,"main_engine_power_kw_mean", after = Inf)) |>
   ggplot(aes(x = year, y = value, group = fleet_year, color = as.factor(fleet_year)))+ 
   geom_line()  +
   facet_wrap(name~.,scales="free_y",ncol=1) +
