@@ -6,7 +6,7 @@
 \usepackage{float}
 \usepackage{quoting}
 
-\title{Quantifying environmental trends: Disentangling changes in  impact from changes in monitoring}
+\title{Quantifying comprehensive ocean-based vessel emissions using data fusion}
 \author{emLab and GFW}
 \date{\today}
 \begin{document}
@@ -15,9 +15,17 @@
 
 \begin{abstract}
 
- Quantifying environmental trends is a fundamental aspect of assessing and managing environmental impacts. This requires a monitoring scheme for measuring changes over time. As technology improves, monitoring itself may also change over time, making it challenging to disentangle actual environmental changes from changes in monitoring. As improved technology allows for more and more comprehensive monitoring over time, this may simultaneously lead to overestimates in the increasing trends of environmental problems and underestimates of their overall scale. Combining multiple monitoring data sources has the potential to reduce these biases. Here we develop a novel method for quantifying high spatiotemporal resolution global ocean-based greenhouse gas (GHG) emissions by combining two unique satellite-based monitoring sources: 1) Automatic Identification System (AIS) to estimate vessel-level emissions for the over 660,000 boats that broadcast their positions using AIS; and 2) synthetic aperture radar (SAR) data from the Sentinel-1 satellite constellation to estimate emissions for boats that do not use AIS. When only looking at emissions based on AIS, global emissions in 2023 were 1,100 million metric tonnes (MMT), and trend from 2016 to 2023 shows a 33\% increase. When also adding in non-broadcasting vessels using Sentinel-1 detections, global emissions in 2023 were 1,320 MMT, and the trend from 2016 to 2023 is more modest at only a 21\% increase. This suggests that if only using AIS data, global emissions in 2023 would be underestimated by 16\%, and the increasing trend from 2016 to 2023 would be overestimated by 57\%. Our approach therefore not only provides a robust method for quantifying comprehensive high-resolution spatiotemporal emissions data that could be used for a variety of interventions for mitigating emissions, but also provides an example of how multiple data sources can be used to disentangle actual environmental changes from improved monitoring and more accurately quantify both the scale and trends of environmental problems.
+ Understanding the scale and trends of ocean-based greenhouse gas (GHG) emissions and non-GHG pollutant emissions is the first step toward mitigating them. We develop a method for quantifying high-resolution spatiotemporal  ocean-based vessel emissions at a global scale by fusing two unique satellite-based data sources: 1) Automatic Identification System (AIS) to estimate vessel-level emissions for the over 660,000 boats that broadcast their positions using AIS; and 2) synthetic aperture radar (SAR) data from the Sentinel-1 satellite constellation to estimate emissions for boats that do not use AIS. We find that industrial vessels emitted approximately 1.3 billion metric tons of CO2 in 2023, accounting for 3.5\% of global fossil fuel emissions. We also find that vessel CO2 emissions increased by 21\% between 2016 and 2023, roughly three times the rate of global fossil fuel emissions. Data fusion is critical to getting these numbers right: if only AIS data were used, the currently accepted state-of-the-art, global emissions in 2023 would be underestimated by 16\%, and the increasing trend from 2016 to 2023 would be overestimated by 57\%. Our approach provides a robust and rich dataset that can be leveraged for a variety of policy- and market-based emissions mitigation interventions. It also provides an example of how data fusion can disentangle actual environmental changes from changes in monitoring in order to more accurately quantify both the scale and trends of environmental problems.
 
 \end{abstract}
+
+% \section{Alternative framing option 2: General problem of quantifying environmental trends}
+
+% \textbf{Title:} Quantifying environmental trends: Disentangling changes in  impact from changes in monitoring
+
+
+% \textbf{Abstract:} Quantifying environmental trends is a fundamental aspect of assessing and managing environmental impacts. This requires a monitoring scheme for measuring changes over time. As technology improves, monitoring itself may also change over time, making it challenging to disentangle actual environmental changes from changes in monitoring. As improved technology allows for more and more comprehensive monitoring over time, this may simultaneously lead to overestimates in the increasing trends of environmental problems and underestimates of their overall scale. Combining multiple monitoring data sources has the potential to reduce these biases. Here we develop a novel method for quantifying high spatiotemporal resolution global ocean-based greenhouse gas (GHG) emissions by combining two unique satellite-based monitoring sources: 1) Automatic Identification System (AIS) to estimate vessel-level emissions for the over 660,000 boats that broadcast their positions using AIS; and 2) synthetic aperture radar (SAR) data from the Sentinel-1 satellite constellation to estimate emissions for boats that do not use AIS. When only looking at emissions based on AIS, global emissions in 2023 were 1,100 million metric tonnes (MMT), and trend from 2016 to 2023 shows a 33\% increase. When also adding in non-broadcasting vessels using Sentinel-1 detections, global emissions in 2023 were 1,320 MMT, and the trend from 2016 to 2023 is more modest at only a 21\% increase. This suggests that if only using AIS data, global emissions in 2023 would be underestimated by 16\%, and the increasing trend from 2016 to 2023 would be overestimated by 57\%. Our approach therefore not only provides a robust method for quantifying comprehensive high-resolution spatiotemporal emissions data that could be used for a variety of interventions for mitigating emissions, but also provides an example of how multiple data sources can be used to disentangle actual environmental changes from improved monitoring and more accurately quantify both the scale and trends of environmental problems.
+
 
 \section{Introduction}
 
@@ -32,7 +40,7 @@ In Fig. \ref{fig:fig-total-annual-emissions-by-fleet}, we can see that when only
     \label{fig:fig-total-annual-emissions-by-fleet}
 \end{figure}
 
-Next we look at how CO2 emissions have changed spatially over time for the AIS-broadcasting fleet, non-broadcasting fleet, and both fleets combined (Fig. \ref{fig:fig-co2-emissions-change-ais-dark-map}).
+Next we look at how CO2 emissions have changed spatially over time for the AIS-broadcasting fleet, non-broadcasting fleet, and both fleets combined (Fig. \ref{fig:fig-co2-emissions-change-ais-dark-map}). Here we can see that three regions in particular had both dramatic increases in AIS-broadcasting emissions alongside dramatic decreases in non-broadcasting emissions: the waters off China, the European Union, and the Gulf of Mexico.
 
 \begin{figure}[H]
     \centering
