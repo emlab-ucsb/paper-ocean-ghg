@@ -50,3 +50,12 @@ download_gfw_data("sql/annual_ais_co2_emissions_by_vessel.sql",
 # Annual spatial CO2 emissions, for AIS and dark fleets
 download_gfw_data("sql/annual_spatial_co2_emissions_ais_dark.sql",
                   "annual_spatial_co2_emissions_ais_dark")
+
+
+# Annual global emissions and number of unique vessels by receiver type (satellite; dynamic; or terrestrial)
+download_gfw_data("sql/annual_global_emissions_by_receiver_type.sql",
+                  "annual_global_emissions_by_receiver_type")
+
+# Monthly global emissions and number of unique vessels by receiver type (satellite; dynamic; or terrestrial) and flag
+download_gfw_data("sql/annual_global_emissions_by_receiver_type_and_flag.sql",
+                  "annual_global_emissions_by_receiver_type_and_flag")
