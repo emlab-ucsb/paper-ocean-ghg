@@ -501,6 +501,9 @@ indicators_by_last_operation_year  |>
 ```
 
 ```{r}
+#| label: fig-annual-emissions-vessels-by-ais-receiver-type
+#| fig-cap: Annual total CO2 emissions (metric tonnes) and total number of distinct vessels disaggregated by AIS receiver type (terrestiral, satellite, or dynamic) and total aggregated across receiver types.
+
 annual_global_emissions_by_receiver_type |>
   dplyr::filter(receiver_type != "unknown") |>
   tidyr::complete(
@@ -523,11 +526,14 @@ annual_global_emissions_by_receiver_type |>
   theme_plot() +
   labs(x = "",
        y = "",
-       color = "AIS data source") +
+       color = "AIS receiver type") +
   theme(panel.grid.minor.x = element_blank())
 ```
 
 ```{r}
+#| label: fig-annual-emissions-vessels-by-ais-receiver-type-top-flags
+#| fig-cap: Annual total CO2 emissions (metric tonnes) and total number of distinct vessels disaggregated by AIS receiver type (terrestiral, satellite, or dynamic) and total aggregated across receiver types, for the top 10 flags with the most emissions in 2024.
+
 top_n_flags_2024 <- annual_global_emissions_by_receiver_type_and_flag |>
   dplyr::filter(year == 2024, receiver_type == "total") |>
   dplyr::slice_max(n = 10, order_by = emissions_co2_mt) |>
@@ -557,7 +563,8 @@ annual_global_emissions_by_receiver_type_and_flag |>
        color = "Flag") +
   theme(panel.grid.minor.x = element_blank()) +
   geom_vline(xintercept = 2022, linetype = 2) +
-  paletteer::scale_color_paletteer_d(palette = "rcartocolor::Safe")
+  paletteer::scale_color_paletteer_d(palette = "rcartocolor::Safe") +
+  theme(legend.position = "bottom")
 ```
 
 
