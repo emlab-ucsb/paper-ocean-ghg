@@ -486,3 +486,176 @@ indicators_by_last_operation_year  |>
   paletteer::scale_color_paletteer_d(palette = "jcolors::pal10") +
   theme(panel.grid.minor = element_blank())
 ```
+
+
+Following Olivier's complementary materials shared on Slack, we present the mean values of four parameters defining yearly information for AIS-broadcasting vessels operating across all years. The data is derived from the ping-level dataset, thus including emissions associated with both port stays and trips.
+
+```{r}
+# Replicating Olivier's plot
+annual_ais_co2_emissions_by_vessel <- glue::glue("{project_directory}/data/processed/annual_ais_co2_emissions_by_vessel.csv") |>
+  readr::read_csv()
+
+# This include vessels operating at all years
+ssvid_op_2015_2024 <- annual_ais_co2_emissions_by_vessel |>
+  dplyr::group_by(ssvid) |>
+  dplyr::summarize(all_years_present = all(2015:2024 %in% year)) |>
+  dplyr::ungroup() |>
+  dplyr::filter(all_years_present) |>
+  dplyr::pull(ssvid)
+
+
+vessels_op_2015_2024 <- annual_ais_co2_emissions_by_vessel |>
+  dplyr::filter(ssvid %in% ssvid_op_2015_2024) |>
+  dplyr::group_by(year) |>
+  dplyr::summarize(m_emi = mean(emissions_co2_mt),
+                   m_hrs = mean(hours),
+                   m_spd = mean(speed_knots),
+                   m_eng = mean(main_engine_power_kw)) |>
+  dplyr::ungroup()
+
+normalized_data <- vessels_op_2015_2024 |>
+  dplyr::mutate(
+    base_m_emi = m_emi[year == 2015],
+    base_m_hrs = m_hrs[year == 2015],
+    base_m_spd = m_spd[year == 2015],
+    base_m_eng = m_eng[year == 2015]
+  ) |>
+  dplyr::mutate(
+    norm_m_emi = m_emi / base_m_emi,
+    norm_m_hrs = m_hrs / base_m_hrs,
+    norm_m_spd = m_spd / base_m_spd,
+    norm_m_eng = m_eng / base_m_eng
+  ) |>
+  dplyr::select(year, norm_m_emi, norm_m_hrs, norm_m_spd, norm_m_eng)
+
+normalized_data_long <- normalized_data |>
+  tidyr::pivot_longer(
+    cols = starts_with("norm"),
+    names_to = "metric",
+    values_to = "value"
+  )
+```
+
+
+```{r}
+#| label: fig-all-years-operating-vessels-norm-mean-values-from-ping-level-emissions
+#| fig-cap: Annual mean of individual per-vessel CO2 ping emissions (metric tonnes); total per-vessel operating hours; mean per-vessel main engine power (killowatts); and mean per-vessel speed (knots) for the set of AIS-broadcasting vessels operating in all years, where each line is colored by the last operation year. Values are normalized againts 2015 estimates.
+#| fig-width: 7.5
+#| fig-height: 8
+#| 
+metric_colors <- c(
+  "norm_m_emi" = "#4A90E2",      
+  "norm_m_hrs" = "#D0021B",     
+  "norm_m_spd" = "#7ED321",      
+  "norm_m_eng" = "#F8E71C"      
+)
+
+ggplot2::ggplot(normalized_data_long, ggplot2::aes(x = year, y = value, color = metric)) +
+  ggplot2::geom_line(linewidth = 0.5) +
+  ggplot2::labs(
+    title = "Mean values across years",
+    x = "Year",
+    y = "Normalized Value",
+    color = "Metric"
+  ) +
+  ggplot2::scale_x_continuous(breaks = normalized_data_long$year) +  # Ensure year is shown as integers
+  ggplot2::scale_color_manual(values = metric_colors) +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(
+    legend.position = "bottom",
+    legend.title = ggplot2::element_text(face = "bold"),
+    plot.title = ggplot2::element_text(face = "bold", hjust = 0.5)
+  )
+
+```
+
+The relationship between hours and speeds may be misleading, as the dataset includes information from both trips and port stays. While hours accumulate regardless of whether a vessel is on a trip or at port, distances covered during port stays are minimal, leading to misrepresented speed values.
+
+```{r}
+updated_ais_co2_emissions <- glue::glue("{project_directory}/data/processed/annual_ais_co2_emissions_from_trips_dataset.csv") |>
+  readr::read_csv()
+```
+
+
+```{r}
+# Using trip emissions instead
+
+# This include vessels operating at all years
+ssvid_trip_op_2015_2024 <- updated_ais_co2_emissions |>
+  dplyr::group_by(ssvid) |>
+  dplyr::summarize(all_years_present = all(2015:2024 %in% year)) |>
+  dplyr::ungroup() |>
+  dplyr::filter(all_years_present) |>
+  dplyr::pull(ssvid)
+
+
+vessels_op_2015_2024 <- updated_ais_co2_emissions |>
+  dplyr::filter(ssvid %in% ssvid_trip_op_2015_2024) |>
+  dplyr::group_by(year) |>
+  dplyr::summarize(m_emi = mean(total_emissions_co2_mt),
+                   m_hrs = mean(total_hours),
+                   m_dis = mean(total_distance_nm),
+                   m_spd = mean(avg_speed),
+                   m_eng = mean(main_engine_power_kw)) |>
+  dplyr::ungroup()
+
+normalized_data <- vessels_op_2015_2024 |>
+  dplyr::mutate(
+    base_m_emi = m_emi[year == 2015],
+    base_m_hrs = m_hrs[year == 2015],
+    base_m_dis = m_dis[year == 2015],
+    base_m_spd = m_spd[year == 2015],
+    base_m_eng = m_eng[year == 2015]
+  ) |>
+  dplyr::mutate(
+    norm_m_emi = m_emi / base_m_emi,
+    norm_m_hrs = m_hrs / base_m_hrs,
+    norm_m_dis = m_dis / base_m_dis,
+    norm_m_spd = m_spd / base_m_spd,
+    norm_m_eng = m_eng / base_m_eng
+  ) |>
+  dplyr::select(year, norm_m_emi, norm_m_hrs, norm_m_dis, norm_m_spd, norm_m_eng)
+
+normalized_data_long <- normalized_data |>
+  tidyr::pivot_longer(
+    cols = starts_with("norm"),
+    names_to = "metric",
+    values_to = "value"
+  )
+```
+
+To address this, we can assess the actual changes in these parameters (considering distances as well) by exclusively analyzing emissions from trips. Below, we present data extracted from the trip emissions dataset, aggregated by vessel for all trips starting in a given year. This shows a completely different trend compared to the observations above. Restricting vessel information to those that has a registered at least one trip in each year has moved the number of vessels considered in this representation from `r length(ssvid_op_2015_2024)` to `r length(ssvid_trip_op_2015_2024)`
+
+
+```{r}
+#| label: fig-all-years-operating-vessels-norm-mean-values-from-trip-level-emissions
+#| fig-cap: Annual mean of individual per-vessel CO2 trip emissions (metric tonnes); total per-vessel operating hours; mean per-vessel main engine power (killowatts); mean per-vessel speed (knots); and total distance traveled for the set of AIS-broadcasting vessels operating in all years, where each line is colored by the last operation year.
+#| fig-width: 7.5
+#| fig-height: 8
+
+metric_colors <- c(
+  "norm_m_emi" = "#4A90E2",      
+  "norm_m_hrs" = "#D0021B",
+  "norm_m_dis" = "purple",
+  "norm_m_spd" = "#7ED321",      
+  "norm_m_eng" = "#F8E71C"      
+)
+
+ggplot2::ggplot(normalized_data_long, ggplot2::aes(x = year, y = value, color = metric)) +
+  ggplot2::geom_line(linewidth = 0.5) +
+  ggplot2::labs(
+    title = "Mean values across years",
+    x = "Year",
+    y = "Normalized Value",
+    color = "Metric"
+  ) +
+  ggplot2::scale_x_continuous(breaks = normalized_data_long$year) + 
+  ggplot2::scale_color_manual(values = metric_colors) +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(
+    legend.position = "bottom",
+    legend.title = ggplot2::element_text(face = "bold"),
+    plot.title = ggplot2::element_text(face = "bold", hjust = 0.5)
+  )
+```
+

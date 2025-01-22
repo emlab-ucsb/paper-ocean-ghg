@@ -50,3 +50,8 @@ download_gfw_data("sql/annual_ais_co2_emissions_by_vessel.sql",
 # Annual spatial CO2 emissions, for AIS and dark fleets
 download_gfw_data("sql/annual_spatial_co2_emissions_ais_dark.sql",
                   "annual_spatial_co2_emissions_ais_dark")
+
+
+# Annual spatial CO2 emissions, for AIS fleets, with speeds from trip level information (TESTING)
+download_gfw_data("sql/annual_ais_co2_emissions_from_trips_dataset.sql",
+                  "annual_ais_co2_emissions_from_trips_dataset")
