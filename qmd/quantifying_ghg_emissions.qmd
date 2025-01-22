@@ -99,6 +99,19 @@ annual_ais_co2_emissions_by_vessel <- glue::glue("{project_directory}/data/proce
 # Annual spatial CO2 emissions, for AIS and dark fleets
 annual_spatial_co2_emissions_ais_dark <-  glue::glue("{project_directory}/data/processed/annual_spatial_co2_emissions_ais_dark.csv") |>
   readr::read_csv()
+
+# Annual global emissions and number of unique vessels by receiver type (satellite; dynamic; or terrestrial)
+annual_global_emissions_by_receiver_type <-  glue::glue("{project_directory}/data/processed/annual_global_emissions_by_receiver_type.csv") |>
+  readr::read_csv()
+
+# Annual global emissions and number of unique vessels by receiver type (satellite; dynamic; or terrestrial) and flag
+annual_global_emissions_by_receiver_type_and_flag <-  glue::glue("{project_directory}/data/processed/annual_global_emissions_by_receiver_type_and_flag.csv") |>
+  readr::read_csv() |>
+  # Add column name for country name based on flag
+  
+  dplyr::mutate(flag = countrycode::countrycode(flag,
+                                                origin = "iso3c",
+                                                destination = "country.name"))
 ```
 
 # Paper figures
@@ -487,6 +500,66 @@ indicators_by_last_operation_year  |>
   theme(panel.grid.minor = element_blank())
 ```
 
+```{r}
+annual_global_emissions_by_receiver_type |>
+  dplyr::filter(receiver_type != "unknown") |>
+  tidyr::complete(
+    receiver_type,
+    tidyr::nesting(year),
+    fill = list(emissions_co2_mt = 0, n_distinct_ssvid = 99)
+  ) |>
+  tidyr::pivot_longer(cols = -c(year,receiver_type)) |>
+  dplyr::mutate(receiver_type = stringr::str_to_sentence(receiver_type)) |>
+  ggplot(aes(x = year,
+             y = value,
+             color = receiver_type)) +
+  facet_wrap(name~., scales = "free_y", ncol = 1) +
+  geom_line() +
+  scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) + 
+  scale_x_continuous(breaks = unique(annual_global_emissions_by_receiver_type$year)) +
+  scale_color_brewer(type = "qual",
+                     palette = "Set2",
+                      guide = guide_legend(reverse = TRUE) ) +
+  theme_plot() +
+  labs(x = "",
+       y = "",
+       color = "AIS data source") +
+  theme(panel.grid.minor.x = element_blank())
+```
+
+```{r}
+top_n_flags_2024 <- annual_global_emissions_by_receiver_type_and_flag |>
+  dplyr::filter(year == 2024, receiver_type == "total") |>
+  dplyr::slice_max(n = 10, order_by = emissions_co2_mt) |>
+  dplyr::select(flag)
+
+annual_global_emissions_by_receiver_type_and_flag |>
+  dplyr::filter(receiver_type != "unknown") |>
+  dplyr::inner_join(top_n_flags_2024, by = "flag") |>
+  dplyr::mutate(flag = forcats::fct_relevel(flag,top_n_flags_2024$flag)) |>
+  tidyr::complete(
+    receiver_type,
+    tidyr::nesting(year,flag),
+    fill = list(emissions_co2_mt = 0, n_distinct_ssvid = 99)
+  ) |>
+  tidyr::pivot_longer(cols = -c(year,receiver_type,flag)) |>
+  dplyr::mutate(receiver_type = stringr::str_to_sentence(receiver_type)) |>
+  ggplot(aes(x = year,
+             y = value,
+             color = flag)) +
+  facet_grid(name~receiver_type, scales = "free_y") +
+  geom_line() +
+  scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) + 
+  scale_x_continuous(breaks = unique(annual_global_emissions_by_receiver_type$year)) +
+  theme_plot() +
+  labs(x = "",
+       y = "",
+       color = "Flag") +
+  theme(panel.grid.minor.x = element_blank()) +
+  geom_vline(xintercept = 2022, linetype = 2) +
+  paletteer::scale_color_paletteer_d(palette = "rcartocolor::Safe")
+```
+
 
 Following Olivier's complementary materials shared on Slack, we present the mean values of four parameters defining yearly information for AIS-broadcasting vessels operating across all years. The data is derived from the ping-level dataset, thus including emissions associated with both port stays and trips.
 
@@ -626,7 +699,6 @@ normalized_data_long <- normalized_data |>
 
 To address this, we can assess the actual changes in these parameters (considering distances as well) by exclusively analyzing emissions from trips. Below, we present data extracted from the trip emissions dataset, aggregated by vessel for all trips starting in a given year. This shows a completely different trend compared to the observations above. Restricting vessel information to those that has a registered at least one trip in each year has moved the number of vessels considered in this representation from `r length(ssvid_op_2015_2024)` to `r length(ssvid_trip_op_2015_2024)`
 
-
 ```{r}
 #| label: fig-all-years-operating-vessels-norm-mean-values-from-trip-level-emissions
 #| fig-cap: Annual mean of individual per-vessel CO2 trip emissions (metric tonnes); total per-vessel operating hours; mean per-vessel main engine power (killowatts); mean per-vessel speed (knots); and total distance traveled for the set of AIS-broadcasting vessels operating in all years, where each line is colored by the last operation year.
@@ -658,4 +730,5 @@ ggplot2::ggplot(normalized_data_long, ggplot2::aes(x = year, y = value, color = 
     plot.title = ggplot2::element_text(face = "bold", hjust = 0.5)
   )
 ```
+
 
