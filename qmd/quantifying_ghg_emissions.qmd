@@ -556,6 +556,7 @@ annual_global_emissions_by_receiver_type_and_flag |>
        y = "",
        color = "Flag") +
   theme(panel.grid.minor.x = element_blank()) +
-  geom_vline(xintercept = 2022, linetype = 2)
+  geom_vline(xintercept = 2022, linetype = 2) +
+  paletteer::scale_color_paletteer_d(palette = "rcartocolor::Safe")
 ```
 
