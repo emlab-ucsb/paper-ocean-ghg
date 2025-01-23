@@ -605,7 +605,7 @@ annual_global_emissions_by_receiver_type_and_flag |>
              color = flag)) +
   facet_grid(receiver_type~., scales = "free_y") +
   geom_line() +
-  scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) + 
+  scale_y_continuous(labels = scales::comma) + 
   scale_x_continuous(breaks = unique(annual_global_emissions_by_receiver_type$year)) +
   theme_plot() +
   labs(x = "",
