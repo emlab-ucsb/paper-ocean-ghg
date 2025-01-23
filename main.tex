@@ -45,16 +45,71 @@ Next we look at how CO2 emissions have changed spatially over time for the AIS-b
 \begin{figure}[H]
     \centering
     \includegraphics[width=\columnwidth]{qmd/quantifying_ghg_emissions_files/figure-pdf/fig-co2-emissions-change-ais-dark-map-1.png}
-    \caption{Spatial change in CO2 emissions between 2016 and 2024 (metric tonnes) for the AIS-broadcasting fleet (top panel), non-broadcasting fleet (middle panel), and both fleets combined (bottom panel) at a 1x1 degree spatial resolution.}
+    \caption{Spatial change in CO2 emissions between 2016 and 2024 (metric tonnes) for the AIS-broadcasting fleet (top panel), non-broadcasting fleet (middle panel), and total across both fleets combined (bottom panel) at a 1x1 degree spatial resolution.}
     \label{fig:fig-co2-emissions-change-ais-dark-map}
 \end{figure}
+
+\section{Discussion}
+
+\section{Methods}
+
+Refer to our comprehensive GitHub notebook that details the full methodology for estimating emissions using AIS and Sentinel-1: \url{https://emlab-ucsb.github.io/ocean-ghg}
+
+\section{Supplementary Information}
+
+% Initiatilze supplementary figure numbering, starting with S1
+% Adapted from here: https://stackoverflow.com/a/68860055
+\setcounter{figure}{0}
+\renewcommand{\figurename}{Fig.}
+\renewcommand{\thefigure}{S\arabic{figure}}
+
+\subsection{Disentangling trends in AIS-based emissions data}
+\subsubsection{The introduction of Dynamic AIS}
+
+In Fig. \ref{fig:fig-annual-emissions-by-ais-receiver-type}, we see that...
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{qmd/quantifying_ghg_emissions_files/figure-pdf/fig-annual-emissions-by-ais-receiver-type-1.png}
+    \caption{Annual total CO2 emissions (metric tonnes) by the AIS-broadcasting fleet, disaggregated by AIS receiver type (satellite, terrestrial, and dynamic) and total aggregated across receiver types. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.}
+    \label{fig:fig-annual-emissions-by-ais-receiver-type}
+\end{figure}
+
+In Fig. \ref{fig:aannual-emissions-by-ais-receiver-type-top-flags}, we see that...
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{qmd/quantifying_ghg_emissions_files/figure-pdf/fig-annual-emissions-by-ais-receiver-type-top-flags-1.png}
+    \caption{Annual total CO2 emissions (metric tonnes) by the AIS-broadcasting fleet, disaggregated by AIS receiver type (satellite, terrestrial, and dynamic) and total aggregated across receiver types, for the top 10 flags with the most emissions in 2024. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.}
+    \label{fig:fig-annual-emissions-by-ais-receiver-type-top-flags}
+\end{figure}
+
+In Fig. \ref{fig:fig-annual-unique-vessels-by-ais-receiver-type-top-flag}, we see that...
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{qmd/quantifying_ghg_emissions_files/figure-pdf/fig-annual-unique-vessels-by-ais-receiver-type-top-flags-1.png}
+    \caption{Annual unique number of vessels in the AIS-broadcasting fleet, disaggregated by AIS receiver type (satellite, terrestrial, and dynamic) and total aggregated across receiver types, for the top 10 flags with the most emissions in 2024. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.}
+    \label{fig:fig-annual-unique-vessels-by-ais-receiver-type-top-flag}
+\end{figure}
+
+In Fig. \ref{fig:fig-co2-emissions-change-map-by-receiver-type}, we see that...
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{qmd/quantifying_ghg_emissions_files/figure-pdf/fig-co2-emissions-change-map-by-receiver-type-1.png}
+    \caption{Spatial change in CO2 emissions by the AIS-broadcasting fleet between 2016 and 2024 (metric tonnes) by receiver type (satellite, terrestrial, and dynamic) and total across receiver types, at a 1x1 degree spatial resolution.}
+    \label{fig:fig-co2-emissions-change-map-by-receiver-type}
+\end{figure}
+
+\subsubsection{Changes in fleet composition and vessel behavior}
 
 In Fig. \ref{fig:fig-total-annual-unique-vessels-hours-power},  we see that the number of unique AIS-broadcasting vessels is steadily increasing over time, showing an 78\% increase from 2015 to 2024. The total operational hours of these vessels increase 104\% over this time period, while the total main engine power for these vessels saw a 37\% increase. This provides some evidence that a primary driver of increasing observed emissions at a global scale (Fig. \ref{fig:fig-total-annual-emissions-by-fleet}) could be the increasing number of vessels that broadcast AIS.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\columnwidth]{qmd/quantifying_ghg_emissions_files/figure-pdf/fig-total-annual-unique-vessels-hours-power-1.png}
-    \caption{Annual unique number of AIS-broadcasting vessels (top panel); annual total number of operating hours for AIS-broadcasting vessels (middle panel); and annual total engine power for those vessels (killowatt). The percent change from 2015 to 2024 is shown next to each line.}
+    \caption{Annual total CO2 emissions (metric tonnes); total operating hours; total engine power across vessels (killowatts); number distinct operating vessels; and average speed; across all AIS-broadcasting vessels. The percent change from 2015 to 2024 is shown next to each line..}
     \label{fig:fig-total-annual-unique-vessels-hours-power}
 \end{figure}
 
@@ -117,11 +172,5 @@ Next we look at time series trends of mean per-vessel emissions, mean per-vessel
     \caption{Annual mean of individual per-vessel CO2 emissions (metric tonnes); mean per-vessel operating hours; mean per-vessel main engine power (killowatts); mean per-vessel speed (knots); and total number of distinct vessels for the set of AIS-broadcasting vessels for each last year of operation, where each line is colored by the last operation year.}
     \label{fig:fig-individual-distribution-annual-emissions-hours-power-by-last-year}
 \end{figure}
-
-\section{Discussion}
-
-\section{Methods}
-
-Refer to our comprehensive GitHub notebook that details the full methodology for estimating emissions using AIS and Sentinel-1: \url{https://emlab-ucsb.github.io/ocean-ghg}
 
 \end{document}
