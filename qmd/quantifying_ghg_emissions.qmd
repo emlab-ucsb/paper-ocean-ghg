@@ -136,8 +136,11 @@ annual_global_emissions_by_receiver_type_and_flag <-  glue::glue("{project_direc
 
 # Annual spatial CO2 emissions vt receiver type  (satellite; dynamic; or terrestrial)
 annual_spatial_emissions_by_receiver_type <-  glue::glue("{project_directory}/data/processed/annual_spatial_emissions_by_receiver_type.csv") |>
-  readr::read_csv()|>
-  dplyr::mutate(receiver_type = stringr::str_to_sentence(receiver_type)) 
+  readr::read_csv() |>
+  dplyr::mutate(receiver_type = stringr::str_to_sentence(receiver_type) |>
+                  forcats::fct_relevel("Satellite",
+                                       "Terrestrial",
+                                       "Dynamic"))
 ```
 
 # Paper figures
@@ -535,7 +538,7 @@ indicators_by_last_operation_year  |>
 
 ```{r}
 #| label: fig-annual-emissions-by-ais-receiver-type
-#| fig-cap: Annual total CO2 emissions (metric tonnes) disaggregated by AIS receiver type (terrestiral, satellite, or dynamic) and total aggregated across receiver types. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.
+#| fig-cap: Annual total CO2 emissions (metric tonnes) by the AIS-broadcasting fleet, disaggregated by AIS receiver type (satellite, terrestrial, and dynamic) and total aggregated across receiver types. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.
 #| fig-width: 7.5
 #| fig-height: 6
 annual_global_emissions_by_receiver_type|>
@@ -560,7 +563,7 @@ annual_global_emissions_by_receiver_type|>
 
 ```{r}
 #| label: fig-annual-emissions-by-ais-receiver-type-top-flags
-#| fig-cap: Annual total CO2 emissions (metric tonnes) disaggregated by AIS receiver type (terrestiral, satellite, or dynamic) and total aggregated across receiver types, for the top 10 flags with the most emissions in 2024. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.
+#| fig-cap: Annual total CO2 emissions (metric tonnes) by the AIS-broadcasting fleet, disaggregated by AIS receiver type (satellite, terrestrial, and dynamic) and total aggregated across receiver types, for the top 10 flags with the most emissions in 2024. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.
 #| fig-width: 7.5
 #| fig-height: 6
 
@@ -590,7 +593,7 @@ annual_global_emissions_by_receiver_type_and_flag |>
 
 ```{r}
 #| label: fig-annual-unique-vessels-by-ais-receiver-type-top-flags
-#| fig-cap: Annual number of unique vessels disaggregated by AIS receiver type (terrestiral, satellite, or dynamic) and total aggregated across receiver types, for the top 10 flags with the most emissions in 2024. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.
+#| fig-cap: Annual unique number of vessels in the AIS-broadcasting fleet, disaggregated by AIS receiver type (satellite, terrestrial, and dynamic) and total aggregated across receiver types, for the top 10 flags with the most emissions in 2024. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.
 #| fig-width: 7.5
 #| fig-height: 6
 
@@ -615,7 +618,7 @@ annual_global_emissions_by_receiver_type_and_flag |>
 
 ```{r}
 #| label: fig-co2-emissions-change-map-by-receiver-type
-#| fig-cap: Spatial change in CO2 emissions between 2016 and 2024 (metric tonnes) by receiver type (dynamic, satellite, and terrestrial) and total across receiver types, at a 1x1 degree spatial resolution.
+#| fig-cap: Spatial change in CO2 emissions by the AIS-broadcasting fleet between 2016 and 2024 (metric tonnes) by receiver type (satellite, terrestrial, and dynamic) and total across receiver types, at a 1x1 degree spatial resolution.
 #| fig-width: 7.5
 #| fig-height: 8
 
