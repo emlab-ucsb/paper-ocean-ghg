@@ -24,14 +24,14 @@
 % \textbf{Title:} Quantifying environmental trends: Disentangling changes in  impact from changes in monitoring
 
 
-% \textbf{Abstract:} Quantifying environmental trends is a fundamental aspect of assessing and managing environmental impacts. This requires a monitoring scheme for measuring changes over time. As technology improves, monitoring itself may also change over time, making it challenging to disentangle actual environmental changes from changes in monitoring. As improved technology allows for more and more comprehensive monitoring over time, this may simultaneously lead to overestimates in the increasing trends of environmental problems and underestimates of their overall magnitude. Combining multiple monitoring data sources has the potential to reduce these biases. Here we develop a novel method for quantifying high spatiotemporal resolution global ocean-based greenhouse gas (GHG) emissions by combining two unique satellite-based monitoring sources: 1) Automatic Identification System (AIS) to estimate vessel-level emissions for the over 660,000 boats that broadcast their positions using AIS; and 2) synthetic aperture radar (SAR) data from the Sentinel-1 satellite constellation to estimate emissions for boats that do not use AIS. When only looking at emissions based on AIS, global emissions in 2024 1,1200 million metric tonnes (MMT), and trend from 2016 to 2024 shows a 34\% increase. When also adding in non-broadcasting vessels using Sentinel-1 detections, global emissions in 2024 were 1,420 MMT, and the trend from 2016 to 2024 is more modest at only a 23\% increase. This suggests that if only using AIS data, global emissions in 2024 would be underestimated by 17\%, and the increasing trend from 2016 to 2024 would be overestimated by48\%. Our approach therefore not only provides a robust method for quantifying comprehensive high-resolution spatiotemporal emissions data that could be used for a variety of interventions for mitigating emissions, but also provides an example of how multiple data sources can be used to disentangle actual environmental changes from improved monitoring and more accurately quantify both the magnitude and trends of environmental problems.
+% \textbf{Abstract:} Quantifying environmental trends is a fundamental aspect of assessing and managing environmental impacts. This requires a monitoring scheme for measuring changes over time. As technology improves, monitoring itself may also change over time, making it challenging to disentangle actual environmental changes from changes in monitoring. As improved technology allows for more and more comprehensive monitoring over time, this may simultaneously lead to overestimates in the increasing trends of environmental problems and underestimates of their overall magnitude. Combining multiple monitoring data sources has the potential to reduce these biases. Here we develop a novel method for quantifying high spatiotemporal resolution global ocean-based greenhouse gas (GHG) emissions by combining two unique satellite-based monitoring sources: 1) Automatic Identification System (AIS) to estimate vessel-level emissions for the over 660,000 boats that broadcast their positions using AIS; and 2) synthetic aperture radar (SAR) data from the Sentinel-1 satellite constellation to estimate emissions for boats that do not use AIS. When only looking at emissions based on AIS, global emissions in 2024 1,1200 million metric tonnes (MMT), and trend from 2016 to 2024 shows a 34\% increase. When also adding in non-broadcasting vessels using Sentinel-1 detections, global emissions in 2024 were 1,420 MMT, and the trend from 2016 to 2024 is more modest at only a 23\% increase. This suggests that if only using AIS data, global emissions in 2024 would be underestimated by 17\%, and the increasing trend from 2016 to 2024 would be overestimated by 48\%. Our approach therefore not only provides a robust method for quantifying comprehensive high-resolution spatiotemporal emissions data that could be used for a variety of interventions for mitigating emissions, but also provides an example of how multiple data sources can be used to disentangle actual environmental changes from improved monitoring and more accurately quantify both the magnitude and trends of environmental problems.
 
 
 \section{Introduction}
 
 \section{Results}
 
-In Fig. \ref{fig:fig-total-annual-emissions-by-fleet}, we can see that when only looking at emissions based on AIS, global emissions in 2024 were 1,1200 million metric tonnes (MMT), and trend from 2016 to 2024 shows a 34\% increase. When also adding in non-broadcasting vessels using Sentinel-1 detections, global emissions in 2024 were 1,420 MMT, and the trend from 2016 to 2024 is more modest at only a 23\% increase. This suggests that if only using AIS data, global emissions in 2024 would be underestimated by 17\%, and the increasing trend from 2016 to 2024 would be overestimated by48\%.
+In Fig. \ref{fig:fig-total-annual-emissions-by-fleet}, we can see that when only looking at emissions based on AIS, global emissions in 2024 were 1,1200 million metric tonnes (MMT), and trend from 2016 to 2024 shows a 34\% increase. When also adding in non-broadcasting vessels using Sentinel-1 detections, global emissions in 2024 were 1,420 MMT, and the trend from 2016 to 2024 is more modest at only a 23\% increase. This suggests that if only using AIS data, global emissions in 2024 would be underestimated by 17\%, and the increasing trend from 2016 to 2024 would be overestimated by 48\%.
 
 \begin{figure}[H]
     \centering
@@ -40,7 +40,7 @@ In Fig. \ref{fig:fig-total-annual-emissions-by-fleet}, we can see that when only
     \label{fig:fig-total-annual-emissions-by-fleet}
 \end{figure}
 
-Next we look at how CO2 emissions have changed spatially over time for the AIS-broadcasting fleet, non-broadcasting fleet, and both fleets combined (Fig. \ref{fig:fig-co2-emissions-change-ais-dark-map}). Here we can see that three regions in particular had both dramatic increases in AIS-broadcasting emissions alongside dramatic decreases in non-broadcasting emissions: the waters off China, the European Union, and the Gulf of Mexico.
+Next we look at how CO2 emissions have changed spatially over time for the AIS-broadcasting fleet, non-broadcasting fleet, and both fleets combined (Fig. \ref{fig:fig-co2-emissions-change-ais-dark-map}). Here we can see that three regions in particular had both dramatic increases in AIS-broadcasting emissions alongside dramatic decreases in non-broadcasting emissions: the waters off China, the European Union, and the Gulf of Mexico. These figures also shed new light on how vessel activity and its associated emissions have changed along different trade routes over time.
 
 \begin{figure}[H]
     \centering
@@ -66,7 +66,7 @@ Refer to our comprehensive GitHub notebook that details the full methodology for
 \subsection{Disentangling trends in AIS-based emissions data}
 \subsubsection{The introduction of Dynamic AIS}
 
-In Fig. \ref{fig:fig-annual-emissions-by-ais-receiver-type}, we see that...
+AIS messages are broadcast from vessels and then received through one of three technologies: satellite-based receivers, terrestrial receivers, and dynamic receivers. Satellite and terrestrial receivers are the oldest receiver types, while 2022 saw the widespread adoption of 'Dynamic-AIS' in several regions throughout the world. Dynamic AIS is a technology that is implemented by Spire, one of the major AIS data providers, in which satellite-enabled AIS receivers are installed on vessels that travel through some of the world's busiest shipping lanes  such as the South China Sea (\href{https://documentation.spire.com/ais-fundamentals/ais-data-sources/dynamic-ais/}{source}). Through GFW, we can determine the receiver type for every single AIS message in the dataset over time. In Fig. \ref{fig:fig-annual-emissions-by-ais-receiver-type}, we summarize the amount of estimated emissions and the number of distinct vessels that were detected by the three different types of AIS receivers. In 2022, we can clearly see a sharp rise in the amount of emissions that were measured by Dynamic AIS, which intuitively coincides with a decrease in the emissions that are measured from satellite and terrestrial receivers. On aggregate, this led to an increase in total measured emissions. The number of distinct vessels detected by dynamic AIS also sharply rose in 2022, almost equaling the number of vessels detected by all receiver types.
 
 \begin{figure}[H]
     \centering
@@ -75,7 +75,7 @@ In Fig. \ref{fig:fig-annual-emissions-by-ais-receiver-type}, we see that...
     \label{fig:fig-annual-emissions-by-ais-receiver-type}
 \end{figure}
 
-In Fig. \ref{fig:aannual-emissions-by-ais-receiver-type-top-flags}, we see that...
+In Fig. \ref{fig:fig-annual-emissions-by-ais-receiver-type-top-flags}, we see the amount of quantified emissions for the top 10 vessel flags broken apart by AIS receiver type (Fig. \ref{fig:fig-annual-unique-vessels-by-ais-receiver-type-top-flag} similarly shows trends in unique vessels detected by each receiver type). The trends are similar to those seen on aggregate ( Fig. \ref{fig:fig-annual-emissions-by-ais-receiver-type}), although there is variation in terms of the increase in Dynamic AIS detections across different flags. This is likely driven by whether or not each flag travels through regions where Dynamic AIS was widely adopted. It is important to note that towards the end of 2021, China experience a blackout of terrestrial AIS signals due to new privacy laws that were being implemented (\href{https://veson.com/blog/benefits-of-dynamic-ais-for-maritime-data-in-times-of-uncertainty/}{source). This sharp decline from 2021 to 2022 in terrestrial-based emissions is clearly evident for China. Without the introduction of Dynamic AIS, it is possible that this disruption may have resulted in erroneously small emissions in China following the terrestrial receiver blackout. This is another example of how multiple complementary technologies can be fused in order to maximize emissions coverage over time.
 
 \begin{figure}[H]
     \centering
@@ -84,7 +84,6 @@ In Fig. \ref{fig:aannual-emissions-by-ais-receiver-type-top-flags}, we see that.
     \label{fig:fig-annual-emissions-by-ais-receiver-type-top-flags}
 \end{figure}
 
-In Fig. \ref{fig:fig-annual-unique-vessels-by-ais-receiver-type-top-flag}, we see that...
 
 \begin{figure}[H]
     \centering
@@ -93,7 +92,7 @@ In Fig. \ref{fig:fig-annual-unique-vessels-by-ais-receiver-type-top-flag}, we se
     \label{fig:fig-annual-unique-vessels-by-ais-receiver-type-top-flag}
 \end{figure}
 
-In Fig. \ref{fig:fig-co2-emissions-change-map-by-receiver-type}, we see that...
+Finally, in Fig. \ref{fig:fig-co2-emissions-change-map-by-receiver-type}, we see how the use of the three AIS receiver types has changed spatially over time between 2016 and 2024. Dynamic AIS was mostly implemented in busy shipping lanes, with clear concentration in areas including the South China Sea, Europe, and the Gulf of Mexico. These regions also generally correspond to decreasing use of satellite and terrestrial receivers. Overall, the largest total change in emissions is generally concentrated in the same regions that saw the largest uptake of Dynamic AIS.
 
 \begin{figure}[H]
     \centering
@@ -172,5 +171,26 @@ Next we look at time series trends of mean per-vessel emissions, mean per-vessel
     \caption{Annual mean of individual per-vessel CO2 emissions (metric tonnes); mean per-vessel operating hours; mean per-vessel main engine power (killowatts); mean per-vessel speed (knots); and total number of distinct vessels for the set of AIS-broadcasting vessels for each last year of operation, where each line is colored by the last operation year.}
     \label{fig:fig-individual-distribution-annual-emissions-hours-power-by-last-year}
 \end{figure}
+
+Following Olivier's complementary materials shared on Slack, we present the mean values of four parameters defining yearly information for AIS-broadcasting vessels operating across all years (Fig. \ref{fig:fig-all-years-operating-vessels-norm-mean-values-from-ping-level-emissions-1}). The data is derived from the ping-level dataset, thus including emissions associated with both port stays and trips.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{qmd/quantifying_ghg_emissions_files/figure-pdf/fig-all-years-operating-vessels-norm-mean-values-from-ping-level-emissions-1.png}
+    \caption{Annual mean of individual per-vessel CO2 emissions (metric tonnes); mean per-vessel operating hours; mean per-vessel main engine power (killowatts); mean per-vessel speed (knots); and total number of distinct vessels for the set of AIS-broadcasting vessels for each last year of operation, where each line is colored by the last operation year.}
+    \label{fig:fig-all-years-operating-vessels-norm-mean-values-from-ping-level-emissions-1}
+\end{figure}
+
+The relationship between hours and speeds may be misleading, as the dataset includes information from both trips and port stays. While hours accumulate regardless of whether a vessel is on a trip or at port, distances covered during port stays are minimal, leading to misrepresented speed values.
+
+To address this, we can assess the actual changes in these parameters (considering distances as well) by exclusively analyzing emissions from trips. Below, we present data extracted from the trip emissions dataset, aggregated by vessel for all trips starting in a given year (Fig. \ref{fig:fig-all-years-operating-vessels-norm-mean-values-from-trip-level-emissions-1}). This shows a completely different trend compared to the observations above. Restricting vessel information to those that has a registered at least one trip in each year has moved the number of vessels considered in this representation from 101754 to 67715.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{qmd/quantifying_ghg_emissions_files/figure-pdf/fig-all-years-operating-vessels-norm-mean-values-from-trip-level-emissions-1.png}
+    \caption{Annual mean of individual per-vessel CO2 emissions (metric tonnes); mean per-vessel operating hours; mean per-vessel main engine power (killowatts); mean per-vessel speed (knots); and total number of distinct vessels for the set of AIS-broadcasting vessels for each last year of operation, where each line is colored by the last operation year.}
+    \label{fig:fig-all-years-operating-vessels-norm-mean-values-from-trip-level-emissions-1}
+\end{figure}
+
 
 \end{document}
