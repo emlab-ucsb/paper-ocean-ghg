@@ -89,7 +89,7 @@ annual_co2_emissions <- glue::glue("{project_directory}/data/processed/annual_co
                       names_to = "fleet",
                       values_to = "co2_emissions") |>
   dplyr::mutate(fleet = dplyr::case_when(stringr::str_detect(fleet,"dark") ~ "Non-broadcasting",
-                                         stringr::str_detect(fleet,"total") ~ "Both fleets",
+                                         stringr::str_detect(fleet,"total") ~ "Total",
                                          TRUE ~ "AIS-broadcasting"))
 
 # Annual AIS-based CO2 emissions, hours, average speed, and main engine power by vessel
@@ -102,7 +102,16 @@ annual_spatial_co2_emissions_ais_dark <-  glue::glue("{project_directory}/data/p
 
 # Annual global emissions and number of unique vessels by receiver type (satellite; dynamic; or terrestrial)
 annual_global_emissions_by_receiver_type <-  glue::glue("{project_directory}/data/processed/annual_global_emissions_by_receiver_type.csv") |>
-  readr::read_csv()
+  readr::read_csv() |>
+  # Don't include unknown receiver type
+  dplyr::filter(receiver_type != "unknown") |>
+  # Fill in missing values with 0s
+  tidyr::complete(
+    receiver_type,
+    tidyr::nesting(year),
+    fill = list(emissions_co2_mt = 0, n_distinct_ssvid = 0)
+  ) |>
+  dplyr::mutate(receiver_type = stringr::str_to_sentence(receiver_type)) 
 
 # Annual global emissions and number of unique vessels by receiver type (satellite; dynamic; or terrestrial) and flag
 annual_global_emissions_by_receiver_type_and_flag <-  glue::glue("{project_directory}/data/processed/annual_global_emissions_by_receiver_type_and_flag.csv") |>
@@ -111,11 +120,24 @@ annual_global_emissions_by_receiver_type_and_flag <-  glue::glue("{project_direc
   
   dplyr::mutate(flag = countrycode::countrycode(flag,
                                                 origin = "iso3c",
-                                                destination = "country.name"))
+                                                destination = "country.name")) |>
+  # Don't include unknown receiver type
+  dplyr::filter(receiver_type != "unknown") |>
+  dplyr::mutate(receiver_type = stringr::str_to_sentence(receiver_type) |>
+                  forcats::fct_relevel("Satellite",
+                                       "Terrestrial",
+                                       "Dynamic")) |>
+  # Fill in missing values with 0s
+  tidyr::complete(
+    receiver_type,
+    tidyr::nesting(year,flag),
+    fill = list(emissions_co2_mt = 0, n_distinct_ssvid = 0)
+  ) 
 
 # Annual spatial CO2 emissions vt receiver type  (satellite; dynamic; or terrestrial)
 annual_spatial_emissions_by_receiver_type <-  glue::glue("{project_directory}/data/processed/annual_spatial_emissions_by_receiver_type.csv") |>
-  readr::read_csv()
+  readr::read_csv()|>
+  dplyr::mutate(receiver_type = stringr::str_to_sentence(receiver_type)) 
 ```
 
 # Paper figures
@@ -129,7 +151,7 @@ annual_spatial_emissions_by_receiver_type <-  glue::glue("{project_directory}/da
 # Calculate the total percent change in emissions by fleet
 total_percent_change_by_fleet <- annual_co2_emissions |>
   dplyr::filter(year %in% c(2016,2024)) |>
-  dplyr::filter(fleet != "Both fleets") |>
+  dplyr::filter(fleet != "Total") |>
   tidyr::pivot_wider(names_from = year,
                      values_from = co2_emissions) |>
   dplyr::mutate(percent_total_2024 = `2024`/sum(`2024`))  |>
@@ -153,7 +175,7 @@ annual_co2_emissions |>
   scale_x_continuous(breaks = unique(annual_co2_emissions$year)) +
   scale_color_brewer(type = "qual",
                      palette = "Dark2",
-                     breaks = c("Both fleets","AIS-broadcasting","Non-broadcasting")) +
+                     breaks = c("Total","AIS-broadcasting","Non-broadcasting")) +
   theme_plot() +
   labs(x = "",
        y = "Annual global CO2 emissions\n(millions metric tonnes)",
@@ -175,14 +197,14 @@ total_percent_change_by_fleet |>
 
 ```{r}
 #| label: fig-co2-emissions-change-ais-dark-map
-#| fig-cap: Spatial change in CO2 emissions between 2016 and 2024 (metric tonnes) for the AIS-broadcasting fleet (top panel), non-broadcasting fleet (middle panel), and both fleets combined (bottom panel) at a 1x1 degree spatial resolution.
+#| fig-cap: Spatial change in CO2 emissions between 2016 and 2024 (metric tonnes) for the AIS-broadcasting fleet (top panel), non-broadcasting fleet (middle panel), and total combined (bottom panel) at a 1x1 degree spatial resolution.
 #| fig-width: 7.5
 #| fig-height: 8
 
 annual_spatial_co2_emissions_ais_dark  |>
   dplyr::filter(year %in% c(2016,2024)) |>
   dplyr::mutate(across(c(emissions_co2_mt,emissions_co2_dark_mt), ~tidyr::replace_na(.,0))) |>
-  dplyr::mutate(`Both fleets` = emissions_co2_mt + emissions_co2_dark_mt) |>
+  dplyr::mutate(`Total` = emissions_co2_mt + emissions_co2_dark_mt) |>
   dplyr::rename(`AIS-broadcasting` = emissions_co2_mt,
                 `Non-broadcasting` = emissions_co2_dark_mt) |>
   tidyr::pivot_longer(cols = -c(year,lon_bin,lat_bin)) |>
@@ -225,20 +247,22 @@ annual_spatial_co2_emissions_ais_dark  |>
 
 ```{r}
 #| label: fig-total-annual-unique-vessels-hours-power
-#| fig-cap: Annual unique number of AIS-broadcasting vessels (top panel); annual number of operating hours for AIS-broadcasting vessels (middle panel); and annual total engine power for those vessels (killowatt). The percent change from 2015 to 2024 is shown next to each line.
+#| fig-cap: Annual total CO2 emissions (metric tonnes); total operating hours; total engine power across vessels (killowatt); number distinct operating vessels; and average speed; across all AIS-broadcasting vessels. The percent change from 2015 to 2024 is shown next to each line.
 #| fig-width: 7.5
 #| fig-height: 6
+# Standard error function
+# https://www.r-bloggers.com/2022/03/calculate-standard-error-in-r/
+std <- function(x) sd(x)/sqrt(length(x))
 
 annual_vessel_summary_by_year <- annual_ais_co2_emissions_by_vessel |>
   dplyr::group_by(year) |>
   dplyr::summarize(n_distinct_vessels = dplyr::n_distinct(ssvid),
-                   main_engine_power_kw = sum(main_engine_power_kw),
-                   hours = sum(hours)) |>
+                   dplyr::across(c(emissions_co2_mt,
+                                                                            main_engine_power_kw,
+                                                                            hours), c(mean = mean,sum = sum,std = std)),
+                                                                            dplyr::across(speed_knots, c(mean = mean, std = std))) |>
   dplyr::ungroup()   |>
-  tidyr::pivot_longer(-year) |>
-  dplyr::mutate(name = dplyr::case_when(stringr::str_detect(name,"power") ~ "Total main engine power for AIS-broadcasting vessels (kW)",
-                                        stringr::str_detect(name,"vessels") ~ "Number unique AIS-broadcasting vessels",
-                                        TRUE ~ "Operating hours for AIS-broadcasting vessels"))
+  tidyr::pivot_longer(-year)
 
 total_percent_change_vessel_summary  <-annual_vessel_summary_by_year |>
   dplyr::filter(year %in% max(year) | year %in% min(year)) |>
@@ -252,9 +276,11 @@ total_percent_change_vessel_summary  <-annual_vessel_summary_by_year |>
                                         glue::glue("{percent_change}%")))
 
 annual_vessel_summary_by_year|>
+  dplyr::filter(name %in% c("hours_sum","emissions_co2_mt_sum","n_distinct_vessels","main_engine_power_kw_sum","speed_knots_mean")) |>
   ggplot(aes(x = year, y = value)) +
   geom_line() +
-  geom_text(data = total_percent_change_vessel_summary,
+  geom_text(data = total_percent_change_vessel_summary|>
+  dplyr::filter(name %in% c("hours_sum","emissions_co2_mt_sum","n_distinct_vessels","main_engine_power_kw_sum","speed_knots_mean")) ,
             aes(label = percent_change,
                 y = end_value,
                 x = max(annual_vessel_summary_by_year$year)+.5),
@@ -275,9 +301,7 @@ annual_vessel_summary_by_year|>
 #| fig-width: 7.5
 #| fig-height: 9
 
-# Standard error function
-# https://www.r-bloggers.com/2022/03/calculate-standard-error-in-r/
-std <- function(x) sd(x)/sqrt(length(x))
+
 
 # For vessels that have been in operation since a given year, calculate their annual emissions
 # Do this for every where from 2015 to 2022
@@ -346,12 +370,17 @@ annual_emissions_by_fleet_year   |>
 #| fig-width: 7.5
 #| fig-height: 5
 
-annual_ais_co2_emissions_by_vessel |>
-   tidyr::pivot_longer(-c(year,ssvid))|>
-  dplyr::mutate(name = glue::glue("{name}_mean")) |>
-  ggplot(aes(x = year, y = value, group = year))+ 
-  stat_summary(fun = mean, geom = "point") + 
-  stat_summary(fun.data = mean_se, geom = "errorbar", fun.args = list(mult = 2), width = 0.5)+
+annual_vessel_summary_by_year |>
+  dplyr::filter(stringr::str_detect(name,"mean|std")) |>
+  dplyr::mutate(indicator_type = ifelse(stringr::str_detect(name,"mean"),"mean","std")) |>
+  dplyr::mutate(name = stringr::str_remove_all(name,"_mean"))|>
+  dplyr::mutate(name = stringr::str_remove_all(name,"_std")) |>
+  dplyr::filter(name %in% c("emissions_co2_mt","hours","main_engine_power_kw","speed_knots")) |>
+  tidyr::pivot_wider(names_from = indicator_type,
+              values_from = value) |>
+  ggplot(aes(x = year, y = mean, group = year))+ 
+  geom_point() +
+  geom_errorbar(aes(ymin = mean - 2*std, ymax = mean + 2*std)) +
   facet_wrap(name~.,scales="free_y",ncol=1) +
   theme_plot()  +
   scale_y_continuous(labels = scales::comma) +
@@ -505,18 +534,12 @@ indicators_by_last_operation_year  |>
 ```
 
 ```{r}
-#| label: fig-annual-emissions-vessels-by-ais-receiver-type
-#| fig-cap: Annual total CO2 emissions (metric tonnes) and total number of distinct vessels disaggregated by AIS receiver type (terrestiral, satellite, or dynamic) and total aggregated across receiver types.
-
-annual_global_emissions_by_receiver_type |>
-  dplyr::filter(receiver_type != "unknown") |>
-  tidyr::complete(
-    receiver_type,
-    tidyr::nesting(year),
-    fill = list(emissions_co2_mt = 0, n_distinct_ssvid = 99)
-  ) |>
+#| label: fig-annual-emissions-by-ais-receiver-type
+#| fig-cap: Annual total CO2 emissions (metric tonnes) disaggregated by AIS receiver type (terrestiral, satellite, or dynamic) and total aggregated across receiver types. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.
+#| fig-width: 7.5
+#| fig-height: 6
+annual_global_emissions_by_receiver_type|>
   tidyr::pivot_longer(cols = -c(year,receiver_type)) |>
-  dplyr::mutate(receiver_type = stringr::str_to_sentence(receiver_type)) |>
   ggplot(aes(x = year,
              y = value,
              color = receiver_type)) +
@@ -531,33 +554,28 @@ annual_global_emissions_by_receiver_type |>
   labs(x = "",
        y = "",
        color = "AIS receiver type") +
-  theme(panel.grid.minor.x = element_blank())
+  theme(panel.grid.minor.x = element_blank())+
+  geom_vline(xintercept = 2022, linetype = 2) 
 ```
 
 ```{r}
-#| label: fig-annual-emissions-vessels-by-ais-receiver-type-top-flags
-#| fig-cap: Annual total CO2 emissions (metric tonnes) and total number of distinct vessels disaggregated by AIS receiver type (terrestiral, satellite, or dynamic) and total aggregated across receiver types, for the top 10 flags with the most emissions in 2024.
+#| label: fig-annual-emissions-by-ais-receiver-type-top-flags
+#| fig-cap: Annual total CO2 emissions (metric tonnes) disaggregated by AIS receiver type (terrestiral, satellite, or dynamic) and total aggregated across receiver types, for the top 10 flags with the most emissions in 2024. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.
+#| fig-width: 7.5
+#| fig-height: 6
 
 top_n_flags_2024 <- annual_global_emissions_by_receiver_type_and_flag |>
-  dplyr::filter(year == 2024, receiver_type == "total") |>
+  dplyr::filter(year == 2024, receiver_type == "Total") |>
   dplyr::slice_max(n = 10, order_by = emissions_co2_mt) |>
   dplyr::select(flag)
 
 annual_global_emissions_by_receiver_type_and_flag |>
-  dplyr::filter(receiver_type != "unknown") |>
   dplyr::inner_join(top_n_flags_2024, by = "flag") |>
   dplyr::mutate(flag = forcats::fct_relevel(flag,top_n_flags_2024$flag)) |>
-  tidyr::complete(
-    receiver_type,
-    tidyr::nesting(year,flag),
-    fill = list(emissions_co2_mt = 0, n_distinct_ssvid = 99)
-  ) |>
-  tidyr::pivot_longer(cols = -c(year,receiver_type,flag)) |>
-  dplyr::mutate(receiver_type = stringr::str_to_sentence(receiver_type)) |>
   ggplot(aes(x = year,
-             y = value,
+             y = emissions_co2_mt,
              color = flag)) +
-  facet_grid(name~receiver_type, scales = "free_y") +
+  facet_grid(receiver_type~., scales = "free_y") +
   geom_line() +
   scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) + 
   scale_x_continuous(breaks = unique(annual_global_emissions_by_receiver_type$year)) +
@@ -567,8 +585,32 @@ annual_global_emissions_by_receiver_type_and_flag |>
        color = "Flag") +
   theme(panel.grid.minor.x = element_blank()) +
   geom_vline(xintercept = 2022, linetype = 2) +
-  paletteer::scale_color_paletteer_d(palette = "rcartocolor::Safe") +
-  theme(legend.position = "bottom")
+  paletteer::scale_color_paletteer_d(palette = "rcartocolor::Safe")
+```
+
+```{r}
+#| label: fig-annual-unique-vessels-by-ais-receiver-type-top-flags
+#| fig-cap: Annual number of unique vessels disaggregated by AIS receiver type (terrestiral, satellite, or dynamic) and total aggregated across receiver types, for the top 10 flags with the most emissions in 2024. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.
+#| fig-width: 7.5
+#| fig-height: 6
+
+annual_global_emissions_by_receiver_type_and_flag |>
+  dplyr::inner_join(top_n_flags_2024, by = "flag") |>
+  dplyr::mutate(flag = forcats::fct_relevel(flag,top_n_flags_2024$flag)) |>
+  ggplot(aes(x = year,
+             y = n_distinct_ssvid,
+             color = flag)) +
+  facet_grid(receiver_type~., scales = "free_y") +
+  geom_line() +
+  scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) + 
+  scale_x_continuous(breaks = unique(annual_global_emissions_by_receiver_type$year)) +
+  theme_plot() +
+  labs(x = "",
+       y = "",
+       color = "Flag") +
+  theme(panel.grid.minor.x = element_blank()) +
+  geom_vline(xintercept = 2022, linetype = 2) +
+  paletteer::scale_color_paletteer_d(palette = "rcartocolor::Safe")
 ```
 
 ```{r}
