@@ -62,3 +62,7 @@ download_gfw_data("sql/annual_global_emissions_by_receiver_type_and_flag.sql",
 # Annual spatial CO2 emissions, for AIS fleets, with speeds from trip level information (TESTING)
 download_gfw_data("sql/annual_ais_co2_emissions_from_trips_dataset.sql",
                   "annual_ais_co2_emissions_from_trips_dataset")
+
+# Annual spatial CO2 emissions vt receiver type  (satellite; dynamic; or terrestrial)
+download_gfw_data("sql/annual_spatial_emissions_by_receiver_type.sql",
+                  "annual_spatial_emissions_by_receiver_type")

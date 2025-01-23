@@ -112,6 +112,10 @@ annual_global_emissions_by_receiver_type_and_flag <-  glue::glue("{project_direc
   dplyr::mutate(flag = countrycode::countrycode(flag,
                                                 origin = "iso3c",
                                                 destination = "country.name"))
+
+# Annual spatial CO2 emissions vt receiver type  (satellite; dynamic; or terrestrial)
+annual_spatial_emissions_by_receiver_type <-  glue::glue("{project_directory}/data/processed/annual_spatial_emissions_by_receiver_type.csv") |>
+  readr::read_csv()
 ```
 
 # Paper figures
@@ -567,6 +571,47 @@ annual_global_emissions_by_receiver_type_and_flag |>
   theme(legend.position = "bottom")
 ```
 
+```{r}
+#| label: fig-co2-emissions-change-map-by-receiver-type
+#| fig-cap: Spatial change in CO2 emissions between 2016 and 2024 (metric tonnes) by receiver type (dynamic, satellite, and terrestrial) and total across receiver types, at a 1x1 degree spatial resolution.
+#| fig-width: 7.5
+#| fig-height: 8
+
+annual_spatial_emissions_by_receiver_type  |>
+  dplyr::filter(year %in% c(2016,2024)) |>
+  tidyr::pivot_wider(names_from = year,
+                     values_from = emissions_co2_mt) |>
+  dplyr::mutate(across(c(`2016`,`2024`),~tidyr::replace_na(.,0))) |>
+  dplyr::mutate(change_emissions_co2 = `2024`-`2016`) |>
+  ggplot() +
+  geom_tile(aes(x = lon_bin,
+                y = lat_bin,
+                fill = change_emissions_co2)) +
+ geom_sf(data = land,
+          color = "#374a6d",
+          fill = "#374a6d") +
+  facet_wrap(receiver_type~., ncol=1) +
+  scico::scale_fill_scico("Change in CO2 emissions\nfrom 2016 to 2024\n(MT)",
+                          palette = "berlin",
+                          midpoint = 0,
+                          trans = ggallin::pseudolog10_trans,
+                          na.value = "black",
+                          breaks = c(-1e6,-1e3,0,1e3,1e6),
+                          labels = scales::comma) +
+  labs(x = '',
+       y= '') +
+  theme_map() +
+  theme(legend.position = "right",
+        legend.direction = "vertical") +
+  guides(fill = guide_colorbar(title.position = "top",
+                               title.hjust = 0.5,
+                               frame.colour = "black",
+                               ticks.colour = "black",
+                               barwidth = unit(1, "cm"),
+                               barheight = unit(5, "cm"))) +
+  scale_x_continuous(expand = c(0, 1)) +
+  scale_y_continuous(expand = c(0, 1)) 
+```
 
 Following Olivier's complementary materials shared on Slack, we present the mean values of four parameters defining yearly information for AIS-broadcasting vessels operating across all years. The data is derived from the ping-level dataset, thus including emissions associated with both port stays and trips.
 
