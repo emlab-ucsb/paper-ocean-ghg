@@ -542,6 +542,8 @@ indicators_by_last_operation_year  |>
 #| fig-width: 7.5
 #| fig-height: 6
 annual_global_emissions_by_receiver_type|>
+  dplyr::rename(`CO2 emissions (MT)` = emissions_co2_mt,
+                `Number unique vessels` = n_distinct_ssvid) |>
   tidyr::pivot_longer(cols = -c(year,receiver_type)) |>
   ggplot(aes(x = year,
              y = value,
@@ -584,7 +586,7 @@ annual_global_emissions_by_receiver_type_and_flag |>
   scale_x_continuous(breaks = unique(annual_global_emissions_by_receiver_type$year)) +
   theme_plot() +
   labs(x = "",
-       y = "",
+       y = "CO2 emissions (MT)",
        color = "Flag") +
   theme(panel.grid.minor.x = element_blank()) +
   geom_vline(xintercept = 2022, linetype = 2) +
@@ -609,7 +611,7 @@ annual_global_emissions_by_receiver_type_and_flag |>
   scale_x_continuous(breaks = unique(annual_global_emissions_by_receiver_type$year)) +
   theme_plot() +
   labs(x = "",
-       y = "",
+       y = "Number unique vessels",
        color = "Flag") +
   theme(panel.grid.minor.x = element_blank()) +
   geom_vline(xintercept = 2022, linetype = 2) +
