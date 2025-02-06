@@ -66,3 +66,6 @@ download_gfw_data("sql/annual_ais_co2_emissions_from_trips_dataset.sql",
 # Annual spatial CO2 emissions vt receiver type  (satellite; dynamic; or terrestrial)
 download_gfw_data("sql/annual_spatial_emissions_by_receiver_type.sql",
                   "annual_spatial_emissions_by_receiver_type")
+
+
+

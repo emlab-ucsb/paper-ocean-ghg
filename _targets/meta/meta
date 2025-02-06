@@ -1,0 +1,17 @@
+name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
+run_version_ais|stem|7e942610e48f624b|5341306a5a08ef62|2c530c1562a7fbd1|-965739729||t20124.8625678297s|s63b|63|rds|local|vector|||0.121||
+monthly_ais_vessels_and_ratios_by_pixel_sql_file|stem|ab29a5ba06220f73|4b4e20b26a43e959|2c530c1562a7fbd1|-1397505240|sql/monthly_ais_vessels_and_ratios_by_pixel.sql|t20124.8587992568s|s1567b|1567|file|local|vector|||0||
+run_version_dark|stem|909c5415e47af3fc|072f0aa0b186b5b8|2c530c1562a7fbd1|1946111252||t20124.8625679386s|s63b|63|rds|local|vector|||0||
+monthly_ais_vessels_and_ratios_by_pixel_bq|stem|63b5855a5f57240e|ba8b60f943d4d5a3|f57afa1050b7fac2|1932988584||t20124.8670152841s|s651b|651|rds|local|vector|||48.801||
+monthly_ais_vessels_and_ratios_by_pixel|stem|a1f4b5d73dbc280e|c55c1c9b5099e971|88455b68bfd05b54|62578721||t20124.8686074854s|s176979962b|176979962|rds|local|vector|||51.469||
+pull_gfw_data_locally|function|f81141110805c5bf
+project_directory|object|0ca827500f07bdc8
+bq_project|object|9e153d08d13073bc
+.Random.seed|object|3604fb3acb13981b
+billing_project|object|d3faa2e000d283dd
+bq_dataset|object|13456abca64fccaf
+run_gfw_query_and_save_table|function|076f052fc2a40190
+data_directory_base|object|482943d82b32255c
+monthly_ais_vessels_and_ratios_sql_file|stem|9d79de692c85a3e2|4fbd510376478e22|2c530c1562a7fbd1|-1495041211|sql/monthly_ais_vessels_and_ratios.sql|t20124.9733820983s|s1726b|1726|file|local|vector|||0.132||
+monthly_ais_vessels_and_ratios_bq|stem|1516e235f121b42b|ee60253d5e5b4dea|16ff29eefc211e23|190105652||t20124.9747683352s|s618b|618|rds|local|vector|||24.774||
+monthly_ais_vessels_and_ratios|stem|8b73b978c1fd05d5|60fefc256dc13909|acf580239916ac81|-225446150||t20124.9747886432s|s26275b|26275|rds|local|vector|||1.743||

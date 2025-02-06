@@ -25,6 +25,15 @@ knitr::opts_chunk$set(message = FALSE, warning = FALSE, echo = FALSE, dev = "png
 
 # Load librariers
 library(ggplot2)
+library(dplyr)
+library(lubridate)
+library(tidyr)
+library(targets)
+
+# Load target objects
+
+tar_load(c(monthly_ais_vessels_and_ratios_by_pixel,
+           monthly_ais_vessels_and_ratios))
 
 # Set consistent theme for all plots
 theme_plot <- function(){
@@ -660,6 +669,9 @@ annual_spatial_emissions_by_receiver_type  |>
   scale_y_continuous(expand = c(0, 1)) 
 ```
 
+
+## Olivier's plots
+
 Following Olivier's complementary materials shared on Slack, we present the mean values of four parameters defining yearly information for AIS-broadcasting vessels operating across all years. The data is derived from the ping-level dataset, thus including emissions associated with both port stays and trips.
 
 ```{r}
@@ -712,8 +724,7 @@ normalized_data_long <- normalized_data |>
 ```{r}
 #| label: fig-all-years-operating-vessels-norm-mean-values-from-ping-level-emissions
 #| fig-cap: Annual mean of individual per-vessel CO2 ping emissions (metric tonnes); total per-vessel operating hours; mean per-vessel main engine power (killowatts); and mean per-vessel speed (knots) for the set of AIS-broadcasting vessels operating in all years, where each line is colored by the last operation year. Values are normalized againts 2015 estimates.
-#| fig-width: 7.5
-#| fig-height: 8
+#| fig-height: 5
 #| 
 metric_colors <- c(
   "norm_m_emi" = "#4A90E2",      
@@ -801,8 +812,7 @@ To address this, we can assess the actual changes in these parameters (consideri
 ```{r}
 #| label: fig-all-years-operating-vessels-norm-mean-values-from-trip-level-emissions
 #| fig-cap: Annual mean of individual per-vessel CO2 trip emissions (metric tonnes); total per-vessel operating hours; mean per-vessel main engine power (killowatts); mean per-vessel speed (knots); and total distance traveled for the set of AIS-broadcasting vessels operating in all years, where each line is colored by the last operation year.
-#| fig-width: 7.5
-#| fig-height: 8
+#| fig-height: 5
 
 metric_colors <- c(
   "norm_m_emi" = "#4A90E2",      
@@ -830,4 +840,108 @@ ggplot2::ggplot(normalized_data_long, ggplot2::aes(x = year, y = value, color = 
   )
 ```
 
+
+## Assessing number of vessels
+
+```{r}
+#| label:  fig-time-series-nb-vessels-area
+#| fig-cap: Summary of total global monthly CO2 emissions over time. All emissions units are in metric tonnes, disaggregated by the AIS-broadcasting fleet and the dark fleet as detected by S1.
+#| fig-height: 5
+
+monthly_ais_vessels_and_ratios
+
+time_series_nb_vessels <- monthly_ais_vessels_and_ratios |> 
+  dplyr::mutate(
+    ratio_dark_to_ais = ifelse(is.na(ratio_dark_to_ais_detections), 0, ratio_dark_to_ais_detections),
+    extr_dark_vessels = ratio_dark_to_ais_detections * unique_ais_vessels) |>
+  dplyr::group_by(time) |> 
+  dplyr::summarise(unique_ais_vessels = sum(unique_ais_vessels, na.rm = TRUE),
+                   extr_dark_vessels = sum(extr_dark_vessels, na.rm = TRUE))
+
+
+time_series_nb_vessels |> 
+  filter(lubridate::year(time) > 2015) |> 
+  pivot_longer(cols = c(extr_dark_vessels, unique_ais_vessels),  # Ensure order
+               names_to = "fleet", 
+               values_to = "count") |> 
+  mutate(fleet = recode(fleet, 
+                              extr_dark_vessels = "Dark", 
+                              unique_ais_vessels = "AIS"),
+         time = as.Date(time)) |> 
+  mutate(fleet = factor(fleet, levels = c("Dark", "AIS"))) |> 
+  ggplot(aes(x = time, y = count, fill = fleet)) +
+  geom_area(position = "stack", alpha = 0.9) +
+  geom_line(data = ~filter(., fleet == "AIS"), 
+            aes(color = fleet), size = 0.5, color = "white") + 
+  scale_x_date(date_labels = "%Y", date_breaks = "1 year") +
+  labs(x = "",
+       y = "Number of vessels") +
+  theme_minimal() +
+  scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) +
+  scale_fill_manual(values = c("AIS" = "#4f83db", "Dark" = "red"))
+```
+
+
+```{r}
+#| label:  fig-time-series-nb-vessels_line
+#| fig-cap: Summary of total global monthly CO2 emissions over time. All emissions units are in metric tonnes, disaggregated by the AIS-broadcasting fleet and the dark fleet as detected by S1.
+#| fig-height: 5
+
+time_series_nb_vessels |> 
+  filter(lubridate::year(time) > 2015) |> 
+  pivot_longer(cols = c(extr_dark_vessels, unique_ais_vessels),  # Ensure order
+               names_to = "fleet", 
+               values_to = "count") |> 
+  mutate(fleet = recode(fleet, 
+                              extr_dark_vessels = "Dark", 
+                              unique_ais_vessels = "AIS"),
+         time = as.Date(time)) |> 
+  mutate(fleet = factor(fleet, levels = c("Dark", "AIS"))) |> 
+  ggplot(aes(x = time, y = count, color = fleet)) +
+  geom_line() +  
+  scale_x_date(date_labels = "%Y", date_breaks = "1 year") +
+  labs(x = "",
+       y = "NUmber of vessels") +
+  theme_minimal() +
+  scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) +
+  scale_color_manual(values = c("Dark" = "red", "AIS" = "#619CFF"))
+
+```
+
+
+```{r, eval = FALSE}
+#| label: fig-time-series-nb-vessels-pixel
+#| fig-cap: Summary of total global monthly CO2 emissions over time. All emissions units are in metric tonnes, disaggregated by the AIS-broadcasting fleet and the dark fleet as detected by S1.
+#| fig-height: 5
+
+time_series_nb_vessels_pixel <- monthly_ais_vessels_and_ratios_by_pixel |> 
+  dplyr::mutate(
+    ratio_dark_to_ais = ifelse(is.na(ratio_dark_to_ais), 0, ratio_dark_to_ais),
+    extr_dark_vessels = ratio_dark_to_ais * unique_ais_vessels) |>
+  dplyr::group_by(time) |> 
+  dplyr::summarise(unique_ais_vessels = sum(unique_ais_vessels),
+            extr_dark_vessels = sum(extr_dark_vessels))
+
+
+time_series_nb_vessels_pixel |> 
+  filter(lubridate::year(time) > 2015) |> 
+  pivot_longer(cols = c(extr_dark_vessels, unique_ais_vessels),  # Ensure order
+               names_to = "vessel_type", 
+               values_to = "count") |> 
+  mutate(vessel_type = recode(vessel_type, 
+                              extr_dark_vessels = "Dark", 
+                              unique_ais_vessels = "AIS"),
+         time = as.Date(time)) |> 
+  ggplot(aes(x = time, y = count, fill = vessel_type)) +
+  geom_area(position = "stack", alpha = 0.9) +
+  geom_line(data = ~filter(., vessel_type == "Dark"), 
+            aes(color = vessel_type), size = 0.5, color = "white") + 
+  scale_x_date(date_labels = "%Y", date_breaks = "1 year") +
+  labs(x = "",
+       y = "Number of vessels") +
+  theme_minimal() +
+  scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) +
+  scale_fill_manual(values = c("AIS" = "#4f83db", "Dark" = "red"))
+
+```
 
