@@ -6,7 +6,9 @@ dark_to_ais_detections AS (
     fishing,
     length_size_class_percentile,
     SUM(number_ais_detections) AS total_ais_detections,
-    SUM(number_dark_detections) AS total_dark_detections
+    SUM(number_dark_detections) AS total_dark_detections,
+    SUM(emissions_co2_mt) AS total_ais_emissions_co2_mt,
+    SUM(emissions_co2_dark_mt) AS total_dark_emissions_co2_mt,
   FROM 
     `world-fishing-827.proj_ocean_ghg.s1_time_gridded_dark_fleet_model_v20250116`
   GROUP BY
@@ -59,7 +61,9 @@ SELECT
   v.fishing,
   v.length_size_class_percentile,
   IF(d.total_ais_detections = 0 AND d.total_dark_detections >0, NULL, d.total_dark_detections / d.total_ais_detections) AS ratio_dark_to_ais_detections,
-  v.unique_ais_vessels
+  v.unique_ais_vessels,
+  d.total_ais_emissions_co2_mt,
+  d.total_dark_emissions_co2_mt
 FROM 
   vessel_counts v
 LEFT JOIN 

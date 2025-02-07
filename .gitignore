@@ -35,3 +35,7 @@ po/*~
 rsconnect/
 paper-ocean-ghg.Rproj
 *.Rproj
+# targets
+*_targets/
+_targets/
+/_targets/

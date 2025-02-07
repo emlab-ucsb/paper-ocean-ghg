@@ -848,12 +848,11 @@ ggplot2::ggplot(normalized_data_long, ggplot2::aes(x = year, y = value, color = 
 #| fig-cap: Summary of total global monthly CO2 emissions over time. All emissions units are in metric tonnes, disaggregated by the AIS-broadcasting fleet and the dark fleet as detected by S1.
 #| fig-height: 5
 
-monthly_ais_vessels_and_ratios
 
 time_series_nb_vessels <- monthly_ais_vessels_and_ratios |> 
   dplyr::mutate(
     ratio_dark_to_ais = ifelse(is.na(ratio_dark_to_ais_detections), 0, ratio_dark_to_ais_detections),
-    extr_dark_vessels = ratio_dark_to_ais_detections * unique_ais_vessels) |>
+    extr_dark_vessels = ratio_dark_to_ais * unique_ais_vessels) |>
   dplyr::group_by(time) |> 
   dplyr::summarise(unique_ais_vessels = sum(unique_ais_vessels, na.rm = TRUE),
                    extr_dark_vessels = sum(extr_dark_vessels, na.rm = TRUE))
@@ -906,6 +905,76 @@ time_series_nb_vessels |>
   scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) +
   scale_color_manual(values = c("Dark" = "red", "AIS" = "#619CFF"))
 
+```
+
+
+```{r}
+#| label:  fig-time-series-emissions-vessels-area
+#| fig-cap: Summary of total global monthly CO2 emissions over time. All emissions units are in metric tonnes, disaggregated by the AIS-broadcasting fleet and the dark fleet as detected by S1.
+#| fig-height: 5
+
+
+
+time_series_nb_vessels <- monthly_ais_vessels_and_ratios |> 
+  dplyr::mutate(
+    ratio_dark_to_ais = ifelse(is.na(ratio_dark_to_ais_detections), 0, ratio_dark_to_ais_detections),
+    updated_dark_emissions = ratio_dark_to_ais * total_ais_emissions_co2_mt) |>
+  dplyr::group_by(time) |> 
+  dplyr::summarise(total_ais_emissions_co2_mt = sum(total_ais_emissions_co2_mt, na.rm = TRUE),
+                   updated_total_dark_emissions = sum(updated_dark_emissions, na.rm = TRUE),
+                   total_dark_emissions_co2_mt = sum(total_dark_emissions_co2_mt, na.rm = TRUE),
+                   )
+
+
+time_series_nb_vessels |> 
+  filter(lubridate::year(time) > 2015) |> 
+  pivot_longer(cols = c(updated_total_dark_emissions, total_ais_emissions_co2_mt),  # Ensure order
+               names_to = "fleet", 
+               values_to = "emissions") |> 
+  mutate(fleet = recode(fleet, 
+                              updated_total_dark_emissions = "Dark", 
+                              total_ais_emissions_co2_mt = "AIS"),
+         time = as.Date(time)) |> 
+  mutate(fleet = factor(fleet, levels = c("AIS", "Dark"))) |> 
+  ggplot(aes(x = time, y = emissions, fill = fleet)) +
+  geom_area(position = "stack", alpha = 0.9) +
+  geom_line(data = ~filter(., fleet == "Dark"), 
+            aes(color = fleet), size = 0.5, color = "white") + 
+  scale_x_date(date_labels = "%Y", date_breaks = "1 year") +
+  labs(x = "",
+       y = "CO2 emissions (mT)") +
+  theme_minimal() +
+  scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) +
+  scale_fill_manual(values = c("AIS" = "#4f83db", "Dark" = "red"))
+```
+
+
+```{r}
+#| label:  fig-time-series-emissions-vessels-area-original
+#| fig-cap: Summary of total global monthly CO2 emissions over time. All emissions units are in metric tonnes, disaggregated by the AIS-broadcasting fleet and the dark fleet as detected by S1.
+#| fig-height: 5
+
+
+time_series_nb_vessels |> 
+  filter(lubridate::year(time) > 2015) |> 
+  pivot_longer(cols = c(total_dark_emissions_co2_mt, total_ais_emissions_co2_mt),  # Ensure order
+               names_to = "fleet", 
+               values_to = "emissions") |> 
+  mutate(fleet = recode(fleet, 
+                              total_dark_emissions_co2_mt = "Dark", 
+                              total_ais_emissions_co2_mt = "AIS"),
+         time = as.Date(time)) |> 
+  mutate(fleet = factor(fleet, levels = c("AIS", "Dark"))) |> 
+  ggplot(aes(x = time, y = emissions, fill = fleet)) +
+  geom_area(position = "stack", alpha = 0.9) +
+  geom_line(data = ~filter(., fleet == "Dark"), 
+            aes(color = fleet), size = 0.5, color = "white") + 
+  scale_x_date(date_labels = "%Y", date_breaks = "1 year") +
+  labs(x = "",
+       y = "CO2 emissions (mT)") +
+  theme_minimal() +
+  scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) +
+  scale_fill_manual(values = c("AIS" = "#4f83db", "Dark" = "red"))
 ```
 
 

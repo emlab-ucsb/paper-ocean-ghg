@@ -114,13 +114,14 @@ list(
                           bq_table_name = glue::glue("monthly_ais_vessels_and_ratios", run_version_dark),
                           # Re-run this target if targets below change
                           monthly_ais_vessels_and_ratios_bq)
-  ),
-  # Make quarto notebook -----
-  tar_quarto(
-    name = quarto_book,
-    path = "qmd",
-    quiet = FALSE
   )
+  # ,
+  # # Make quarto notebook -----
+  # tar_quarto(
+  #   name = quarto_book,
+  #   path = "qmd",
+  #   quiet = FALSE
+  # )
   
 
   
