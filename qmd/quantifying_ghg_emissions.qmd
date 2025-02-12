@@ -150,6 +150,12 @@ annual_spatial_emissions_by_receiver_type <-  glue::glue("{project_directory}/da
                   forcats::fct_relevel("Satellite",
                                        "Terrestrial",
                                        "Dynamic"))
+
+# Monthly extrapolation of AIS activity to dark activity
+monthly_ais_to_dark_activity_extrapolation <-  glue::glue("{project_directory}/data/processed/monthly_ais_to_dark_activity_extrapolation.csv") |>
+  readr::read_csv() |>
+  dplyr::mutate(across(-c(month,fishing,length_size_class_percentile),
+                       ~tidyr::replace_na(.,0)))
 ```
 
 # Paper figures
