@@ -67,5 +67,9 @@ download_gfw_data("sql/annual_ais_co2_emissions_from_trips_dataset.sql",
 download_gfw_data("sql/annual_spatial_emissions_by_receiver_type.sql",
                   "annual_spatial_emissions_by_receiver_type")
 
-
+# Monthly extrapolation of AIS activity to dark activity
+# Use method we use for extrapolating emissions (by pixel, month, fishing, and vessel size class)
+# To also extrapolate hours, kw-hours, and speed
+download_gfw_data("sql/monthly_ais_to_dark_activity_extrapolation.sql",
+                  "monthly_ais_to_dark_activity_extrapolation")
 
