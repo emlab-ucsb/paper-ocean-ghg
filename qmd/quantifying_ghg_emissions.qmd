@@ -151,10 +151,11 @@ annual_spatial_emissions_by_receiver_type <-  glue::glue("{project_directory}/da
                                        "Terrestrial",
                                        "Dynamic"))
 
-# Monthly extrapolation of AIS activity to dark activity
-monthly_ais_to_dark_activity_extrapolation <-  glue::glue("{project_directory}/data/processed/monthly_ais_to_dark_activity_extrapolation.csv") |>
+# Annual extrapolation of AIS activity to dark activity
+annual_ais_to_dark_activity_extrapolation <-  glue::glue("{project_directory}/data/processed/annual_ais_to_dark_activity_extrapolation.csv") |>
   readr::read_csv() |>
-  dplyr::mutate(across(-c(month,fishing,length_size_class_percentile),
+  dplyr::select(-c(average_speed_knots_dark,average_speed_knots)) |>
+  dplyr::mutate(across(-c(year,fishing,length_size_class_percentile),
                        ~tidyr::replace_na(.,0)))
 ```
 

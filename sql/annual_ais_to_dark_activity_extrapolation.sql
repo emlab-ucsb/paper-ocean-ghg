@@ -39,7 +39,8 @@ WITH
     SUM(hours) hours,
     SUM(hours * main_engine_power_kw) kw_hours,
     SUM(emissions_co2_mt) emissions_co2_mt,
-    SUM(distance_nm) distance_nm
+    SUM(distance_nm) distance_nm,
+    AVG(distance_nm/hours) speed_knots
   FROM
     `world-fishing-827.proj_ocean_ghg.daily_gridded_emissions_by_vessel_v20241121`
   JOIN
@@ -51,9 +52,15 @@ WITH
   USING
     (ssvid)
   WHERE
+  # Only use last full year of data
     EXTRACT(YEAR
     FROM
       date) <= 2024
+  # Don't need 2015, since dark fleet wasn't available then
+    AND
+        EXTRACT(YEAR
+    FROM
+      date) >= 2016
   GROUP BY
     lon_bin,
     lat_bin,
@@ -74,7 +81,8 @@ WITH
     emissions_co2_mt,
     emissions_co2_mt * ratio_dark_to_ais emissions_co2_mt_dark,
     distance_nm,
-    distance_nm * ratio_dark_to_ais distance_nm_dark
+    distance_nm * ratio_dark_to_ais distance_nm_dark,
+    speed_knots
   FROM
     ais_activity_summary
   LEFT JOIN
@@ -86,7 +94,7 @@ WITH
       fishing,
       length_size_class_percentile))
 SELECT
-  month,
+  EXTRACT(YEAR FROM month) year,
   fishing,
   length_size_class_percentile,
   SUM(hours) hours,
@@ -98,10 +106,11 @@ SELECT
   SUM(distance_nm) distance_nm,
   SUM(distance_nm_dark) distance_nm_dark,
   SUM(distance_nm) / SUM(hours) average_speed_knots,
-  SUM(distance_nm_dark) / SUM(hours_dark) average_speed_knots_dark
+  SUM(distance_nm_dark) / SUM(hours_dark) average_speed_knots_dark,
+  AVG(speed_knots) avg_speed_knots
 FROM
   spatiotemporal_extrapolations
 GROUP BY
-  month,
+  year,
   fishing,
   length_size_class_percentile
