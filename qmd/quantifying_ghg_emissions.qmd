@@ -189,11 +189,11 @@ iea_plus_gfw_data <- annual_iea_tranportation_emissions |>
   dplyr::bind_rows(annual_co2_emissions |> 
                      dplyr::filter(fleet == "Total") |>
                      dplyr::mutate(sector = "Ocean-based transportation"))|> 
-  dplyr::select(-c(emissions_co2_gt,fleet)) |>
-  dplyr::filter(sector!="Shipping (IEA)")
+  dplyr::select(-c(emissions_co2_gt,fleet))
 
 iea_plus_gfw_data_total_transportation <- iea_plus_gfw_data |>
-  dplyr::filter(stringr::str_detect(sector,"IEA")) |>
+  dplyr::filter(stringr::str_detect(sector,"IEA"))  |>
+  dplyr::filter(sector!="Shipping (IEA)") |>
   dplyr::group_by(year) |>
   dplyr::summarise(co2_emissions = sum(co2_emissions)) |>
   dplyr::ungroup() |>
@@ -212,7 +212,30 @@ iea_plus_gfw_data_total_transportation_normalized <- all_transportation |>
   dplyr::inner_join(iea_plus_gfw_data_total_transportiation_starting, by = "sector")|>
   dplyr::mutate(co2_emissions_normalized = co2_emissions/co2_emissions_starting-1) 
 
-iea_plus_gfw_data_total_transportation_normalized |>
+iea_figure_absolute <- iea_plus_gfw_data_total_transportation_normalized |>
+  dplyr::filter(year<=2022) |>
+  ggplot(aes(x = year,y= co2_emissions, color = sector))  +
+  geom_line() + 
+  scale_x_continuous(breaks = unique(annual_co2_emissions$year)) +
+  scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) +
+  theme_plot() +
+  labs(x = "",
+       y = "Annual CO2 emissions (MT)",
+       color = "Sector") +
+  theme(panel.grid.minor.x = element_blank())+
+  paletteer::scale_colour_paletteer_d("ggthemes::Color_Blind",
+                                      breaks = c("Total land-based transportation (IEA)",
+                                                 "Road (IEA)",
+                                                 "Ocean-based transportation",
+                                                 "Shipping (IEA)",
+                                                 "Aviation (IEA)",
+                                                 "Rail (IEA)"))
+
+iea_plus_gfw_data_total_transportation_normalized <- all_transportation |>
+  dplyr::inner_join(iea_plus_gfw_data_total_transportiation_starting, by = "sector")|>
+  dplyr::mutate(co2_emissions_normalized = co2_emissions/co2_emissions_starting-1) 
+
+iea_figure_normalized <- iea_plus_gfw_data_total_transportation_normalized |>
   dplyr::filter(year<=2022) |>
   ggplot(aes(x = year,y= co2_emissions_normalized, color = sector))  +
   geom_hline(yintercept = 0,linetype=2)+ 
@@ -226,10 +249,13 @@ iea_plus_gfw_data_total_transportation_normalized |>
   scale_y_continuous(labels = scales::percent)+
   paletteer::scale_colour_paletteer_d("ggthemes::Color_Blind",
                                       breaks = c("Ocean-based transportation",
-                                                 "Rail (IEA)",
+                                                 "Shipping (IEA)",
                                                  "Road (IEA)",
+                                                 "Rail (IEA)",
                                                  "Total land-based transportation (IEA)",
                                                  "Aviation (IEA)"))
+
+cowplot::plot_grid(iea_figure_absolute,iea_figure_normalized,ncol=1)
 ```
 
 
