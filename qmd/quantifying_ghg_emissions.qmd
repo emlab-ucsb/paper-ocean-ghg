@@ -93,6 +93,21 @@ project_directory <- glue::glue("{data_directory_base}/projects/current-projects
 ```{r cache = FALSE}
 #| label: load-data
 
+# Annual CO2 emissions for the transport sector, from IEA
+# "Global CO2 emissions from transport by sub-sector in the Net Zero Scenario, 2000-2030"
+# Citation: IEA (2022), Global CO2 emissions from transport by sub-sector in the Net Zero Scenario, 2000-2030, IEA, Paris https://www.iea.org/data-and-statistics/charts/global-co2-emissions-from-transport-by-sub-sector-in-the-net-zero-scenario-2000-2030, Licence: CC BY 4.0
+# https://www.iea.org/data-and-statistics/charts/global-co2-emissions-from-transport-by-sub-sector-in-the-net-zero-scenario-2000-2030-2
+# Note that the CSV from EIA was very messy; needed to manually clean it up quite a bit
+annual_iea_tranportation_emissions <- glue::glue("{project_directory}/data/raw/iea/global-co2-emissions-from-transport-by-sub-sector-in-the-net-zero-scenario-2000-2030.csv") |>
+  readr::read_csv() |>
+  tidyr::pivot_longer(-year,
+                      names_to = "sector",
+                      values_to = "emissions_co2_gt") |>
+  dplyr::filter(sector!="Pipeline transport") |>
+  dplyr::filter(year>=2016,
+                year<=2024)
+
+
 # Annual CO2 emissions data for AIS-broadcasting fleet and dark fleet
 annual_co2_emissions <- glue::glue("{project_directory}/data/processed/annual_co2_emissions.csv") |>
   readr::read_csv() |>
@@ -163,6 +178,60 @@ annual_ais_to_dark_activity_extrapolation <-  glue::glue("{project_directory}/da
 ```
 
 # Paper figures
+
+## Figure 1
+
+```{r}
+iea_plus_gfw_data <- annual_iea_tranportation_emissions |> 
+  # Convert gigatons to metric tonnes
+  dplyr::mutate(co2_emissions = emissions_co2_gt*1e9) |>
+  dplyr::mutate(sector = glue::glue("{sector} (IEA)")) |>
+  dplyr::bind_rows(annual_co2_emissions |> 
+                     dplyr::filter(fleet == "Total") |>
+                     dplyr::mutate(sector = "Ocean-based transportation"))|> 
+  dplyr::select(-c(emissions_co2_gt,fleet)) |>
+  dplyr::filter(sector!="Shipping (IEA)")
+
+iea_plus_gfw_data_total_transportation <- iea_plus_gfw_data |>
+  dplyr::filter(stringr::str_detect(sector,"IEA")) |>
+  dplyr::group_by(year) |>
+  dplyr::summarise(co2_emissions = sum(co2_emissions)) |>
+  dplyr::ungroup() |>
+  dplyr::filter(year<=2022) |>
+  dplyr::mutate(sector = "Total land-based transportation (IEA)")
+
+all_transportation <-  iea_plus_gfw_data |>
+  dplyr::bind_rows(iea_plus_gfw_data_total_transportation)
+
+iea_plus_gfw_data_total_transportiation_starting <- all_transportation |>
+  dplyr::filter(year == 2016) |>
+  dplyr::mutate(co2_emissions_starting = co2_emissions) |>
+  dplyr::select(-c(year,co2_emissions))
+
+iea_plus_gfw_data_total_transportation_normalized <- all_transportation |>
+  dplyr::inner_join(iea_plus_gfw_data_total_transportiation_starting, by = "sector")|>
+  dplyr::mutate(co2_emissions_normalized = co2_emissions/co2_emissions_starting-1) 
+
+iea_plus_gfw_data_total_transportation_normalized |>
+  dplyr::filter(year<=2022) |>
+  ggplot(aes(x = year,y= co2_emissions_normalized, color = sector))  +
+  geom_hline(yintercept = 0,linetype=2)+ 
+  geom_line() + 
+  scale_x_continuous(breaks = unique(annual_co2_emissions$year)) +
+  theme_plot() +
+  labs(x = "",
+       y = "Relative change in CO2 emissions\nfrom 2016 baseline",
+       color = "Sector") +
+  theme(panel.grid.minor.x = element_blank())+
+  scale_y_continuous(labels = scales::percent)+
+  paletteer::scale_colour_paletteer_d("ggthemes::Color_Blind",
+                                      breaks = c("Ocean-based transportation",
+                                                 "Rail (IEA)",
+                                                 "Road (IEA)",
+                                                 "Total land-based transportation (IEA)",
+                                                 "Aviation (IEA)"))
+```
+
 
 ## Figure 2
 
@@ -379,7 +448,7 @@ final_prediction_dataset <- predictions_dataset |>
 
 ```{r}
 #| label: fig-hours-speed-vessel-type-decomposition
-#| fig-cap: (A) Relative predicted change in CO2 emissions from 2016 baseline, using the predicted model outputs of four different scenarios that decompose the relative impact of changes in total hours (extensive margin) and changes in average speed (intensive margin); (B) relative observed change in CO2 emissions from 2016 basline by vessel type (fishing, non-fishing, and total).
+#| fig-cap: (A) Relative predicted change in CO2 emissions from 2016 baseline, using the random forest model outputs of four different scenarios that decompose the relative impact of changes in total hours (extensive margin) and changes in average speed (intensive margin); (B) relative observed change in CO2 emissions from 2016 baseline by vessel type (fishing, non-fishing, and total).
 #| fig-width: 7.5
 #| fig-height: 6
 
