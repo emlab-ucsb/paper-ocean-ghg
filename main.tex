@@ -15,7 +15,7 @@
 
 \begin{abstract}
 
- Understanding the magnitude and trends of ocean-based greenhouse gas (GHG) emissions and non-GHG pollutant emissions is the first step toward mitigating them. We develop a method for quantifying high-resolution spatiotemporal  ocean-based vessel emissions at a global scale by fusing two unique satellite-based data sources: 1) Automatic Identification System (AIS) to estimate vessel-level emissions for the over 665,000 boats that broadcast their positions using AIS; and 2) synthetic aperture radar (SAR) data from the Sentinel-1 satellite constellation to estimate emissions for boats that do not use AIS. We find that industrial vessels emitted approximately 1.3 billion metric tons of CO2 in 2024, accounting for 3.5\% of global fossil fuel emissions. We also find that vessel CO2 emissions increased by 23\% between 2016 and 2024, roughly three times the rate of global fossil fuel emissions. Data fusion is critical to getting these numbers right: if only AIS data were used, the currently accepted state-of-the-art, global emissions in 2024 would be underestimated by 17\%, and the increasing trend from 2016 to 2024 would be overestimated by 48\%. Our approach provides a robust and rich dataset that can be leveraged for a variety of policy- and market-based emissions mitigation interventions. It also provides an example of how data fusion can disentangle actual environmental changes from changes in monitoring in order to more accurately quantify both the magnitude and trends of environmental problems.
+ Understanding the magnitude and trends of ocean-based greenhouse gas (GHG) emissions and non-GHG pollutant emissions is the first step toward mitigating them. We develop a method for quantifying high-resolution spatiotemporal  ocean-based vessel emissions at a global scale by fusing two unique satellite-based data sources: 1) Automatic Identification System (AIS) to estimate vessel-level emissions for the over 665,000 boats that broadcast their positions using AIS; and 2) synthetic aperture radar (SAR) data from the Sentinel-1 satellite constellation to estimate emissions for boats that do not use AIS. We find that vessels emitted approximately 1.3 billion metric tons of CO2 in 2024, accounting for 3.5\% of global fossil fuel emissions. We also find that vessel CO2 emissions increased by 23\% between 2016 and 2024, roughly three times the rate of global fossil fuel emissions. Data fusion is critical to getting these numbers right: if only AIS data were used, the currently accepted state-of-the-art, global emissions in 2024 would be \textit{underestimated} by 17\%, and the increasing trend from 2016 to 2024 would be \textit{overestimated} by 48\%. Our approach provides a robust and rich dataset that can be leveraged for a variety of policy- and market-based emissions mitigation interventions. It also provides an example of how data fusion can disentangle actual environmental changes from changes in monitoring in order to more accurately quantify both the magnitude and trends of environmental problems.
 
 \end{abstract}
 
@@ -31,7 +31,7 @@
 
 \section{Results}
 
-In Fig. \ref{fig:fig-total-annual-emissions-by-fleet}, we can see that when only looking at emissions based on AIS, global emissions in 2024 were 1,1200 million metric tonnes (MMT), and trend from 2016 to 2024 shows a 34\% increase. When also adding in non-broadcasting vessels using Sentinel-1 detections, global emissions in 2024 were 1,420 MMT, and the trend from 2016 to 2024 is more modest at only a 23\% increase. This suggests that if only using AIS data, global emissions in 2024 would be underestimated by 17\%, and the increasing trend from 2016 to 2024 would be overestimated by 48\%.
+In Fig. \ref{fig:fig-total-annual-emissions-by-fleet}, we can see that when only looking at emissions based on AIS, global emissions in 2024 were 1,120 million metric tonnes (MMT), and trend from 2016 to 2024 shows a 34\% increase. When also adding in non-broadcasting vessels using Sentinel-1 detections, global emissions in 2024 were 1,420 MMT, and the trend from 2016 to 2024 is more modest at only a 23\% increase. This suggests that if only using AIS data, global emissions in 2024 would be underestimated by 17\%, and the increasing trend from 2016 to 2024 would be overestimated by 48\%.
 
 \begin{figure}[H]
     \centering
@@ -40,13 +40,22 @@ In Fig. \ref{fig:fig-total-annual-emissions-by-fleet}, we can see that when only
     \label{fig:fig-total-annual-emissions-by-fleet}
 \end{figure}
 
-Next we look at how CO2 emissions have changed spatially over time for the AIS-broadcasting fleet, non-broadcasting fleet, and both fleets combined (Fig. \ref{fig:fig-co2-emissions-change-ais-dark-map}). Here we can see that three regions in particular had both dramatic increases in AIS-broadcasting emissions alongside dramatic decreases in non-broadcasting emissions: the waters off China, the European Union, and the Gulf of Mexico. These figures also shed new light on how vessel activity and its associated emissions have changed along different trade routes over time.
+Next we look at how CO2 emissions have changed spatially over time across both the AIS-broadcasting fleet and non-broadcasting fleet combined (Fig. \ref{fig:fig-co2-emissions-map}). Here we can see that three regions in particular had both dramatic increases in AIS-broadcasting emissions alongside dramatic decreases in non-broadcasting emissions: the waters off China, the European Union, and the Gulf of Mexico. These figures also shed new light on how vessel activity and its associated emissions have changed along different trade routes over time.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{qmd/quantifying_ghg_emissions_files/figure-pdf/fig-co2-emissions-change-ais-dark-map-1.png}
-    \caption{Spatial change in CO2 emissions between 2016 and 2024 (metric tonnes) for the AIS-broadcasting fleet (top panel), non-broadcasting fleet (middle panel), and total across both fleets combined (bottom panel) at a 1x1 degree spatial resolution.}
-    \label{fig:fig-co2-emissions-change-ais-dark-map}
+    \includegraphics[width=\columnwidth]{qmd/quantifying_ghg_emissions_files/figure-pdf/fig-co2-emissions-map-1.png}
+    \caption{Spatial patterns of CO2 emissions in 2016 (top panel), 2024 (middle panel), and the change in CO2 emissions between 2016 and 2024 (bottom panel) (metric tonnes). Emissions are total aggregated across the AIS-broadcasting fleetand non-broadcasting fleet, and shown at a 1x1 degree spatial resolution.}
+    \label{fig:fig-co2-emissions-map}
+\end{figure}
+
+Next we look at (Fig. \ref{fig:fig-hours-speed-decomposition})...
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{qmd/quantifying_ghg_emissions_files/figure-pdf/fig-hours-speed-decomposition-1.png}
+    \caption{Relative predicted change in CO2 emissions from 2016 baseline, using the predicted model outputs of four different scenarios that decompose the relative impact of changes in total hours (extensive margin) and changes in average speed (intensive margin).}
+    \label{fig:fig-hours-speed-decomposition}
 \end{figure}
 
 \section{Discussion}
