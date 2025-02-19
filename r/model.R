@@ -25,7 +25,7 @@ model_recipe <- recipes::recipe(emissions_co2_mt_total ~ fishing + length_size_c
                            levels = as.character(unique(annual_extrapolation_dataset$length_size_class_percentile)))
 
 # Specify model type
-model_type <- parsnip::rand_forest() |>
+model_type <- parsnip::rand_forest(trees = 1000) |>
   parsnip::set_engine("ranger", importance = "impurity") |>
   parsnip::set_mode("regression")
 
@@ -262,13 +262,16 @@ final_prediction_dataset |>
   dplyr::summarise(across(c(observed_hours_observed_speed,
                             observed_hours_constant_speed,
                             constant_hours_observed_speed,
-                            constant_hours_constant_speed),
+                            constant_hours_constant_speed,
+                            emissions_co2_mt_total),
                           ~sum(.,na.rm=TRUE))) |>
   dplyr::rename(`Observed hours, observed speed` = observed_hours_observed_speed,
                 `Observed hours, constant speed` = observed_hours_constant_speed,
                 `Constant hours, observed speed` = constant_hours_observed_speed,
-                `Constant hours, constant speed` = constant_hours_constant_speed) |>
+                `Constant hours, constant speed` = constant_hours_constant_speed,
+                `Historical actual emissions` = emissions_co2_mt_total) |>
   tidyr::pivot_longer(-year) |>
+  dplyr::mutate(name = forcats::fct_relevel(name,c("Historical actual emissions"),after=Inf)) |>
   ggplot(aes(x = year, y = value, color = name)) +
   geom_line() +
   guides(color = guide_legend(reverse=TRUE)) +
@@ -276,7 +279,8 @@ final_prediction_dataset |>
                      values = c("steelblue4",
                                 "steelblue2",
                                 "coral4",
-                                "coral2")) +
+                                "coral2",
+                                "darkgrey")) +
   scale_x_continuous(breaks = unique(final_prediction_dataset$year)) +
   scale_y_continuous(limits = c(0,NA),
                      labels = scales::unit_format(unit = "M", scale = 1e-6)) +
