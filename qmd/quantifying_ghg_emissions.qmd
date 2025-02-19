@@ -197,9 +197,8 @@ annual_co2_emissions |>
   scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6),
                      limits = c(0,1.5e9)) + 
   scale_x_continuous(breaks = unique(annual_co2_emissions$year)) +
-  scale_color_brewer(type = "qual",
-                     palette = "Dark2",
-                     breaks = c("Total","AIS-broadcasting","Non-broadcasting")) +
+  scale_color_manual(values = c("#7570b3","#377eb8","#e41a1c"),
+                     breaks = c("Total","AIS-broadcasting","Non-broadcasting"))+
   theme_plot() +
   labs(x = "",
        y = "Annual global CO2 emissions\n(millions metric tonnes)",
@@ -379,10 +378,10 @@ final_prediction_dataset <- predictions_dataset |>
 ```
 
 ```{r}
-#| label: fig-hours-speed-decomposition
-#| fig-cap: Relative predicted change in CO2 emissions from 2016 baseline, using the predicted model outputs of four different scenarios that look at the relative impact of changes in total hours (extensive margin) and changes in average speed (intensive margin).
+#| label: fig-hours-speed-vessel-type-decomposition
+#| fig-cap: (A) Relative predicted change in CO2 emissions from 2016 baseline, using the predicted model outputs of four different scenarios that decompose the relative impact of changes in total hours (extensive margin) and changes in average speed (intensive margin); (B) relative observed change in CO2 emissions from 2016 basline by vessel type (fishing, non-fishing, and total).
 #| fig-width: 7.5
-#| fig-height: 4
+#| fig-height: 6
 
 # Aggregate prediction values by year (across vessel size classes and type)
 final_annual_prediction_dataset <- final_prediction_dataset |>
@@ -404,7 +403,7 @@ starting_value_from_prediction <- final_annual_prediction_dataset |>
   rename(starting_value = value) |>
   dplyr::select(-year)
 
-final_annual_prediction_dataset |>
+time_series_predicted_decomposition <- final_annual_prediction_dataset |>
   dplyr::inner_join(starting_value_from_prediction, by = "name") |>
   dplyr::mutate(normalized_value = value/starting_value-1) |>
   ggplot(aes(x = year, y = normalized_value, color = name)) +
@@ -418,10 +417,56 @@ final_annual_prediction_dataset |>
   scale_x_continuous(breaks = unique(final_prediction_dataset$year)) +
   scale_y_continuous(labels = scales::percent) +
   labs(x = "",
-       y = "Relative predicted change in CO2 emissions\nfrom 2016 baseline") +
+       y = "Relative predicted change\nin CO2 emissions\nfrom 2016 baseline") +
   theme_plot() +
   theme(panel.grid.minor.x = element_blank())
+
+# Summarize annual emissions by fishing and non-fishing vessels
+annual_total_emissions_by_type <- annual_ais_to_dark_activity_extrapolation |>
+  dplyr::mutate(emissions_co2_mt_total = emissions_co2_mt + emissions_co2_mt_dark) |>
+  dplyr::group_by(year,fishing) |>
+  dplyr::summarise(emissions_co2_mt_total = sum(emissions_co2_mt_total)) |>
+  dplyr::ungroup() |>
+  dplyr::mutate(fishing = ifelse(fishing,"Fishing","Non-fishing"))
+
+# Summarize annual emissions across all values
+annual_total_emissions <- annual_total_emissions_by_type |>
+  dplyr::group_by(year) |>
+  dplyr::summarise(emissions_co2_mt_total = sum(emissions_co2_mt_total)) |>
+  dplyr::ungroup() |>
+  dplyr::mutate(fishing = "Total")
+
+# Bind these datasets together
+annual_emissions <- annual_total_emissions_by_type |>
+  dplyr::bind_rows(annual_total_emissions)
+
+# For each vessel type, determine the starting emissions in 2016
+annual_emissions_starting_value <- annual_emissions |>
+  dplyr::filter(year == 2016) |>
+  dplyr::rename(emissions_co2_mt_total_starting = emissions_co2_mt_total) |>
+  dplyr::select(-year)
+
+# Now normalize all emissions to the starting value
+time_series_by_vessel_type <- annual_emissions |>
+  dplyr::inner_join(annual_emissions_starting_value, by = "fishing") |>
+  dplyr::mutate(emissions_co2_normalized = emissions_co2_mt_total/emissions_co2_mt_total_starting - 1) |>
+  ggplot(aes(x = year, y = emissions_co2_normalized, color = fishing)) +
+  geom_line()+
+  scale_x_continuous(breaks = unique(final_prediction_dataset$year)) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "",
+       y = "Relative observed change\nin CO2 emissions\nfrom 2016 baseline",
+       color = "Vessel type") +
+  theme_plot() +
+  theme(panel.grid.minor.x = element_blank()) +
+  geom_hline(yintercept = 0, linetype = 2) +
+  scale_color_manual(values = c("#a65628","#ff7f00","#7570b3"))
+
+cowplot::plot_grid(time_series_predicted_decomposition,time_series_by_vessel_type,
+                   ncol=1, align="vh",
+                   labels = c("A","B"))
 ```
+
 
 
 # Supplementary figures
