@@ -259,7 +259,7 @@ emissions_comparison_figure_absolute <- all_tranportation_data_normalized |>
   scale_y_continuous(labels = scales::unit_format(unit = "B", scale = 1e-9), limits = c(0,NA)) +
   theme_plot() +
   labs(x = "",
-       y = "Annual\nCO2 emissions\n(MT)",
+       y = "Annual\nCO2 emissions\n(billion MT)",
        color = "Data source") +
   theme(panel.grid.minor.x = element_blank())+
   scale_color_manual(values = all_transportation_color_palette)
@@ -287,27 +287,34 @@ cowplot::plot_grid(emissions_comparison_figure_absolute,
 ```
 
 ```{r}
+#| label: tbl-summary-stat-comparison-2023-gfw-edgar
+#| tbl-cap: Comparison of 2023 data between ocean-based transportation emissions from GFW and land-based transportation emissions from EDGAR.
+
 edgar_comparison <- all_tranportation_data_normalized |>
-  dplyr::filter(year == 2023) |>
   dplyr::filter(data_source %in% c("Ocean-based transportation (GFW)",
                                                  "Land-based transportation (EDGAR)")) |>
-  dplyr::select(-c(emissions_co2_mt,emissions_co2_mt_starting)) |>
-  tidyr::pivot_wider(values_from = emissions_co2_mt_normalized,
+  dplyr::filter(year == 2023) |>
+  dplyr::select(-year) |>
+  dplyr::mutate(data_source = ifelse(data_source == "Ocean-based transportation (GFW)","ocean_gfw","land_edgar"))|>
+  dplyr::select(-c(emissions_co2_mt_starting)) |>
+  dplyr::rename(emissions_normalized_from_2016 = emissions_co2_mt_normalized) |>
+  tidyr::pivot_wider(values_from = c(emissions_co2_mt,
+                                     emissions_normalized_from_2016),
                      names_from = data_source) |>
-  dplyr::mutate(difference = `Ocean-based transportation (GFW)`/`Land-based transportation (EDGAR)`)
+  dplyr::mutate(normalized_ocean_over_land = as.character(signif(emissions_normalized_from_2016_ocean_gfw/emissions_normalized_from_2016_land_edgar,2)),
+                fraction_ocean_over_total = emissions_co2_mt_ocean_gfw / (emissions_co2_mt_ocean_gfw+emissions_co2_mt_land_edgar)) |>
+  dplyr::mutate(across(c(emissions_normalized_from_2016_ocean_gfw,
+                         emissions_normalized_from_2016_land_edgar,
+                         fraction_ocean_over_total),
+                       ~scales::percent(.))) |>
+  dplyr::mutate(across(c(emissions_co2_mt_land_edgar,
+                         emissions_co2_mt_ocean_gfw),
+                       ~as.character(signif(./1e9,2)))) |>
+  dplyr::rename(emissions_co2_billion_mt_land_edgar = emissions_co2_mt_land_edgar,
+                emissions_co2_billion_mt_ocean_gfw = emissions_co2_mt_ocean_gfw) |>
+  tidyr::pivot_longer(cols = everything())
 
-iea_comparison <- all_tranportation_data_normalized |>
-  dplyr::filter(year == 2022) |>
-  dplyr::filter(data_source %in% c("Ocean-based transportation (GFW)",
-                                                 "Land-based transportation (IEA)")) |>
-  dplyr::select(-c(emissions_co2_mt,emissions_co2_mt_starting)) |>
-  tidyr::pivot_wider(values_from = emissions_co2_mt_normalized,
-                     names_from = data_source) |>
-  dplyr::mutate(difference = `Ocean-based transportation (GFW)`/`Land-based transportation (IEA)`)
-
-knitr::kable(edgar_comparison,digits=3)
-
-knitr::kable(iea_comparison,digits=3)
+knitr::kable(edgar_comparison)
 ```
 
 
@@ -341,25 +348,25 @@ annual_co2_emissions |>
                 y = `2024`,
                 x = 2024.5),
             show.legend = FALSE) +
-  scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6),
+  scale_y_continuous(labels = scales::unit_format(unit = "B", scale = 1e-9),
                      limits = c(0,1.5e9)) + 
   scale_x_continuous(breaks = unique(annual_co2_emissions$year)) +
   scale_color_manual(values = c("#7570b3","#377eb8","#e41a1c"),
                      breaks = c("Total","AIS-broadcasting","Non-broadcasting"))+
   theme_plot() +
   labs(x = "",
-       y = "Annual global CO2 emissions\n(millions metric tonnes)",
+       y = "Annual global CO2 emissions\n(billion MT)",
        color = "Fleet") +
   theme(panel.grid.minor.x = element_blank())
 ```
 
 ```{r}
 #| label: tbl-total-annual-emissions-by-fleet
-#| tbl-cap: Total global annual CO2 emissions (million metric tonnes) by fleet for 2016 and 2024. The percent of total 2024 emissions for each fleet is also shown, along with the percent change from 2016 to 2024 for each fleet.
+#| tbl-cap: Total global annual CO2 emissions (billion metric tonnes) by fleet for 2016 and 2024. The percent of total 2024 emissions for each fleet is also shown, along with the percent change from 2016 to 2024 for each fleet.
 
 total_percent_change_by_fleet |>
   dplyr::relocate(fleet,`2016`,`2024`,`percent_total_2024`) |>
-  dplyr::mutate(across(c(`2016`,`2024`), ~signif(./1e6,3))) |>
+  dplyr::mutate(across(c(`2016`,`2024`), ~signif(./1e9,3))) |>
   knitr::kable()
 ```
 
