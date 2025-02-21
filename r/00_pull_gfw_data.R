@@ -74,3 +74,11 @@ download_gfw_data("sql/annual_spatial_emissions_by_receiver_type.sql",
 download_gfw_data("sql/annual_ais_to_dark_activity_extrapolation.sql",
                   "annual_ais_to_dark_activity_extrapolation")
 
+
+# Download total spatial emissions by pollutant for 2024
+download_gfw_data("sql/total_spatial_emissions_by_pollutant_2024.sql",
+                  "total_spatial_emissions_by_pollutant_2024")
+
+# Download total monthly non-spatial emissions by pollutant
+download_gfw_data("sql/total_monthly_emissions_by_pollutant.sql",
+                  "total_monthly_emissions_by_pollutant")

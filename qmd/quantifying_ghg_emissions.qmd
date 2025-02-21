@@ -202,6 +202,31 @@ annual_ais_to_dark_activity_extrapolation <-  glue::glue("{project_directory}/da
   dplyr::select(-c(average_speed_knots_dark,average_speed_knots)) |>
   dplyr::mutate(across(-c(year,fishing,length_size_class_percentile),
                        ~tidyr::replace_na(.,0)))
+
+# Total spatial emissions by pollutant for 2024
+total_spatial_emissions_by_pollutant_2024 <- glue::glue("{project_directory}/data/processed/total_spatial_emissions_by_pollutant_2024.csv") |>
+  readr::read_csv() |>
+  tidyr::pivot_longer(-c(lat_bin,lon_bin),
+                      names_to = "pollutant",
+                      values_to = "emissions_mt") |>
+  dplyr::mutate(pollutant = stringr::str_remove_all(pollutant,
+                                                    "emissions_") |>
+                  stringr::str_remove_all("_total_mt") |>
+                  stringr::str_to_upper() |>
+                  stringr::str_replace_all("_","."))
+
+# Total monthly non-spatial emissions by pollutant
+total_monthly_emissions_by_pollutant <- glue::glue("{project_directory}/data/processed/total_monthly_emissions_by_pollutant.csv") |>
+  readr::read_csv() |>
+  dplyr::mutate(month = lubridate::ymd(month)) |>
+  tidyr::pivot_longer(-month,
+                      names_to = "pollutant",
+                      values_to = "emissions_mt") |>
+  dplyr::mutate(pollutant = stringr::str_remove_all(pollutant,
+                                                    "emissions_") |>
+                  stringr::str_remove_all("_total_mt") |>
+                  stringr::str_to_upper() |>
+                  stringr::str_replace_all("_","."))
 ```
 
 # Paper figures
@@ -418,6 +443,65 @@ annual_spatial_co2_emissions_ais_dark  |>
   scale_x_continuous(expand = c(0, 1)) +
   scale_y_continuous(expand = c(0, 1)) 
 ```
+
+## Figure 3
+
+```{r}
+#| label: fig-pollutant-emissions-map-time-series
+#| fig-cap: (A) Spatial map of 2024 emissions by pollutant, aggregated across the AIS-broadcasting fleet and non-broadcasting fleet, and shown at a 1x1 degree spatial resolution; (B) time series of monthly global emissions by pollutant.
+#| fig-width: 7.5
+#| fig-height: 7.5
+pollutant_map <-total_spatial_emissions_by_pollutant_2024 |>
+  ggplot() +
+  geom_tile(aes(x = lon_bin,
+                y = lat_bin,
+                fill = emissions_mt)) +
+  geom_sf(data = land,
+          color = "#374a6d",
+          fill = "#374a6d") +
+  scale_fill_viridis_c(option = "mako",
+                       name = "2024\n emissions\n(MT)",
+                       breaks = c(0.0001,
+                                  1,
+                                  10000,
+                                  10e6),
+                       labels=c("0.0001",
+                                "1",
+                                "10k",
+                                "10M"),
+                       trans="log10") +
+  labs(x = '',
+       y= '') +
+  theme_map() +
+  theme(legend.position = "left",
+        legend.direction = "vertical",
+        legend.key.height = unit(1.5, 'cm'),
+          legend.key.width = unit(1, 'cm')) +
+  guides(fill = guide_colorbar(title.position = "top",
+                               title.hjust = 0.5,
+                               frame.colour = "black",
+                               ticks.colour = "black")) +
+  scale_x_continuous(expand = c(0, 1)) +
+  scale_y_continuous(expand = c(0, 1)) +
+  facet_wrap(pollutant~.,ncol=3)
+
+pollutant_timeseries <- total_monthly_emissions_by_pollutant |>
+  ggplot(aes(x = month,
+             y = emissions_mt)) +
+  geom_line() + 
+  scale_y_continuous(labels = scales::comma) +
+  theme_plot() +
+  labs(x = "",
+       y = "Monthly emissions (MT)") +
+  theme(panel.grid.minor.x = element_blank())+
+  facet_wrap(pollutant~.,ncol=3,scales="free_y")
+
+cowplot::plot_grid(pollutant_map, 
+                   pollutant_timeseries, 
+                   nrow = 2,rel_heights = c(0.6,0.4),
+                   labels = c("A","B"))
+```
+
 
 ## Figure 4
 
