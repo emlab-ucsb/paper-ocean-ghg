@@ -31,6 +31,13 @@
 
 \section{Results}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{qmd/quantifying_ghg_emissions_files/figure-pdf/fig-transportation-emissions-comparison-1.png}
+    \caption{ (A) Annual CO2 emissions for the ocean-based and land-based transportation sectors, with each line colored based on the emissions data source (MT); (A) Change in annual CO2 emissions from a 2016 baseline for the ocean-based and land-based transportation sectors, with each line colored based on the emissions data source (\%).}
+    \label{fig:fig-transportation-emissions-comparison}
+\end{figure}
+
 In Fig. \ref{fig:fig-total-annual-emissions-by-fleet}, we can see that when only looking at emissions based on AIS, global emissions in 2024 were 1,120 million metric tonnes (MMT), and trend from 2016 to 2024 shows a 34\% increase. When also adding in non-broadcasting vessels using Sentinel-1 detections, global emissions in 2024 were 1,420 MMT, and the trend from 2016 to 2024 is more modest at only a 23\% increase. This suggests that if only using AIS data, global emissions in 2024 would be underestimated by 17\%, and the increasing trend from 2016 to 2024 would be overestimated by 48\%.
 
 \begin{figure}[H]
@@ -49,12 +56,12 @@ Next we look at how CO2 emissions have changed spatially over time across both t
     \label{fig:fig-co2-emissions-map}
 \end{figure}
 
-Next we look at (Fig. \ref{fig:fig-hours-speed-decomposition})...
+Next we look at (Fig. \ref{fig:fig-hours-speed-vessel-type-decomposition})...
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\columnwidth]{qmd/quantifying_ghg_emissions_files/figure-pdf/fig-hours-speed-vessel-type-decomposition-1.png}
-    \caption{(A) Relative predicted change in CO2 emissions from 2016 baseline, using the predicted model outputs of four different scenarios that decompose the relative impact of changes in total hours (extensive margin) and changes in average speed (intensive margin); (B) relative observed change in CO2 emissions from 2016 basline by vessel type (fishing, non-fishing, and total).}
+    \caption{(A) Relative predicted change in CO2 emissions from 2016 baseline, using the random forest model outputs of four different scenarios that decompose the relative impact of changes in total hours (extensive margin) and changes in average speed (intensive margin); (B) relative observed change in CO2 emissions from 2016 baseline by vessel type (fishing, non-fishing, and total).}
     \label{fig:fig-hours-speed-vessel-type-decomposition}
 \end{figure}
 
