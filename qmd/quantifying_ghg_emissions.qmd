@@ -19,7 +19,7 @@ editor:
 #| label: document-setup
 
 # Set default chunk options
-knitr::opts_chunk$set(message = FALSE, warning = FALSE, echo = FALSE, dev = "png")
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, echo = FALSE, dev = "png", fig.path = "figures/")
 
 # Load librariers
 library(ggplot2)
