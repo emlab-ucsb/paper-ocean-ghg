@@ -10,8 +10,6 @@ format:
     colorlinks: true
 editor_options: 
   chunk_output_type: console
-execute: 
-  cache: true
 editor: 
   markdown: 
     wrap: 72
@@ -144,15 +142,21 @@ annual_co2_emissions <- glue::glue("{project_directory}/data/processed/annual_co
                       values_to = "co2_emissions") |>
   dplyr::mutate(fleet = dplyr::case_when(stringr::str_detect(fleet,"dark") ~ "Non-broadcasting",
                                          stringr::str_detect(fleet,"total") ~ "Total",
-                                         TRUE ~ "AIS-broadcasting"))
+                                         TRUE ~ "AIS-broadcasting")) |>
+  # Don't use 2025 data, since the year is incomplete
+  dplyr::filter(year < 2025)
 
 # Annual AIS-based CO2 emissions, hours, average speed, and main engine power by vessel
 annual_ais_co2_emissions_by_vessel <- glue::glue("{project_directory}/data/processed/annual_ais_co2_emissions_by_vessel.csv") |>
-  readr::read_csv()
+  readr::read_csv() |>
+  # Don't use 2025 data, since the year is incomplete
+  dplyr::filter(year < 2025)
 
 # Annual spatial CO2 emissions, for AIS and dark fleets
 annual_spatial_co2_emissions_ais_dark <-  glue::glue("{project_directory}/data/processed/annual_spatial_co2_emissions_ais_dark.csv") |>
-  readr::read_csv()
+  readr::read_csv() |>
+  # Don't use 2025 data, since the year is incomplete
+  dplyr::filter(year < 2025)
 
 # Annual global emissions and number of unique vessels by receiver type (satellite; dynamic; or terrestrial)
 annual_global_emissions_by_receiver_type <-  glue::glue("{project_directory}/data/processed/annual_global_emissions_by_receiver_type.csv") |>
@@ -165,7 +169,9 @@ annual_global_emissions_by_receiver_type <-  glue::glue("{project_directory}/dat
     tidyr::nesting(year),
     fill = list(emissions_co2_mt = 0, n_distinct_ssvid = 0)
   ) |>
-  dplyr::mutate(receiver_type = stringr::str_to_sentence(receiver_type)) 
+  dplyr::mutate(receiver_type = stringr::str_to_sentence(receiver_type))  |>
+  # Don't use 2025 data, since the year is incomplete
+  dplyr::filter(year < 2025)
 
 # Annual global emissions and number of unique vessels by receiver type (satellite; dynamic; or terrestrial) and flag
 annual_global_emissions_by_receiver_type_and_flag <-  glue::glue("{project_directory}/data/processed/annual_global_emissions_by_receiver_type_and_flag.csv") |>
@@ -186,7 +192,9 @@ annual_global_emissions_by_receiver_type_and_flag <-  glue::glue("{project_direc
     receiver_type,
     tidyr::nesting(year,flag),
     fill = list(emissions_co2_mt = 0, n_distinct_ssvid = 0)
-  ) 
+  )  |>
+  # Don't use 2025 data, since the year is incomplete
+  dplyr::filter(year < 2025)
 
 # Annual spatial CO2 emissions vt receiver type  (satellite; dynamic; or terrestrial)
 annual_spatial_emissions_by_receiver_type <-  glue::glue("{project_directory}/data/processed/annual_spatial_emissions_by_receiver_type.csv") |>
@@ -194,14 +202,18 @@ annual_spatial_emissions_by_receiver_type <-  glue::glue("{project_directory}/da
   dplyr::mutate(receiver_type = stringr::str_to_sentence(receiver_type) |>
                   forcats::fct_relevel("Satellite",
                                        "Terrestrial",
-                                       "Dynamic"))
+                                       "Dynamic")) |>
+  # Don't use 2025 data, since the year is incomplete
+  dplyr::filter(year < 2025)
 
 # Annual extrapolation of AIS activity to dark activity
 annual_ais_to_dark_activity_extrapolation <-  glue::glue("{project_directory}/data/processed/annual_ais_to_dark_activity_extrapolation.csv") |>
   readr::read_csv() |>
   dplyr::select(-c(average_speed_knots_dark,average_speed_knots)) |>
   dplyr::mutate(across(-c(year,fishing,length_size_class_percentile),
-                       ~tidyr::replace_na(.,0)))
+                       ~tidyr::replace_na(.,0))) |>
+  # Don't use 2025 data, since the year is incomplete
+  dplyr::filter(year < 2025)
 
 # Total spatial emissions by pollutant for 2024
 total_spatial_emissions_by_pollutant_2024 <- glue::glue("{project_directory}/data/processed/total_spatial_emissions_by_pollutant_2024.csv") |>
@@ -226,7 +238,9 @@ total_monthly_emissions_by_pollutant <- glue::glue("{project_directory}/data/pro
                                                     "emissions_") |>
                   stringr::str_remove_all("_total_mt") |>
                   stringr::str_to_upper() |>
-                  stringr::str_replace_all("_","."))
+                  stringr::str_replace_all("_",".")) |>
+  # Don't use 2025 data, since the year is incomplete
+  dplyr::filter(lubridate::year(month) < 2025)
 ```
 
 # Paper figures
@@ -260,7 +274,9 @@ all_tranportation_data <- land_based_transportation_emissions_edgar |>
                      dplyr::filter(fleet == "Total") |>
                      dplyr::rename(emissions_co2_mt = co2_emissions) |>
                      dplyr::mutate(data_source = "Ocean-based transportation (GFW)") |>
-                     dplyr::select(-fleet))
+                     dplyr::select(-fleet)) |>
+  # EDGAR only runs up through 2023
+  dplyr::filter(year<2024)
 
 
 # Get 2016 values for time-series normalization
@@ -360,15 +376,16 @@ total_percent_change_by_fleet <- annual_co2_emissions |>
   dplyr::mutate(percent_total_2024 = `2024`/sum(`2024`))  |>
   janitor::adorn_totals("row") |>
   dplyr::mutate(percent_total_2024 = scales::percent(percent_total_2024)) |>
-  dplyr::mutate(percent_change = round(100*(`2024` - `2016`)/`2016`),
-                percent_change = ifelse(percent_change>0,
-                                        glue::glue("+{percent_change}%"),
-                                        glue::glue("{percent_change}%")))
+  dplyr::mutate(percent_change = 100*(`2024` - `2016`)/`2016`)
 
 annual_co2_emissions |>
   ggplot(aes(x = year, y = co2_emissions, color = fleet)) +
   geom_line() +
-  geom_text(data = total_percent_change_by_fleet,
+  geom_text(data = total_percent_change_by_fleet|>
+    dplyr::mutate(percent_change = round(percent_change),
+                  percent_change = ifelse(percent_change>0,
+                                        glue::glue("+{percent_change}%"),
+                                        glue::glue("{percent_change}%"))),
             aes(label = percent_change,
                 y = `2024`,
                 x = 2024.5),
@@ -386,10 +403,26 @@ annual_co2_emissions |>
 ```
 
 ```{r}
+ais_scale_underestimation_2024 <- (1 - (total_percent_change_by_fleet |>
+  dplyr::filter(fleet == "AIS-broadcasting"))$`2024`/(total_percent_change_by_fleet |>
+  dplyr::filter(fleet == "Total"))$`2024`) |>
+  scales::percent()
+
+ais_trend_overestimation_2016_2024 <- ((total_percent_change_by_fleet |>
+  dplyr::filter(fleet == "AIS-broadcasting"))$percent_change/(total_percent_change_by_fleet |>
+  dplyr::filter(fleet == "Total"))$percent_change -1) |>
+  scales::percent()
+```
+
+```{r}
 #| label: tbl-total-annual-emissions-by-fleet
 #| tbl-cap: Total global annual CO2 emissions (billion metric tonnes) by fleet for 2016 and 2024. The percent of total 2024 emissions for each fleet is also shown, along with the percent change from 2016 to 2024 for each fleet.
 
 total_percent_change_by_fleet |>
+    dplyr::mutate(percent_change = round(percent_change),
+                  percent_change = ifelse(percent_change>0,
+                                        glue::glue("+{percent_change}%"),
+                                        glue::glue("{percent_change}%"))) |>
   dplyr::relocate(fleet,`2016`,`2024`,`percent_total_2024`) |>
   dplyr::mutate(across(c(`2016`,`2024`), ~signif(./1e9,3))) |>
   knitr::kable()
@@ -706,6 +739,9 @@ cowplot::plot_grid(time_series_predicted_decomposition,time_series_by_vessel_typ
                    labels = c("A","B"))
 ```
 
+# Abstract text with stats
+
+We develop a method for quantifying high-resolution spatiotemporal  ocean-based vessel emissions at a global scale by fusing two unique satellite-based data sources: 1) Automatic Identification System (AIS) to estimate vessel-level emissions for the over `r prettyNum(signif(length(unique(annual_ais_co2_emissions_by_vessel$ssvid)),3),big.mark=",")` boats that broadcast their positions using AIS; and 2) synthetic aperture radar (SAR) data from the Sentinel-1 satellite constellation to estimate emissions for boats that do not use AIS. We find that vessels emitted approximately `r (edgar_comparison|>dplyr::filter(name=="emissions_co2_billion_mt_ocean_gfw"))$value` billion metric tons of CO2 in 2023, accounting for `r (edgar_comparison|>dplyr::filter(name=="fraction_ocean_over_total"))$value` of global fossil fuel emissions from the transportation sector. We also find that ocean-based CO2 emissions increased by `r (edgar_comparison|>dplyr::filter(name=="emissions_normalized_from_2016_ocean_gfw"))$value` between 2016 and 2023, `r (edgar_comparison|>dplyr::filter(name=="normalized_ocean_over_land"))$value` times the increase measured from land-based transportation emissions. Data fusion is critical to getting these numbers right: if only AIS data were used, the currently accepted state-of- the-art for measuring vessel emissions, global emissions in 2024 would be *underestimated* by `r ais_scale_underestimation_2024`, and the increasing trend from 2016 to 2024 would be *overestimated* by `r ais_trend_overestimation_2016_2024`.
 
 
 # Supplementary figures
