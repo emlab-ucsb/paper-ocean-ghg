@@ -24,6 +24,12 @@
 
 \section{Introduction}
 
+The transportation sector is a major source of greenhouse gas (GHG) emissions and contributor to global climate change. In 2023, the transportation sector was responsible for 21\% of all carbon dioxide (CO2) emissions globally (\cite{JRC138862})...
+
+Current methods for estimating emissions at sea rely on vessel tracking data from the Automatic Identification System (AIS) (\cite{olmer2017greenhouse, fourth2020greenhouse}), but cannot provide comprehensive coverage due to the often opaque nature of vessel activity in the oceans. Analysis of satellite imagery has shown that upwards of 76\% of industrial fishing vessels are not tracked by AIS, while upwards of 30\% of transport and energy vessels are not tracked (\cite{paolo2024satellite})...
+
+Here we develop a method for comprehensively estimating ocean-based vessel emissions that leverages AIS data for vessels that broadast their positions, and Sentinel-1 Synthetic Aperture Radar (SAR) for non-broadcasting vessels...
+
 \section{Results}
 
 In 2023 there were 1.3 billion metric tonnes (MT) of ocean-based transportation emissions, which accounted for 15\% of all transportation-related emissions (Fig. \ref{fig:fig-transportation-emissions-comparison}). Ocean-based transportation emissions increased by 24\% between 2016 and 2023, an increase 5.8 times larger than land-based transportation emissions.
@@ -35,7 +41,7 @@ In 2023 there were 1.3 billion metric tonnes (MT) of ocean-based transportation 
     \label{fig:fig-transportation-emissions-comparison}
 \end{figure}
 
-In Fig. \ref{fig:fig-total-annual-emissions-by-fleet}, we can see that when only looking at emissions based on AIS, global emissions in 2024 were 1.1 billion MT, and trend from 2016 to 2024 shows a 34\% increase. When also adding in non-broadcasting vessels using Sentinel-1 detections, global emissions in 2024 were 1.3  billion MT, and the trend from 2016 to 2024 is more modest at only a 24\% increase. This suggests that if only using AIS data, global emissions in 2024 would be underestimated by 14\%, and the increasing trend from 2016 to 2024 would be overestimated by 41\%.
+When only looking at emissions based on AIS, global emissions in 2024 were 1.1 billion MT, and the trend from 2016 to 2024 shows a 34\% increase (Fig. \ref{fig:fig-total-annual-emissions-by-fleet}). When also including non-broadcasting vessels using Sentinel-1 detections, global emissions in 2024 were 1.3  billion MT, and the trend from 2016 to 2024 is more modest at only a 24\% increase. This suggests that if only using AIS data, global emissions in 2024 would be underestimated by 14\%, and the increasing trend from 2016 to 2024 would be overestimated by 41\%...
 
 \begin{figure}[H]
     \centering
@@ -44,7 +50,7 @@ In Fig. \ref{fig:fig-total-annual-emissions-by-fleet}, we can see that when only
     \label{fig:fig-total-annual-emissions-by-fleet}
 \end{figure}
 
-Next we look at... (Fig. \ref{fig:fig-pollutant-emissions-map-time-series}).
+Our approach provides high spatiotemporal resolution emissions estimates both for GHGs (including CO2, CH4, and N2O), as well as for other pollutants (CO, NOX, SOX, VOCs, PM2.5, and PM10) (Fig. \ref{fig:fig-pollutant-emissions-map-time-series}). This dataset provides opportunities for the analysis of both global impacts from GHG emissions that affect global climate change, as localized impacts from other pollutant emissions that affect local air quality...
 
 \begin{figure}[H]
     \centering
@@ -100,7 +106,7 @@ AIS messages are broadcast from vessels and then received through one of three t
     \label{fig:fig-annual-emissions-by-ais-receiver-type}
 \end{figure}
 
-In Fig. \ref{fig:fig-annual-emissions-by-ais-receiver-type-top-flags}, we see the amount of quantified emissions for the top 10 vessel flags broken apart by AIS receiver type (Fig. \ref{fig:fig-annual-unique-vessels-by-ais-receiver-type-top-flag} similarly shows trends in unique vessels detected by each receiver type). The trends are similar to those seen on aggregate ( Fig. \ref{fig:fig-annual-emissions-by-ais-receiver-type}), although there is variation in terms of the increase in Dynamic AIS detections across different flags. This is likely driven by whether or not each flag travels through regions where Dynamic AIS was widely adopted. It is important to note that towards the end of 2021, China experience a blackout of terrestrial AIS signals due to new privacy laws that were being implemented (\href{https://veson.com/blog/benefits-of-dynamic-ais-for-maritime-data-in-times-of-uncertainty/}{source). This sharp decline from 2021 to 2022 in terrestrial-based emissions is clearly evident for China. Without the introduction of Dynamic AIS, it is possible that this disruption may have resulted in erroneously small emissions in China following the terrestrial receiver blackout. This is another example of how multiple complementary technologies can be fused in order to maximize emissions coverage over time.
+In Fig. \ref{fig:fig-annual-emissions-by-ais-receiver-type-top-flags}, we see the amount of quantified emissions for the top 10 vessel flags broken apart by AIS receiver type. The trends are similar to those seen on aggregate ( Fig. \ref{fig:fig-annual-emissions-by-ais-receiver-type}), although there is variation in terms of the increase in Dynamic AIS detections across different flags. This is likely driven by whether or not each flag travels through regions where Dynamic AIS was widely adopted. It is important to note that towards the end of 2021, China experience a blackout of terrestrial AIS signals due to new privacy laws that were being implemented (\href{https://veson.com/blog/benefits-of-dynamic-ais-for-maritime-data-in-times-of-uncertainty/}{source). This sharp decline from 2021 to 2022 in terrestrial-based emissions is clearly evident for China. Without the introduction of Dynamic AIS, it is possible that this disruption may have resulted in erroneously small emissions in China following the terrestrial receiver blackout. This is another example of how multiple complementary technologies can be fused in order to maximize emissions coverage over time.
 
 \begin{figure}[H]
     \centering
@@ -110,12 +116,12 @@ In Fig. \ref{fig:fig-annual-emissions-by-ais-receiver-type-top-flags}, we see th
 \end{figure}
 
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\columnwidth]{qmd/figures/fig-annual-unique-vessels-by-ais-receiver-type-top-flags-1.png}
-    \caption{Annual unique number of vessels in the AIS-broadcasting fleet, disaggregated by AIS receiver type (satellite, terrestrial, and dynamic) and total aggregated across receiver types, for the top 10 flags with the most emissions in 2024. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.}
-    \label{fig:fig-annual-unique-vessels-by-ais-receiver-type-top-flag}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=\columnwidth]{qmd/figures/fig-annual-unique-vessels-by-ais-receiver-type-top-flags-1.png}
+%     \caption{Annual unique number of vessels in the AIS-broadcasting fleet, disaggregated by AIS receiver type (satellite, terrestrial, and dynamic) and total aggregated across receiver types, for the top 10 flags with the most emissions in 2024. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.}
+%     \label{fig:fig-annual-unique-vessels-by-ais-receiver-type-top-flag}
+% \end{figure}
 
 Finally, in Fig. \ref{fig:fig-co2-emissions-change-map-by-receiver-type}, we see how the use of the three AIS receiver types has changed spatially over time between 2016 and 2024. Dynamic AIS was mostly implemented in busy shipping lanes, with clear concentration in areas including the South China Sea, Europe, and the Gulf of Mexico. These regions also generally correspond to decreasing use of satellite and terrestrial receivers. Overall, the largest total change in emissions is generally concentrated in the same regions that saw the largest uptake of Dynamic AIS.
 
@@ -128,94 +134,94 @@ Finally, in Fig. \ref{fig:fig-co2-emissions-change-map-by-receiver-type}, we see
 
 \subsubsection{Changes in fleet composition and vessel behavior}
 
-In Fig. \ref{fig:fig-total-annual-unique-vessels-hours-power},  we see that the number of unique AIS-broadcasting vessels is steadily increasing over time, showing an 78\% increase from 2015 to 2024. The total operational hours of these vessels increase 104\% over this time period, while the total main engine power for these vessels saw a 37\% increase. This provides some evidence that a primary driver of increasing observed emissions at a global scale (Fig. \ref{fig:fig-total-annual-emissions-by-fleet}) could be the increasing number of vessels that broadcast AIS.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\columnwidth]{qmd/figures/fig-total-annual-unique-vessels-hours-power-1.png}
-    \caption{Annual total CO2 emissions (metric tonnes); total operating hours; total engine power across vessels (killowatts); number distinct operating vessels; and average speed; across all AIS-broadcasting vessels. The percent change from 2015 to 2024 is shown next to each line..}
-    \label{fig:fig-total-annual-unique-vessels-hours-power}
-\end{figure}
-
-In Fig. \ref{fig:fig-total-annual-unique-vessels-by-earliest-operation-year},  we look at how each of these indicators would change over time if we only included the vessels that have been operating since a given earliest operation year. For example, for an earliest operation year of 2015, we can see how CO2 emissions change over time for just those vessels that have been operating since 2015. Regardless of which year we take as a baseline, the emissions for the fleet from any given year shows a consistent decreasing pattern from the first year to the last year. This is also seen in the number of broadcasting vessels, operating hours, and total main engine power. This provides further evidence that the main source of increasing observed emissions seen across all vessels at a global scale (Fig. \ref{fig:fig-total-annual-emissions-by-fleet}) is primarily driven by the increasing number of vessels that broadcast AIS over time (Fig. \ref{fig:fig-total-annual-unique-vessels-hours-power}).
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\columnwidth]{qmd/figures/fig-total-indicators-by-earliest-operation-year-1.png}
-    \caption{Total global CO2 emissions; number unique vessels; operating hours; and total main engine power for the set of AIS-broadcasting vessels that have been operating since a given year, where each line is colored by the earliest operation year. The percent change from the earliest year to 2024 is shown next to its line.}
-    \label{fig:fig-total-annual-unique-vessels-by-earliest-operation-year}
-\end{figure}
-
-In Fig. \ref{fig:fig-individual-distribution-annual-emissions-hours-power}, we look at how the distribution of individual vessel-level indicators have changed over time. Since 2015, the general trend of annual average emissions of individual vessels has been decreasing. This is because even though the average operating hours of individual vessels has been fluctuating over time and has been increasing steadily since the low-point during COVID in 2020, the average main engine power and the average speed for individual vessels has been steadily decreasing since 2015.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\columnwidth]{qmd/figures/fig-individual-distribution-annual-emissions-hours-power-1.png}
-    \caption{Annual distributions of individual per-vessel CO2 emissions (metric tonnes); operating hours; main engine power (killowatts); and average speed (knots). The point shows the mean value, and the error bars show +/- two standard errors.}
-    \label{fig:fig-individual-distribution-annual-emissions-hours-power}
-\end{figure}
-
-% In Fig. \ref{fig:fig-individual-distribution-annual-emissions-hours-power-by-earliest-operation-year}, we look at how the trend of mean individual per-vessel emissions, operating hours, and main engine power would change over time if we only included the vessels that have been operating since a given earliest operation year. Regardless of which earliest year is used, operating hours consistently increases over time. Meanwhile, main engine power is decreasing (for earlier years) or stable (for later years). Combined, this means a modest increase in emissions over time.
+% In Fig. \ref{fig:fig-total-annual-unique-vessels-hours-power},  we see that the number of unique AIS-broadcasting vessels is steadily increasing over time, showing an 78\% increase from 2015 to 2024. The total operational hours of these vessels increase 104\% over this time period, while the total main engine power for these vessels saw a 37\% increase. This provides some evidence that a primary driver of increasing observed emissions at a global scale (Fig. \ref{fig:fig-total-annual-emissions-by-fleet}) could be the increasing number of vessels that broadcast AIS.
 
 % \begin{figure}[H]
 %     \centering
-%     \includegraphics[width=\columnwidth]{qmd/figures/fig-individual-distribution-annual-emissions-hours-power-by-earliest-operation-year-1.png}
-%     \caption{Annual mean vessel-level CO2 emissions (metric tonnes, top panel); operating hours (middle panel); and main engine power (panel) for the set of AIS-broadcasting vessels that have been operating since a given year, where each line is colored by the earliest operation year. The percent change from the earliest year to 2024 is shown next to its line.}
-%     \label{fig:fig-individual-distribution-annual-emissions-hours-power-by-earliest-operation-year}
+%     \includegraphics[width=\columnwidth]{qmd/figures/fig-total-annual-unique-vessels-hours-power-1.png}
+%     \caption{Annual total CO2 emissions (metric tonnes); total operating hours; total engine power across vessels (killowatts); number distinct operating vessels; and average speed; across all AIS-broadcasting vessels. The percent change from 2015 to 2024 is shown next to each line..}
+%     \label{fig:fig-total-annual-unique-vessels-hours-power}
 % \end{figure}
 
-Finally, we turn to Oliver's idea from Slack:
+% In Fig. \ref{fig:fig-total-annual-unique-vessels-by-earliest-operation-year},  we look at how each of these indicators would change over time if we only included the vessels that have been operating since a given earliest operation year. For example, for an earliest operation year of 2015, we can see how CO2 emissions change over time for just those vessels that have been operating since 2015. Regardless of which year we take as a baseline, the emissions for the fleet from any given year shows a consistent decreasing pattern from the first year to the last year. This is also seen in the number of broadcasting vessels, operating hours, and total main engine power. This provides further evidence that the main source of increasing observed emissions seen across all vessels at a global scale (Fig. \ref{fig:fig-total-annual-emissions-by-fleet}) is primarily driven by the increasing number of vessels that broadcast AIS over time (Fig. \ref{fig:fig-total-annual-unique-vessels-hours-power}).
 
-\begin{quoting}
-"One idea for Gavin: do a "box-plot" of annual emission against calendar year by entry cohort: all vessels entering in 2015 (or earlier), all vessels entering in 2016 (this will be a much smaller N), all vessels entering in 2017, etc.  You could imagine doing the same for leavers (all vessels leaving in 2015, 2016, ...) This will produce 2 figures per year (only 1 in 2015) with new entrants and leavers that should summarize very well the trends in the AIS data"
-\end{quoting}
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=\columnwidth]{qmd/figures/fig-total-indicators-by-earliest-operation-year-1.png}
+%     \caption{Total global CO2 emissions; number unique vessels; operating hours; and total main engine power for the set of AIS-broadcasting vessels that have been operating since a given year, where each line is colored by the earliest operation year. The percent change from the earliest year to 2024 is shown next to its line.}
+%     \label{fig:fig-total-annual-unique-vessels-by-earliest-operation-year}
+% \end{figure}
 
-First we look at histograms showing the distribution of the first and last operation year of each vessel (Fig. \ref{fig:fig-first-last-operation-year-histogram}). Most vessels started operations in 2015, although some vessels came on board during each following years. Meanwhile, most vessels have continued operating up through 2024, although some stop operating in each of the previous years.
+% In Fig. \ref{fig:fig-individual-distribution-annual-emissions-hours-power}, we look at how the distribution of individual vessel-level indicators have changed over time. Since 2015, the general trend of annual average emissions of individual vessels has been decreasing. This is because even though the average operating hours of individual vessels has been fluctuating over time and has been increasing steadily since the low-point during COVID in 2020, the average main engine power and the average speed for individual vessels has been steadily decreasing since 2015.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\columnwidth]{qmd/figures/fig-first-last-operation-year-histogram-1.png}
-    \caption{Histograms showing the distribution of the first and last operation year of each vessel.}
-    \label{fig:fig-first-last-operation-year-histogram}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=\columnwidth]{qmd/figures/fig-individual-distribution-annual-emissions-hours-power-1.png}
+%     \caption{Annual distributions of individual per-vessel CO2 emissions (metric tonnes); operating hours; main engine power (killowatts); and average speed (knots). The point shows the mean value, and the error bars show +/- two standard errors.}
+%     \label{fig:fig-individual-distribution-annual-emissions-hours-power}
+% \end{figure}
 
-Next we look at time series trends of mean per-vessel emissions, mean per-vessel operating hours, mean per-vessel main engine power, mean per-vessel speed, and number of unique vessels, by subsetting the data to each year that vessels first started operating (Fig. \ref{fig:fig-individual-distribution-annual-emissions-hours-power-by-first-year}).
+% % In Fig. \ref{fig:fig-individual-distribution-annual-emissions-hours-power-by-earliest-operation-year}, we look at how the trend of mean individual per-vessel emissions, operating hours, and main engine power would change over time if we only included the vessels that have been operating since a given earliest operation year. Regardless of which earliest year is used, operating hours consistently increases over time. Meanwhile, main engine power is decreasing (for earlier years) or stable (for later years). Combined, this means a modest increase in emissions over time.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\columnwidth]{qmd/figures/fig-individual-distribution-annual-emissions-hours-power-by-first-year-1.png}
-    \caption{Annual mean of individual per-vessel CO2 emissions (metric tonnes); mean per-vessel operating hours; mean per-vessel main engine power (killowatts); mean per-vessel speed (knots); and total number of distinct vessels for the set of AIS-broadcasting vessels for each first year of operation, where each line is colored by the first operation year.}
-    \label{fig:fig-individual-distribution-annual-emissions-hours-power-by-first-year}
-\end{figure}
+% % \begin{figure}[H]
+% %     \centering
+% %     \includegraphics[width=\columnwidth]{qmd/figures/fig-individual-distribution-annual-emissions-hours-power-by-earliest-operation-year-1.png}
+% %     \caption{Annual mean vessel-level CO2 emissions (metric tonnes, top panel); operating hours (middle panel); and main engine power (panel) for the set of AIS-broadcasting vessels that have been operating since a given year, where each line is colored by the earliest operation year. The percent change from the earliest year to 2024 is shown next to its line.}
+% %     \label{fig:fig-individual-distribution-annual-emissions-hours-power-by-earliest-operation-year}
+% % \end{figure}
 
-Next we look at time series trends of mean per-vessel emissions, mean per-vessel operating hours, mean per-vessel main engine power, mean per-vessel speed, and number of unique vessels, by subsetting the data to each year that vessels last operated (Fig. \ref{fig:fig-individual-distribution-annual-emissions-hours-power-by-last-year}).
+% Finally, we turn to Oliver's idea from Slack:
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\columnwidth]{qmd/figures/fig-individual-distribution-annual-emissions-hours-power-by-last-year-1.png}
-    \caption{Annual mean of individual per-vessel CO2 emissions (metric tonnes); mean per-vessel operating hours; mean per-vessel main engine power (killowatts); mean per-vessel speed (knots); and total number of distinct vessels for the set of AIS-broadcasting vessels for each last year of operation, where each line is colored by the last operation year.}
-    \label{fig:fig-individual-distribution-annual-emissions-hours-power-by-last-year}
-\end{figure}
+% \begin{quoting}
+% "One idea for Gavin: do a "box-plot" of annual emission against calendar year by entry cohort: all vessels entering in 2015 (or earlier), all vessels entering in 2016 (this will be a much smaller N), all vessels entering in 2017, etc.  You could imagine doing the same for leavers (all vessels leaving in 2015, 2016, ...) This will produce 2 figures per year (only 1 in 2015) with new entrants and leavers that should summarize very well the trends in the AIS data"
+% \end{quoting}
 
-Following Olivier's complementary materials shared on Slack, we present the mean values of four parameters defining yearly information for AIS-broadcasting vessels operating across all years (Fig. \ref{fig:fig-all-years-operating-vessels-norm-mean-values-from-ping-level-emissions-1}). The data is derived from the ping-level dataset, thus including emissions associated with both port stays and trips.
+% First we look at histograms showing the distribution of the first and last operation year of each vessel (Fig. \ref{fig:fig-first-last-operation-year-histogram}). Most vessels started operations in 2015, although some vessels came on board during each following years. Meanwhile, most vessels have continued operating up through 2024, although some stop operating in each of the previous years.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\columnwidth]{qmd/figures/fig-all-years-operating-vessels-norm-mean-values-from-ping-level-emissions-1.png}
-    \caption{Annual mean of individual per-vessel CO2 emissions (metric tonnes); mean per-vessel operating hours; mean per-vessel main engine power (killowatts); mean per-vessel speed (knots); and total number of distinct vessels for the set of AIS-broadcasting vessels for each last year of operation, where each line is colored by the last operation year.}
-    \label{fig:fig-all-years-operating-vessels-norm-mean-values-from-ping-level-emissions-1}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=\columnwidth]{qmd/figures/fig-first-last-operation-year-histogram-1.png}
+%     \caption{Histograms showing the distribution of the first and last operation year of each vessel.}
+%     \label{fig:fig-first-last-operation-year-histogram}
+% \end{figure}
 
-The relationship between hours and speeds may be misleading, as the dataset includes information from both trips and port stays. While hours accumulate regardless of whether a vessel is on a trip or at port, distances covered during port stays are minimal, leading to misrepresented speed values.
+% Next we look at time series trends of mean per-vessel emissions, mean per-vessel operating hours, mean per-vessel main engine power, mean per-vessel speed, and number of unique vessels, by subsetting the data to each year that vessels first started operating (Fig. \ref{fig:fig-individual-distribution-annual-emissions-hours-power-by-first-year}).
 
-To address this, we can assess the actual changes in these parameters (considering distances as well) by exclusively analyzing emissions from trips. Below, we present data extracted from the trip emissions dataset, aggregated by vessel for all trips starting in a given year (Fig. \ref{fig:fig-all-years-operating-vessels-norm-mean-values-from-trip-level-emissions-1}). This shows a completely different trend compared to the observations above. Restricting vessel information to those that has a registered at least one trip in each year has moved the number of vessels considered in this representation from 101754 to 67715.
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=\columnwidth]{qmd/figures/fig-individual-distribution-annual-emissions-hours-power-by-first-year-1.png}
+%     \caption{Annual mean of individual per-vessel CO2 emissions (metric tonnes); mean per-vessel operating hours; mean per-vessel main engine power (killowatts); mean per-vessel speed (knots); and total number of distinct vessels for the set of AIS-broadcasting vessels for each first year of operation, where each line is colored by the first operation year.}
+%     \label{fig:fig-individual-distribution-annual-emissions-hours-power-by-first-year}
+% \end{figure}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\columnwidth]{qmd/figures/fig-all-years-operating-vessels-norm-mean-values-from-trip-level-emissions-1.png}
-    \caption{Annual mean of individual per-vessel CO2 emissions (metric tonnes); mean per-vessel operating hours; mean per-vessel main engine power (killowatts); mean per-vessel speed (knots); and total number of distinct vessels for the set of AIS-broadcasting vessels for each last year of operation, where each line is colored by the last operation year.}
-    \label{fig:fig-all-years-operating-vessels-norm-mean-values-from-trip-level-emissions-1}
-\end{figure}
+% Next we look at time series trends of mean per-vessel emissions, mean per-vessel operating hours, mean per-vessel main engine power, mean per-vessel speed, and number of unique vessels, by subsetting the data to each year that vessels last operated (Fig. \ref{fig:fig-individual-distribution-annual-emissions-hours-power-by-last-year}).
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=\columnwidth]{qmd/figures/fig-individual-distribution-annual-emissions-hours-power-by-last-year-1.png}
+%     \caption{Annual mean of individual per-vessel CO2 emissions (metric tonnes); mean per-vessel operating hours; mean per-vessel main engine power (killowatts); mean per-vessel speed (knots); and total number of distinct vessels for the set of AIS-broadcasting vessels for each last year of operation, where each line is colored by the last operation year.}
+%     \label{fig:fig-individual-distribution-annual-emissions-hours-power-by-last-year}
+% \end{figure}
+
+% Following Olivier's complementary materials shared on Slack, we present the mean values of four parameters defining yearly information for AIS-broadcasting vessels operating across all years (Fig. \ref{fig:fig-all-years-operating-vessels-norm-mean-values-from-ping-level-emissions-1}). The data is derived from the ping-level dataset, thus including emissions associated with both port stays and trips.
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=\columnwidth]{qmd/figures/fig-all-years-operating-vessels-norm-mean-values-from-ping-level-emissions-1.png}
+%     \caption{Annual mean of individual per-vessel CO2 emissions (metric tonnes); mean per-vessel operating hours; mean per-vessel main engine power (killowatts); mean per-vessel speed (knots); and total number of distinct vessels for the set of AIS-broadcasting vessels for each last year of operation, where each line is colored by the last operation year.}
+%     \label{fig:fig-all-years-operating-vessels-norm-mean-values-from-ping-level-emissions-1}
+% \end{figure}
+
+% The relationship between hours and speeds may be misleading, as the dataset includes information from both trips and port stays. While hours accumulate regardless of whether a vessel is on a trip or at port, distances covered during port stays are minimal, leading to misrepresented speed values.
+
+% To address this, we can assess the actual changes in these parameters (considering distances as well) by exclusively analyzing emissions from trips. Below, we present data extracted from the trip emissions dataset, aggregated by vessel for all trips starting in a given year (Fig. \ref{fig:fig-all-years-operating-vessels-norm-mean-values-from-trip-level-emissions-1}). This shows a completely different trend compared to the observations above. Restricting vessel information to those that has a registered at least one trip in each year has moved the number of vessels considered in this representation from 101754 to 67715.
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=\columnwidth]{qmd/figures/fig-all-years-operating-vessels-norm-mean-values-from-trip-level-emissions-1.png}
+%     \caption{Annual mean of individual per-vessel CO2 emissions (metric tonnes); mean per-vessel operating hours; mean per-vessel main engine power (killowatts); mean per-vessel speed (knots); and total number of distinct vessels for the set of AIS-broadcasting vessels for each last year of operation, where each line is colored by the last operation year.}
+%     \label{fig:fig-all-years-operating-vessels-norm-mean-values-from-trip-level-emissions-1}
+% \end{figure}
 
 
 \end{document}
