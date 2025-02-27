@@ -225,7 +225,8 @@ total_spatial_emissions_by_pollutant_2024 <- glue::glue("{project_directory}/dat
                                                     "emissions_") |>
                   stringr::str_remove_all("_total_mt") |>
                   stringr::str_to_upper() |>
-                  stringr::str_replace_all("_","."))
+                  stringr::str_replace_all("_","."),
+                pollutant = ifelse(pollutant == "VOCS","VOCs",pollutant))
 
 # Total monthly non-spatial emissions by pollutant
 total_monthly_emissions_by_pollutant <- glue::glue("{project_directory}/data/processed/total_monthly_emissions_by_pollutant.csv") |>
@@ -238,7 +239,8 @@ total_monthly_emissions_by_pollutant <- glue::glue("{project_directory}/data/pro
                                                     "emissions_") |>
                   stringr::str_remove_all("_total_mt") |>
                   stringr::str_to_upper() |>
-                  stringr::str_replace_all("_",".")) |>
+                  stringr::str_replace_all("_","."),
+                pollutant = ifelse(pollutant == "VOCS","VOCs",pollutant)) |>
   # Don't use 2025 data, since the year is incomplete
   dplyr::filter(lubridate::year(month) < 2025)
 ```
@@ -313,7 +315,7 @@ emissions_comparison_figure_normalized <- all_tranportation_data_normalized |>
   scale_y_continuous(labels = scales::percent) +
   theme_plot() +
   labs(x = "",
-       y = "Relative change\nin annual CO2 emissions\nfrom 2016 baseline",
+       y = "Relative change in\nannual CO2 emissions\nfrom 2016 baseline",
        color = "Data source") +
   theme(panel.grid.minor.x = element_blank())+
   scale_color_manual(values = all_transportation_color_palette,
@@ -324,7 +326,7 @@ emissions_comparison_figure_normalized <- all_tranportation_data_normalized |>
 
 cowplot::plot_grid(emissions_comparison_figure_absolute,
                    emissions_comparison_figure_normalized,
-                   ncol=1,align="vh")
+                   ncol=1,align="vh",labels=c("A","B"))
 ```
 
 ```{r}
