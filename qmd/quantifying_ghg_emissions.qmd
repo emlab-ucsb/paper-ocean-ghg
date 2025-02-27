@@ -429,8 +429,18 @@ co2_emissions_map_fig <- annual_spatial_co2_emissions_ais_dark  |>
                           midpoint = 0,
                           trans = ggallin::pseudolog10_trans,
                           na.value = "black",
-                          breaks = c(-1e6,-1e3,0,1e3,1e6),
-                          labels = scales::comma) +
+                       breaks = c(-1e5,
+                                  -1e3,
+                                  0,
+                                  1e3,
+                                  1e5,
+                                  1e7),
+                       labels=c("-100K",
+                                "-1k",
+                                "0",
+                                "1k",
+                                "100K",
+                                "10M")) +
   labs(x = '',
        y= '') +
   theme_map() +
