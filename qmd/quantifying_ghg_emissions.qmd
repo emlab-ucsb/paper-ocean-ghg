@@ -419,7 +419,7 @@ total_annual_emissions_by_fleet_fig <- annual_co2_emissions |>
   scale_y_continuous(labels = scales::unit_format(unit = "B", scale = 1e-9),
                      limits = c(0,1.5e9)) + 
   scale_x_continuous(breaks = unique(annual_co2_emissions$year)) +
-  scale_color_manual(values = c("#7570b3","#377eb8","#e41a1c"),
+  scale_color_manual(values = c("#7570b3","#1b9e77","#d95f02"),
                      breaks = c("Total","AIS-broadcasting","Non-broadcasting"))+
   theme_plot() +
   labs(x = "",
@@ -502,8 +502,6 @@ co2_emissions_map_fig <- annual_spatial_co2_emissions_ais_dark  |>
   scale_x_continuous(expand = c(0, 1)) +
   scale_y_continuous(expand = c(0, 1)) +
   coord_sf(crs = map_projection)
-
-co2_emissions_map_fig 
 ```
 
 ```{r}
