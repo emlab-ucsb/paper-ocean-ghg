@@ -8,6 +8,7 @@ format:
     toc: true
     number-sections: true
     colorlinks: true
+    fig-pos: H
 editor_options: 
   chunk_output_type: console
 editor: 
@@ -433,55 +434,6 @@ total_percent_change_by_fleet |>
 ## Figure 3
 
 ```{r}
-#| label: fig-co2-emissions-map
-#| fig-cap: Spatial patterns of CO2 emissions in 2024 (top panel), and the change in CO2 emissions between 2016 and 2024 (bottom panel) (metric tonnes). Emissions are total aggregated across the AIS-broadcasting fleetand non-broadcasting fleet, and shown at a 1x1 degree spatial resolution.
-#| fig-width: 6
-#| fig-height: 4
-
-annual_spatial_co2_emissions_ais_dark  |>
-  dplyr::filter(year %in% c(2016,2024)) |>
-  dplyr::mutate(across(c(emissions_co2_mt,emissions_co2_dark_mt), ~tidyr::replace_na(.,0))) |>
-  # Calculate total emissions
-  dplyr::mutate(emissions_co2_total_mt = emissions_co2_mt + emissions_co2_dark_mt) |>
-  dplyr::select(-c(emissions_co2_mt,emissions_co2_dark_mt)) |>
-  tidyr::pivot_wider(names_from = year,
-                     values_from = emissions_co2_total_mt) |>
-  dplyr::mutate(`Change from 2016 to 2024` = `2024`-`2016`) |>
-  dplyr::select(-`2016`) |>
-  tidyr::pivot_longer(cols = c(`2024`,`Change from 2016 to 2024`)) |>
-  ggplot() +
-  geom_tile(aes(x = lon_bin,
-                y = lat_bin,
-                fill = value)) +
-  geom_sf(data = land,
-          color = "#374a6d",
-          fill = "#374a6d") +
-  facet_wrap(name~., ncol=1) +
-  scico::scale_fill_scico("CO2 emissions\n(MT)",
-                          palette = "berlin",
-                          midpoint = 0,
-                          trans = ggallin::pseudolog10_trans,
-                          na.value = "black",
-                          breaks = c(-1e6,-1e3,0,1e3,1e6),
-                          labels = scales::comma) +
-  labs(x = '',
-       y= '') +
-  theme_map() +
-  theme(legend.position = "right",
-        legend.direction = "vertical") +
-  guides(fill = guide_colorbar(title.position = "top",
-                               title.hjust = 0.5,
-                               frame.colour = "black",
-                               ticks.colour = "black",
-                               barwidth = unit(1, "cm"),
-                               barheight = unit(5, "cm"))) +
-  scale_x_continuous(expand = c(0, 1)) +
-  scale_y_continuous(expand = c(0, 1)) 
-```
-
-## Figure 3
-
-```{r}
 #| label: fig-pollutant-emissions-map-time-series
 #| fig-cap: (A) Spatial map of 2024 emissions by pollutant, aggregated across the AIS-broadcasting fleet and non-broadcasting fleet, and shown at a 1x1 degree spatial resolution; (B) time series of monthly global emissions by pollutant.
 #| fig-width: 7.5
@@ -537,6 +489,54 @@ cowplot::plot_grid(pollutant_map,
                    labels = c("A","B"))
 ```
 
+## Figure 3 alternative
+
+```{r}
+#| label: fig-co2-emissions-map
+#| fig-cap: Spatial patterns of CO2 emissions in 2024 (top panel), and the change in CO2 emissions between 2016 and 2024 (bottom panel) (metric tonnes). Emissions are total aggregated across the AIS-broadcasting fleetand non-broadcasting fleet, and shown at a 1x1 degree spatial resolution.
+#| fig-width: 6
+#| fig-height: 4
+
+annual_spatial_co2_emissions_ais_dark  |>
+  dplyr::filter(year %in% c(2016,2024)) |>
+  dplyr::mutate(across(c(emissions_co2_mt,emissions_co2_dark_mt), ~tidyr::replace_na(.,0))) |>
+  # Calculate total emissions
+  dplyr::mutate(emissions_co2_total_mt = emissions_co2_mt + emissions_co2_dark_mt) |>
+  dplyr::select(-c(emissions_co2_mt,emissions_co2_dark_mt)) |>
+  tidyr::pivot_wider(names_from = year,
+                     values_from = emissions_co2_total_mt) |>
+  dplyr::mutate(`Change from 2016 to 2024` = `2024`-`2016`) |>
+  dplyr::select(-`2016`) |>
+  tidyr::pivot_longer(cols = c(`2024`,`Change from 2016 to 2024`)) |>
+  ggplot() +
+  geom_tile(aes(x = lon_bin,
+                y = lat_bin,
+                fill = value)) +
+  geom_sf(data = land,
+          color = "#374a6d",
+          fill = "#374a6d") +
+  facet_wrap(name~., ncol=1) +
+  scico::scale_fill_scico("CO2 emissions\n(MT)",
+                          palette = "berlin",
+                          midpoint = 0,
+                          trans = ggallin::pseudolog10_trans,
+                          na.value = "black",
+                          breaks = c(-1e6,-1e3,0,1e3,1e6),
+                          labels = scales::comma) +
+  labs(x = '',
+       y= '') +
+  theme_map() +
+  theme(legend.position = "right",
+        legend.direction = "vertical") +
+  guides(fill = guide_colorbar(title.position = "top",
+                               title.hjust = 0.5,
+                               frame.colour = "black",
+                               ticks.colour = "black",
+                               barwidth = unit(1, "cm"),
+                               barheight = unit(5, "cm"))) +
+  scale_x_continuous(expand = c(0, 1)) +
+  scale_y_continuous(expand = c(0, 1)) 
+```
 
 ## Figure 4
 
@@ -677,9 +677,11 @@ starting_value_from_prediction <- final_annual_prediction_dataset |>
   rename(starting_value = value) |>
   dplyr::select(-year)
 
-time_series_predicted_decomposition <- final_annual_prediction_dataset |>
+time_series_predicted_decomposition_df <- final_annual_prediction_dataset |>
   dplyr::inner_join(starting_value_from_prediction, by = "name") |>
-  dplyr::mutate(normalized_value = value/starting_value-1) |>
+  dplyr::mutate(normalized_value = value/starting_value-1)
+
+time_series_predicted_decomposition <- time_series_predicted_decomposition_df |>
   ggplot(aes(x = year, y = normalized_value, color = name)) +
   geom_line() +
   guides(color = guide_legend(reverse=TRUE)) +
@@ -721,9 +723,11 @@ annual_emissions_starting_value <- annual_emissions |>
   dplyr::select(-year)
 
 # Now normalize all emissions to the starting value
-time_series_by_vessel_type <- annual_emissions |>
+time_series_by_vessel_type_df <- annual_emissions |>
   dplyr::inner_join(annual_emissions_starting_value, by = "fishing") |>
-  dplyr::mutate(emissions_co2_normalized = emissions_co2_mt_total/emissions_co2_mt_total_starting - 1) |>
+  dplyr::mutate(emissions_co2_normalized = emissions_co2_mt_total/emissions_co2_mt_total_starting - 1)
+  
+time_series_by_vessel_type <- time_series_by_vessel_type_df  |>
   ggplot(aes(x = year, y = emissions_co2_normalized, color = fishing)) +
   geom_line()+
   scale_x_continuous(breaks = unique(final_prediction_dataset$year)) +
@@ -734,12 +738,14 @@ time_series_by_vessel_type <- annual_emissions |>
   theme_plot() +
   theme(panel.grid.minor.x = element_blank()) +
   geom_hline(yintercept = 0, linetype = 2) +
-  scale_color_manual(values = c("#a65628","#ff7f00","#7570b3"))
+  scale_color_manual(values = c("lightgoldenrod4","lightgoldenrod3","slateblue3"))
 
 cowplot::plot_grid(time_series_predicted_decomposition,time_series_by_vessel_type,
                    ncol=1, align="vh",
                    labels = c("A","B"))
 ```
+
+While emissions from non-fishing vessels rose by `r scales::percent((time_series_by_vessel_type_df |> dplyr::filter(year==2024, fishing == "Non-fishing"))$emissions_co2_normalized)` between 2016 and 2024, emissions from fishing vessesl rose by `r scales::percent((time_series_by_vessel_type_df |> dplyr::filter(year==2024, fishing == "Fishing"))$emissions_co2_normalized)`.
 
 # Abstract text with stats
 
