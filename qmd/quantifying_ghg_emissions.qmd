@@ -41,6 +41,9 @@ theme_plot <- function(){
           strip.text.y = element_text(angle = 0,
                                       face = "bold"))}
 
+# Set map projection for all map figures
+map_projection <- "+proj=eqearth"
+
 # Set consistent theme for maps
 # Based loosely off fishwatchr::theme_gfw_map()
 # https://github.com/GlobalFishingWatch/fishwatchr/blob/master/R/theme_gfw_map.R
@@ -61,8 +64,32 @@ theme_map <- function(){
           plot.margin = unit(c(0.25,0,0,0), "cm"))
 }
 
+# Create bounding box of globe, for making black map backgrounds
+lats <- c(90:-90, -90:90, 90)
+longs <- c(rep(c(180, -180), each = 181), 180)
+world_bbox_sf <- 
+  list(cbind(longs, lats)) %>%
+  sf::st_polygon() %>%
+  sf::st_sfc( # create sf geometry list column
+    crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+  ) %>% 
+  sf::st_sf() %>%
+  sf::st_transform(map_projection)
+
 land <- rnaturalearth::ne_countries(returnclass = "sf") |>
   dplyr::select(geometry)
+
+# Convert lat/lon pixel area to square km
+# https://stackoverflow.com/a/1253545
+# Need function to convert degrees to radians
+# https://stackoverflow.com/q/32370485
+deg2rad <- function(deg) {(deg * pi) / (180)}
+
+# Given a latitude, what is a pixel's area?
+# https://stackoverflow.com/a/1253545
+lat_to_area <- function(lat){
+  110.574*(111.320*cos(deg2rad(lat)))
+}
 
 
 data_directory_base <-  ifelse(Sys.info()["nodename"] == "quebracho" | Sys.info()["nodename"] == "sequoia",
@@ -126,9 +153,9 @@ annual_edgar_tranportation_emissions <- glue::glue("{project_directory}/data/raw
                 emissions_co2_mt = emissions_co2_kt * 1e3) |>
   dplyr::select(-emissions_co2_kt) |>
   dplyr::mutate(land_based_tranpsportation = ifelse(sector %in% c("Civil Aviation",
-                              "Road Transportation no resuspension",
-                              "Other Transportation",
-                              "Railways"), TRUE,FALSE)) |>
+                                                                  "Road Transportation no resuspension",
+                                                                  "Other Transportation",
+                                                                  "Railways"), TRUE,FALSE)) |>
   # Only need years that correspond to our dataset
   dplyr::filter(year>=2016,
                 year<=2024)
@@ -320,9 +347,9 @@ emissions_comparison_figure_normalized <- all_tranportation_data_normalized |>
        color = "Data source") +
   theme(panel.grid.minor.x = element_blank())+
   scale_color_manual(values = all_transportation_color_palette,
-                                      breaks = c("Ocean-based transportation (GFW)",
-                                                 "Land-based transportation (EDGAR)",
-                                                 "Land-based transportation (IEA)"))
+                     breaks = c("Ocean-based transportation (GFW)",
+                                "Land-based transportation (EDGAR)",
+                                "Land-based transportation (IEA)"))
 
 
 cowplot::plot_grid(emissions_comparison_figure_absolute,
@@ -336,7 +363,7 @@ cowplot::plot_grid(emissions_comparison_figure_absolute,
 
 edgar_comparison <- all_tranportation_data_normalized |>
   dplyr::filter(data_source %in% c("Ocean-based transportation (GFW)",
-                                                 "Land-based transportation (EDGAR)")) |>
+                                   "Land-based transportation (EDGAR)")) |>
   dplyr::filter(year == 2023) |>
   dplyr::select(-year) |>
   dplyr::mutate(data_source = ifelse(data_source == "Ocean-based transportation (GFW)","ocean_gfw","land_edgar"))|>
@@ -381,10 +408,10 @@ total_annual_emissions_by_fleet_fig <- annual_co2_emissions |>
   ggplot(aes(x = year, y = co2_emissions, color = fleet)) +
   geom_line() +
   geom_text(data = total_percent_change_by_fleet|>
-    dplyr::mutate(percent_change = round(percent_change),
-                  percent_change = ifelse(percent_change>0,
-                                        glue::glue("+{percent_change}%"),
-                                        glue::glue("{percent_change}%"))),
+              dplyr::mutate(percent_change = round(percent_change),
+                            percent_change = ifelse(percent_change>0,
+                                                    glue::glue("+{percent_change}%"),
+                                                    glue::glue("{percent_change}%"))),
             aes(label = percent_change,
                 y = `2024`,
                 x = 2024.5),
@@ -406,6 +433,8 @@ total_annual_emissions_by_fleet_fig <- annual_co2_emissions |>
 
 ```{r}
 co2_emissions_map_fig <- annual_spatial_co2_emissions_ais_dark  |>
+  # Using centroid of pixel, calculate area
+  dplyr::mutate(pixel_area_km2 = lat_to_area(lat_bin+0.5)) |>
   dplyr::filter(year %in% c(2016,2024)) |>
   dplyr::mutate(across(c(emissions_co2_mt,emissions_co2_dark_mt), ~tidyr::replace_na(.,0))) |>
   # Calculate total emissions
@@ -417,9 +446,11 @@ co2_emissions_map_fig <- annual_spatial_co2_emissions_ais_dark  |>
   dplyr::select(-`2016`) |>
   tidyr::pivot_longer(cols = c(`2024`,`Change from 2016 to 2024`)) |>
   ggplot() +
-  geom_tile(aes(x = lon_bin,
-                y = lat_bin,
-                fill = value)) +
+  geom_sf(data = world_bbox_sf, fill = "black") +
+  ggspatial::geom_spatial_tile(aes(x = lon_bin+0.5,
+                                   y = lat_bin+0.5,
+                                   fill = value,
+                                   color = value)) +
   geom_sf(data = land,
           color = "#374a6d",
           fill = "#374a6d") +
@@ -429,21 +460,38 @@ co2_emissions_map_fig <- annual_spatial_co2_emissions_ais_dark  |>
                           midpoint = 0,
                           trans = ggallin::pseudolog10_trans,
                           na.value = "black",
-                       breaks = c(-1e5,
-                                  -1e3,
-                                  0,
-                                  1e3,
-                                  1e5,
-                                  1e7),
-                       labels=c("-100K",
-                                "-1k",
-                                "0",
-                                "1k",
-                                "100K",
-                                "10M")) +
+                          breaks = c(-1e5,
+                                     -1e3,
+                                     0,
+                                     1e3,
+                                     1e5,
+                                     1e7),
+                          labels=c("-100K",
+                                   "-1k",
+                                   "0",
+                                   "1k",
+                                   "100K",
+                                   "10M")) +
+  scico::scale_color_scico("Total fleet CO2 emissions (MT)",
+                           palette = "berlin",
+                           midpoint = 0,
+                           trans = ggallin::pseudolog10_trans,
+                           na.value = "black",
+                           breaks = c(-1e5,
+                                      -1e3,
+                                      0,
+                                      1e3,
+                                      1e5,
+                                      1e7),
+                           labels=c("-100K",
+                                    "-1k",
+                                    "0",
+                                    "1k",
+                                    "100K",
+                                    "10M")) +
   labs(x = '',
        y= '') +
-  theme_map() +
+  theme_void() +
   theme(legend.position = "bottom",
         legend.direction = "horizontal") +
   guides(fill = guide_colorbar(title.position = "top",
@@ -452,7 +500,10 @@ co2_emissions_map_fig <- annual_spatial_co2_emissions_ais_dark  |>
                                ticks.colour = "black",
                                barwidth = unit(10, "cm"))) +
   scale_x_continuous(expand = c(0, 1)) +
-  scale_y_continuous(expand = c(0, 1)) 
+  scale_y_continuous(expand = c(0, 1)) +
+  coord_sf(crs = map_projection)
+
+co2_emissions_map_fig 
 ```
 
 ```{r}
@@ -471,13 +522,13 @@ cowplot::plot_grid(total_annual_emissions_by_fleet_fig,
 
 ```{r}
 ais_scale_underestimation_2024 <- (1 - (total_percent_change_by_fleet |>
-  dplyr::filter(fleet == "AIS-broadcasting"))$`2024`/(total_percent_change_by_fleet |>
-  dplyr::filter(fleet == "Total"))$`2024`) |>
+                                          dplyr::filter(fleet == "AIS-broadcasting"))$`2024`/(total_percent_change_by_fleet |>
+                                                                                                dplyr::filter(fleet == "Total"))$`2024`) |>
   scales::percent()
 
 ais_trend_overestimation_2016_2024 <- ((total_percent_change_by_fleet |>
-  dplyr::filter(fleet == "AIS-broadcasting"))$percent_change/(total_percent_change_by_fleet |>
-  dplyr::filter(fleet == "Total"))$percent_change -1) |>
+                                          dplyr::filter(fleet == "AIS-broadcasting"))$percent_change/(total_percent_change_by_fleet |>
+                                                                                                        dplyr::filter(fleet == "Total"))$percent_change -1) |>
   scales::percent()
 ```
 
@@ -486,8 +537,8 @@ ais_trend_overestimation_2016_2024 <- ((total_percent_change_by_fleet |>
 #| tbl-cap: Total global annual CO2 emissions (billion metric tonnes) by fleet for 2016 and 2024. The percent of total 2024 emissions for each fleet is also shown, along with the percent change from 2016 to 2024 for each fleet.
 
 total_percent_change_by_fleet |>
-    dplyr::mutate(percent_change = round(percent_change),
-                  percent_change = ifelse(percent_change>0,
+  dplyr::mutate(percent_change = round(percent_change),
+                percent_change = ifelse(percent_change>0,
                                         glue::glue("+{percent_change}%"),
                                         glue::glue("{percent_change}%"))) |>
   dplyr::relocate(fleet,`2016`,`2024`,`percent_total_2024`) |>
@@ -504,9 +555,11 @@ total_percent_change_by_fleet |>
 #| fig-height: 7.5
 pollutant_map <-total_spatial_emissions_by_pollutant_2024 |>
   ggplot() +
-  geom_tile(aes(x = lon_bin,
-                y = lat_bin,
-                fill = emissions_mt)) +
+  geom_sf(data = world_bbox_sf, fill = "black") +
+  ggspatial::geom_spatial_tile(aes(x = lon_bin+0.5,
+                                   y = lat_bin+0.5,
+                                   color = emissions_mt,
+                                   fill = emissions_mt))+
   geom_sf(data = land,
           color = "#374a6d",
           fill = "#374a6d") +
@@ -520,21 +573,33 @@ pollutant_map <-total_spatial_emissions_by_pollutant_2024 |>
                                 "1",
                                 "10k",
                                 "10M"),
-                       trans="log10") +
+                       trans="log10")+
+  scale_color_viridis_c(option = "mako",
+                        name = "2024\n emissions\n(MT)",
+                        breaks = c(0.0001,
+                                   1,
+                                   10000,
+                                   10e6),
+                        labels=c("0.0001",
+                                 "1",
+                                 "10k",
+                                 "10M"),
+                        trans="log10") +
   labs(x = '',
        y= '') +
-  theme_map() +
+  theme_void() +
   theme(legend.position = "left",
         legend.direction = "vertical",
         legend.key.height = unit(1.5, 'cm'),
-          legend.key.width = unit(1, 'cm')) +
+        legend.key.width = unit(1, 'cm')) +
   guides(fill = guide_colorbar(title.position = "top",
                                title.hjust = 0.5,
                                frame.colour = "black",
                                ticks.colour = "black")) +
   scale_x_continuous(expand = c(0, 1)) +
   scale_y_continuous(expand = c(0, 1)) +
-  facet_wrap(pollutant~.,ncol=3)
+  facet_wrap(pollutant~.,ncol=3) +
+  coord_sf(crs = map_projection)
 
 pollutant_timeseries <- total_monthly_emissions_by_pollutant |>
   ggplot(aes(x = month,
@@ -741,7 +806,7 @@ annual_emissions_starting_value <- annual_emissions |>
 time_series_by_vessel_type_df <- annual_emissions |>
   dplyr::inner_join(annual_emissions_starting_value, by = "fishing") |>
   dplyr::mutate(emissions_co2_normalized = emissions_co2_mt_total/emissions_co2_mt_total_starting - 1)
-  
+
 time_series_by_vessel_type <- time_series_by_vessel_type_df  |>
   ggplot(aes(x = year, y = emissions_co2_normalized, color = fishing)) +
   geom_line()+
@@ -770,16 +835,16 @@ We develop a method for quantifying high-resolution spatiotemporal  ocean-based 
 
 ```{r}
 percent_2023_emissions_from_transportation <- (annual_edgar_tranportation_emissions |>
-    dplyr::mutate(transportation = ifelse(sector %in% c("Civil Aviation",
-                                                                    "Road Transportation no resuspension",
-                                                                    "Other Transportation",
-                                                                    "Railways","Water-borne Navigation"), TRUE,FALSE)) |> 
-  dplyr::filter(year == 2023) |> 
-  dplyr::group_by(transportation) |> 
-  dplyr::summarize(emissions_co2_mt = sum(emissions_co2_mt,na.rm=TRUE)) |> 
-  dplyr::ungroup() |> 
-  tidyr::pivot_wider(names_from = "transportation",values_from = "emissions_co2_mt") |>
-  dplyr::mutate(fraction_transportation_of_total = `TRUE`/(`TRUE` + `FALSE`)))$fraction_transportation_of_total |>
+                                                 dplyr::mutate(transportation = ifelse(sector %in% c("Civil Aviation",
+                                                                                                     "Road Transportation no resuspension",
+                                                                                                     "Other Transportation",
+                                                                                                     "Railways","Water-borne Navigation"), TRUE,FALSE)) |> 
+                                                 dplyr::filter(year == 2023) |> 
+                                                 dplyr::group_by(transportation) |> 
+                                                 dplyr::summarize(emissions_co2_mt = sum(emissions_co2_mt,na.rm=TRUE)) |> 
+                                                 dplyr::ungroup() |> 
+                                                 tidyr::pivot_wider(names_from = "transportation",values_from = "emissions_co2_mt") |>
+                                                 dplyr::mutate(fraction_transportation_of_total = `TRUE`/(`TRUE` + `FALSE`)))$fraction_transportation_of_total |>
   scales::percent()
 ```
 
