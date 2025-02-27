@@ -743,6 +743,24 @@ cowplot::plot_grid(time_series_predicted_decomposition,time_series_by_vessel_typ
 
 We develop a method for quantifying high-resolution spatiotemporal  ocean-based vessel emissions at a global scale by fusing two unique satellite-based data sources: 1) Automatic Identification System (AIS) to estimate vessel-level emissions for the over `r prettyNum(signif(length(unique(annual_ais_co2_emissions_by_vessel$ssvid)),3),big.mark=",")` boats that broadcast their positions using AIS; and 2) synthetic aperture radar (SAR) data from the Sentinel-1 satellite constellation to estimate emissions for boats that do not use AIS. We find that vessels emitted approximately `r (edgar_comparison|>dplyr::filter(name=="emissions_co2_billion_mt_ocean_gfw"))$value` billion metric tons of CO2 in 2023, accounting for `r (edgar_comparison|>dplyr::filter(name=="fraction_ocean_over_total"))$value` of global fossil fuel emissions from the transportation sector. We also find that ocean-based CO2 emissions increased by `r (edgar_comparison|>dplyr::filter(name=="emissions_normalized_from_2016_ocean_gfw"))$value` between 2016 and 2023, `r (edgar_comparison|>dplyr::filter(name=="normalized_ocean_over_land"))$value` times the increase measured from land-based transportation emissions. Data fusion is critical to getting these numbers right: if only AIS data were used, the currently accepted state-of- the-art for measuring vessel emissions, global emissions in 2024 would be *underestimated* by `r ais_scale_underestimation_2024`, and the increasing trend from 2016 to 2024 would be *overestimated* by `r ais_trend_overestimation_2016_2024`.
 
+# Introduction text with stats
+
+```{r}
+percent_2023_emissions_from_transportation <- (annual_edgar_tranportation_emissions |>
+    dplyr::mutate(transportation = ifelse(sector %in% c("Civil Aviation",
+                                                                    "Road Transportation no resuspension",
+                                                                    "Other Transportation",
+                                                                    "Railways","Water-borne Navigation"), TRUE,FALSE)) |> 
+  dplyr::filter(year == 2023) |> 
+  dplyr::group_by(transportation) |> 
+  dplyr::summarize(emissions_co2_mt = sum(emissions_co2_mt,na.rm=TRUE)) |> 
+  dplyr::ungroup() |> 
+  tidyr::pivot_wider(names_from = "transportation",values_from = "emissions_co2_mt") |>
+  dplyr::mutate(fraction_transportation_of_total = `TRUE`/(`TRUE` + `FALSE`)))$fraction_transportation_of_total |>
+  scales::percent()
+```
+
+In 2023, the transportation sector was responsible for `r percent_2023_emissions_from_transportation` of all emissions globally
 
 # Supplementary figures
 
