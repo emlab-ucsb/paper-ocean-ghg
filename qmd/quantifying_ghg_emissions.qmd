@@ -1262,9 +1262,11 @@ annual_spatial_emissions_by_receiver_type  |>
   dplyr::mutate(across(c(`2016`,`2024`),~tidyr::replace_na(.,0))) |>
   dplyr::mutate(change_emissions_co2 = `2024`-`2016`) |>
   ggplot() +
-  geom_tile(aes(x = lon_bin,
-                y = lat_bin,
-                fill = change_emissions_co2)) +
+  geom_sf(data = world_bbox_sf, fill = "black") +
+  ggspatial::geom_spatial_tile(aes(x = lon_bin+0.5,
+                y = lat_bin+0.5,
+                fill = change_emissions_co2,
+                color = change_emissions_co2)) +
   geom_sf(data = land,
           color = "#374a6d",
           fill = "#374a6d") +
@@ -1276,9 +1278,16 @@ annual_spatial_emissions_by_receiver_type  |>
                           na.value = "black",
                           breaks = c(-1e6,-1e3,0,1e3,1e6),
                           labels = scales::comma) +
+  scico::scale_color_scico("Change in CO2 emissions\nfrom 2016 to 2024\n(MT)",
+                          palette = "berlin",
+                          midpoint = 0,
+                          trans = ggallin::pseudolog10_trans,
+                          na.value = "black",
+                          breaks = c(-1e6,-1e3,0,1e3,1e6),
+                          labels = scales::comma) +
   labs(x = '',
        y= '') +
-  theme_map() +
+  theme_void() +
   theme(legend.position = "right",
         legend.direction = "vertical") +
   guides(fill = guide_colorbar(title.position = "top",
@@ -1288,7 +1297,8 @@ annual_spatial_emissions_by_receiver_type  |>
                                barwidth = unit(1, "cm"),
                                barheight = unit(5, "cm"))) +
   scale_x_continuous(expand = c(0, 1)) +
-  scale_y_continuous(expand = c(0, 1)) 
+  scale_y_continuous(expand = c(0, 1))+
+  coord_sf(crs = map_projection)
 ```
 
 
