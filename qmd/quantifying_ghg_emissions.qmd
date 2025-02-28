@@ -436,7 +436,7 @@ total_annual_emissions_by_fleet_fig <- annual_co2_emissions |>
 
 ```{r}
 #| label: fig-total-annual-emissions-by-data-source
-#| fig-cap: (A) Change in annual transportation sector CO2 emissions from a 2016 baseline, with each line colored based on the data source and whether it is ocean-based or land-based transportation. The total 2023 emissions for the ocean-based and land-based EDGAR data sources are shown next to each respective line. (B) Total annual ocean-based CO2 emissions, with each line colored based on the data source. The percent change from 2016 to 2024 for each data source is shown next to its respective line.
+#| fig-cap: (A) Change in annual transportation sector CO2 emissions from a 2016 baseline, with each line colored based on the data source and whether it is ocean-based or land-based transportation. The total 2023 emissions for the ocean-based and land-based EDGAR data sources are shown next to each respective line. (B) Total annual ocean-based CO2 emissions, with each line colored based on the data source. The percent change from 2016 to 2024 for each data source is shown next to each respective line.
 #| fig-width: 7.5
 #| fig-height: 6
 cowplot::plot_grid(
@@ -591,12 +591,18 @@ total_percent_change_by_fleet |>
 
 ## Figure 3
 
-```{r eval=FALSE}
+```{r}
 #| label: fig-pollutant-emissions-map-time-series
 #| fig-cap: (A) Spatial map of 2024 emissions by pollutant, aggregated across the AIS-broadcasting fleet and non-broadcasting fleet, and shown at a 1x1 degree spatial resolution; (B) time series of monthly global emissions by pollutant.
 #| fig-width: 7.5
 #| fig-height: 7.5
+
+# For figures, order pollutants first for GHG pollutants,
+# then local pollutants
+pollutant_factor_levels <- c("CO2","CH4","N2O","CO","NOX","SOX","PM2.5","PM10","VOCs")
 pollutant_map <-total_spatial_emissions_by_pollutant_2024 |>
+  dplyr::mutate(pollutant = forcats::fct_relevel(pollutant,
+                                                 pollutant_factor_levels)) |>
   ggplot() +
   geom_sf(data = world_bbox_sf, fill = "black") +
   ggspatial::geom_spatial_tile(aes(x = lon_bin+0.5,
@@ -644,7 +650,9 @@ pollutant_map <-total_spatial_emissions_by_pollutant_2024 |>
   facet_wrap(pollutant~.,ncol=3) +
   coord_sf(crs = map_projection)
 
-pollutant_timeseries <- total_monthly_emissions_by_pollutant |>
+pollutant_timeseries <- total_monthly_emissions_by_pollutant |> 
+  dplyr::mutate(pollutant = forcats::fct_relevel(pollutant,
+                                                 pollutant_factor_levels)) |>
   ggplot(aes(x = month,
              y = emissions_mt)) +
   geom_line() + 
