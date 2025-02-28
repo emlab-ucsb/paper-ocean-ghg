@@ -275,13 +275,9 @@ total_monthly_emissions_by_pollutant <- glue::glue("{project_directory}/data/pro
 
 # Paper figures
 
-## Figure 1
+### Figure 1 panel A
 
 ```{r}
-#| label: fig-transportation-emissions-comparison
-#| fig-cap: (A) Annual CO2 emissions for the ocean-based and land-based transportation sectors, with each line colored based on the emissions data source (MT); (A) Change in annual CO2 emissions from a 2016 baseline for the ocean-based and land-based transportation sectors, with each line colored based on the emissions data source (%).
-#| fig-width: 7.5
-#| fig-height: 5
 # Calculate annual land-based transportation emissions from EDGAR
 land_based_transportation_emissions_edgar <- annual_edgar_tranportation_emissions |> 
   dplyr::filter(land_based_tranpsportation) |>
@@ -327,23 +323,23 @@ all_tranportation_data_normalized <- all_tranportation_data |>
   dplyr::inner_join(all_tranportation_data_starting, by = "data_source")|>
   dplyr::mutate(emissions_co2_mt_normalized = emissions_co2_mt/emissions_co2_mt_starting-1) 
 
-emissions_comparison_figure_absolute <- all_tranportation_data_normalized |>
-  ggplot(aes(x = year,y= emissions_co2_mt, color = data_source))  +
-  geom_line() + 
-  scale_x_continuous(breaks = unique(all_tranportation_data_normalized$year)) +
-  scale_y_continuous(labels = scales::unit_format(unit = "B", scale = 1e-9), limits = c(0,NA)) +
-  theme_plot() +
-  labs(x = "",
-       y = "Annual transportation\nCO2 emissions\n(billion MT)",
-       color = "Data source") +
-  theme(panel.grid.minor.x = element_blank())+
-  scale_color_manual(values = all_data_source_color_palette)
+# Summarize total emissions by data source for 2023, for putting on figure
+
+transportation_labels_2023 <- all_tranportation_data_normalized |>
+  dplyr::filter(year == 2023) |> 
+  dplyr::mutate(emissions_co2_billion_mt = glue::glue("{signif(emissions_co2_mt/1e9,2)}B MT"))
 
 emissions_comparison_figure_normalized <- all_tranportation_data_normalized |>
   ggplot(aes(x = year,y= emissions_co2_mt_normalized, color = data_source))  +
   geom_hline(yintercept = 0, linetype=2) +
   geom_line() + 
-  scale_x_continuous(breaks = unique(all_tranportation_data_normalized$year)) +
+  geom_text(data = transportation_labels_2023,
+            aes(x = 2023+0.75,
+                y = emissions_co2_mt_normalized,
+                label = emissions_co2_billion_mt),
+            show.legend = FALSE) +
+  scale_x_continuous(breaks = unique(all_tranportation_data_normalized$year),
+                     limits = c(2016,2024)) +
   scale_y_continuous(labels = scales::percent) +
   theme_plot() +
   labs(x = "",
@@ -356,11 +352,6 @@ emissions_comparison_figure_normalized <- all_tranportation_data_normalized |>
                      breaks = c("Ocean-based (Total AIS plus S1)",
                                 "Land-based (EDGAR)",
                                 "Land-based (IEA)"))
-
-
-cowplot::plot_grid(emissions_comparison_figure_absolute,
-                   emissions_comparison_figure_normalized,
-                   ncol=1,align="vh",labels=c("A","B"))
 ```
 
 ```{r}
@@ -394,9 +385,8 @@ edgar_comparison <- all_tranportation_data_normalized |>
 knitr::kable(edgar_comparison)
 ```
 
-## Figure 2
 
-### Figure 2 panel A
+### Figure 1 panel B
 
 ```{r}
 # Calculate the total percent change in emissions by fleet
@@ -426,11 +416,12 @@ total_annual_emissions_by_fleet_fig <- annual_co2_emissions |>
                                                     glue::glue("{percent_change}%"))),
             aes(label = percent_change,
                 y = `2024`,
-                x = 2024.5),
+                x = 2024 + 0.75),
             show.legend = FALSE) +
   scale_y_continuous(labels = scales::unit_format(unit = "B", scale = 1e-9),
                      limits = c(0,1.5e9)) + 
-  scale_x_continuous(breaks = unique(annual_co2_emissions$year)) +
+  scale_x_continuous(breaks = unique(annual_co2_emissions$year),
+                     limits = c(2016,2025)) +
   scale_color_manual(values = all_data_source_color_palette,
                      breaks = c("Total AIS plus S1","AIS (broadcasting vessels)","S1 (non-broadcasting vessels)"))+
   theme_plot() +
@@ -445,7 +436,7 @@ total_annual_emissions_by_fleet_fig <- annual_co2_emissions |>
 
 ```{r}
 #| label: fig-total-annual-emissions-by-data-source
-#| fig-cap: (A) Change in annual transportation sector CO2 emissions from a 2016 baseline, with each line colored based on the data source and whether it is ocean-based or land-based transportation. (B) Total annual ocean-based CO2 emissions by data source. The percent change from 2016 to 2024 for each data source is shown next to its line.
+#| fig-cap: (A) Change in annual transportation sector CO2 emissions from a 2016 baseline, with each line colored based on the data source and whether it is ocean-based or land-based transportation. The total 2023 emissions for the ocean-based and land-based EDGAR data sources are shown next to each respective line. (B) Total annual ocean-based CO2 emissions, with each line colored based on the data source. The percent change from 2016 to 2024 for each data source is shown next to its respective line.
 #| fig-width: 7.5
 #| fig-height: 6
 cowplot::plot_grid(
