@@ -432,7 +432,7 @@ total_annual_emissions_by_fleet_fig <- annual_co2_emissions |>
         legend.position = "right")
 ```
 
-### Figure 2 combined
+### Figure 1 combined
 
 ```{r}
 #| label: fig-total-annual-emissions-by-data-source
@@ -450,9 +450,13 @@ cowplot::plot_grid(
 ```
 
 
-### Figure 2 panel B
+### Figure 1 addition
 
-```{r eval = FALSE}
+```{r}
+#| label: fig-co2-emissions-map
+#| fig-cap: Spatial patterns of total fleet CO2 emissions in 2024 (top panel), and the change in CO2 emissions between 2016 and 2024 (bottom panel) (metric tonnes). Total fleet are shown at a 1x1 degree spatial resolution.
+#| fig-width: 7.5
+#| fig-height: 6
 co2_emissions_map_fig <- annual_spatial_co2_emissions_ais_dark  |>
   # Using centroid of pixel, calculate area
   dplyr::mutate(pixel_area_km2 = lat_to_area(lat_bin+0.5)) |>
@@ -467,11 +471,11 @@ co2_emissions_map_fig <- annual_spatial_co2_emissions_ais_dark  |>
   dplyr::select(-`2016`) |>
   tidyr::pivot_longer(cols = c(`2024`,`Change from 2016 to 2024`)) |>
   ggplot() +
-  #geom_sf(data = world_bbox_sf, fill = "black") +
-  # ggspatial::geom_spatial_tile(aes(x = lon_bin+0.5,
-  #                                  y = lat_bin+0.5,
-  #                                  fill = value,
-  #                                  color = value)) +
+  geom_sf(data = world_bbox_sf, fill = "black") +
+  ggspatial::geom_spatial_tile(aes(x = lon_bin+0.5,
+                                   y = lat_bin+0.5,
+                                   fill = value,
+                                   color = value)) +
   geom_tile(aes(x = lon_bin+0.5,
                 y = lat_bin+0.5,
                 fill = value,
@@ -525,41 +529,10 @@ co2_emissions_map_fig <- annual_spatial_co2_emissions_ais_dark  |>
                                ticks.colour = "black",
                                barwidth = unit(5, "cm"))) +
   scale_x_continuous(expand = c(0, 1)) +
-  scale_y_continuous(expand = c(0, 1)) #+
-# coord_sf(crs = map_projection)
-```
+  scale_y_continuous(expand = c(0, 1)) +
+  coord_sf(crs = map_projection)
 
-```{r eval = FALSE}
-#| fig-width: 7.5
-#| fig-height: 6
-cowplot::plot_grid(
-  cowplot::plot_grid(
-    emissions_comparison_figure_normalized,
-    total_annual_emissions_by_fleet_fig,
-    ncol = 1,
-    labels = c("A","B"),
-    align = "vh",
-    axis = "lr"
-  ),
-  co2_emissions_map_fig,
-  ncol=2,
-  rel_widths = c(0.5,0.5),
-  labels = c("","C"))
-
-```
-
-
-```{r eval = FALSE}
-#| label: fig-total-annual-emissions-by-fleet-and-co2-emissions-map
-#| fig-cap: (A) Total global annual CO2 emissions by fleet. The percent change from 2016 to 2024 for each fleet is shown next to its line; and (B) Spatial patterns of total fleet CO2 emissions in 2024 (top panel), and the change in CO2 emissions between 2016 and 2024 (bottom panel) (metric tonnes). Total fleet are shown at a 1x1 degree spatial resolution.
-#| fig-width: 7.5
-#| fig-height: 6
-
-cowplot::plot_grid(total_annual_emissions_by_fleet_fig,
-                   co2_emissions_map_fig,
-                   ncol = 2,
-                   labels = c("A","B"),
-                   rel_heights = c(0.45,0.55))
+co2_emissions_map_fig
 ```
 
 
@@ -589,7 +562,7 @@ total_percent_change_by_fleet |>
   knitr::kable()
 ```
 
-## Figure 3
+## Figure 2
 
 ```{r}
 #| label: fig-pollutant-emissions-map-time-series
@@ -669,7 +642,7 @@ cowplot::plot_grid(pollutant_map,
                    labels = c("A","B"))
 ```
 
-## Figure 4
+## Figure 3
 
 ```{r}
 #| label: build-decomposition-model
@@ -817,10 +790,10 @@ time_series_predicted_decomposition <- time_series_predicted_decomposition_df |>
   geom_line() +
   guides(color = guide_legend(reverse=TRUE)) +
   scale_color_manual("Prediction scenario",
-                     values = c("steelblue4",
-                                "steelblue2",
+                     values = c("coral3",
                                 "coral4",
-                                "coral2")) +
+                                paletteer::paletteer_d("colorblindr::OkabeIto")[[2]],
+                                paletteer::paletteer_d("colorblindr::OkabeIto")[[5]])) +
   scale_x_continuous(breaks = unique(final_prediction_dataset$year)) +
   scale_y_continuous(labels = scales::percent) +
   labs(x = "",
@@ -841,7 +814,7 @@ annual_total_emissions <- annual_total_emissions_by_type |>
   dplyr::group_by(year) |>
   dplyr::summarise(emissions_co2_mt_total = sum(emissions_co2_mt_total)) |>
   dplyr::ungroup() |>
-  dplyr::mutate(fishing = "Total")
+  dplyr::mutate(fishing = "Total (fishing and non-fishing)")
 
 # Bind these datasets together
 annual_emissions <- annual_total_emissions_by_type |>
@@ -869,7 +842,10 @@ time_series_by_vessel_type <- time_series_by_vessel_type_df  |>
   theme_plot() +
   theme(panel.grid.minor.x = element_blank()) +
   geom_hline(yintercept = 0, linetype = 2) +
-  scale_color_manual(values = c("lightgoldenrod4","lightgoldenrod3","slateblue3"))
+  scale_color_manual(values = c("lightgoldenrod4",paletteer::paletteer_d("colorblindr::OkabeIto")[[5]],"lightgoldenrod3"),
+                     breaks = c("Fishing",
+                                "Total (fishing and non-fishing)",
+                                "Non-fishing"))
 
 cowplot::plot_grid(time_series_predicted_decomposition,time_series_by_vessel_type,
                    ncol=1, align="vh",
