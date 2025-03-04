@@ -1,5 +1,5 @@
 ---
-title: "Quantifying environmental trends: Disentangling changes in  impact from changes in monitoring"
+title: "Quantifying comprehensive ocean-based transportation emissions using data fusion"
 author: "emLab, UCSB and GFW"
 date: last-modified
 date-format: "[Last Updated on] MMMM DD, YYYY"
@@ -538,13 +538,13 @@ co2_emissions_map_fig
 
 ```{r}
 ais_scale_underestimation_2024 <- (1 - (total_percent_change_by_fleet |>
-                                          dplyr::filter(fleet == "AIS-broadcasting"))$`2024`/(total_percent_change_by_fleet |>
-                                                                                                dplyr::filter(fleet == "Total"))$`2024`) |>
+                                          dplyr::filter(fleet == "AIS (broadcasting vessels)"))$`2024`/(total_percent_change_by_fleet |>
+                                                                                                dplyr::filter(fleet == "Total AIS plus S1"))$`2024`) |>
   scales::percent()
 
 ais_trend_overestimation_2016_2024 <- ((total_percent_change_by_fleet |>
-                                          dplyr::filter(fleet == "AIS-broadcasting"))$percent_change/(total_percent_change_by_fleet |>
-                                                                                                        dplyr::filter(fleet == "Total"))$percent_change -1) |>
+                                          dplyr::filter(fleet == "AIS (broadcasting vessels)"))$percent_change/(total_percent_change_by_fleet |>
+                                                                                                        dplyr::filter(fleet == "Total AIS plus S1"))$percent_change -1) |>
   scales::percent()
 ```
 
