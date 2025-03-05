@@ -300,9 +300,7 @@ all_tranportation_data <- land_based_transportation_emissions_edgar |>
                      dplyr::filter(fleet == "Total") |>
                      dplyr::rename(emissions_co2_mt = co2_emissions) |>
                      dplyr::mutate(data_source = "Ocean-based (Total AIS plus S1)") |>
-                     dplyr::select(-fleet)) |>
-  # EDGAR only runs up through 2023
-  dplyr::filter(year<2024)
+                     dplyr::select(-fleet))
 
 
 # Get 2016 values for time-series normalization
@@ -324,22 +322,12 @@ all_tranportation_data_normalized <- all_tranportation_data |>
   dplyr::mutate(emissions_co2_mt_normalized = emissions_co2_mt/emissions_co2_mt_starting-1) 
 
 # Summarize total emissions by data source for 2023, for putting on figure
-
-transportation_labels_2023 <- all_tranportation_data_normalized |>
-  dplyr::filter(year == 2023) |> 
-  dplyr::mutate(emissions_co2_billion_mt = glue::glue("{signif(emissions_co2_mt/1e9,2)}B MT"))
-
 emissions_comparison_figure_normalized <- all_tranportation_data_normalized |>
   ggplot(aes(x = year,y= emissions_co2_mt_normalized, color = data_source))  +
   geom_hline(yintercept = 0, linetype=2) +
   geom_line() + 
-  # geom_text(data = transportation_labels_2023,
-  #           aes(x = 2023+0.75,
-  #               y = emissions_co2_mt_normalized,
-  #               label = emissions_co2_billion_mt),
-  #           show.legend = FALSE) +
   scale_x_continuous(breaks = unique(all_tranportation_data_normalized$year),
-                     limits = c(2016,2023)) +
+                     limits = c(2016,2024)) +
   scale_y_continuous(labels = scales::percent) +
   theme_plot() +
   labs(x = "",
