@@ -598,10 +598,10 @@ total_percent_change_by_fleet |>
 ## Figure 2
 
 ```{r}
-#| label: fig-pollutant-emissions-map-time-series
-#| fig-cap: (A) Spatial map of 2024 emissions by pollutant, aggregated across the AIS-broadcasting fleet and non-broadcasting fleet, and shown at a 1x1 degree spatial resolution; (B) time series of monthly global emissions by pollutant.
-#| fig-width: 7.5
-#| fig-height: 7.5
+#| label: fig-pollutant-emissions-map-time-series-vessel-type
+#| fig-cap: (A) Spatial map of 2024 emissions by pollutant, aggregated across the AIS-broadcasting fleet and non-broadcasting fleet, and shown at a 1x1 degree spatial resolution; (B) time series of monthly global emissions by pollutant; (C) total 2024 CO2 emissions by vessel type (millions metric tonnes).
+#| fig-width: 10
+#| fig-height: 9
 
 # For figures, order pollutants first for GHG pollutants,
 # then local pollutants
@@ -654,8 +654,39 @@ pollutant_map <-total_spatial_emissions_by_pollutant_2024 |>
                                ticks.colour = "black")) +
   scale_x_continuous(expand = c(0, 1)) +
   scale_y_continuous(expand = c(0, 1)) +
-  facet_wrap(pollutant~.,ncol=1) +
-  coord_sf(crs = map_projection)
+  facet_wrap(pollutant~.,ncol=1)
+
+emissions_by_vessel_class <- annual_ais_co2_emissions_by_vessel |>
+  dplyr::filter(year == 2024) |>
+  dplyr::group_by(vessel_class) |>
+  dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt)) |>
+  dplyr::ungroup() |>
+  dplyr::mutate(fishing = ifelse(vessel_class %in% c("trawlers",
+                                                     "squid_jigger",
+                                                     "tuna_purse_seines",
+                                                     "set_longlines",
+                                                     "pole_and_line",
+                                                     "set_gillnets",
+                                                     "pots_and_traps",
+                                                     "dredge_fishing",
+                                                     "other_seines",
+                                                     "other_purse_seines",
+                                                     "trollers"),
+                                 "Fishing","Non-fishing") |>
+                  forcats::fct_rev()) |>
+  dplyr::mutate(vessel_class = stringr::str_replace_all(vessel_class,"cargo.","cargo: ") |>
+                  stringr::str_replace_all("_"," ") |>
+                  stringr::str_to_sentence()) |>
+  ggplot(aes(x = emissions_co2_mt,
+             y = reorder(vessel_class,emissions_co2_mt))) +
+  geom_col (position = position_dodge2(preserve = "single")) +
+  ggforce::facet_col(~ fishing, space = "free", scales = "free") +
+  theme_plot() +
+  labs(title = "2024 CO2 emissions by vessel type (MT)",
+       x = "",
+       y = "") +
+  scale_x_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6), limits = c(0,NA)) 
+
 
 pollutant_timeseries <- total_monthly_emissions_by_pollutant |> 
   dplyr::mutate(pollutant = forcats::fct_relevel(pollutant,
@@ -670,9 +701,11 @@ pollutant_timeseries <- total_monthly_emissions_by_pollutant |>
   theme(panel.grid.minor.x = element_blank())+
   facet_wrap(pollutant~.,ncol=3,scales="free_y")
 
-cowplot::plot_grid(pollutant_map, 
+cowplot::plot_grid(cowplot::plot_grid(pollutant_map, emissions_by_vessel_class,ncol=2,
+                                      rel_widths = c(0.5,0.5),
+                                      labels = c("","C")),
                    pollutant_timeseries, 
-                   nrow = 2,rel_heights = c(0.6,0.4),
+                   nrow = 2,rel_heights = c(0.55,0.45),
                    labels = c("A","B"))
 ```
 
