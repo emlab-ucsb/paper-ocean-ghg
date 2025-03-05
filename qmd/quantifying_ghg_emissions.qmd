@@ -322,6 +322,25 @@ all_tranportation_data_normalized <- all_tranportation_data |>
   dplyr::mutate(emissions_co2_mt_normalized = emissions_co2_mt/emissions_co2_mt_starting-1) 
 
 # Summarize total emissions by data source for 2023, for putting on figure
+emissions_comparison_figure <- all_tranportation_data |>
+  ggplot(aes(x = year,y= emissions_co2_mt, color = data_source))  +
+  geom_line() + 
+  scale_x_continuous(breaks = unique(all_tranportation_data_normalized$year),
+                     limits = c(2016,2024)) +
+  scale_y_continuous(labels = scales::unit_format(unit = "B", scale = 1e-9), limits = c(0,NA)) +
+  theme_plot() +
+  labs(x = "",
+       y = "",
+       title = "Annual transportation CO2 emissions\n(billion MT)",
+       color = "Data source") +
+  theme(panel.grid.minor.x = element_blank(),
+        legend.position="right",
+        legend.direction="vertical")+
+  scale_color_manual(values = all_data_source_color_palette,
+                     breaks = c("Land-based (EDGAR)",
+                                "Land-based (IEA)",
+                                "Ocean-based (Total AIS plus S1)"))
+
 emissions_comparison_figure_normalized <- all_tranportation_data_normalized |>
   ggplot(aes(x = year,y= emissions_co2_mt_normalized, color = data_source))  +
   geom_hline(yintercept = 0, linetype=2) +
@@ -407,7 +426,7 @@ total_annual_emissions_by_fleet_fig <- annual_co2_emissions |>
   theme_plot() +
   labs(x = "",
        y = "",
-       title = "Annual ocean-based CO2 emissions (billion MT)",
+       title = "Annual ocean-based CO2 emissions\n(billion MT)",
        color = "Data source") +
   theme(panel.grid.minor.x = element_blank(),
         legend.position = "right")
@@ -450,17 +469,18 @@ normalized_annual_emissions_by_fleet_fig <- annual_co2_emissions |>
 
 ```{r}
 #| label: fig-total-annual-emissions-by-data-source
-#| fig-cap: (A) Change in annual transportation sector CO2 emissions from a 2016 baseline, with each line colored based on the data source and whether it is ocean-based or land-based transportation. The total 2023 emissions for the ocean-based and land-based EDGAR data sources are shown next to each respective line. (B) Total annual ocean-based CO2 emissions, with each line colored based on the data source. The percent change from 2016 to 2024 for each data source is shown next to each respective line. (C) Change in annual ocean-based CO2 emissions from a 2016 baseline, with each line colored based on the data source. The percent change from 2016 to 2024 for each data source is shown next to each respective line.
-#| fig-width: 7.5
-#| fig-height: 8
+#| fig-cap: (A) Annual transportation sector CO2 emissions from a 2016 baseline, with each line colored based on the data source and whether it is ocean-based or land-based transportation. (B) Change in annual transportation sector CO2 emissions from a 2016 baseline, with each line colored based on the data source and whether it is ocean-based or land-based transportation. (C) Annual ocean-based CO2 emissions, with each line colored based on the data source. The percent change from 2016 to 2024 for each data source is shown next to each respective line. (D) Change in annual ocean-based CO2 emissions from a 2016 baseline, with each line colored based on the data source.
+#| fig-width: 13
+#| fig-height: 7.5
 cowplot::plot_grid(
+  emissions_comparison_figure,
   emissions_comparison_figure_normalized,
   total_annual_emissions_by_fleet_fig,
   normalized_annual_emissions_by_fleet_fig,
-  ncol=1,
+  ncol=2,
   align="v",
   axis = "lr",
-  labels=c("A","B","C")
+  labels=c("A","B","C","D")
 )
 ```
 
