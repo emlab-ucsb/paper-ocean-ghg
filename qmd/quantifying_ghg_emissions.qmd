@@ -474,20 +474,18 @@ normalized_annual_emissions_by_fleet_fig <- annual_co2_emissions |>
 #| fig-height: 7.5
 cowplot::plot_grid(
   emissions_comparison_figure,
-  emissions_comparison_figure_normalized,
   total_annual_emissions_by_fleet_fig,
+  emissions_comparison_figure_normalized,
   normalized_annual_emissions_by_fleet_fig,
   ncol=2,
   align="v",
   axis = "lr",
-  labels=c("A","B","C","D")
+  labels=c("A","C","B","D")
 )
 ```
 
 
-### Figure 1 addition
-
-```{r}
+```{r eval = FALSE}
 #| label: fig-co2-emissions-map
 #| fig-cap: Spatial patterns of total fleet CO2 emissions in 2024 (top panel), and the change in CO2 emissions between 2016 and 2024 (bottom panel) (metric tonnes). Total fleet are shown at a 1x1 degree spatial resolution.
 #| fig-width: 7.5
@@ -611,6 +609,7 @@ pollutant_factor_levels <- c("CO2","CH4","N2O","CO","NOX","SOX","PM2.5","PM10","
 pollutant_map <-total_spatial_emissions_by_pollutant_2024 |>
   dplyr::mutate(pollutant = forcats::fct_relevel(pollutant,
                                                  pollutant_factor_levels)) |>
+  dplyr::filter(pollutant %in% c("CO2","PM2.5")) |>
   ggplot() +
   geom_sf(data = world_bbox_sf, fill = "black") +
   ggspatial::geom_spatial_tile(aes(x = lon_bin+0.5,
@@ -655,7 +654,7 @@ pollutant_map <-total_spatial_emissions_by_pollutant_2024 |>
                                ticks.colour = "black")) +
   scale_x_continuous(expand = c(0, 1)) +
   scale_y_continuous(expand = c(0, 1)) +
-  facet_wrap(pollutant~.,ncol=3) +
+  facet_wrap(pollutant~.,ncol=1) +
   coord_sf(crs = map_projection)
 
 pollutant_timeseries <- total_monthly_emissions_by_pollutant |> 
@@ -791,10 +790,10 @@ final_prediction_dataset <- predictions_dataset |>
 ```
 
 ```{r}
-#| label: fig-hours-speed-vessel-type-decomposition
-#| fig-cap: (A) Relative predicted change in CO2 emissions from 2016 baseline, using the random forest model outputs of four different scenarios that decompose the relative impact of changes in total hours (extensive margin) and changes in average speed (intensive margin); (B) relative observed change in CO2 emissions from 2016 baseline by vessel type (fishing, non-fishing, and total).
+#| label: fig-hours-speed-decomposition
+#| fig-cap: Relative predicted change in CO2 emissions from 2016 baseline, using the random forest model outputs of four different scenarios that decompose the relative impact of changes in total hours (extensive margin) and changes in average speed (intensive margin)
 #| fig-width: 7.5
-#| fig-height: 6
+#| fig-height: 4
 
 # Aggregate prediction values by year (across vessel size classes and type)
 final_annual_prediction_dataset <- final_prediction_dataset |>
@@ -882,9 +881,10 @@ time_series_by_vessel_type <- time_series_by_vessel_type_df  |>
                                 "Total (fishing and non-fishing)",
                                 "Non-fishing"))
 
-cowplot::plot_grid(time_series_predicted_decomposition,time_series_by_vessel_type,
-                   ncol=1, align="vh",
-                   labels = c("A","B"))
+# cowplot::plot_grid(time_series_predicted_decomposition,time_series_by_vessel_type,
+#                    ncol=1, align="vh",
+#                    labels = c("A","B"))
+time_series_predicted_decomposition
 ```
 
 While emissions from non-fishing vessels rose by `r scales::percent((time_series_by_vessel_type_df |> dplyr::filter(year==2024, fishing == "Non-fishing"))$emissions_co2_normalized)` between 2016 and 2024, emissions from fishing vessesl rose by `r scales::percent((time_series_by_vessel_type_df |> dplyr::filter(year==2024, fishing == "Fishing"))$emissions_co2_normalized)`.
