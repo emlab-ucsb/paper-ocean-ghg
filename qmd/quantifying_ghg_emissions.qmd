@@ -1047,7 +1047,7 @@ ais_fleet_summary_relative <- ais_fleet_summary_relative_df |>
   geom_hline(yintercept = 0, linetype = 2) +
   geom_line() +
   facet_wrap(name~., ncol = 1, scales = "free_y") +
-  scale_y_continuous(labels = scales::percent,limits=c(0,0.8)) + 
+  scale_y_continuous(labels = scales::percent,limits=c(-.1,0.8)) + 
   scale_x_continuous(breaks = unique(annual_vessel_summary_by_year$year)) +
   theme_plot() +
   labs(x = "",
