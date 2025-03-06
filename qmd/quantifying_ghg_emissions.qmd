@@ -1063,9 +1063,9 @@ ais_fleet_summary_relative_df_2024 <- ais_fleet_summary_relative_df |>
 
 ```{r}
 #| label: fig-hours-speed-decomposition
-#| fig-cap: (A) Relative predicted change in CO2 emissions from 2016 baseline, using the random forest model outputs of four different scenarios that decompose the relative impact of changes in total hours (extensive margin) and changes in average speed (intensive margin)
+#| fig-cap: (A) Relative predicted change in CO2 emissions from 2016 baseline, using the random forest model outputs of four different scenarios that decompose the relative impact of changes in total hours (extensive margin) and changes in average speed (intensive margin); (B) Observed AIS hours, number of unique vessels, and hours per vessel; (C) Relative change from a 2016 baseline for observed AIS hours, number of unique vessels, and hours per vessel.
 #| fig-width: 7.5
-#| fig-height: 7.5
+#| fig-height: 7
 
 cowplot::plot_grid(time_series_predicted_decomposition,
 cowplot::plot_grid(ais_fleet_summary_absolute,
@@ -1073,7 +1073,7 @@ cowplot::plot_grid(ais_fleet_summary_absolute,
                    ncol = 2,
                    align = "h",
                    labels = c("B","C"),
-                   rel_widths = c(0.55,0.45)),
+                   rel_widths = c(0.53,0.47)),
 ncol=1,rel_heights = c(0.4,0.6),
 labels = c("A",""))
 ```
