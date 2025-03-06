@@ -349,7 +349,8 @@ emissions_comparison_figure_normalized <- all_tranportation_data_normalized |>
   geom_line() + 
   scale_x_continuous(breaks = unique(all_tranportation_data_normalized$year),
                      limits = c(2016,2024)) +
-  scale_y_continuous(labels = scales::percent) +
+  scale_y_continuous(labels = scales::percent,
+                     limits = c(-0.2,0.35)) +
   theme_plot() +
   labs(x = "",
        y = "",
@@ -452,7 +453,8 @@ normalized_annual_emissions_by_fleet_fig <- annual_co2_emissions |>
   ggplot(aes(x = year, y = emissions_co2_mt_normalized, color = fleet)) +
   geom_hline(yintercept = 0, linetype = 2) +
   geom_line() +
-  scale_y_continuous(labels = scales::percent) + 
+  scale_y_continuous(labels = scales::percent,
+                     limits = c(-0.2,0.35)) + 
   scale_x_continuous(breaks = unique(annual_co2_emissions$year),
                      limits = c(2016,2024)) +
   scale_color_manual(values = all_data_source_color_palette,
@@ -1045,7 +1047,7 @@ ais_fleet_summary_relative <- ais_fleet_summary_relative_df |>
   geom_hline(yintercept = 0, linetype = 2) +
   geom_line() +
   facet_wrap(name~., ncol = 1, scales = "free_y") +
-  scale_y_continuous(labels = scales::percent) + 
+  scale_y_continuous(labels = scales::percent,limits=c(0,0.8)) + 
   scale_x_continuous(breaks = unique(annual_vessel_summary_by_year$year)) +
   theme_plot() +
   labs(x = "",
