@@ -824,7 +824,7 @@ training_data <-rsample::training(inital_split)
 testing_data <- rsample::testing(inital_split)
 
 # Specify recipe for model
-model_recipe <- recipes::recipe(emissions_co2_mt_total ~ fishing + length_size_class_percentile + hours_total + avg_speed_knots, 
+model_recipe <- recipes::recipe(emissions_co2_mt_total ~ fishing + length_size_class_percentile + kw_hours_total + avg_speed_knots, 
                                 data = head(rsample::training(inital_split))) |>
   recipes::step_num2factor(length_size_class_percentile,
                            levels = as.character(unique(annual_extrapolation_dataset$length_size_class_percentile)))
@@ -876,7 +876,7 @@ performance_metrics |>
 
 ```{r}
 #| label: predict-using-decomposition-model
-# Find initial/starting 2016 values of hours and speed, by fishing and length_size_class_percentile, for decomposition
+# Find initial/starting 2016 values of kw-hours and speed, by fishing and length_size_class_percentile, for decomposition
 starting_values <- annual_extrapolation_dataset |>
   dplyr::filter(year == 2016) |>
   dplyr::select(fishing,
@@ -891,22 +891,22 @@ predictions_dataset <- annual_extrapolation_dataset |>
 
 # Now run predictions for 4 different scenarios
 final_prediction_dataset <- predictions_dataset |>
-  # Add model predictions using observed hours and observed speed
-  bind_cols(observed_hours_observed_speed = predict(workflow_fit_final, predictions_dataset)$.pred) |>
-  # Add model predictions using observed hours and constant speed (from 2016)
-  bind_cols(observed_hours_constant_speed = predict(workflow_fit_final, predictions_dataset  |>
+  # Add model predictions using observed kw-hours and observed speed
+  bind_cols(observed_kw_hours_observed_speed = predict(workflow_fit_final, predictions_dataset)$.pred) |>
+  # Add model predictions using observed kw-hours and constant speed (from 2016)
+  bind_cols(observed_kw_hours_constant_speed = predict(workflow_fit_final, predictions_dataset  |>
                                                       dplyr::select(-avg_speed_knots) |>
                                                       dplyr::rename(avg_speed_knots = avg_speed_knots_starting))$.pred)|>
-  # Add model predictions using constant hours (from 2016) and observed speed
-  bind_cols(constant_hours_observed_speed = predict(workflow_fit_final, predictions_dataset|>
-                                                      dplyr::select(-hours_total) |>
-                                                      dplyr::rename(hours_total = hours_total_starting))$.pred)|>
-  # Add model predictions using constant hours (from 2016) and constant speed (from 2016)
-  bind_cols(constant_hours_constant_speed = predict(workflow_fit_final, predictions_dataset |>
+  # Add model predictions using constant kw-hours (from 2016) and observed speed
+  bind_cols(constant_kw_hours_observed_speed = predict(workflow_fit_final, predictions_dataset|>
+                                                      dplyr::select(-kw_hours_total) |>
+                                                      dplyr::rename(kw_hours_total = kw_hours_total_starting))$.pred)|>
+  # Add model predictions using constant kw-hours (from 2016) and constant speed (from 2016)
+  bind_cols(constant_kw_hours_constant_speed = predict(workflow_fit_final, predictions_dataset |>
                                                       dplyr::select(-avg_speed_knots) |>
                                                       dplyr::rename(avg_speed_knots = avg_speed_knots_starting) |>
-                                                      dplyr::select(-hours_total) |>
-                                                      dplyr::rename(hours_total = hours_total_starting))$.pred)
+                                                      dplyr::select(-kw_hours_total) |>
+                                                      dplyr::rename(kw_hours_total = kw_hours_total_starting))$.pred)
 ```
 
 ## Figure 3 panel A
@@ -915,15 +915,15 @@ final_prediction_dataset <- predictions_dataset |>
 # Aggregate prediction values by year (across vessel size classes and type)
 final_annual_prediction_dataset <- final_prediction_dataset |>
   dplyr::group_by(year) |>
-  dplyr::summarise(across(c(observed_hours_observed_speed,
-                            observed_hours_constant_speed,
-                            constant_hours_observed_speed,
-                            constant_hours_constant_speed),
+  dplyr::summarise(across(c(observed_kw_hours_observed_speed,
+                            observed_kw_hours_constant_speed,
+                            constant_kw_hours_observed_speed,
+                            constant_kw_hours_constant_speed),
                           ~sum(.,na.rm=TRUE))) |>
-  dplyr::rename(`Observed hours, observed speed` = observed_hours_observed_speed,
-                `Observed hours, constant speed` = observed_hours_constant_speed,
-                `Constant hours, observed speed` = constant_hours_observed_speed,
-                `Constant hours, constant speed` = constant_hours_constant_speed) |>
+  dplyr::rename(`Observed kW-hours, observed speed` = observed_kw_hours_observed_speed,
+                `Observed kW-hours, constant speed` = observed_kw_hours_constant_speed,
+                `Constant kW-hours, observed speed` = constant_kw_hours_observed_speed,
+                `Constant kW-hours, constant speed` = constant_kw_hours_constant_speed) |>
   tidyr::pivot_longer(-year) 
 
 # We will normalize all of these predictions to the 2016 starting prediction
@@ -949,55 +949,9 @@ time_series_predicted_decomposition <- time_series_predicted_decomposition_df |>
   scale_y_continuous(labels = scales::percent) +
   labs(x = "",
        y = "",
-       title = "Relative predicted change in CO2 emissions\nfrom 2016 baseline") +
+       title = "Predicted relative change in total CO2 emissions from 2016 baseline") +
   theme_plot() +
   theme(panel.grid.minor.x = element_blank())
-
-# Summarize annual emissions by fishing and non-fishing vessels
-annual_total_emissions_by_type <- annual_ais_to_dark_activity_extrapolation |>
-  dplyr::mutate(emissions_co2_mt_total = emissions_co2_mt + emissions_co2_mt_dark) |>
-  dplyr::group_by(year,fishing) |>
-  dplyr::summarise(emissions_co2_mt_total = sum(emissions_co2_mt_total)) |>
-  dplyr::ungroup() |>
-  dplyr::mutate(fishing = ifelse(fishing,"Fishing","Non-fishing"))
-
-# Summarize annual emissions across all values
-annual_total_emissions <- annual_total_emissions_by_type |>
-  dplyr::group_by(year) |>
-  dplyr::summarise(emissions_co2_mt_total = sum(emissions_co2_mt_total)) |>
-  dplyr::ungroup() |>
-  dplyr::mutate(fishing = "Total (fishing and non-fishing)")
-
-# Bind these datasets together
-annual_emissions <- annual_total_emissions_by_type |>
-  dplyr::bind_rows(annual_total_emissions)
-
-# For each vessel type, determine the starting emissions in 2016
-annual_emissions_starting_value <- annual_emissions |>
-  dplyr::filter(year == 2016) |>
-  dplyr::rename(emissions_co2_mt_total_starting = emissions_co2_mt_total) |>
-  dplyr::select(-year)
-
-# Now normalize all emissions to the starting value
-time_series_by_vessel_type_df <- annual_emissions |>
-  dplyr::inner_join(annual_emissions_starting_value, by = "fishing") |>
-  dplyr::mutate(emissions_co2_normalized = emissions_co2_mt_total/emissions_co2_mt_total_starting - 1)
-
-time_series_by_vessel_type <- time_series_by_vessel_type_df  |>
-  ggplot(aes(x = year, y = emissions_co2_normalized, color = fishing)) +
-  geom_line()+
-  scale_x_continuous(breaks = unique(final_prediction_dataset$year)) +
-  scale_y_continuous(labels = scales::percent) +
-  labs(x = "",
-       y = "Relative observed change\nin CO2 emissions\nfrom 2016 baseline",
-       color = "Vessel type") +
-  theme_plot() +
-  theme(panel.grid.minor.x = element_blank()) +
-  geom_hline(yintercept = 0, linetype = 2) +
-  scale_color_manual(values = c("lightgoldenrod4",paletteer::paletteer_d("colorblindr::OkabeIto")[[5]],"lightgoldenrod3"),
-                     breaks = c("Fishing",
-                                "Total (fishing and non-fishing)",
-                                "Non-fishing"))
 ```
 
 ## Figure 3 Panel B
@@ -1006,17 +960,24 @@ time_series_by_vessel_type <- time_series_by_vessel_type_df  |>
 annual_vessel_summary_by_year <- annual_ais_co2_emissions_by_vessel |>
   dplyr::group_by(year) |>
   dplyr::summarize(n_distinct_vessels = dplyr::n_distinct(ssvid),
-                   hours = sum(hours)) |>
+                   kw_hours = sum(hours * main_engine_power_kw),
+                   hours = sum(hours),
+                   main_engine_power_kw = sum(main_engine_power_kw)) |>
   dplyr::ungroup() |>
-  dplyr::mutate(hours_per_vessel = hours / n_distinct_vessels) |>
+  dplyr::mutate(kw_per_vessel = main_engine_power_kw / n_distinct_vessels,
+                hours_per_vessel = hours / n_distinct_vessels) |>
+  dplyr::select(-c(hours,main_engine_power_kw)) |>
   tidyr::pivot_longer(-year) |>
   # Limit to just years 2016 and beyond, to match decomposition
   # Since we don't have dark data for 2015
   dplyr::filter(year>2015) |>
-  dplyr::mutate(name = dplyr::case_when(name == "hours" ~ "Observed AIS hours",
-                                        name == "hours_per_vessel" ~ "Observed AIS hours per vessel",
-                                        name == "n_distinct_vessels" ~ "Observed AIS number unique vessels") |>
-                  forcats::fct_relevel("Observed AIS hours","Observed AIS number unique vessels"))
+  dplyr::mutate(name = dplyr::case_when(name == "hours" ~ "Total hours",
+                                        name == "kw_hours" ~ "Total kW-hours",
+                                        name == "main_engine_power_kw" ~ "Total main engine power (KW)",
+                                        name == "kw_per_vessel" ~ "Average main engine power per vessel (kW)",
+                                        name == "hours_per_vessel" ~ "Average hours per vessel",
+                                        name == "n_distinct_vessels" ~ "Unique number of vessels") |>
+                  forcats::fct_relevel("Total kW-hours","Unique number of vessels"))
 
 annual_vessel_summary_starting <- annual_vessel_summary_by_year |>
   dplyr::filter(year == 2016) |>
@@ -1027,32 +988,31 @@ ais_fleet_summary_absolute <- annual_vessel_summary_by_year |>
   ggplot(aes(x = year, y = value)) +
   geom_line() +
   facet_wrap(name~., ncol = 1, scales = "free_y") +
-  scale_y_continuous(labels = scales::comma,
+  scale_y_continuous(labels =  scales::unit_format(unit = "k", scale = 1e-3),
                      limits = c(0,NA)) + 
   scale_x_continuous(breaks = unique(annual_vessel_summary_by_year$year)) +
   theme_plot() +
   labs(x = "",
-       y = "") +
-  theme(panel.grid.minor.x = element_blank())
+       y = "",
+       title = "Observed metrics from\nAIS data") +
+  theme(panel.grid.minor = element_blank())
 
 ais_fleet_summary_relative_df <- annual_vessel_summary_by_year |>
   dplyr::left_join(annual_vessel_summary_starting, by = "name") |>
   dplyr::mutate(value_normalized = value/value_starting-1) 
 
 ais_fleet_summary_relative <- ais_fleet_summary_relative_df |>
-  dplyr::mutate(name = glue::glue("{name}\n(relative change from 2016 baseline)") |>
-                  forcats::fct_relevel("Observed AIS hours\n(relative change from 2016 baseline)",
-                                       "Observed AIS number unique vessels\n(relative change from 2016 baseline)")) |>
   ggplot(aes(x = year, y = value_normalized)) +
   geom_hline(yintercept = 0, linetype = 2) +
   geom_line() +
   facet_wrap(name~., ncol = 1, scales = "free_y") +
-  scale_y_continuous(labels = scales::percent,limits=c(-.1,0.8)) + 
+  scale_y_continuous(labels = scales::percent,limits=c(-.2,0.8)) + 
   scale_x_continuous(breaks = unique(annual_vessel_summary_by_year$year)) +
   theme_plot() +
   labs(x = "",
-       y = "") +
-  theme(panel.grid.minor.x = element_blank())
+       y = "",
+       title = "Observed relative change in\nAIS metrics from 2016 baseline") +
+  theme(panel.grid.minor = element_blank())
 
 ais_fleet_summary_relative_df_2024 <- ais_fleet_summary_relative_df |>
   dplyr::filter(year==2024)
@@ -1063,9 +1023,9 @@ ais_fleet_summary_relative_df_2024 <- ais_fleet_summary_relative_df |>
 
 ```{r}
 #| label: fig-hours-speed-decomposition
-#| fig-cap: (A) Relative predicted change in CO2 emissions from 2016 baseline, using the random forest model outputs of four different scenarios that decompose the relative impact of changes in total hours (extensive margin) and changes in average speed (intensive margin); (B) Observed AIS hours, number of unique vessels, and hours per vessel; (C) Relative change from a 2016 baseline for observed AIS hours, number of unique vessels, and hours per vessel.
+#| fig-cap: (A) Relative predicted change in total CO2 emissions from 2016 baseline (aggregating across both broadcasting and non-broadcasting vessels), using the random forest model outputs of four different scenarios that decompose the relative impact of changes in total kW-hours and changes in average speed ; (B) Observed total kW-hours for AIS-broadcasting vessels, number of unique vessels, average hours per vessel, and average main engine power per vessel; (C) Relative change from a 2016 baseline for observed total kW-hours for AIS-broadcasting vessels, number of unique vessels, average hours per vessel, and average main engine power per vessel.
 #| fig-width: 7.5
-#| fig-height: 7
+#| fig-height: 7.5
 
 cowplot::plot_grid(time_series_predicted_decomposition,
 cowplot::plot_grid(ais_fleet_summary_absolute,
@@ -1079,7 +1039,7 @@ labels = c("A",""))
 ```
 
 
-Looking at the observed AIS data, the number of unique vessels increased by `r ais_fleet_summary_relative_df_2024 |> dplyr::filter(name == "Observed AIS number unique vessels") |> dplyr::pull(value_normalized) |> scales::percent()` from 2016 to 2024, while the number of hours per vessel increased by only `r ais_fleet_summary_relative_df_2024 |> dplyr::filter(name == "Observed AIS hours per vessel") |> dplyr::pull(value_normalized) |> scales::percent()`. This suggests that most of the observed `r ais_fleet_summary_relative_df_2024 |> dplyr::filter(name == "Observed AIS hours") |> dplyr::pull(value_normalized) |> scales::percent()` increase in hours from 2016 to 2024 was driven by the increase in vessels, not by changes in how much each vessel operates. 
+Looking at the observed AIS data, the number of unique vessels increased by `r ais_fleet_summary_relative_df_2024 |> dplyr::filter(name == "Unique number of vessels") |> dplyr::pull(value_normalized) |> scales::percent()` from 2016 to 2024, while the average number of hours per vessel increased by only `r ais_fleet_summary_relative_df_2024 |> dplyr::filter(name == "Average hours per vessel") |> dplyr::pull(value_normalized) |> scales::percent()` and the average main engine power per vessel actually decreased by `r ais_fleet_summary_relative_df_2024 |> dplyr::filter(name == "Average main engine power per vessel (kW)") |> dplyr::pull(value_normalized) |> abs() |> scales::percent()`. This suggests that most of the observed `r ais_fleet_summary_relative_df_2024 |> dplyr::filter(name == "Total kW-hours") |> dplyr::pull(value_normalized) |> scales::percent()` increase in kW-hours from 2016 to 2024 was driven by the increase in vessels, not by changes in how much each vessel operates or the engine size of each vessel. 
 
 # Abstract text with stats
 
