@@ -161,9 +161,17 @@ annual_edgar_tranportation_emissions <- glue::glue("{project_directory}/data/raw
                 year<=2024)
 
 
-# Annual CO2 emissions data for AIS-broadcasting fleet and dark fleet
-annual_co2_emissions <- glue::glue("{project_directory}/data/processed/annual_co2_emissions.csv") |>
-  readr::read_csv() |>
+# Annual CO2 emissions data for AIS-broadcasting fleet and dark fleet,
+# broken apart by fishing and non-fishing vessels
+annual_co2_emissions_fishing_non_fishing <- glue::glue("{project_directory}/data/processed/annual_co2_emissions.csv") |>
+  readr::read_csv()
+
+# Agregate the two fleets to get total CO2 emissions
+annual_co2_emissions <- annual_co2_emissions_fishing_non_fishing |>
+  dplyr::group_by(year) |>
+  dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt),
+                   emissions_co2_dark_mt = sum(emissions_co2_dark_mt)) |>
+  dplyr::ungroup() |>
   dplyr::mutate(total_co2_emissions = emissions_co2_mt + emissions_co2_dark_mt) |>
   tidyr::pivot_longer(cols = -year,
                       names_to = "fleet",
@@ -271,6 +279,22 @@ total_monthly_emissions_by_pollutant <- glue::glue("{project_directory}/data/pro
                 pollutant = ifelse(pollutant == "VOCS","VOCs",pollutant)) |>
   # Don't use 2025 data, since the year is incomplete
   dplyr::filter(lubridate::year(month) < 2025)
+
+
+# Downloaded from UNTAD Trade-and-Transport Dataset
+# https://unctadstat.unctad.org/datacentre/dataviewer/US.TransportCosts
+# Filtered to just at-sea transport, where destination and source are both "World",
+# And looking across all commodities
+unctad_annual_global_trade_value_data_maritime_transport <- glue::glue("{project_directory}/data/raw/unctad/US.TransportCosts_20250311_204332.csv") |>
+  readr::read_csv() |>
+  dplyr::filter(Destination_Label == "World") |>
+  dplyr::select(-Destination_Label) |>
+  tidyr::pivot_longer(dplyr::everything(),
+                      values_to = "value_usd") |>
+  dplyr::mutate(year = stringr::str_remove_all(name,
+                                               "_FOB_value_US_Value") |>
+                  as.numeric()) |>
+  dplyr::select(-name)
 ```
 
 # Paper figures
@@ -1063,6 +1087,28 @@ percent_2023_emissions_from_transportation <- (annual_edgar_tranportation_emissi
 ```
 
 In 2023, the transportation sector was responsible for `r percent_2023_emissions_from_transportation` of all emissions globally
+
+## Social Cost of Carbon externality text
+
+```{r}
+unctad_anual_global_trade_value_2021_usd <- unctad_annual_global_trade_value_data_maritime_transport |>
+  dplyr::filter(year == 2021) |> 
+  dplyr::pull(value_usd) 
+# CO2 emissions by non-fishing vessels in 2021
+co2_emissions_2021_non_fishing_mt <- annual_co2_emissions_fishing_non_fishing |> 
+  dplyr::filter(!fishing, year == 2021) |> 
+  dplyr::mutate(emissions_co2_mt_total = emissions_co2_mt + emissions_co2_dark_mt) |>
+  dplyr::pull(emissions_co2_mt_total)
+
+# Social cost of carbon per metric tonne of CO2
+# From https://www.pnas.org/doi/10.1073/pnas.2410733121
+scc_usd_mt_co2 <- 283
+
+scc_co2_emissions_2021_usd <- co2_emissions_2021_non_fishing_mt * scc_usd_mt_co2
+```
+
+
+In 2021, the total global value of commercial maritime transportation was $`r unctad_anual_global_trade_value_2021_usd |> signif(3) / 1e12 ` trillion USD. Looking at our emissions estimates, we find that non-fishing vessels emitted `r  co2_emissions_2021_non_fishing_mt |> signif(3)/1e9` billion metric tonnes of CO2. Using a SCC value of \$283 USD/metric tonne of CO2, this translates to a total SCC in 2021 of \$USD `r scc_co2_emissions_2021_usd |> signif(3) / 1e9` billion USD for emissions from the marine transportation sector, representing `r scales::percent(scc_co2_emissions_2021_usd/unctad_anual_global_trade_value_2021_usd)` of the total value of goods transported by maritime trade.
 
 # Supplementary figures
 
