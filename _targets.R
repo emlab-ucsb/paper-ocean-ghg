@@ -61,6 +61,10 @@ list(
     name = run_version_dark,
     "_v20250116" 
   ),
+  tar_target(
+    name = run_version_dark_fleet,
+    "_v20250228" 
+  ),
   # Define monthly_ais_vessels_and_ratios_by_pixel query path
   tar_target(
     name = monthly_ais_vessels_and_ratios_by_pixel_sql_file,
@@ -114,6 +118,27 @@ list(
                           bq_table_name = glue::glue("monthly_ais_vessels_and_ratios", run_version_dark),
                           # Re-run this target if targets below change
                           monthly_ais_vessels_and_ratios_bq)
+  ),
+  tar_target(
+    name = s1_knn_ratios_within_footprint,
+    pull_gfw_data_locally(billing_project = billing_project,
+                          bq_dataset = bq_dataset,
+                          bq_table_name = glue::glue("s1_knn_ratios_within_footprint", run_version_dark_fleet)
+    )
+  ),
+  tar_target(
+    name = s1_knn_ratios_outside_footprint,
+    pull_gfw_data_locally(billing_project = billing_project,
+                          bq_dataset = bq_dataset,
+                          bq_table_name = glue::glue("s1_knn_ratios_outside_footprint", run_version_dark_fleet)
+    )
+  ),
+  tar_target(
+    name = s1_dark_fleet_model_results,
+    pull_gfw_data_locally(billing_project = billing_project,
+                          bq_dataset = bq_dataset,
+                          bq_table_name = glue::glue("s1_time_gridded_dark_fleet_model", run_version_dark_fleet)
+    )
   )
   # ,
   # # Make quarto notebook -----

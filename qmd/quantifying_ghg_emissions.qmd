@@ -1880,3 +1880,78 @@ time_series_nb_vessels_pixel |>
 
 ```
 
+
+## Supplementary materials
+
+### Methods
+
+#### Ratios map
+
+```{r}
+tar_load(c(s1_knn_ratios_within_footprint, s1_knn_ratios_outside_footprint))
+
+create_filtered_dfs <- function(fishing_status) {
+  if (!is.logical(fishing_status)) stop("fishing_status must be TRUE or FALSE")
+  
+  # Step 1: Compute mean_ratio for within footprint
+  within_ratios <- s1_knn_ratios_within_footprint %>%
+    filter(fishing == fishing_status) %>%
+    group_by(lat_bin, lon_bin) %>%
+    summarize(mean_ratio = mean(avg_neighbor_ratio, na.rm = TRUE), .groups = "drop")
+  
+  # Step 2: Compute mean_ratio for outside footprint
+  outside_ratios <- s1_knn_ratios_outside_footprint %>%
+    filter(fishing == fishing_status) %>%
+    group_by(lat_bin, lon_bin) %>%
+    summarize(mean_ratio = mean(avg_neighbor_ratio, na.rm = TRUE), .groups = "drop")
+  
+  # Step 3: Remove overlapping locations
+  filtered_outside_ratios <- outside_ratios %>%
+    anti_join(within_ratios, by = c("lat_bin", "lon_bin"))
+  
+  return(list(within_ratios = within_ratios, filtered_outside_ratios = filtered_outside_ratios))
+}
+
+
+# Compute global limits for color scale
+all_data <- bind_rows(
+  create_filtered_dfs(TRUE)$within_ratios,
+  create_filtered_dfs(TRUE)$filtered_outside_ratios,
+  create_filtered_dfs(FALSE)$within_ratios,
+  create_filtered_dfs(FALSE)$filtered_outside_ratios
+)
+
+scale_limits <- c(0.001, max(all_data$mean_ratio, na.rm = TRUE))
+
+# Generate data for fishing and non-fishing vessels
+fishing_data <- create_filtered_dfs(TRUE)
+non_fishing_data <- create_filtered_dfs(FALSE)
+
+# Create a single integrated ggplot with facets
+combined_data <- bind_rows(
+  fishing_data$filtered_outside_ratios %>% mutate(footprint = "Outside S1 footprint", fishing_status = "Fishing"),
+  fishing_data$within_ratios %>% mutate(footprint = "Within S1 footprint", fishing_status = "Fishing"),
+  non_fishing_data$filtered_outside_ratios %>% mutate(footprint = "Outside S1 footprint", fishing_status = "Non-Fishing"),
+  non_fishing_data$within_ratios %>% mutate(footprint = "Within S1 footprint", fishing_status = "Non-Fishing")
+)
+
+# Reorder factor levels to ensure correct placement in facet grid
+combined_data$footprint <- factor(combined_data$footprint, levels = c("Within S1 footprint", "Outside S1 footprint"))
+
+p_combined <- ggplot(combined_data) +
+  geom_tile(aes(x = lon_bin, y = lat_bin, fill = mean_ratio)) +
+  geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
+  scale_fill_viridis_c("Average ratios (log scale)",
+                       trans = "log10",
+                       option = "mako",
+                       na.value = "black",
+                       limits = scale_limits) +
+  labs(x = '', y = '') +
+  theme_map() +
+  theme(legend.position = "bottom") +
+  scale_x_continuous(expand = c(0, 1)) +
+  scale_y_continuous(expand = c(0, 1)) +
+  facet_grid(rows = vars(fishing_status), cols = vars(footprint))
+
+p_combined
+```
