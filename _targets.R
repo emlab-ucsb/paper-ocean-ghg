@@ -21,9 +21,9 @@ data_directory_base <-  ifelse(Sys.info()["nodename"] == "quebracho" | Sys.info(
                                              # Replace your_username with your local machine user name
                                              "/home/your_username/Nextcloud")))
 
-# project_directory <- glue::glue("{data_directory_base}/projects/current-projects/paper-ocean-ghg")
+project_directory <- glue::glue("{data_directory_base}/projects/current-projects/paper-ocean-ghg")
 
-project_directory <- glue::glue("/Users/Shared/nextcloud/emLab/projects/current-projects/paper-ocean-ghg")
+# project_directory <- glue::glue("/Users/Shared/nextcloud/emLab/projects/current-projects/paper-ocean-ghg")
 
 # Set targets store to appropriate GRIT/Nextcloud directory
 tar_config_set(project = "base_pipeline",
@@ -141,6 +141,14 @@ list(
                           bq_dataset = bq_dataset,
                           bq_table_name = glue::glue("s1_time_gridded_dark_fleet_model", run_version_dark_fleet)
     )
+  ),
+  tar_target(
+    name = s1_summarized_dark_fleet_ratios_spatial,
+    summarize_dark_fleet_ratios_spatial(s1_dark_fleet_model_results)
+  ), 
+  tar_target(
+    name = s1_summarized_dark_fleet_model_results_emissions_year,
+    summarize_dark_fleet_model_results_emissions(s1_dark_fleet_model_results, time_extrapolation  = "YEAR")
   )
   # ,
   # # Make quarto notebook -----
