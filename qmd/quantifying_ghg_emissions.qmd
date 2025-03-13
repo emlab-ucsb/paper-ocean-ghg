@@ -1955,3 +1955,34 @@ p_combined <- ggplot(combined_data) +
 
 p_combined
 ```
+
+
+
+####
+
+```{r}
+summarized_s1_dark_fleet_ratios <- s1_summarized_dark_fleet_ratios_spatial |>
+  dplyr::filter(year<2025) |>
+  group_by(year, fishing, length_size_class_percentile) %>%
+  summarize(across(c(number_dark_detections,
+                     number_ais_detections), ~sum(.,na.rm=TRUE))) %>%
+  ungroup() %>%
+  mutate(ratio_dark_to_ais_detections = number_dark_detections / number_ais_detections,
+         fraction_tracked = number_ais_detections / (number_ais_detections + number_dark_detections))
+
+summarized_s1_dark_fleet_ratios %>%
+  filter(!is.na(fishing)) %>%
+  ggplot(aes(x = year, y = ratio_dark_to_ais_detections, color = factor(length_size_class_percentile),group=length_size_class_percentile)) +
+  geom_line() +
+  paletteer::scale_color_paletteer_d(palette = "jcolors::pal10") +
+  theme_plot() +
+  facet_grid(.~fishing) +
+  scale_y_continuous(limits = c(0,NA)) +
+  labs(color = "Length bin",
+       x = "",
+       y = "Ratio of S1-detected dark vessels\nto matched AIS-broadcasting vessels")+
+  guides(linetype  = guide_legend(order = 2,
+                                  reverse = TRUE),
+         color = guide_legend(order = 1))
+```
+

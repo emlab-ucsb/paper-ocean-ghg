@@ -21,7 +21,9 @@ data_directory_base <-  ifelse(Sys.info()["nodename"] == "quebracho" | Sys.info(
                                              # Replace your_username with your local machine user name
                                              "/home/your_username/Nextcloud")))
 
-project_directory <- glue::glue("{data_directory_base}/projects/current-projects/paper-ocean-ghg")
+# project_directory <- glue::glue("{data_directory_base}/projects/current-projects/paper-ocean-ghg")
+
+project_directory <- glue::glue("/Users/Shared/nextcloud/emLab/projects/current-projects/paper-ocean-ghg")
 
 # Set targets store to appropriate GRIT/Nextcloud directory
 tar_config_set(project = "base_pipeline",
