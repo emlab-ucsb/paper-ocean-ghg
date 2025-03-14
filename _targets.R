@@ -23,6 +23,8 @@ data_directory_base <-  ifelse(Sys.info()["nodename"] == "quebracho" | Sys.info(
 
 project_directory <- glue::glue("{data_directory_base}/projects/current-projects/paper-ocean-ghg")
 
+# project_directory <- glue::glue("/Users/Shared/nextcloud/emLab/projects/current-projects/paper-ocean-ghg")
+
 # Set targets store to appropriate GRIT/Nextcloud directory
 tar_config_set(project = "base_pipeline",
                script= "_targets.R",
@@ -60,6 +62,10 @@ list(
   tar_target(
     name = run_version_dark,
     "_v20250116" 
+  ),
+  tar_target(
+    name = run_version_dark_fleet,
+    "_v20250228" 
   ),
   # Define monthly_ais_vessels_and_ratios_by_pixel query path
   tar_target(
@@ -114,6 +120,35 @@ list(
                           bq_table_name = glue::glue("monthly_ais_vessels_and_ratios", run_version_dark),
                           # Re-run this target if targets below change
                           monthly_ais_vessels_and_ratios_bq)
+  ),
+  tar_target(
+    name = s1_knn_ratios_within_footprint,
+    pull_gfw_data_locally(billing_project = billing_project,
+                          bq_dataset = bq_dataset,
+                          bq_table_name = glue::glue("s1_knn_ratios_within_footprint", run_version_dark_fleet)
+    )
+  ),
+  tar_target(
+    name = s1_knn_ratios_outside_footprint,
+    pull_gfw_data_locally(billing_project = billing_project,
+                          bq_dataset = bq_dataset,
+                          bq_table_name = glue::glue("s1_knn_ratios_outside_footprint", run_version_dark_fleet)
+    )
+  ),
+  tar_target(
+    name = s1_dark_fleet_model_results,
+    pull_gfw_data_locally(billing_project = billing_project,
+                          bq_dataset = bq_dataset,
+                          bq_table_name = glue::glue("s1_time_gridded_dark_fleet_model", run_version_dark_fleet)
+    )
+  ),
+  tar_target(
+    name = s1_summarized_dark_fleet_ratios_spatial,
+    summarize_dark_fleet_ratios_spatial(s1_dark_fleet_model_results)
+  ), 
+  tar_target(
+    name = s1_summarized_dark_fleet_model_results_emissions_year,
+    summarize_dark_fleet_model_results_emissions(s1_dark_fleet_model_results, time_extrapolation  = "YEAR")
   )
   # ,
   # # Make quarto notebook -----

@@ -91,7 +91,7 @@ lat_to_area <- function(lat){
   110.574*(111.320*cos(deg2rad(lat)))
 }
 
-
+# 
 data_directory_base <-  ifelse(Sys.info()["nodename"] == "quebracho" | Sys.info()["nodename"] == "sequoia",
                                "/home/emlab",
                                # Otherwise, set the directory for local machines based on the OS
@@ -105,7 +105,26 @@ data_directory_base <-  ifelse(Sys.info()["nodename"] == "quebracho" | Sys.info(
                                              # Replace your_username with your local machine user name
                                              "/home/your_username/Nextcloud")))
 
-project_directory <- glue::glue("{data_directory_base}/projects/current-projects/paper-ocean-ghg")                          
+project_directory <- glue::glue("{data_directory_base}/projects/current-projects/paper-ocean-ghg")
+
+# Read and assign each object explicitly
+s1_knn_ratios_within_footprint <- targets::tar_read("s1_knn_ratios_within_footprint",
+                                                    store = targets::tar_config_get("store", 
+                                                                                    project = "base_pipeline"))
+
+s1_knn_ratios_outside_footprint <- targets::tar_read("s1_knn_ratios_outside_footprint",
+                                                     store = targets::tar_config_get("store", 
+                                                                                     project = "base_pipeline"))
+
+s1_summarized_dark_fleet_ratios_spatial <- targets::tar_read("s1_summarized_dark_fleet_ratios_spatial",
+                                                              store = targets::tar_config_get("store", 
+                                                                                              project = "base_pipeline"))
+
+s1_summarized_dark_fleet_model_results_emissions_year <- targets::tar_read("s1_summarized_dark_fleet_model_results_emissions_year",
+                                                                           store = targets::tar_config_get("store", 
+                                                                                                           project = "base_pipeline"))
+
+
 
 # Load target objects
 # Set targets store to appropriate GRIT/Nextcloud directory
@@ -1884,5 +1903,170 @@ time_series_nb_vessels_pixel |>
   scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) +
   scale_fill_manual(values = c("AIS" = "#4f83db", "Dark" = "red"))
 
+```
+
+
+
+## Methods
+
+### Outside and withing S1 footprint ratios
+
+```{r}
+
+
+create_filtered_dfs <- function(fishing_status) {
+  if (!is.logical(fishing_status)) stop("fishing_status must be TRUE or FALSE")
+  
+  # Step 1: Compute mean_ratio for within footprint
+  within_ratios <- s1_knn_ratios_within_footprint %>%
+    filter(fishing == fishing_status) %>%
+    group_by(lat_bin, lon_bin) %>%
+    summarize(mean_ratio = mean(avg_neighbor_ratio, na.rm = TRUE), .groups = "drop")
+  
+  # Step 2: Compute mean_ratio for outside footprint
+  outside_ratios <- s1_knn_ratios_outside_footprint %>%
+    filter(fishing == fishing_status) %>%
+    group_by(lat_bin, lon_bin) %>%
+    summarize(mean_ratio = mean(avg_neighbor_ratio, na.rm = TRUE), .groups = "drop")
+  
+  # Step 3: Remove overlapping locations
+  filtered_outside_ratios <- outside_ratios %>%
+    anti_join(within_ratios, by = c("lat_bin", "lon_bin"))
+  
+  return(list(within_ratios = within_ratios, filtered_outside_ratios = filtered_outside_ratios))
+}
+
+
+# Compute global limits for color scale
+all_data <- bind_rows(
+  create_filtered_dfs(TRUE)$within_ratios,
+  create_filtered_dfs(TRUE)$filtered_outside_ratios,
+  create_filtered_dfs(FALSE)$within_ratios,
+  create_filtered_dfs(FALSE)$filtered_outside_ratios
+)
+
+scale_limits <- c(0.001, max(all_data$mean_ratio, na.rm = TRUE))
+
+# Generate data for fishing and non-fishing vessels
+fishing_data <- create_filtered_dfs(TRUE)
+non_fishing_data <- create_filtered_dfs(FALSE)
+
+# Create a single integrated ggplot with facets
+combined_data <- bind_rows(
+  fishing_data$filtered_outside_ratios %>% mutate(footprint = "Outside S1 footprint", fishing_status = "Fishing"),
+  fishing_data$within_ratios %>% mutate(footprint = "Within S1 footprint", fishing_status = "Fishing"),
+  non_fishing_data$filtered_outside_ratios %>% mutate(footprint = "Outside S1 footprint", fishing_status = "Non-Fishing"),
+  non_fishing_data$within_ratios %>% mutate(footprint = "Within S1 footprint", fishing_status = "Non-Fishing")
+)
+
+# Reorder factor levels to ensure correct placement in facet grid
+combined_data$footprint <- factor(combined_data$footprint, levels = c("Within S1 footprint", "Outside S1 footprint"))
+
+p_combined <- ggplot(combined_data) +
+    geom_tile(aes(x = lon_bin, y = lat_bin, fill = mean_ratio)) +
+    geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
+    scale_fill_viridis_c("Average ratios (log scale)",
+                         trans = "log10",
+                         option = "mako",
+                         na.value = "black",
+                         limits = scale_limits) +
+    labs(x = '', y = '') +
+    theme_map() +
+    theme(legend.position = "bottom") +
+    guides(fill = guide_colorbar(title.position = "top",
+                                 title.hjust = 0.5,
+                                 frame.colour = "black",
+                                 ticks.colour = "black",
+                                 barwidth = unit(10, "cm"),
+                                 barheight = unit(0.5, "cm")))  +
+    scale_x_continuous(expand = c(0, 1)) +
+    scale_y_continuous(expand = c(0, 1)) +
+    facet_grid(rows = vars(fishing_status), cols = vars(footprint))
+
+p_combined
+```
+
+
+
+###  Fraction of S1-detected vessels
+
+```{r}
+#| label: fig-dark-vessel-fraction-detected-time-series
+#| fig-cap: Fraction of S1-detected vessels matched AIS-broadcasting vessels over time, disaggregated by vessel type and length size class
+
+
+
+summarized_s1_dark_fleet_ratios <- s1_summarized_dark_fleet_ratios_spatial |>
+  dplyr::filter(year<2025) |>
+  group_by(year, fishing, length_size_class_percentile) %>%
+  summarize(across(c(number_dark_detections,
+                     number_ais_detections), ~sum(.,na.rm=TRUE))) %>%
+  ungroup() %>%
+  mutate(ratio_dark_to_ais_detections = number_dark_detections / number_ais_detections,
+         fraction_tracked = number_ais_detections / (number_ais_detections + number_dark_detections))
+
+summarized_s1_dark_fleet_ratios %>%
+  filter(!is.na(fishing)) %>%
+  ggplot(aes(x = year, y = ratio_dark_to_ais_detections, color = factor(length_size_class_percentile),group=length_size_class_percentile)) +
+  geom_line() +
+  paletteer::scale_color_paletteer_d(palette = "jcolors::pal10") +
+  theme_plot() +
+  facet_grid(.~fishing) +
+  scale_y_continuous(limits = c(0,NA)) +
+  labs(color = "Length bin",
+       x = "",
+       y = "Ratio of S1-detected dark vessels\nto matched AIS-broadcasting vessels")+
+  guides(linetype  = guide_legend(order = 2,
+                                  reverse = TRUE),
+         color = guide_legend(order = 1))
+```
+
+### Summary of global annual CO2 dark emissions over time
+
+```{r}
+#| label: fig-global-annual-co2-dark-emissions-by-type
+#| fig-cap: Summary of global annual CO2 dark emissions over time, disaggregated by vessel type.
+#| fig-height: 5
+
+
+
+time_series_data_annual_agg_dark <- s1_summarized_dark_fleet_model_results_emissions_year %>%
+  group_by(year,pollutant, dark) %>%
+  summarize(emissions_mt = sum(emissions_mt)) %>%
+  ungroup() %>%
+  mutate(Fleet = ifelse(dark,"Dark","AIS")) %>%
+  dplyr::select(-dark) |>
+  # Don't inclde last year of data, since it's incomplete
+  dplyr::filter(year<2025)
+
+dark_percentage_2024 <- time_series_data_annual_agg_dark %>%
+  filter(year == 2024, pollutant == "CO2") %>%
+  summarise(
+    dark_percentage = emissions_mt[Fleet == "Dark"] / sum(emissions_mt) * 100
+  ) %>% pull() %>% round(1)
+
+time_series_data_annual_agg_dark_by_group <- s1_summarized_dark_fleet_model_results_emissions_year |>
+  # Don't inclde last year of data, since it's incomplete
+  dplyr::filter(year<2025)%>%
+  filter(dark == TRUE & pollutant == "CO2") %>% 
+  group_by(year, fishing, length_size_class_percentile) %>%
+  summarize(emissions_mt = sum(emissions_mt)) %>%
+  ungroup()
+
+time_series_data_annual_agg_dark_by_group %>%
+  filter(!is.na(fishing))%>%
+  mutate( fishing = forcats::fct_recode(as.factor(fishing),
+                                        "Fishing" = "TRUE", 
+                                        "Non-fishing" = "FALSE")) %>%
+  ggplot(aes(x = year, y = emissions_mt, fill = factor(length_size_class_percentile))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_x_continuous(breaks = unique(time_series_data_annual_agg_dark$year)) +
+  labs(x = "",
+       y = "CO2 dark emissions (MT)",
+       fill = "Length bin") +
+  theme_plot() +
+  scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) +
+  facet_grid(fishing~.,scales = "free_y") +
+  paletteer::scale_fill_paletteer_d(palette = "jcolors::pal10")
 ```
 
