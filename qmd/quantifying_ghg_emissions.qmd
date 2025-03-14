@@ -683,12 +683,12 @@ co2_emissions_map_fig
 ```{r}
 ais_scale_underestimation_2024 <- (1 - (total_percent_change_by_fleet |>
                                           dplyr::filter(fleet == "AIS (broadcasting)"))$`2024`/(total_percent_change_by_fleet |>
-                                                                                                dplyr::filter(fleet == "Total AIS plus S1"))$`2024`) |>
+                                                                                                  dplyr::filter(fleet == "Total AIS plus S1"))$`2024`) |>
   scales::percent()
 
 ais_trend_overestimation_2016_2024 <- ((total_percent_change_by_fleet |>
                                           dplyr::filter(fleet == "AIS (broadcasting)"))$percent_change/(total_percent_change_by_fleet |>
-                                                                                                        dplyr::filter(fleet == "Total AIS plus S1"))$percent_change -1) |>
+                                                                                                          dplyr::filter(fleet == "Total AIS plus S1"))$percent_change -1) |>
   scales::percent()
 ```
 
@@ -834,7 +834,9 @@ annual_extrapolation_dataset <- annual_ais_to_dark_activity_extrapolation |>
   dplyr::select(-c(emissions_co2_mt, emissions_co2_mt_dark, 
                    kw_hours, kw_hours_dark, 
                    distance_nm, distance_nm_dark, 
-                   hours, hours_dark))
+                   hours, hours_dark, avg_speed_knots)) |>
+  # Calculate average aggregate speed as total distance traveled divided by total hours
+  dplyr::mutate(avg_speed_knots = distance_nm_total / hours_total)
 
 # Using annual_extrapolation_dataset, use tidymodels to train a random forest model
 # to predict emissions
@@ -854,8 +856,12 @@ model_recipe <- recipes::recipe(emissions_co2_mt_total ~ fishing + length_size_c
                            levels = as.character(unique(annual_extrapolation_dataset$length_size_class_percentile)))
 
 # Specify model type
-model_type <- parsnip::rand_forest(trees = 1000) |>
-  parsnip::set_engine("ranger", importance = "impurity") |>
+model_type <- parsnip::rand_forest(trees = 1000,
+                                   # Default of ranger is squareroot of number of model features. We have 4 features, so use a value of 2.
+                                   mtry = 2,
+                                   # Default of ranger is 5 for regression
+                                   min_n = 5) |>
+  parsnip::set_engine("ranger") |>
   parsnip::set_mode("regression")
 
 # Initialize model workflow
@@ -919,18 +925,18 @@ final_prediction_dataset <- predictions_dataset |>
   bind_cols(observed_kw_hours_observed_speed = predict(workflow_fit_final, predictions_dataset)$.pred) |>
   # Add model predictions using observed kw-hours and constant speed (from 2016)
   bind_cols(observed_kw_hours_constant_speed = predict(workflow_fit_final, predictions_dataset  |>
-                                                      dplyr::select(-avg_speed_knots) |>
-                                                      dplyr::rename(avg_speed_knots = avg_speed_knots_starting))$.pred)|>
+                                                         dplyr::select(-avg_speed_knots) |>
+                                                         dplyr::rename(avg_speed_knots = avg_speed_knots_starting))$.pred)|>
   # Add model predictions using constant kw-hours (from 2016) and observed speed
   bind_cols(constant_kw_hours_observed_speed = predict(workflow_fit_final, predictions_dataset|>
-                                                      dplyr::select(-kw_hours_total) |>
-                                                      dplyr::rename(kw_hours_total = kw_hours_total_starting))$.pred)|>
+                                                         dplyr::select(-kw_hours_total) |>
+                                                         dplyr::rename(kw_hours_total = kw_hours_total_starting))$.pred)|>
   # Add model predictions using constant kw-hours (from 2016) and constant speed (from 2016)
   bind_cols(constant_kw_hours_constant_speed = predict(workflow_fit_final, predictions_dataset |>
-                                                      dplyr::select(-avg_speed_knots) |>
-                                                      dplyr::rename(avg_speed_knots = avg_speed_knots_starting) |>
-                                                      dplyr::select(-kw_hours_total) |>
-                                                      dplyr::rename(kw_hours_total = kw_hours_total_starting))$.pred)
+                                                         dplyr::select(-avg_speed_knots) |>
+                                                         dplyr::rename(avg_speed_knots = avg_speed_knots_starting) |>
+                                                         dplyr::select(-kw_hours_total) |>
+                                                         dplyr::rename(kw_hours_total = kw_hours_total_starting))$.pred)
 ```
 
 ## Figure 3 panel A
@@ -1052,14 +1058,14 @@ ais_fleet_summary_relative_df_2024 <- ais_fleet_summary_relative_df |>
 #| fig-height: 7.5
 
 cowplot::plot_grid(time_series_predicted_decomposition,
-cowplot::plot_grid(ais_fleet_summary_absolute,
-                   ais_fleet_summary_relative,
-                   ncol = 2,
-                   align = "h",
-                   labels = c("B","C"),
-                   rel_widths = c(0.53,0.47)),
-ncol=1,rel_heights = c(0.4,0.6),
-labels = c("A",""))
+                   cowplot::plot_grid(ais_fleet_summary_absolute,
+                                      ais_fleet_summary_relative,
+                                      ncol = 2,
+                                      align = "h",
+                                      labels = c("B","C"),
+                                      rel_widths = c(0.53,0.47)),
+                   ncol=1,rel_heights = c(0.4,0.6),
+                   labels = c("A",""))
 ```
 
 
@@ -1498,9 +1504,9 @@ annual_spatial_emissions_by_receiver_type  |>
   ggplot() +
   geom_sf(data = world_bbox_sf, fill = "black") +
   ggspatial::geom_spatial_tile(aes(x = lon_bin+0.5,
-                y = lat_bin+0.5,
-                fill = change_emissions_co2,
-                color = change_emissions_co2)) +
+                                   y = lat_bin+0.5,
+                                   fill = change_emissions_co2,
+                                   color = change_emissions_co2)) +
   geom_sf(data = land,
           color = "#374a6d",
           fill = "#374a6d") +
@@ -1513,12 +1519,12 @@ annual_spatial_emissions_by_receiver_type  |>
                           breaks = c(-1e6,-1e3,0,1e3,1e6),
                           labels = scales::comma) +
   scico::scale_color_scico("Change in CO2 emissions\nfrom 2016 to 2024\n(MT)",
-                          palette = "berlin",
-                          midpoint = 0,
-                          trans = ggallin::pseudolog10_trans,
-                          na.value = "black",
-                          breaks = c(-1e6,-1e3,0,1e3,1e6),
-                          labels = scales::comma) +
+                           palette = "berlin",
+                           midpoint = 0,
+                           trans = ggallin::pseudolog10_trans,
+                           na.value = "black",
+                           breaks = c(-1e6,-1e3,0,1e3,1e6),
+                           labels = scales::comma) +
   labs(x = '',
        y= '') +
   theme_void() +
