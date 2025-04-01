@@ -1212,7 +1212,7 @@ pollutant_ais_underestimation_overestimation_summary_tbl <- pollutant_ais_undere
                caption = "Underestimation of 2024 emissions using only AIS data, and overestimation of 2016 to 2024 emissions trend using only AIS data, by pollutant.") |>
   kableExtra::kable_styling(font_size = 7, latex_options = "hold_position")
 
-writeLines(total_percent_change_by_fleet_tbl, here::here("qmd/tables/pollutant_ais_underestimation_overestimation_summary.tex"))
+writeLines(pollutant_ais_underestimation_overestimation_summary_tbl, here::here("qmd/tables/pollutant_ais_underestimation_overestimation_summary.tex"))
 ```
 
 
