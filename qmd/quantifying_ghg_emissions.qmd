@@ -1184,13 +1184,15 @@ total_percent_change_by_fleet_tbl <- total_percent_change_by_fleet |>
                 pollutant = ifelse(pollutant == "VOCS","VOCs",pollutant)) |>
   dplyr::rename(`Data source` = fleet,
                 Pollutant = pollutant,
-                `2016 emissions (MT)` = `2016`,
-                `2024 emissions (MT)` = `2024`,
-                `Percent of 2024 total` = percent_total_2024,
+                `2016 emissions` = `2016`,
+                `2024 emissions` = `2024`,
+                `Percent 2024 total` = percent_total_2024,
                 `Percent change from 2016 to 2024` = percent_change) |>
-  knitr::kable(format = 'latex', label = "total_percent_change_by_fleet_tbl")
+  knitr::kable(format = 'latex', label = "total_percent_change_by_fleet_tbl", 
+               caption = "Summary of 2016 and 2024 emissions, by pollutant and data source.") |>
+  kableExtra::kable_styling(font_size = 7, latex_options = "hold_position")
 
-writeLines(total_percent_change_by_fleet_tbl, here::here("qmd/tables/total_percent_change_by_fleet_tbl.tex"))
+writeLines(total_percent_change_by_fleet_tbl, here::here("qmd/tables/total_percent_change_by_fleet.tex"))
 ```
 
 
