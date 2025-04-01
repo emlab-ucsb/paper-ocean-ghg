@@ -39,10 +39,11 @@ download_gfw_data <- function(query_file_name,file_output_name) {
     readr::write_csv(glue::glue("{project_directory}/data/processed/{file_output_name}.csv"))
 }
 
-# Annual CO2 emissions data for AIS-broadcasting fleet and dark fleet,
+# Annual emissions data for AIS-broadcasting fleet and dark fleet,
 # broken apart by fishing and non-fishing vessels
-download_gfw_data("sql/annual_co2_emissions.sql",
-                  "annual_co2_emissions")
+# For all pollutants
+download_gfw_data("sql/annual_emissions_all_pollutants.sql",
+                  "annual_emissions_all_pollutants")
 
 # Annual AIS-based CO2 emissions, hours, average speed, and main engine power by vessel
 download_gfw_data("sql/annual_ais_co2_emissions_by_vessel.sql",
