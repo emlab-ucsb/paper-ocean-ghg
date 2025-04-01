@@ -1035,7 +1035,7 @@ time_series_predicted_decomposition <- time_series_predicted_decomposition_df |>
   scale_y_continuous(labels = scales::percent) +
   labs(x = "",
        y = "",
-       title = "Predicted relative change in total CO2 emissions from 2016 baseline") +
+       title = "Estimated decomposition of change in total CO2 emissions from 2016 baseline") +
   theme_plot() +
   theme(panel.grid.minor.x = element_blank())
 ```
@@ -1109,7 +1109,7 @@ ais_fleet_summary_relative_df_2024 <- ais_fleet_summary_relative_df |>
 
 ```{r}
 #| label: fig-hours-speed-decomposition
-#| fig-cap: (A) Relative predicted change in total CO2 emissions from 2016 baseline (aggregating across both broadcasting and non-broadcasting vessels), using the random forest model outputs of four different scenarios that decompose the relative impact of changes in total kW-hours and changes in average speed ; (B) Observed total kW-hours for AIS-broadcasting vessels, number of unique vessels, average hours per vessel, and average main engine power per vessel; (C) Relative change from a 2016 baseline for observed total kW-hours for AIS-broadcasting vessels, number of unique vessels, average hours per vessel, and average main engine power per vessel.
+#| fig-cap: (A) Estimated decomposition of change in total CO2 emissions from 2016 baseline (aggregating across both broadcasting and non-broadcasting vessels), using the random forest model outputs of four different scenarios that decompose the relative impact of changes in total kW-hours and changes in average speed ; (B) Observed total kW-hours for AIS-broadcasting vessels, number of unique vessels, average hours per vessel, and average main engine power per vessel; (C) Relative change from a 2016 baseline for observed total kW-hours for AIS-broadcasting vessels, number of unique vessels, average hours per vessel, and average main engine power per vessel.
 #| fig-width: 7.5
 #| fig-height: 7.5
 
