@@ -1191,7 +1191,7 @@ total_percent_change_by_fleet_tbl <- total_percent_change_by_fleet |>
                 `2024 emissions (MT)` = `2024`,
                 `Percent 2024 total` = percent_total_2024,
                 `Percent change from 2016 to 2024` = percent_change) |>
-  knitr::kable(format = 'latex', label = "total_percent_change_by_fleet", 
+  knitr::kable(format = 'latex', label = "tab:total_percent_change_by_fleet", 
                caption = "Summary of 2016 and 2024 emissions, by pollutant and data source.") |>
   kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
 
@@ -1208,7 +1208,7 @@ pollutant_ais_underestimation_overestimation_summary_tbl <- pollutant_ais_undere
   dplyr::rename(Pollutant = pollutant,
                 "AIS-only underestimation of 2024 emissions" = ais_underestimation_2024,
                 "AIS-only overestimation of 2016-2024 emissions trend" = trend_overestimation_2016_2024)|>
-  knitr::kable(format = 'latex', label = "pollutant_ais_underestimation_overestimation_summary", 
+  knitr::kable(format = 'latex', label = "tab:pollutant_ais_underestimation_overestimation_summary", 
                caption = "Underestimation of 2024 emissions using only AIS data, and overestimation of 2016 to 2024 emissions trend using only AIS data, by pollutant.") |>
   kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
 
