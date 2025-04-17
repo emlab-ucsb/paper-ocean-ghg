@@ -1,0 +1,5 @@
+base_pipeline:
+  script: _targets.R
+  store: /Users/Shared/nextcloud/emLab/projects/current-projects/paper-ocean-ghg/data/_targets
+main:
+  inherits: base_pipeline

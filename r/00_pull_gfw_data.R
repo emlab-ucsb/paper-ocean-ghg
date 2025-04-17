@@ -29,7 +29,7 @@ billing_project <- "emlab-gcp" # emLab's billing project
 bq_dataset <- "proj_ocean_ghg" # The dataset name for this project
 
 run_version_ais <- "v20241121" # Define the version of the AIS dataset to pull
-run_version_dark <- "v20250228" #"v20250116" # Define the version of the dark fleet dataset to pull
+run_version_dark <- "v20250228" # Define the version of the dark fleet dataset to pull
 
 
 # Function to download GFW data and save it in repo
@@ -50,8 +50,13 @@ download_gfw_data <- function(query_file_name, file_output_name) {
     ))
 }
 
-# Annual CO2 emissions data for AIS-broadcasting fleet and dark fleet
-download_gfw_data("sql/annual_co2_emissions.sql", "annual_co2_emissions")
+# Annual emissions data for AIS-broadcasting fleet and dark fleet,
+# broken apart by fishing and non-fishing vessels
+# For all pollutants
+download_gfw_data(
+  "sql/annual_emissions_all_pollutants.sql",
+  "annual_emissions_all_pollutants"
+)
 
 # Annual AIS-based CO2 emissions, hours, average speed, and main engine power by vessel
 download_gfw_data(
@@ -89,10 +94,24 @@ download_gfw_data(
   "annual_spatial_emissions_by_receiver_type"
 )
 
-# Data for KNN performance testing
-# (i.e., how well does our KNN interpolation method work for predicting the dark/AIS ratio)
-# Has observed dark/AIS detection ratios and nearest neighbor ratios
-# For all lat_bin/lon_bin pixels, months, size classes, and vessel types
-# For top 50 neighbors for each observation
+# Annual extrapolation of AIS activity to dark activity
+# Use method we use for extrapolating emissions (by pixel, month, fishing, and vessel size class)
+# To also extrapolate hours, kw-hours
+# Also get average speed, assuming they are same for dark and AIS (by pixel, month, fishing, and vessel size class)
+download_gfw_data(
+  "sql/annual_ais_to_dark_activity_extrapolation.sql",
+  "annual_ais_to_dark_activity_extrapolation"
+)
 
-download_gfw_data("sql/knn_performance_testing.sql", "knn_performance_testing")
+
+# Download total spatial emissions by pollutant for 2024
+download_gfw_data(
+  "sql/total_spatial_emissions_by_pollutant_2024.sql",
+  "total_spatial_emissions_by_pollutant_2024"
+)
+
+# Download total monthly non-spatial emissions by pollutant
+download_gfw_data(
+  "sql/total_monthly_emissions_by_pollutant.sql",
+  "total_monthly_emissions_by_pollutant"
+)
