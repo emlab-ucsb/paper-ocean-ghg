@@ -84,3 +84,54 @@ performance_by_k |>
     )
   ) +
   theme_minimal()
+
+performance_by_k_and_vessel_type <- purrr::map_dfr(
+  unique(knn_performance_testing$nearest_neighbor_rank),
+  function(k) {
+    knn_performance_testing |>
+      dplyr::filter(nearest_neighbor_rank <= k) |>
+      dplyr::select(-c(nearest_neighbor_rank, distance_m)) |>
+      dplyr::group_by(dplyr::across(-c(ratio_dark_to_ais_detections_to))) |>
+      dplyr::summarize(
+        ratio_dark_to_ais_detections_to = mean(
+          ratio_dark_to_ais_detections_to,
+          na.rm = TRUE
+        )
+      ) |>
+      dplyr::ungroup() |>
+      dplyr::group_by(length_size_class_percentile, fishing) |>
+      multi_metric(
+        truth = ratio_dark_to_ais_detections_from,
+        estimate = ratio_dark_to_ais_detections_to
+      ) |>
+      dplyr::mutate(k = k)
+  }
+)
+
+max_rsq_trad_vessel_type <- performance_by_k_and_vessel_type |>
+  dplyr::filter(.metric == "rsq_trad") |>
+  dplyr::slice_max(.estimate)
+
+performance_by_k_and_vessel_type |>
+  dplyr::filter(.metric == "rsq_trad") |>
+  dplyr::mutate(fishing = ifelse(fishing, "Fishing", "Non-fishing")) |>
+  ggplot(aes(
+    x = k,
+    y = .estimate,
+    color = as.factor(length_size_class_percentile)
+  )) +
+  geom_point() +
+  scale_y_continuous(limits = c(0, NA)) +
+  labs(
+    x = "Number of neighbors (K)",
+    y = "rsq_trad",
+    color = "Length decile",
+    title = glue::glue(
+      "Max rsq_trad of {signif(max_rsq_trad_vessel_type$.estimate,3)} at K = {max_rsq_trad_vessel_type$k}\nat fishing = {max_rsq_trad_vessel_type$fishing} and length decile {max_rsq_trad_vessel_type$length_size_class_percentile}"
+    )
+  ) +
+  theme_minimal() +
+  facet_wrap(. ~ fishing) +
+  paletteer::scale_colour_paletteer_d(
+    palette = "ggthemes::Classic_Green_Orange_12"
+  )
