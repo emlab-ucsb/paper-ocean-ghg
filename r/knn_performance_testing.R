@@ -27,6 +27,14 @@ knn_performance_testing <- glue::glue(
 ) |>
   readr::read_csv()
 
+# Define yardstick metrics we want to look at
+multi_metric <- yardstick::metric_set(
+  yardstick::rmse,
+  yardstick::rsq,
+  yardstick::rsq_trad,
+  yardstick::mae
+)
+
 performance_by_k <- purrr::map_dfr(
   unique(knn_performance_testing$nearest_neighbor_rank),
   function(k) {
@@ -41,7 +49,7 @@ performance_by_k <- purrr::map_dfr(
         )
       ) |>
       dplyr::ungroup() |>
-      yardstick::rsq_trad(
+      multi_metric(
         truth = ratio_dark_to_ais_detections_from,
         estimate = ratio_dark_to_ais_detections_to
       ) |>
@@ -50,9 +58,21 @@ performance_by_k <- purrr::map_dfr(
 )
 
 max_rsq_trad <- performance_by_k |>
+  dplyr::filter(.metric == "rsq_trad") |>
   dplyr::slice_max(.estimate)
 
+rsq_at_k_8 <- performance_by_k |>
+  dplyr::filter(.metric == "rsq_trad", k == 8) |>
+  dplyr::pull(.estimate) |>
+  signif(3)
+
+rsq_at_k_20 <- performance_by_k |>
+  dplyr::filter(.metric == "rsq_trad", k == 20) |>
+  dplyr::pull(.estimate) |>
+  signif(3)
+
 performance_by_k |>
+  dplyr::filter(.metric == "rsq_trad") |>
   ggplot(aes(x = k, y = .estimate)) +
   geom_point() +
   scale_y_continuous(limits = c(0, NA)) +
@@ -60,7 +80,7 @@ performance_by_k |>
     x = "Number of neighbors (K)",
     y = "rsq_trad",
     title = glue::glue(
-      "Max rsq_trad of {signif(max_rsq_trad$.estimate,3)} at K = {max_rsq_trad$k}"
+      "Max rsq_trad of {signif(max_rsq_trad$.estimate,3)} at K = {max_rsq_trad$k}\nrsq_trad of {rsq_at_k_8} at K = 8\nrsq_trad of {rsq_at_k_20} at K = 20"
     )
   ) +
   theme_minimal()

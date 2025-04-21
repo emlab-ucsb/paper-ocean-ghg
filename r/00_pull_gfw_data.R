@@ -115,3 +115,9 @@ download_gfw_data(
   "sql/total_monthly_emissions_by_pollutant.sql",
   "total_monthly_emissions_by_pollutant"
 )
+
+# Download KNN testing data
+download_gfw_data(
+  "sql/knn_performance_testing.sql",
+  "knn_performance_testing"
+)
