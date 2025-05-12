@@ -48,10 +48,10 @@ ggplot(snp_fuel_consumption, aes(y = consumption_value_1)) +
 ## Speed values 
 ggplot(snp_fuel_consumption|> filter(consumption_speed_1 < 300), aes(x = consumption_speed_1)) +
   geom_histogram(
-    bins = 30,              # Number of bins (adjust as needed)
-    fill = "#2c3e50",       # Dark blue color
-    color = "white",        # White border for clarity
-    alpha = 0.8             # Transparency
+    bins = 30,              
+    fill = "#2c3e50",       
+    color = "white",       
+    alpha = 0.8             
   ) +
   labs(
     title = "Histogram of Consumption Speed",
@@ -73,8 +73,7 @@ q1 <- quantile(snp_fuel_consumption$consumption_speed_1, 0.25)
 q3 <- quantile(snp_fuel_consumption$consumption_speed_1, 0.75)
 
 snp_filtered <- snp_fuel_consumption %>%
-  filter( #consumption_speed_1 >= q1 & 
-    consumption_speed_1 <= q3)
+  filter(consumption_speed_1 >= q1 & consumption_speed_1 <= q3)
 
 
 
@@ -209,16 +208,16 @@ multi_metric <- yardstick::metric_set(
 
 vessel_info_emissions %>%
   multi_metric(
-    truth = co2_emissions_tonnes_snp,     # Observed values
-    estimate = co2_emissions_tonnes_estimate  # Simulated values
+    truth = co2_emissions_tonnes_snp,     
+    estimate = co2_emissions_tonnes_estimate  
   ) |> kable()
 
 
 ggplot(vessel_info_emissions, aes(x = co2_emissions_tonnes_estimate, y = co2_emissions_tonnes_snp)) +
   geom_point(size = 3, alpha = 0.3, stroke = 0) +
-  geom_smooth(method = "lm", linewidth=0.5, color= "red", linetype = "solid", se = FALSE) +  # Trend line
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey") +  # Diagonal line
-  coord_fixed(ratio = 1, clip = "on") +  # Ensure 1:1 ratio 
+  geom_smooth(method = "lm", linewidth=0.5, color= "red", linetype = "solid", se = FALSE) +  
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey") +  
+  coord_fixed(ratio = 1, clip = "on") +  
   labs(
     x = "Simulated CO2 Emissions (Tonnes)",
     y = "Observed CO2 Emissions (Tonnes)"
@@ -227,14 +226,14 @@ ggplot(vessel_info_emissions, aes(x = co2_emissions_tonnes_estimate, y = co2_emi
   scale_y_continuous(limits = c(0, 600)) +
   theme_minimal() +
   theme(
-    panel.grid.major = element_blank(),  # Remove major grid lines
-    panel.grid.minor = element_blank(),  # Remove minor grid lines
-    axis.line = element_line(color = "black"),  # Add contour (axis lines)
-    axis.ticks = element_line(color = "black"),  # Add axis ticks
-    axis.ticks.length = unit(0.25, "cm"),  # Adjust tick length
+    panel.grid.major = element_blank(),  
+    panel.grid.minor = element_blank(),  
+    axis.line = element_line(color = "black"), 
+    axis.ticks = element_line(color = "black"),  
+    axis.ticks.length = unit(0.25, "cm"),  
     legend.position = "right",
-    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 7),  # Rotate x-axis tick labels
-    aspect.ratio = 1  # Enforce square aspect in layout regardless of device
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 7),
+    aspect.ratio = 1  
   )
 
 
