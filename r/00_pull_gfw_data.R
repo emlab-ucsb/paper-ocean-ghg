@@ -121,3 +121,14 @@ download_gfw_data(
   "sql/knn_performance_testing.sql",
   "knn_performance_testing"
 )
+
+# Download S&P consumption data for valiadtion
+pull_gfw_data_locally(bq_table_name, bq_dataset, billing_project) |>
+  readr::write_csv(glue::glue(
+    "{project_directory}/data/processed/snp_fuel_consumption_v20250404.csv"
+  ))
+
+download_gfw_data(
+  "sql/vessel_info_snp_match.sql",
+  "vessel_info_snp_match"
+)
