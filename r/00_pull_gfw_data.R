@@ -123,7 +123,11 @@ download_gfw_data(
 )
 
 # Download S&P consumption data for valiadtion
-pull_gfw_data_locally(bq_table_name, bq_dataset, billing_project) |>
+pull_gfw_data_locally(
+  bq_table_name = "snp_fuel_consumption_v20250404",
+  bq_dataset,
+  billing_project
+) |>
   readr::write_csv(glue::glue(
     "{project_directory}/data/processed/snp_fuel_consumption_v20250404.csv"
   ))
@@ -137,3 +141,32 @@ download_gfw_data(
   "sql/vessel_info_snp_match_extended.sql",
   "vessel_info_snp_match_extended"
 )
+
+
+# Download MRV EU validation data
+pull_gfw_data_locally(
+  bq_table_name = "eu_validation_data_v20241121",
+  bq_dataset,
+  billing_project
+) |>
+  readr::write_csv(glue::glue(
+    "{project_directory}/data/processed/eu_validation_data_v20241121.csv"
+  ))
+
+pull_gfw_data_locally(
+  bq_table_name = "eu_validation_trip_v20241121",
+  bq_dataset,
+  billing_project
+) |>
+  readr::write_csv(glue::glue(
+    "{project_directory}/data/processed/eu_validation_trip_v20241121.csv"
+  ))
+
+pull_gfw_data_locally(
+  bq_table_name = "eu_validation_port_v20241121",
+  bq_dataset,
+  billing_project
+) |>
+  readr::write_csv(glue::glue(
+    "{project_directory}/data/processed/eu_validation_port_v20241121.csv"
+  ))
