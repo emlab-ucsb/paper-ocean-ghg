@@ -33,7 +33,6 @@ project_directory <- glue::glue(
 vessel_info_snp_match <- read.csv(glue::glue("{project_directory}/data/processed/vessel_info_snp_match.csv"))
 snp_fuel_consumption <- read.csv(glue::glue("{project_directory}/data/processed/snp_fuel_consumption_v20250404.csv"))
 
-
 # Data exploration and filtering ----
 
 ## Consumption values 
@@ -68,16 +67,6 @@ ggplot(snp_fuel_consumption |> filter(consumption_speed_1 < 300), aes(y = consum
   ) +
   theme_minimal()
 
-## Filtering data between Q1 and Q3
-q1 <- quantile(snp_fuel_consumption$consumption_speed_1, 0.25)
-q3 <- quantile(snp_fuel_consumption$consumption_speed_1, 0.75)
-
-snp_filtered <- snp_fuel_consumption %>%
-  filter(consumption_speed_1 >= q1 & consumption_speed_1 <= q3)
-
-
-
-
 # Match vessel_info_snp_match to snp_fuel_consumption -----
 
 # Identify the duplicated imo_ais values
@@ -89,7 +78,7 @@ repeated_imo_ais <- vessel_info_snp_match %>%
 # Match selection using MMSI and vessel name
 filtered_repeated <- vessel_info_snp_match %>%
   filter(imo_ais %in% repeated_imo_ais) %>%
-  inner_join(snp_filtered, by = c("imo_ais" = "imo")) %>%
+  inner_join(snp_fuel_consumption, by = c("imo_ais" = "imo")) %>%
   filter(
     ssvid == mmsi |
     ship_name_registry == ship_name | 
@@ -101,12 +90,12 @@ vessel_info_final <- vessel_info_snp_match %>%
   filter(!imo_ais %in% repeated_imo_ais) |> 
   bind_rows(filtered_repeated) |> 
   dplyr::select(names(vessel_info_snp_match)) |> 
-  inner_join(snp_filtered, by = c("imo_ais" = "imo"))
+  inner_join(snp_fuel_consumption, by = c("imo_ais" = "imo"))
 
 ## Limit selection to direct IMO matches
 # vessel_info_final <- vessel_info_snp_match %>%
 #   filter(!imo_ais %in% repeated_imo_ais) |> 
-#   inner_join(snp_filtered, by = c("imo_ais" = "imo"))
+#   inner_join(snp_fuel_consumption, by = c("imo_ais" = "imo"))
 
 
 # Define main engine model ----
@@ -118,7 +107,7 @@ draft_correction_factor <- 0.85
 assign_weather_correction <- function(distance_from_shore_m) {
   ifelse(distance_from_shore_m > 5 * 1852, 1.15, 1.1)
 }
-weather_correction_factor <- 1.1
+weather_correction_factor <- assign_weather_correction(10000)
 
 calculate_main_engine_energy_use_kwh <- function(
   vessel_class,
@@ -163,7 +152,7 @@ calculate_main_engine_energy_use_kwh <- function(
 ## Apply function to each row
 vessel_info_energy_use <- vessel_info_final |>
   mutate(
-    main_engine_energy_kwh = calculate_main_engine_energy_use_kwh(
+    main_engine_energy_use_kwh = calculate_main_engine_energy_use_kwh(
       vessel_class,
       FALSE,
       on_fishing_list_best,
@@ -178,20 +167,32 @@ vessel_info_energy_use <- vessel_info_final |>
   )
 
 
+# Alternative dataset generated directly within BQ using vessel_info_snp_match_extended.sql
+vessel_info_snp_match_extended <- read.csv(glue::glue("{project_directory}/data/processed/vessel_info_snp_match_extended.csv"))
+vessel_info_energy_use <- vessel_info_snp_match_extended
+
+## Filtering data between Q1 and Q3. OPTIONAL if we want to remove outliers
+q1 <- quantile(snp_fuel_consumption$consumption_speed_1, 0.25)
+q3 <- quantile(snp_fuel_consumption$consumption_speed_1, 0.75)
+
+vessel_info_energy_use <- vessel_info_energy_use %>%
+  filter(consumption_speed_1 >= q1 & consumption_speed_1 <= q3)
+
 ## Convert to CO2 emissions
 ## Main engine pollutant emission factors are derived from Appendix E in Olmer et al. (2017).
 co2_ef <- 629.83333 # g pollutant / kwh
 ## To convert from fuel to CO2, I use 3.12 which is an approximation between heavy fuel oil (HFO) of 3.114 and marine diesel (MDO) 3.206 which is from table 27 of the 4th IMO study.
 co2_fuel_factor <- 3.12 # tonnes pollutant/tonne fuel
+co2_fuel_factor <- 3.114 # tonnes pollutant/tonne fuel
 
 vessel_info_emissions <- vessel_info_energy_use |>
   mutate(
-    co2_emissions_tonnes_estimate = (main_engine_energy_kwh * co2_ef) / 1e6,
+    co2_emissions_tonnes_estimate = (main_engine_energy_use_kwh * co2_ef) / 1e6,
     co2_emissions_tonnes_snp = consumption_value_1 * co2_fuel_factor
   ) |>
   dplyr::select(
     imo_ais,
-    main_engine_energy_kwh,
+    main_engine_energy_use_kwh, 
     co2_emissions_tonnes_estimate,
     co2_emissions_tonnes_snp
   )

@@ -132,3 +132,8 @@ download_gfw_data(
   "sql/vessel_info_snp_match.sql",
   "vessel_info_snp_match"
 )
+
+download_gfw_data(
+  "sql/vessel_info_snp_match_extended.sql",
+  "vessel_info_snp_match_extended"
+)
