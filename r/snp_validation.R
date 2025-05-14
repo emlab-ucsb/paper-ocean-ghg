@@ -189,13 +189,9 @@ vessel_info_emissions <- vessel_info_energy_use |>
   mutate(
     co2_emissions_tonnes_estimate = (main_engine_energy_use_kwh * co2_ef) / 1e6,
     co2_emissions_tonnes_snp = consumption_value_1 * co2_fuel_factor
-  ) |>
-  dplyr::select(
-    imo_ais,
-    main_engine_energy_use_kwh, 
-    co2_emissions_tonnes_estimate,
-    co2_emissions_tonnes_snp
-  )
+  ) 
+
+
 
 
 # Validation ----
@@ -204,15 +200,29 @@ multi_metric <- yardstick::metric_set(
   yardstick::rmse,
   yardstick::rsq,
   yardstick::rsq_trad,
-  yardstick::mae
+  yardstick::mae,
 )
 
 vessel_info_emissions %>%
-  multi_metric(
-    truth = co2_emissions_tonnes_snp,     
-    estimate = co2_emissions_tonnes_estimate  
-  ) |> kable()
+  group_by(vessel_class) %>%
+  yardstick::rsq(
+    truth = co2_emissions_tonnes_snp,
+    estimate = co2_emissions_tonnes_estimate
+  ) %>%
+  left_join(
+    vessel_info_emissions %>%
+      group_by(vessel_class) %>%
+      summarise(n = n(), .groups = "drop"),
+    by = "vessel_class"
+  ) |>
+  arrange(desc(.estimate ))|> 
+  kableExtra::kable()
 
+  vessel_info_emissions %>%
+    multi_metric(
+      truth = co2_emissions_tonnes_snp,     
+      estimate = co2_emissions_tonnes_estimate  
+    ) |> kableExtra::kable()
 
 ggplot(vessel_info_emissions, aes(x = co2_emissions_tonnes_estimate, y = co2_emissions_tonnes_snp)) +
   geom_point(size = 3, alpha = 0.3, stroke = 0) +
@@ -222,6 +232,30 @@ ggplot(vessel_info_emissions, aes(x = co2_emissions_tonnes_estimate, y = co2_emi
   labs(
     x = "Simulated CO2 Emissions (Tonnes)",
     y = "Observed CO2 Emissions (Tonnes)"
+  ) +
+  scale_x_continuous(limits = c(0, 600)) +
+  scale_y_continuous(limits = c(0, 600)) +
+  theme_minimal() +
+  theme(
+    panel.grid.major = element_blank(),  
+    panel.grid.minor = element_blank(),  
+    axis.line = element_line(color = "black"), 
+    axis.ticks = element_line(color = "black"),  
+    axis.ticks.length = unit(0.25, "cm"),  
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 7),
+    aspect.ratio = 1  
+  )
+
+
+ggplot(vessel_info_emissions, aes(x = co2_emissions_tonnes_estimate, y = co2_emissions_tonnes_snp)) +
+  geom_point(size = 3, alpha = 0.3, stroke = 0) +
+  geom_smooth(method = "lm", linewidth=0.5, color= "red", linetype = "solid", se = FALSE) +  
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey") +  
+  coord_fixed(ratio = 1, clip = "on") +  
+  labs(
+    x = "AIS-model CO2 Emissions (Tonnes)",
+    y = "S&P derived CO2 Emissions (Tonnes)"
   ) +
   scale_x_continuous(limits = c(0, 600)) +
   scale_y_continuous(limits = c(0, 600)) +
