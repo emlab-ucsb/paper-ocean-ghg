@@ -6,6 +6,29 @@ library(purrr)
 library(yardstick)
 
 
+data_directory_base <- ifelse(
+  Sys.info()["nodename"] == "quebracho" | Sys.info()["nodename"] == "sequoia",
+  "/home/emlab",
+  # Otherwise, set the directory for local machines based on the OS
+  # If using Mac OS, the directory will be automatically set as follows
+  ifelse(
+    Sys.info()["sysname"] == "Darwin",
+    "/Users/Shared/nextcloud/emLab",
+    # If using Windows, the directory will be automatically set as follows
+    ifelse(
+      Sys.info()["sysname"] == "Windows",
+      "G:/Shared\ drives/nextcloud/emLab",
+      # If using Linux, will need to manually modify the following directory path based on their user name
+      # Replace your_username with your local machine user name
+      "/home/your_username/Nextcloud"
+    )
+  )
+)
+
+project_directory <- glue::glue(
+  "{data_directory_base}/projects/current-projects/paper-ocean-ghg"
+)
+
 eu_validation_data <- read.csv(glue::glue("{project_directory}/data/processed/eu_validation_data_v20241121.csv"))
 eu_validation_port <- read.csv(glue::glue("{project_directory}/data/processed/eu_validation_port_v20241121.csv"))
 eu_validation_trip <- read.csv(glue::glue("{project_directory}/data/processed/eu_validation_trip_v20241121.csv"))
@@ -180,7 +203,45 @@ results_by_ship_type %>%
   group_by(ship_type) %>%
   slice_max(order_by = rsq_trad, n = 1, with_ties = FALSE) %>%
   ungroup() %>%
-  arrange(desc(rsq_trad))
+  arrange(desc(rsq_trad)) #|> 
+  # rename(n = vessels_included) |> 
+  # dplyr::select(ship_type, rsq, rsq_trad, n)
+
+
+## Fixed thresshold of 5%
+
+multi_metric <- yardstick::metric_set(
+  yardstick::rsq,
+  yardstick::rsq_trad
+)
+
+single_threshold <- 0.05
+
+filtered_df <- merged_df %>%
+  filter(diff / max < single_threshold)
+
+filtered_df %>%
+  group_by(ship_type) %>%
+    multi_metric(
+    truth = co2_emissions_from_navigation,
+    estimate = total_emissions_co2_mt_trip
+  ) %>%
+  left_join(
+    filtered_df %>%
+      group_by(ship_type) %>%
+      summarise(n = n(), .groups = "drop"),
+    by = "ship_type"
+  ) |> 
+  pivot_wider(
+    id_cols = c(ship_type, .estimator, n),
+    names_from = .metric,
+    values_from = .estimate
+  ) |> 
+  dplyr::select(ship_type, n, rsq, rsq_trad) |> 
+  mutate(threshold = single_threshold) |> 
+  arrange(desc(rsq_trad)) |>
+  kableExtra::kable()
+
 
 
 # Replicating IMO validation ----
