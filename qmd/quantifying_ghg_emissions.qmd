@@ -44,26 +44,6 @@ theme_plot <- function(){
 # Set map projection for all map figures
 map_projection <- "+proj=eqearth"
 
-# Set consistent theme for maps
-# Based loosely off fishwatchr::theme_gfw_map()
-# https://github.com/GlobalFishingWatch/fishwatchr/blob/master/R/theme_gfw_map.R
-theme_map <- function(){
-  theme_minimal() %+replace%
-    theme(panel.background = element_rect(fill = "black"),
-          legend.position = "bottom",
-          legend.direction = "horizontal",
-          plot.title = element_text(hjust = 0.5),
-          panel.grid.minor = element_line(color = "black"),
-          panel.grid.major = element_line(color = "black"),
-          axis.text.x = element_blank(),
-          axis.ticks.x = element_blank(),
-          axis.title.y = element_blank(),
-          axis.text.y = element_blank(),
-          axis.ticks.y = element_blank(),
-          strip.background = element_rect(fill=NA,color=NA),
-          plot.margin = unit(c(0.25,0,0,0), "cm"))
-}
-
 # Create bounding box of globe, for making black map backgrounds
 lats <- c(90:-90, -90:90, 90)
 longs <- c(rep(c(180, -180), each = 181), 180)
@@ -1999,7 +1979,8 @@ time_series_nb_vessels_pixel |>
 ### Outside and withing S1 footprint ratios
 
 ```{r}
-
+#| label: fig-map-dark-to-ais-s1-ratio
+#| fig-cap: Mean ratio value within and outside S1 footprint, aggregated across all years, and vessel lengths, for representation purposes. Model inputs are disaggregated by pixel, month, vessel class and length bin.
 
 create_filtered_dfs <- function(fishing_status) {
   if (!is.logical(fishing_status)) stop("fishing_status must be TRUE or FALSE")
@@ -2050,15 +2031,24 @@ combined_data <- bind_rows(
 combined_data$footprint <- factor(combined_data$footprint, levels = c("Within S1 footprint", "Outside S1 footprint"))
 
 p_combined <- ggplot(combined_data) +
-  geom_tile(aes(x = lon_bin, y = lat_bin, fill = mean_ratio)) +
+  geom_sf(data = world_bbox_sf, fill = "black")  +
+    ggspatial::geom_spatial_tile(aes(x = lon_bin+0.5,
+                                     y = lat_bin+0.5,
+                                     fill = mean_ratio,
+                                     color = mean_ratio))+
+    theme_void() +
   geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
   scale_fill_viridis_c("Average ratios (log scale)",
                        trans = "log10",
                        option = "mako",
                        na.value = "black",
+                       limits = scale_limits)  +
+  scale_color_viridis_c("Average ratios (log scale)",
+                       trans = "log10",
+                       option = "mako",
+                       na.value = "black",
                        limits = scale_limits) +
   labs(x = '', y = '') +
-  theme_map() +
   theme(legend.position = "bottom") +
   guides(fill = guide_colorbar(title.position = "top",
                                title.hjust = 0.5,
@@ -2068,7 +2058,8 @@ p_combined <- ggplot(combined_data) +
                                barheight = unit(0.5, "cm")))  +
   scale_x_continuous(expand = c(0, 1)) +
   scale_y_continuous(expand = c(0, 1)) +
-  facet_grid(rows = vars(fishing_status), cols = vars(footprint))
+  facet_grid(rows = vars(fishing_status), cols = vars(footprint))+
+    coord_sf(crs = map_projection)
 
 p_combined
 ```
