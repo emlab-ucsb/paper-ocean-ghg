@@ -93,9 +93,6 @@ merged_df$max <- pmax(merged_df$total_time_spent_at_sea_hours_eu,
 
 # Function to assess R2 over a range of thresholds
 
-
-
-
 rsq_with_threshold <- function(data, threshold, truth, estimate) {
   
   if (threshold != 0) {

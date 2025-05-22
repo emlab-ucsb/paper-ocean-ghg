@@ -133,8 +133,13 @@ pull_gfw_data_locally(
   ))
 
 download_gfw_data(
-  "sql/vessel_info_snp_match.sql",
+  "sql/vessel_info_snp_match.sql", # using vessel_info_v20241121
   "vessel_info_snp_match"
+)
+
+download_gfw_data(
+  "sql/vessel_info_snp_match.sql", # using vessel_info_rf_experimental_v20250516
+  "vessel_info_snp_match_updated_metadata"
 )
 
 download_gfw_data(
