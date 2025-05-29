@@ -175,3 +175,11 @@ pull_gfw_data_locally(
   readr::write_csv(glue::glue(
     "{project_directory}/data/processed/eu_validation_port_v20241121.csv"
   ))
+
+
+# Download trip emissions estimates to replicate ICCT validation
+  download_gfw_data(
+    "sql/annual_trip_emissions_estimates_for_validation.sql",
+    "annual_trip_emissions_estimates_for_validation"
+  )
+
