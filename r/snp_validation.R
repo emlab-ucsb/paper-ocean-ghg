@@ -93,9 +93,9 @@ vessel_info_final <- vessel_info_snp_match %>%
   inner_join(snp_fuel_consumption, by = c("imo_ais" = "imo"))
 
 ## Limit selection to direct IMO matches
-# vessel_info_final <- vessel_info_snp_match %>%
-#   filter(!imo_ais %in% repeated_imo_ais) |> 
-#   inner_join(snp_fuel_consumption, by = c("imo_ais" = "imo"))
+vessel_info_final <- vessel_info_snp_match %>%
+  filter(!imo_ais %in% repeated_imo_ais) |> 
+  inner_join(snp_fuel_consumption, by = c("imo_ais" = "imo"))
 
 
 # Define main engine model ----
@@ -166,7 +166,6 @@ vessel_info_energy_use <- vessel_info_final |>
     )
   )
 
-
 # Alternative dataset generated directly within BQ using vessel_info_snp_match_extended.sql
 vessel_info_snp_match_extended <- read.csv(glue::glue("{project_directory}/data/processed/vessel_info_snp_match_extended.csv"))
 vessel_info_energy_use <- vessel_info_snp_match_extended
@@ -190,8 +189,6 @@ vessel_info_emissions <- vessel_info_energy_use |>
     co2_emissions_tonnes_estimate = (main_engine_energy_use_kwh * co2_ef) / 1e6,
     co2_emissions_tonnes_snp = consumption_value_1 * co2_fuel_factor
   ) 
-
-
 
 
 # Validation ----
@@ -289,5 +286,160 @@ ggplot(vessel_info_emissions, aes(x = factor(1), y = percentage_difference)) +
   )
 
 
+# Simplified model version ----
+# Following alternative steps suggested by Mark Powell (https://docs.google.com/document/d/1Wbge4KvavuPIJfGgWh3hMo_Tbs6pFuAoMz0iQQLSf5M/edit?tab=t.0)
 
 
+# Simplified version of the model for validation purposes
+
+simplified_model <- function(
+  main_engine_power_kw,
+  speed_knots, # Consumption speed from S&P
+  design_speed_knots, # In Mark's example he used max speeds from S&P data
+  emissions_factor,
+  hours
+) {
+  main_engine_power_kw *
+    (speed_knots / design_speed_knots)^3 *
+    emissions_factor *
+    hours
+}
+
+vessel_info_energy_use_simplified <- vessel_info_final |>
+  mutate(
+    co2_emissions_tonnes_estimate = simplified_model(
+      main_engine_power_kw,
+      consumption_speed_1,
+      design_speed_knots,
+      emissions_factor = 0.00063,
+      hours = 24
+    ),
+    co2_emissions_tonnes_snp = consumption_value_1 * 3.12
+)
+
+multi_metric <- yardstick::metric_set(
+  yardstick::rmse,
+  yardstick::rsq,
+  yardstick::rsq_trad,
+  yardstick::mae,
+)
+  
+vessel_info_emissions_simplified %>%
+  multi_metric(
+    truth = co2_emissions_tonnes_snp,     
+    estimate = co2_emissions_tonnes_estimate  
+  ) |> kableExtra::kable()
+
+
+ggplot(vessel_info_emissions_simplified, aes(x = co2_emissions_tonnes_estimate, y = co2_emissions_tonnes_snp)) +
+  geom_point(size = 3, alpha = 0.3, stroke = 0) +
+  geom_smooth(method = "lm", linewidth=0.5, color= "red", linetype = "solid", se = FALSE) +  
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey") +  
+  coord_fixed(ratio = 1, clip = "on") +  
+  labs(
+    x = "Simulated CO2 Emissions (Tonnes)",
+    y = "Observed CO2 Emissions (Tonnes)"
+  ) +
+  scale_x_continuous(limits = c(0, 600)) +
+  scale_y_continuous(limits = c(0, 600)) +
+  theme_minimal() +
+  theme(
+    panel.grid.major = element_blank(),  
+    panel.grid.minor = element_blank(),  
+    axis.line = element_line(color = "black"), 
+    axis.ticks = element_line(color = "black"),  
+    axis.ticks.length = unit(0.25, "cm"),  
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 7),
+    aspect.ratio = 1  
+  )
+
+
+
+# Using updated metadata from rf_predictions_v20250516 ----
+
+vessel_info_snp_match_updated_metadata <- read.csv(glue::glue("{project_directory}/data/processed/vessel_info_snp_match_updated_metadata.csv"))
+
+# # Identify the duplicated imo_ais values
+# repeated_imo_ais <- vessel_info_snp_match_updated_metadata %>%
+#   count(imo_ais) %>%
+#   filter(n > 1) %>%
+#   pull(imo_ais)
+
+# # Match selection using MMSI and vessel name
+# filtered_repeated <- vessel_info_snp_match_updated_metadata %>%
+#   filter(imo_ais %in% repeated_imo_ais) %>%
+#   inner_join(snp_fuel_consumption, by = c("imo_ais" = "imo")) %>%
+#   filter(
+#     ssvid == mmsi |
+#     ship_name_registry == ship_name | 
+#     ship_name_ais == ship_name
+#   )
+
+# # Generate final dataset of matches
+# vessel_info_final <- vessel_info_snp_match_updated_metadata %>%
+#   filter(!imo_ais %in% repeated_imo_ais) |> 
+#   bind_rows(filtered_repeated) |> 
+#   dplyr::select(names(vessel_info_snp_match_updated_metadata)) |> 
+#   inner_join(snp_fuel_consumption, by = c("imo_ais" = "imo"))
+
+## Alternatively: Limit selection to direct IMO matches
+vessel_info_final <- vessel_info_snp_match_updated_metadata %>%
+  filter(!imo_ais %in% repeated_imo_ais) |> 
+  inner_join(snp_fuel_consumption, by = c("imo_ais" = "imo"))
+
+
+## Apply function to each row
+vessel_info_energy_use <- vessel_info_final |>
+  mutate(
+    main_engine_energy_use_kwh = calculate_main_engine_energy_use_kwh(
+      vessel_class,
+      FALSE,
+      on_fishing_list_best,
+      24,
+      main_engine_power_kw_rf,
+      consumption_speed_1,
+      design_speed_knots_rf,
+      hull_fouling_correction_factor,
+      weather_correction_factor,
+      draft_correction_factor
+    )
+  )
+
+co2_ef <- 629.83333 # g pollutant / kwh
+co2_fuel_factor <- 3.12 # tonnes pollutant/tonne fuel
+
+vessel_info_emissions <- vessel_info_energy_use |>
+  mutate(
+    co2_emissions_tonnes_estimate = (main_engine_energy_use_kwh * co2_ef) / 1e6,
+    co2_emissions_tonnes_snp = consumption_value_1 * co2_fuel_factor
+  ) 
+
+vessel_info_emissions %>%
+  multi_metric(
+    truth = co2_emissions_tonnes_snp,     
+    estimate = co2_emissions_tonnes_estimate  
+  ) |> kableExtra::kable()
+
+ggplot(vessel_info_emissions, aes(x = co2_emissions_tonnes_estimate, y = co2_emissions_tonnes_snp)) +
+  geom_point(size = 3, alpha = 0.3, stroke = 0) +
+  geom_smooth(method = "lm", linewidth=0.5, color= "red", linetype = "solid", se = FALSE) +  
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey") +  
+  coord_fixed(ratio = 1, clip = "on") +  
+  labs(
+    x = "Simulated CO2 Emissions (Tonnes)",
+    y = "Observed CO2 Emissions (Tonnes)"
+  ) +
+  scale_x_continuous(limits = c(0, 600)) +
+  scale_y_continuous(limits = c(0, 600)) +
+  theme_minimal() +
+  theme(
+    panel.grid.major = element_blank(),  
+    panel.grid.minor = element_blank(),  
+    axis.line = element_line(color = "black"), 
+    axis.ticks = element_line(color = "black"),  
+    axis.ticks.length = unit(0.25, "cm"),  
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 7),
+    aspect.ratio = 1  
+  )

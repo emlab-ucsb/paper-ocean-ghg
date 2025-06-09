@@ -32,13 +32,14 @@ project_directory <- glue::glue(
 eu_validation_data <- read.csv(glue::glue("{project_directory}/data/processed/eu_validation_data_v20241121.csv"))
 eu_validation_port <- read.csv(glue::glue("{project_directory}/data/processed/eu_validation_port_v20241121.csv"))
 eu_validation_trip <- read.csv(glue::glue("{project_directory}/data/processed/eu_validation_trip_v20241121.csv"))
-                      
+
+
 
 
 repeated_imo <- eu_validation_trip %>%
   distinct(imo_number, ssvid) %>%                   
   count(imo_number) %>%                             
-  filter(n > 2) |>
+  filter(n > 1) |>
   pull(imo_number)
 
 # eu_validation_trip |> filter(imo_number == 9904510) |> distinct(imo_number, ssvid)
@@ -92,9 +93,6 @@ merged_df$max <- pmax(merged_df$total_time_spent_at_sea_hours_eu,
 
 
 # Function to assess R2 over a range of thresholds
-
-
-
 
 rsq_with_threshold <- function(data, threshold, truth, estimate) {
   
@@ -306,7 +304,16 @@ ggplot(merged_df, aes(x = ship_type, y = co2_error_percent)) +
 
 merged_df_ratio <- merged_df %>% 
   mutate(gfw_ratio = total_emissions_co2_mt_trip/total_time_spent_at_sea_hours_gfw,
-         eu_ratio = co2_emissions_from_navigation/total_time_spent_at_sea_hours_eu)
+         eu_ratio = co2_emissions_from_navigation/total_time_spent_at_sea_hours_eu) |> 
+  filter(gfw_ratio < 7, eu_ratio < 7)
+
+
+ggplot(merged_df_ratio, aes(x = eu_ratio, y = gfw_ratio)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = TRUE) +
+  labs(x = "EU data CO2 (mt)",
+       y = "Our CO2 estimates (mt)") +
+  theme_minimal()
 
 
 merged_df_ratio <- merged_df_ratio %>%
@@ -334,10 +341,133 @@ rsq_trad(merged_df_ratio,
 
 
 
+# Replicating ICCT validation ----
+
+# EU-MRV emissions
+mrv_2022 <- readxl::read_xlsx(glue::glue("{project_directory}/data/processed/2022-v236-28052025-EU MRV Publication of information.xlsx"),
+  skip =2) |> janitor::clean_names() |>
+  mutate(across(where(is.character), ~na_if(., "N/A"))) |>
+  mutate(across(where(is.character), ~type.convert(., as.is = TRUE)))
+
+mrv_2022_container <- mrv_2022 |> 
+  filter(ship_type == "Container ship") |> 
+  dplyr::select(imo_number, ship_type, annual_average_co2_emissions_per_distance_kg_co2_n_mile) |> 
+  mutate(annual_average_co2_emissions_per_distance_kg_co2_n_mile = as.numeric(annual_average_co2_emissions_per_distance_kg_co2_n_mile))
 
 
+# Our trip emissions
+trip_emissions_2022 <- read.csv(glue::glue("{project_directory}/data/processed/annual_trip_emissions_estimates_for_validation.csv")) |> 
+  filter(year == 2022) 
+
+repeated_imo <- trip_emissions_2022 %>%
+  distinct(imo_number, ssvid) %>%                   
+  count(imo_number) %>%                             
+  filter(n > 1) |>
+  pull(imo_number)
+
+trip_emissions_2022_clean <- trip_emissions_2022 |> 
+  filter(!imo_number %in% repeated_imo) |>
+  group_by(imo_number, ssvid, year, tonnage_gt) |>
+  summarise(total_time_spent_at_sea_hours = sum(total_time_spent_at_sea_hours, rm.na = TRUE),
+            total_emissions_co2_mt = sum(total_emissions_co2_mt, rm.na = TRUE),
+            total_distance_nm = sum(total_distance_nm, rm.na = TRUE)) |>
+  ungroup()
+
+# Considering our port emissions
+# eu_validation_port <- read.csv(glue::glue("{project_directory}/data/processed/eu_validation_port_v20241121.csv"))
+
+# port_emissions_2022_clean <- eu_validation_port |> 
+#   filter(year == 2022,
+#          imo_number %in% trip_emissions_2022_clean$imo_number)
+
+# # Combined estimates
+# gfw_emissions <- port_emissions_2022_clean |>
+#   inner_join(trip_emissions_2022_clean, by = "imo_number") |> 
+#   mutate(total_emissions_co2_mt = total_emissions_co2_mt.x + total_emissions_co2_mt.y)
+
+# Calculating emission intensity
+emission_intensities <- trip_emissions_2022_clean |>
+  inner_join(mrv_2022_container, by = "imo_number") |>
+  # filter(tonnage_gt < quantile(tonnage_gt, 0.75),
+  #        tonnage_gt > quantile(tonnage_gt, 0.25)) |> 
+  mutate(
+    eu_intensity = (annual_average_co2_emissions_per_distance_kg_co2_n_mile * 1e3) *
+      (1 / tonnage_gt),
+    gfw_intensity = (total_emissions_co2_mt * 1e6) /
+      (total_distance_nm * tonnage_gt),
+    gfw_emissions_distance = total_emissions_co2_mt * 1000 / total_distance_nm,
+    eu_emissions_distance = annual_average_co2_emissions_per_distance_kg_co2_n_mile
+  ) |>
+  dplyr::select(imo_number, eu_intensity, gfw_intensity, eu_emissions_distance, gfw_emissions_distance)
 
 
+rsq_trad(emission_intensities,
+  truth = eu_intensity,
+  estimate = gfw_intensity)
+
+rsq(emission_intensities,
+  truth = eu_intensity,
+  estimate = gfw_intensity)
+
+rsq(emission_intensities,
+  truth = eu_emissions_distance,
+  estimate = gfw_emissions_distance)
 
 
+rsq_trad(emission_intensities,
+  truth = eu_emissions_distance,
+  estimate = gfw_emissions_distance)
 
+
+ggplot(emission_intensities, aes(x = gfw_emissions_distance, y = eu_emissions_distance)) +
+  geom_point(size = 3, alpha = 0.3, stroke = 0) +
+  geom_smooth(method = "lm", linewidth=0.5, color= "red", linetype = "solid", se = FALSE) +  
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey") +  
+  coord_fixed(ratio = 1, clip = "on") +  
+  labs(
+    x = "Intensity (GFW)",
+    y = "Intensity (MRV)"
+  ) +
+  scale_x_continuous(limits = c(0, 2000)) +
+  scale_y_continuous(limits = c(0, 2000)) +
+  theme_minimal() +
+  theme(
+    panel.grid.major = element_blank(),  
+    panel.grid.minor = element_blank(),  
+    axis.line = element_line(color = "black"), 
+    axis.ticks = element_line(color = "black"),  
+    axis.ticks.length = unit(0.25, "cm"),  
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 7),
+    aspect.ratio = 1  
+  )
+
+ggplot(emission_intensities, aes(x = gfw_intensity, y = eu_intensity)) +
+  geom_point(size = 3, alpha = 0.3, stroke = 0) +
+  geom_smooth(method = "lm", linewidth=0.5, color= "red", linetype = "solid", se = FALSE) +  
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey") +  
+  coord_fixed(ratio = 1, clip = "on") +  
+  labs(
+    x = "Intensity (GFW)",
+    y = "Intensity (MRV)"
+  ) +
+  scale_x_continuous(limits = c(0, 80)) +
+  scale_y_continuous(limits = c(0, 80)) +
+  theme_minimal() +
+  theme(
+    panel.grid.major = element_blank(),  
+    panel.grid.minor = element_blank(),  
+    axis.line = element_line(color = "black"), 
+    axis.ticks = element_line(color = "black"),  
+    axis.ticks.length = unit(0.25, "cm"),  
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 7),
+    aspect.ratio = 1  
+  )
+
+  trip_emissions_2022 |> 
+    filter(imo_number == 9103386)
+
+
+  mrv_2022 |> 
+    filter(imo_number == 9103386) |> View()
