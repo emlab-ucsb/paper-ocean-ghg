@@ -418,7 +418,7 @@ all_tranportation_data <- land_based_transportation_emissions_edgar |>
     annual_emissions |>
       dplyr::filter(pollutant == "co2", fleet == "Total") |>
       dplyr::rename(emissions_co2_mt = emissions_mt) |>
-      dplyr::mutate(data_source = "Marine (AIS plus S1)") |>
+      dplyr::mutate(data_source = "Marine (AIS + S1)") |>
       dplyr::select(-c(fleet, pollutant))
   )
 
@@ -431,8 +431,8 @@ all_tranportation_data_starting <- all_tranportation_data |>
 
 # Use Okabe-Ito colorblind-friendly colors
 all_data_source_color_palette <- c(
-  "Marine (AIS plus S1)" = paletteer::paletteer_d("colorblindr::OkabeIto")[[5]],
-  "AIS plus S1" = paletteer::paletteer_d("colorblindr::OkabeIto")[[5]],
+  "Marine (AIS + S1)" = paletteer::paletteer_d("colorblindr::OkabeIto")[[5]],
+  "AIS + S1" = paletteer::paletteer_d("colorblindr::OkabeIto")[[5]],
   "Terrestrial (EDGAR)" = paletteer::paletteer_d("colorblindr::OkabeIto")[[6]],
   "Terrestrial (IEA)" = paletteer::paletteer_d("colorblindr::OkabeIto")[[1]],
   "AIS (broadcasting)" = paletteer::paletteer_d("colorblindr::OkabeIto")[[3]],
@@ -483,7 +483,7 @@ emissions_comparison_figure <- all_tranportation_data |>
     breaks = c(
       "Terrestrial (EDGAR)",
       "Terrestrial (IEA)",
-      "Marine (AIS plus S1)"
+      "Marine (AIS + S1)"
     )
   )
 
@@ -514,7 +514,7 @@ emissions_comparison_figure_normalized <- all_tranportation_data_normalized |>
   scale_color_manual(
     values = all_data_source_color_palette,
     breaks = c(
-      "Marine (AIS plus S1)",
+      "Marine (AIS + S1)",
       "Terrestrial (EDGAR)",
       "Terrestrial (IEA)"
     )
@@ -527,13 +527,13 @@ emissions_comparison_figure_normalized <- all_tranportation_data_normalized |>
 
 edgar_comparison <- all_tranportation_data_normalized |>
   dplyr::filter(
-    data_source %in% c("Marine (AIS plus S1)", "Terrestrial (EDGAR)")
+    data_source %in% c("Marine (AIS + S1)", "Terrestrial (EDGAR)")
   ) |>
   dplyr::filter(year == 2023) |>
   dplyr::select(-year) |>
   dplyr::mutate(
     data_source = ifelse(
-      data_source == "Marine (AIS plus S1)",
+      data_source == "Marine (AIS + S1)",
       "ocean_gfw",
       "land_edgar"
     )
@@ -594,7 +594,7 @@ total_percent_change_by_fleet <- annual_emissions |>
   dplyr::mutate(percent_change = 100 * (`2024` - `2016`) / `2016`) |>
   dplyr::mutate(
     fleet = dplyr::case_when(
-      fleet == "Total" ~ "AIS plus S1",
+      fleet == "Total" ~ "AIS + S1",
       fleet == "AIS-broadcasting" ~ "AIS (broadcasting)",
       TRUE ~ "S1 (non-broadcasting)"
     )
@@ -604,7 +604,7 @@ total_annual_emissions_by_fleet_fig <- annual_emissions |>
   dplyr::filter(pollutant == "co2") |>
   dplyr::mutate(
     fleet = dplyr::case_when(
-      fleet == "Total" ~ "AIS plus S1",
+      fleet == "Total" ~ "AIS + S1",
       fleet == "AIS-broadcasting" ~ "AIS (broadcasting)",
       TRUE ~ "S1 (non-broadcasting)"
     )
@@ -621,7 +621,7 @@ total_annual_emissions_by_fleet_fig <- annual_emissions |>
   ) +
   scale_color_manual(
     values = all_data_source_color_palette,
-    breaks = c("AIS plus S1", "AIS (broadcasting)", "S1 (non-broadcasting)")
+    breaks = c("AIS + S1", "AIS (broadcasting)", "S1 (non-broadcasting)")
   ) +
   theme_plot() +
   labs(
@@ -653,7 +653,7 @@ normalized_annual_emissions_by_fleet_fig <- annual_emissions |>
   ) |>
   dplyr::mutate(
     fleet = dplyr::case_when(
-      fleet == "Total" ~ "AIS plus S1",
+      fleet == "Total" ~ "AIS + S1",
       fleet == "AIS-broadcasting" ~ "AIS (broadcasting)",
       TRUE ~ "S1 (non-broadcasting)"
     )
@@ -668,7 +668,7 @@ normalized_annual_emissions_by_fleet_fig <- annual_emissions |>
   ) +
   scale_color_manual(
     values = all_data_source_color_palette,
-    breaks = c("AIS (broadcasting)", "AIS plus S1", "S1 (non-broadcasting)")
+    breaks = c("AIS (broadcasting)", "AIS + S1", "S1 (non-broadcasting)")
   ) +
   theme_plot() +
   labs(
@@ -727,7 +727,7 @@ all_tranportation_data_full_sectors <- transportation_emissions_edgar_full_secto
     annual_emissions |>
       dplyr::filter(pollutant == "co2", fleet == "Total") |>
       dplyr::rename(emissions_co2_mt = emissions_mt) |>
-      dplyr::mutate(data_source = "AIS plus S1") |>
+      dplyr::mutate(data_source = "AIS + S1") |>
       dplyr::select(-fleet)
   ) |>
   dplyr::mutate(
@@ -766,7 +766,7 @@ all_tranportation_data_full_sectors |>
   facet_wrap(sector ~ ., ncol = 2, scales = "free") +
   scale_color_manual(
     values = all_data_source_color_palette,
-    breaks = c("AIS plus S1", "EIA", "EDGAR")
+    breaks = c("AIS + S1", "EIA", "EDGAR")
   )
 ```
 
@@ -811,7 +811,7 @@ all_tranportation_data_full_sectors |>
   facet_wrap(sector ~ ., ncol = 2, scales = "free") +
   scale_color_manual(
     values = all_data_source_color_palette,
-    breaks = c("AIS plus S1", "EIA", "EDGAR")
+    breaks = c("AIS + S1", "EIA", "EDGAR")
   )
 
 ```
@@ -895,35 +895,35 @@ co2_emissions_map_fig
 
 ```{r}
 # For each pollutant, estimate how much emissions are underestimated by just using AIS
-# As compared to using AIS plus S1
+# As compared to using AIS + S1
 ais_scale_underestimation_2024 <- total_percent_change_by_fleet |>
   dplyr::filter(fleet != "S1 (non-broadcasting)") |>
   dplyr::select(fleet, pollutant, `2024`) |>
   tidyr::pivot_wider(names_from = "fleet", values_from = `2024`) |>
   dplyr::mutate(
-    ais_underestimation_2024 = (1 - `AIS (broadcasting)` / `AIS plus S1`) |>
+    ais_underestimation_2024 = (1 - `AIS (broadcasting)` / `AIS + S1`) |>
       scales::percent()
   ) |>
   dplyr::rename(
     emissions_mt_2024_ais = `AIS (broadcasting)`,
-    emissions_mt_2024_ais_s1 = `AIS plus S1`
+    emissions_mt_2024_ais_s1 = `AIS + S1`
   )
 
 # For each pollutant, estimate how much the 2016->2024 trend in emissions is underestimated by just using AIS
-# As compared to using AIS plus S1
+# As compared to using AIS + S1
 ais_trend_overestimation_2016_2024 <- total_percent_change_by_fleet |>
   dplyr::filter(fleet != "S1 (non-broadcasting)") |>
   dplyr::select(fleet, pollutant, percent_change) |>
   tidyr::pivot_wider(names_from = "fleet", values_from = percent_change) |>
   dplyr::mutate(
     trend_overestimation_2016_2024 = (`AIS (broadcasting)` /
-      `AIS plus S1` -
+      `AIS + S1` -
       1) |>
       scales::percent()
   ) |>
   dplyr::rename(
     trend_2016_2024_ais = `AIS (broadcasting)`,
-    trend_2016_2024_ais_s1 = `AIS plus S1`
+    trend_2016_2024_ais_s1 = `AIS + S1`
   )
 
 # Put all this information together
