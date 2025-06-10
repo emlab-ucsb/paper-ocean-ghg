@@ -454,7 +454,7 @@ all_tranportation_data_normalized <- all_tranportation_data |>
 # Summarize total emissions by data source for 2023, for putting on figure
 emissions_comparison_figure <- all_tranportation_data |>
   ggplot(aes(x = year, y = emissions_co2_mt, color = data_source)) +
-  geom_line() +
+  geom_line(linewidth = 1.05) +
   scale_x_continuous(
     breaks = unique(all_tranportation_data_normalized$year),
     limits = c(2016, 2024)
@@ -490,7 +490,7 @@ emissions_comparison_figure <- all_tranportation_data |>
 emissions_comparison_figure_normalized <- all_tranportation_data_normalized |>
   ggplot(aes(x = year, y = emissions_co2_mt_normalized, color = data_source)) +
   geom_hline(yintercept = 0, linetype = 2) +
-  geom_line() +
+  geom_line(linewidth = 1.1) +
   scale_x_continuous(
     breaks = unique(all_tranportation_data_normalized$year),
     limits = c(2016, 2024)
@@ -610,7 +610,7 @@ total_annual_emissions_by_fleet_fig <- annual_emissions |>
     )
   ) |>
   ggplot(aes(x = year, y = emissions_mt, color = fleet)) +
-  geom_line() +
+  geom_line(linewidth = 1.1) +
   scale_y_continuous(
     labels = scales::unit_format(unit = "B", scale = 1e-9),
     limits = c(0, 1.5e9)
@@ -660,7 +660,7 @@ normalized_annual_emissions_by_fleet_fig <- annual_emissions |>
   ) |>
   ggplot(aes(x = year, y = emissions_co2_mt_normalized, color = fleet)) +
   geom_hline(yintercept = 0, linetype = 2) +
-  geom_line() +
+  geom_line(linewidth = 1.1) +
   scale_y_continuous(labels = scales::percent, limits = c(-0.2, 0.35)) +
   scale_x_continuous(
     breaks = unique(annual_emissions$year),
@@ -742,7 +742,7 @@ all_tranportation_data_full_sectors <- transportation_emissions_edgar_full_secto
 
 all_tranportation_data_full_sectors |>
   ggplot(aes(x = year, y = emissions_co2_mt, color = data_source)) +
-  geom_line() +
+  geom_line(linewidth = 1.1) +
   scale_x_continuous(
     breaks = unique(all_tranportation_data_full_sectors$year),
     limits = c(2016, 2024)
@@ -790,7 +790,7 @@ all_tranportation_data_full_sectors |>
   ) |>
   ggplot(aes(x = year, y = emissions_co2_mt_normalized, color = data_source)) +
   geom_hline(yintercept = 0, linetype = 2) +
-  geom_line() +
+  geom_line(linewidth = 1.1) +
   scale_x_continuous(
     breaks = unique(all_tranportation_data_full_sectors$year),
     limits = c(2016, 2024)
@@ -1101,7 +1101,7 @@ pollutant_timeseries <- total_monthly_emissions_by_pollutant |>
     pollutant = forcats::fct_relevel(pollutant, pollutant_factor_levels)
   ) |>
   ggplot(aes(x = month, y = emissions_mt)) +
-  geom_line() +
+  geom_line(linewidth = 1.1) +
   scale_y_continuous(labels = scales::comma) +
   theme_plot() +
   labs(x = "", y = "Monthly emissions (MT)") +
@@ -1325,7 +1325,7 @@ time_series_predicted_decomposition_df <- final_annual_prediction_dataset |>
 
 time_series_predicted_decomposition <- time_series_predicted_decomposition_df |>
   ggplot(aes(x = year, y = normalized_value, color = name)) +
-  geom_line() +
+  geom_line(linewidth = 1.1) +
   guides(color = guide_legend(reverse = TRUE)) +
   scale_color_manual(
     "Prediction scenario",
@@ -1392,7 +1392,7 @@ annual_vessel_summary_starting <- annual_vessel_summary_by_year |>
 
 ais_fleet_summary_absolute <- annual_vessel_summary_by_year |>
   ggplot(aes(x = year, y = value)) +
-  geom_line() +
+  geom_line(linewidth = 1.1) +
   facet_wrap(name ~ ., ncol = 1, scales = "free_y") +
   scale_y_continuous(
     labels = scales::unit_format(unit = "k", scale = 1e-3),
@@ -1410,7 +1410,7 @@ ais_fleet_summary_relative_df <- annual_vessel_summary_by_year |>
 ais_fleet_summary_relative <- ais_fleet_summary_relative_df |>
   ggplot(aes(x = year, y = value_normalized)) +
   geom_hline(yintercept = 0, linetype = 2) +
-  geom_line() +
+  geom_line(linewidth = 1.1) +
   facet_wrap(name ~ ., ncol = 1, scales = "free_y") +
   scale_y_continuous(labels = scales::percent, limits = c(-.2, 0.8)) +
   scale_x_continuous(breaks = unique(annual_vessel_summary_by_year$year)) +
@@ -1643,7 +1643,7 @@ annual_vessel_summary_by_year |>
       )
   ) |>
   ggplot(aes(x = year, y = value)) +
-  geom_line() +
+  geom_line(linewidth = 1.1) +
   geom_text(
     data = total_percent_change_vessel_summary |>
       dplyr::filter(
@@ -1739,7 +1739,7 @@ annual_emissions_by_fleet_year |>
     color = as.factor(fleet_year),
     group = fleet_year
   )) +
-  geom_line() +
+  geom_line(linewidth = 1.1) +
   facet_wrap(name ~ ., ncol = 1, scales = "free_y") +
   geom_text(
     data = total_percent_change_by_fleet_year |>
@@ -1807,7 +1807,7 @@ annual_emissions_by_fleet_year |>
     group = fleet_year,
     color = as.factor(fleet_year)
   )) +
-  geom_line() +
+  geom_line(linewidth = 1.1) +
   geom_text(
     data = total_percent_change_by_fleet_year |>
       dplyr::filter(stringr::str_detect(name, "mean")),
@@ -1902,7 +1902,7 @@ indicators_by_first_operation_year |>
     group = fleet_year,
     color = as.factor(fleet_year)
   )) +
-  geom_line() +
+  geom_line(linewidth = 1.1) +
   facet_wrap(name ~ ., scales = "free_y", ncol = 1) +
   theme_plot() +
   scale_y_continuous(labels = scales::comma) +
@@ -1958,7 +1958,7 @@ indicators_by_last_operation_year |>
     group = fleet_year,
     color = as.factor(fleet_year)
   )) +
-  geom_line() +
+  geom_line(linewidth = 1.1) +
   facet_wrap(name ~ ., scales = "free_y", ncol = 1) +
   theme_plot() +
   scale_y_continuous(labels = scales::comma) +
@@ -1981,7 +1981,7 @@ annual_global_emissions_by_receiver_type |>
   tidyr::pivot_longer(cols = -c(year, receiver_type)) |>
   ggplot(aes(x = year, y = value, color = receiver_type)) +
   facet_wrap(name ~ ., scales = "free_y", ncol = 1) +
-  geom_line() +
+  geom_line(linewidth = 1.1) +
   scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) +
   scale_x_continuous(
     breaks = unique(annual_global_emissions_by_receiver_type$year)
@@ -2013,7 +2013,7 @@ annual_global_emissions_by_receiver_type_and_flag |>
   dplyr::mutate(flag = forcats::fct_relevel(flag, top_n_flags_2024$flag)) |>
   ggplot(aes(x = year, y = emissions_co2_mt, color = flag)) +
   facet_grid(receiver_type ~ ., scales = "free_y") +
-  geom_line() +
+  geom_line(linewidth = 1.1) +
   scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) +
   scale_x_continuous(
     breaks = unique(annual_global_emissions_by_receiver_type$year)
@@ -2036,7 +2036,7 @@ annual_global_emissions_by_receiver_type_and_flag |>
   dplyr::mutate(flag = forcats::fct_relevel(flag, top_n_flags_2024$flag)) |>
   ggplot(aes(x = year, y = n_distinct_ssvid, color = flag)) +
   facet_grid(receiver_type ~ ., scales = "free_y") +
-  geom_line() +
+  geom_line(linewidth = 1.1) +
   scale_y_continuous(labels = scales::comma) +
   scale_x_continuous(
     breaks = unique(annual_global_emissions_by_receiver_type$year)
@@ -2381,7 +2381,7 @@ time_series_nb_vessels |>
   ) |>
   mutate(fleet = factor(fleet, levels = c("Dark", "AIS"))) |>
   ggplot(aes(x = time, y = count, color = fleet)) +
-  geom_line() +
+  geom_line(linewidth = 1.1) +
   scale_x_date(date_labels = "%Y", date_breaks = "1 year") +
   labs(x = "", y = "NUmber of vessels") +
   theme_minimal() +
@@ -2684,7 +2684,7 @@ summarized_s1_dark_fleet_ratios %>%
     color = factor(length_size_class_percentile),
     group = length_size_class_percentile
   )) +
-  geom_line() +
+  geom_line(linewidth = 1.1) +
   paletteer::scale_color_paletteer_d(palette = "jcolors::pal10") +
   theme_plot() +
   facet_grid(. ~ fishing) +
