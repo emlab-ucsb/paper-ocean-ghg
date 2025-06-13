@@ -1209,7 +1209,7 @@ make_pollutant_time_series_figure(
 #| label: fig-co2-emissions-by-vessel-type
 #| fig-cap: Total 2024 CO2 emissions by vessel type for AIS-broadcasting vessels (millions metric tonnes).
 #| fig-width: 4
-#| fig-height: 8
+#| fig-height: 5
 annual_ais_co2_emissions_by_vessel |>
   dplyr::filter(year == 2024) |>
   dplyr::group_by(vessel_class) |>
