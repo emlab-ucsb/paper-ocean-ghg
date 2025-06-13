@@ -702,7 +702,7 @@ cowplot::plot_grid(
 ```
 
 
-### Figure 1 panel B
+### Figure 1 panel A
 
 ```{r}
 # Calculate the total percent change in emissions by fleet
@@ -740,7 +740,8 @@ total_annual_emissions_by_fleet_fig <- annual_emissions |>
   geom_line(linewidth = 1.1) +
   scale_y_continuous(
     labels = scales::unit_format(unit = "B", scale = 1e-9),
-    limits = c(0, 1.5e9)
+    limits = c(0, 1.5e9),
+    breaks = seq(0, 1.5e9, 0.25e9)
   ) +
   scale_x_continuous(
     breaks = unique(annual_emissions$year),
@@ -753,14 +754,17 @@ total_annual_emissions_by_fleet_fig <- annual_emissions |>
   theme_plot() +
   labs(
     x = "",
-    y = "",
-    title = expression(Annual ~ marine ~ vessel ~ CO[2] ~ emissions ~ (MT)),
-    color = "Data source"
+    y = expression(Annual ~ CO[2] ~ emissions ~ (MT))
   ) +
-  theme(panel.grid.minor.x = element_blank(), legend.position = "right")
+  theme(
+    panel.grid.minor = element_blank(),
+    legend.position = c(0.75, 0.4),
+    legend.background = element_rect(fill = "white", color = "gray"),
+    legend.title = element_blank()
+  )
 ```
 
-## Figure 1 panel C
+## Figure 1 panel B
 
 ```{r}
 # Get 2016 values for time-series normalization
@@ -785,7 +789,11 @@ normalized_annual_emissions_by_fleet_fig <- annual_emissions |>
   ggplot(aes(x = year, y = emissions_co2_mt_normalized, color = fleet)) +
   geom_hline(yintercept = 0, linetype = 2) +
   geom_line(linewidth = 1.1) +
-  scale_y_continuous(labels = scales::percent, limits = c(-0.2, 0.35)) +
+  scale_y_continuous(
+    labels = scales::percent,
+    limits = c(-0.2, 0.35),
+    breaks = seq(-.2, .35, .05)
+  ) +
   scale_x_continuous(
     breaks = unique(annual_emissions$year),
     limits = c(2016, 2024)
@@ -797,33 +805,35 @@ normalized_annual_emissions_by_fleet_fig <- annual_emissions |>
   theme_plot() +
   labs(
     x = "",
-    y = "",
-    title = expression(atop(
-      Relative ~ change ~ of ~ marine ~ vessel ~ CO[2] ~ emissions,
+    y = expression(atop(
+      Relative ~ change ~ of ~ CO[2] ~ emissions,
       from ~ 2016 ~ baseline
-    )),
-    color = "Data source"
+    ))
   ) +
-  theme(panel.grid.minor.x = element_blank(), legend.position = "right")
+  theme(
+    panel.grid.minor = element_blank(),
+    legend.position = c(0.25, 0.85),
+    legend.background = element_rect(fill = "white", color = "gray"),
+    legend.title = element_blank()
+  )
 ```
 
 
-### Figure 1 combined
+### Figure 2
 
 ```{r}
 #| label: fig-total-annual-emissions-by-data-source
-#| fig-cap: (A) Annual transportation sector CO2 emissions, with each line colored based on the data source and whether it is marine or terrestrial transportation. (B) Relative change in annual transportation sector CO2 emissions, with each line colored based on the data source and whether it is marine or terrestrial transportation. (C) Annual marine CO2 emissions, with each line colored based on the data source. (D) Relative change in annual marine CO2 emissions from a 2016 baseline, with each line colored based on the data source.
-#| fig-width: 12
-#| fig-height: 7.5
+#| fig-cap: (A) Annual marine vessel CO2 emissions, with each line colored based on the data source. (B) Relative change in annual marine vessel CO2 emissions from a 2016 baseline, with each line colored based on the data source.
+#| fig-width: 6
+#| fig-height: 6.5
+
 cowplot::plot_grid(
-  emissions_comparison_figure,
   total_annual_emissions_by_fleet_fig,
-  emissions_comparison_figure_normalized,
   normalized_annual_emissions_by_fleet_fig,
-  ncol = 2,
+  ncol = 1,
   align = "v",
   axis = "lr",
-  labels = c("A", "C", "B", "D")
+  labels = c("A", "B")
 )
 ```
 
