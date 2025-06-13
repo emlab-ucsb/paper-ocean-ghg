@@ -619,8 +619,8 @@ knitr::kable(edgar_comparison)
 ### Figure 1
 
 ```{r}
-#| label: fig-co2-emissions-normalized-sector-time-series
-#| fig-cap: (A) Spatial map of CO2 2024 emissions, aggregated across AIS-broadcasting vessels and non-broadcasting vessels, and shown at a 1x1 degree spatial resolution; (B) Change in annual CO$_{2}$ emissions from a 2016 baseline, by sector
+#| label: fig-co2-emissions-map-normalized-sector-time-series
+#| #| fig-cap: (A) Spatial map of CO2 2024 emissions, aggregated across AIS-broadcasting vessels and non-broadcasting vessels, and shown at a 1x1 degree spatial resolution; (B) Change in annual CO$_{2}$ emissions from a 2016 baseline, by sector
 #| fig-width: 7
 #| fig-height: 7
 
@@ -826,7 +826,7 @@ normalized_annual_emissions_by_fleet_fig <- annual_emissions |>
 #| fig-cap: (A) Annual marine vessel CO2 emissions, with each line colored based on the data source. (B) Relative change in annual marine vessel CO2 emissions from a 2016 baseline, with each line colored based on the data source.
 #| fig-width: 6
 #| fig-height: 6.5
-
+#|
 cowplot::plot_grid(
   total_annual_emissions_by_fleet_fig,
   normalized_annual_emissions_by_fleet_fig,
@@ -1133,29 +1133,31 @@ make_pollutant_map(
 ```
 
 ```{r}
+make_pollutant_time_series_figure <- function(
+    pollutant_time_series_data,
+    y_axis_label) {{ ggplot(
+  data = pollutant_time_series_data,
+  aes(x = month, y = emissions_mt)
+) +
+  geom_line(linewidth = 1.1) +
+  scale_y_continuous(labels = scales::comma) +
+  theme_plot() +
+  labs(x = "", y = y_axis_label) +
+  theme(panel.grid.minor.x = element_blank()) +
+  scale_y_continuous(limits = c(0, NA)) }
+}
+```
+
+```{r}
+#| label: fig-co2-emissions-time-series
+#| fig-cap: Time series of monthly global CO2 emissions, aggregated across AIS-broadcasting vessels and non-broadcasting vessels.
+#| #| fig-width: 8
+#| fig-height: 4
 
 pollutant_time_series_data_co2 <- total_monthly_emissions_by_pollutant |>
   dplyr::filter(pollutant == "CO2")
 
-make_pollutant_time_series_figure <- function(
-  pollutant_time_series_data,
-  y_axis_label
-) {
-  {
-    ggplot(
-      data = pollutant_time_series_data,
-      aes(x = month, y = emissions_mt)
-    ) +
-      geom_line(linewidth = 1.1) +
-      scale_y_continuous(labels = scales::comma) +
-      theme_plot() +
-      labs(x = "", y = y_axis_label) +
-      theme(panel.grid.minor.x = element_blank()) +
-      scale_y_continuous(limits = c(0, NA))
-  }
-}
-
-co2_timeseries <- make_pollutant_time_series_figure(
+make_pollutant_time_series_figure(
   pollutant_time_series_data_co2,
   y_axis_label = expression(Monthly ~ CO[2] ~ emissions ~ (MT))
 ) +
@@ -1167,7 +1169,7 @@ co2_timeseries <- make_pollutant_time_series_figure(
 
 ```{r}
 #| label: fig-pollutant-time-series
-#| fig-cap: Time series of monthly global emissions for each pollutant, aggregated across the AIS-broadcasting fleet and non-broadcasting.
+#| fig-cap: Time series of monthly global emissions for each pollutant, aggregated across AIS-broadcasting vessels and non-broadcasting vessels.
 #| fig-width: 8
 #| fig-height: 8
 pollutant_time_series_data_all <- total_monthly_emissions_by_pollutant |>
