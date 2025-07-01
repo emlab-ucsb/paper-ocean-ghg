@@ -1474,13 +1474,13 @@ time_series_predicted_decomposition <- time_series_predicted_decomposition_df |>
   scale_y_continuous(labels = scales::percent) +
   labs(
     x = "",
-    y = "",
-    title = expression(
-      Estimated ~ deomposition ~ of ~ change ~ of ~ total ~ CO[2] ~ emissions ~
-        from ~
-        2016 ~
-        baseline
-    )
+    y = ""
+    # title = expression(
+    #   Estimated ~ deomposition ~ of ~ change ~ of ~ total ~ CO[2] ~ emissions ~
+    #     from ~
+    #     2016 ~
+    #     baseline
+    # )
   ) +
   theme_plot() +
   theme(panel.grid.minor.x = element_blank())
@@ -1565,24 +1565,24 @@ ais_fleet_summary_relative_df_2024 <- ais_fleet_summary_relative_df |>
 
 ```{r}
 #| label: fig-hours-speed-decomposition
-#| fig-cap: (A) Estimated decomposition of change in total CO2 emissions from 2016 baseline (aggregating across both broadcasting and non-broadcasting vessels), using the random forest model outputs of four different scenarios that decompose the relative impact of changes in total kW-hours and changes in average speed ; (B) Observed total kW-hours for AIS-broadcasting vessels, number of unique vessels, average hours per vessel, and average main engine power per vessel; (C) Relative change from a 2016 baseline for observed total kW-hours for AIS-broadcasting vessels, number of unique vessels, average hours per vessel, and average main engine power per vessel.
+#| fig-cap: Estimated decomposition of change in total CO2 emissions from 2016 baseline (aggregating across both broadcasting and non-broadcasting vessels), using the random forest model outputs of four different scenarios that decompose the relative impact of changes in total kW-hours and changes in average speed/
 #| fig-width: 7.5
-#| fig-height: 7.5
-
-cowplot::plot_grid(
-  time_series_predicted_decomposition,
-  cowplot::plot_grid(
-    ais_fleet_summary_absolute,
-    ais_fleet_summary_relative,
-    ncol = 2,
-    align = "h",
-    labels = c("B", "C"),
-    rel_widths = c(0.53, 0.47)
-  ),
-  ncol = 1,
-  rel_heights = c(0.4, 0.6),
-  labels = c("A", "")
-)
+#| fig-height: 3
+time_series_predicted_decomposition
+# cowplot::plot_grid(
+#   time_series_predicted_decomposition,
+#   cowplot::plot_grid(
+#     ais_fleet_summary_absolute,
+#     ais_fleet_summary_relative,
+#     ncol = 2,
+#     align = "h",
+#     labels = c("B", "C"),
+#     rel_widths = c(0.53, 0.47)
+#   ),
+#   ncol = 1,
+#   rel_heights = c(0.4, 0.6),
+#   labels = c("A", "")
+# )
 ```
 
 
