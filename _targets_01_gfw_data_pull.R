@@ -142,6 +142,24 @@ list(
       )
     ),
     format = "file"
+  ),
+  # Annual AIS-broadcasting CO2 emissions by vessel type
+  tar_file_read(
+    name = annual_ais_co2_emissions_by_vessel_type,
+    "sql/annual_ais_co2_emissions_by_vessel_type.sql",
+    download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_ais = run_version_ais,
+          analysis_start_year = analysis_start_year,
+          analysis_end_year = analysis_end_year
+        ),
+      file_path = here::here(
+        "data/gfw/annual_ais_co2_emissions_by_vessel_type.csv"
+      )
+    ),
+    format = "file"
   )
   # # Define monthly_ais_vessels_and_ratios_by_pixel query path
   # tar_target(

@@ -99,7 +99,8 @@ targets::tar_load(c(
   "annual_emissions_all_pollutants",
   "total_spatial_emissions_by_pollutant_2024",
   "annual_ais_to_dark_activity_extrapolation",
-  "total_monthly_emissions_by_pollutant"
+  "total_monthly_emissions_by_pollutant",
+  "annual_ais_co2_emissions_by_vessel_type"
 ))
 ```
 
@@ -835,22 +836,17 @@ pollutant_time_series_data_co2 <- total_monthly_emissions_by_pollutant |>
   dplyr::filter(pollutant == "CO2")
 
 make_pollutant_time_series_figure <- function(
-  pollutant_time_series_data,
-  y_axis_label
-) {
-  {
-    ggplot(
-      data = pollutant_time_series_data,
-      aes(x = month, y = emissions_mt)
-    ) +
-      geom_line(linewidth = 1.1) +
-      scale_y_continuous(labels = scales::comma) +
-      theme_plot() +
-      labs(x = "", y = y_axis_label) +
-      theme(panel.grid.minor.x = element_blank()) +
-      scale_y_continuous(limits = c(0, NA))
-  }
-}
+    pollutant_time_series_data,
+    y_axis_label) {{ ggplot(
+  data = pollutant_time_series_data,
+  aes(x = month, y = emissions_mt)
+) +
+  geom_line(linewidth = 1.1) +
+  scale_y_continuous(labels = scales::comma) +
+  theme_plot() +
+  labs(x = "", y = y_axis_label) +
+  theme(panel.grid.minor.x = element_blank()) +
+  scale_y_continuous(limits = c(0, NA)) }}
 
 make_pollutant_time_series_figure(
   pollutant_time_series_data_co2,
@@ -894,5 +890,59 @@ make_pollutant_time_series_figure(
     ncol = 3,
     scales = "free_y",
     labeller = label_parsed
+  )
+```
+
+```{r}
+#| label: fig-co2-emissions-by-vessel-type
+#| fig-cap: Total 2024 CO2 emissions by vessel type for AIS-broadcasting vessels (millions metric tonnes).
+#| fig-width: 4
+#| fig-height: 5
+annual_ais_co2_emissions_by_vessel_type |>
+  dplyr::filter(year == 2024) |>
+  dplyr::mutate(
+    fishing = ifelse(
+      vessel_class %in%
+        c(
+          "trawlers",
+          "squid_jigger",
+          "tuna_purse_seines",
+          "set_longlines",
+          "pole_and_line",
+          "set_gillnets",
+          "pots_and_traps",
+          "dredge_fishing",
+          "other_seines",
+          "other_purse_seines",
+          "trollers"
+        ),
+      "Fishing",
+      "Non-fishing"
+    ) |>
+      forcats::fct_rev()
+  ) |>
+  dplyr::mutate(
+    vessel_class = stringr::str_replace_all(
+      vessel_class,
+      "cargo.",
+      "cargo: "
+    ) |>
+      stringr::str_replace_all("_", " ") |>
+      stringr::str_to_sentence()
+  ) |>
+  ggplot(aes(
+    x = emissions_co2_mt,
+    y = reorder(vessel_class, emissions_co2_mt)
+  )) +
+  geom_col(position = position_dodge2(preserve = "single")) +
+  ggforce::facet_col(~fishing, space = "free", scales = "free") +
+  theme_plot() +
+  labs(
+    x = "2024 global CO2 emissions (MT)",
+    y = ""
+  ) +
+  scale_x_continuous(
+    labels = scales::unit_format(unit = "M", scale = 1e-6),
+    limits = c(0, NA)
   )
 ```

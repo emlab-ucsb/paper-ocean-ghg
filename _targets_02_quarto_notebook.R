@@ -46,6 +46,13 @@ list(
     ),
     read = readr::read_csv(!!.x)
   ),
+  tar_file_read(
+    name = annual_ais_co2_emissions_by_vessel_type,
+    command = here::here(
+      "data/gfw/annual_ais_co2_emissions_by_vessel_type.csv"
+    ),
+    read = readr::read_csv(!!.x)
+  ),
   # Load other data ----
   # EDGAR - Emissions Database for Global Atmospheric Research
   # From the European Commission
