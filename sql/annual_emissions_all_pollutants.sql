@@ -9,7 +9,7 @@ SELECT
     SUM(emissions_vocs_mt) AS emissions_vocs_mt,
     SUM(emissions_pm2_5_mt) AS emissions_pm2_5_mt,
     SUM(emissions_pm10_mt) AS emissions_pm10_mt,
-  SUM(emissions_co2_dark_mt) emissions_co2_dark_mt,
+    SUM(emissions_co2_dark_mt) emissions_co2_dark_mt,
     SUM(emissions_ch4_dark_mt) AS emissions_ch4_dark_mt,
     SUM(emissions_n2o_dark_mt) AS emissions_n2o_dark_mt,
     SUM(emissions_nox_dark_mt) AS emissions_nox_dark_mt,
@@ -20,7 +20,8 @@ SELECT
     SUM(emissions_pm10_dark_mt) AS emissions_pm10_dark_mt,
   fishing
 FROM
-  `{bq_project}.{bq_dataset}.s1_time_gridded_dark_fleet_model_{run_version_dark}`
+  `world-fishing-827.proj_ocean_ghg.s1_time_gridded_dark_fleet_model_{run_version_dark}`
+WHERE EXTRACT(YEAR from time) BETWEEN {analysis_start_year} and {analysis_end_year}
 GROUP BY
   year,
   fishing

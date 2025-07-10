@@ -26,7 +26,7 @@ list(
   # Define the version of the dark fleet dataset to pull
   tar_target(
     name = run_version_dark,
-    "v20250116"
+    "v20250228"
   ),
   # Set analysis start year
   tar_target(
@@ -67,6 +67,43 @@ list(
           analysis_end_year = analysis_end_year
         ),
       file_path = here::here("data/gfw/n_ais_messages.csv"),
+    ),
+    format = "file"
+  ),
+  # Annual emissions data for AIS-broadcasting fleet and non-broadcasting vessels,
+  # broken apart by fishing and non-fishing vessels
+  # For all pollutants
+  tar_file_read(
+    name = annual_emissions_all_pollutants,
+    "sql/annual_emissions_all_pollutants.sql",
+    download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_dark = run_version_dark,
+          analysis_start_year = analysis_start_year,
+          analysis_end_year = analysis_end_year
+        ),
+      file_path = here::here("data/gfw/annual_emissions_all_pollutants.csv"),
+    ),
+    format = "file"
+  ),
+  # Spatial gridded 2024 emissions by pollutant
+  # Aggregated across AIS-broadcasting and non-broadcasting fleets
+  tar_file_read(
+    name = total_spatial_emissions_by_pollutant_2024,
+    "sql/total_spatial_emissions_by_pollutant_2024.sql",
+    download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_dark = run_version_dark,
+          analysis_start_year = analysis_start_year,
+          analysis_end_year = analysis_end_year
+        ),
+      file_path = here::here(
+        "data/gfw/total_spatial_emissions_by_pollutant_2024.csv"
+      ),
     ),
     format = "file"
   )
