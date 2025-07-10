@@ -1572,7 +1572,7 @@
     },
     "parsnip": {
       "Package": "parsnip",
-      "Version": "1.2.1",
+      "Version": "1.3.2",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -1590,6 +1590,7 @@
         "prettyunits",
         "purrr",
         "rlang",
+        "sparsevctrs",
         "stats",
         "tibble",
         "tidyr",
@@ -1597,7 +1598,7 @@
         "vctrs",
         "withr"
       ],
-      "Hash": "ace928adf616e06ece817d970faa2d03"
+      "Hash": "18f6b91c0e920ae4acc180fedb988b7b"
     },
     "pillar": {
       "Package": "pillar",
@@ -2647,7 +2648,7 @@
     },
     "workflows": {
       "Package": "workflows",
-      "Version": "1.1.4",
+      "Version": "1.2.0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -2659,11 +2660,14 @@
         "lifecycle",
         "modelenv",
         "parsnip",
+        "recipes",
         "rlang",
+        "sparsevctrs",
         "tidyselect",
-        "vctrs"
+        "vctrs",
+        "withr"
       ],
-      "Hash": "f2c2cefdf6babfed4594b33479d19fc3"
+      "Hash": "3339eafba56a1ccdc0a59ce7ab7be055"
     },
     "xfun": {
       "Package": "xfun",

@@ -9,14 +9,14 @@ WITH
     fishing,
     length_size_class_percentile
   FROM
-    `world-fishing-827.proj_ocean_ghg.s1_ais_vessels_size_classified_v20250116` ),
+    `world-fishing-827.proj_ocean_ghg.s1_ais_vessels_size_classified_{run_version_dark}` ),
   vessel_engine_power_info AS(
     -- Get main engine power for each vessel
   SELECT
     ssvid,
     main_engine_power_kw
   FROM
-    `world-fishing-827.proj_ocean_ghg.vessel_info_v20241121` ),
+    `world-fishing-827.proj_ocean_ghg.vessel_info_{run_version_ais}` ),
   dark_to_ais_ratios AS (
     -- Get ratio of dark detections to AIS detections
   SELECT
@@ -27,7 +27,7 @@ WITH
     length_size_class_percentile,
     COALESCE(ratio_dark_to_ais_detections, global_time_ratio_dark_to_ais_detections) AS ratio_dark_to_ais
   FROM
-    `world-fishing-827.proj_ocean_ghg.s1_time_gridded_dark_fleet_model_v20250116` ),
+    `world-fishing-827.proj_ocean_ghg.s1_time_gridded_dark_fleet_model_{run_version_dark}` ),
   ais_activity_summary AS (
     -- Summarize total hours and kW hours, and average speed, by fishing, pixel, month,and size class
   SELECT
@@ -42,7 +42,7 @@ WITH
     SUM(distance_nm) distance_nm,
     AVG(distance_nm/hours) speed_knots
   FROM
-    `world-fishing-827.proj_ocean_ghg.daily_gridded_emissions_by_vessel_v20241121`
+    `world-fishing-827.proj_ocean_ghg.daily_gridded_emissions_by_vessel_{run_version_ais}`
   JOIN
     vessel_size_class_info
   USING
