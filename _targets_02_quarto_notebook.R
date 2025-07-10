@@ -1,0 +1,42 @@
+# Load packages required to define the pipeline:
+library(targets)
+library(tarchetypes) # Load other packages as needed.
+
+# Set the targets pipeline, since this repo has multiple targets pipelines
+Sys.setenv(TAR_PROJECT = "02_quarto_notebook")
+
+# Run the R scripts in the R/ folder with your custom functions:
+tar_source("r/functions.R")
+
+list(
+  # Load all GFW CSVs generated in _targets_01_gfw_data_pull.R ----
+  tar_file_read(
+    name = n_unique_vessels,
+    command = here::here("data/gfw/n_unique_vessels.csv"),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
+    name = n_ais_messages,
+    command = here::here("data/gfw/n_ais_messages.csv"),
+    read = readr::read_csv(!!.x)
+  ),
+  # Load other data ----
+  # EDGAR - Emissions Database for Global Atmospheric Research
+  # From the European Commission
+  # Annual totals by sector and country (1970-2023)
+  # Downloaded from here: https://edgar.jrc.ec.europa.eu/dataset_ghg2024#p1
+  # For each substance emission time series (1970-2023) by sector and country are provided in an overview table (.xlsx). Emission country totals are expressed in kton substance / year. The IPCC 1996 and 2006 codes are used for specification of the sectors.
+  tar_file_read(
+    name = annual_edgar_emissions,
+    command = here::here(
+      "data/IEA_EDGAR_CO2_1970_2023/IEA_EDGAR_CO2_1970_2023.xlsx"
+    ),
+    read = readxl::read_excel(!!.x, sheet = "IPCC 2006", skip = 9)
+  ),
+  # Render quarto notebook -----
+  tar_quarto(
+    name = quarto_notebook,
+    path = "qmd/quarto_notebook.qmd",
+    quiet = FALSE
+  )
+)

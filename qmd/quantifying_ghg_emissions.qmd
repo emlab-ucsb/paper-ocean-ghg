@@ -138,6 +138,22 @@ s1_summarized_dark_fleet_model_results_emissions_year <- targets::tar_read(
 ```{r cache = FALSE}
 #| label: load-data
 
+# Number of unique vessels for which we estimate AIS emissions
+
+n_unique_vessels <- glue::glue(
+  here::here("data/gfw/n_unique_vessels.csv")
+) |>
+  readr::read_csv() |>
+  dplyr::pull(n_unique_vessels) |>
+  scales::comma()
+
+n_ais_messages <- glue::glue(
+  here::here("data/gfw/n_ais_messages.csv")
+) |>
+  readr::read_csv() |>
+  dplyr::pull(n_billion_ais_messages) |>
+  scales::comma()
+
 # Annual CO2 emissions for the transport sector, from IEA
 # "Global CO2 emissions from transport by sub-sector in the Net Zero Scenario, 2000-2030"
 # Citation: IEA (2022), Global CO2 emissions from transport by sub-sector in the Net Zero Scenario, 2000-2030, IEA, Paris https://www.iea.org/data-and-statistics/charts/global-co2-emissions-from-transport-by-sub-sector-in-the-net-zero-scenario-2000-2030, Licence: CC BY 4.0
@@ -393,6 +409,12 @@ unctad_annual_global_trade_value_data_maritime_transport <- glue::glue(
 ```
 
 # Paper stats
+
+## Number unique vessels
+
+We estimate AIS-broadcasting emissions for `r n_unique_vessels` unique AIS-broadcasting vessels from 2016-2024.
+
+For those vessel, we estimate emissions for `r n_ais_messages` billion AIS messages (pings) from 2016-2024.
 
 ## Fraction of total global emissions from the transportation sector in 2023
 
@@ -1134,21 +1156,17 @@ make_pollutant_map(
 
 ```{r}
 make_pollutant_time_series_figure <- function(
-  pollutant_time_series_data,
-  y_axis_label
-) {
-  {
-    ggplot(
-      data = pollutant_time_series_data,
-      aes(x = month, y = emissions_mt)
-    ) +
-      geom_line(linewidth = 1.1) +
-      scale_y_continuous(labels = scales::comma) +
-      theme_plot() +
-      labs(x = "", y = y_axis_label) +
-      theme(panel.grid.minor.x = element_blank()) +
-      scale_y_continuous(limits = c(0, NA))
-  }
+    pollutant_time_series_data,
+    y_axis_label) {{ ggplot(
+  data = pollutant_time_series_data,
+  aes(x = month, y = emissions_mt)
+) +
+  geom_line(linewidth = 1.1) +
+  scale_y_continuous(labels = scales::comma) +
+  theme_plot() +
+  labs(x = "", y = y_axis_label) +
+  theme(panel.grid.minor.x = element_blank()) +
+  scale_y_continuous(limits = c(0, NA)) }
 }
 ```
 

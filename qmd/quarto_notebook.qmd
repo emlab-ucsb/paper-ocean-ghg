@@ -1,0 +1,117 @@
+---
+title: "Quantifying comprehensive marine vessel emissions using data fusion"
+author: "emLab, UCSB and GFW"
+date: last-modified
+date-format: "[Last Updated on] MMMM DD, YYYY"
+format:
+  pdf:
+    toc: true
+    number-sections: true
+    colorlinks: true
+    fig-pos: H
+editor_options: 
+  chunk_output_type: console
+editor: 
+  markdown: 
+    wrap: 72
+cache: true
+---
+
+```{r, echo = FALSE, results = FALSE, message = FALSE, warning = FALSE, cache = FALSE}
+#| label: document-setup
+
+# Set default chunk options
+knitr::opts_chunk$set(
+  message = FALSE,
+  warning = FALSE,
+  echo = FALSE,
+  dev = "png",
+  fig.path = "figures/"
+)
+
+# Load librariers
+library(ggplot2)
+library(sf)
+
+analysis_start_year <- 2016
+analysis_end_year <- 2024
+```
+
+```{r}
+#| label: load-data
+targets::tar_load(c(
+  "n_unique_vessels",
+  "n_ais_messages",
+  "annual_edgar_emissions"
+))
+```
+
+```{r}
+#| label: wrangle-edgar-data
+annual_edgar_tranportation_emissions <- annual_edgar_emissions |>
+  dplyr::select(
+    -c(
+      IPCC_annex,
+      C_group_IM24_sh,
+      Country_code_A3,
+      Name,
+      ipcc_code_2006_for_standard_report,
+      Substance,
+      fossil_bio
+    )
+  ) |>
+  dplyr::rename(sector = ipcc_code_2006_for_standard_report_name) |>
+  tidyr::pivot_longer(
+    cols = -c(sector),
+    names_to = "year",
+    values_to = "emissions_co2_kt"
+  ) |>
+  dplyr::mutate(
+    year = stringr::str_remove_all(year, "Y_") |>
+      as.numeric(),
+    emissions_co2_mt = emissions_co2_kt * 1e3
+  ) |>
+  dplyr::select(-emissions_co2_kt) |>
+  dplyr::mutate(
+    land_based_tranpsportation = ifelse(
+      sector %in%
+        c(
+          "Civil Aviation",
+          "Road Transportation no resuspension",
+          "Other Transportation",
+          "Railways"
+        ),
+      TRUE,
+      FALSE
+    )
+  ) |>
+  # Only need years that correspond to our dataset
+  dplyr::filter(year >= analysis_start_year, year <= analysis_end_year)
+
+# Fraction of global 2023 CO2 emissions that came from transportation sectors
+fraction_co2_from_transportation <- annual_edgar_tranportation_emissions |>
+  dplyr::mutate(
+    transportation = ifelse(
+      land_based_tranpsportation | sector == "Water-borne Navigation",
+      TRUE,
+      FALSE
+    )
+  ) |>
+  dplyr::filter(year == 2023) |>
+  dplyr::group_by(transportation) |>
+  dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt, na.rm = TRUE)) |>
+  dplyr::ungroup() |>
+  tidyr::pivot_wider(
+    names_from = "transportation",
+    values_from = "emissions_co2_mt"
+  ) |>
+  dplyr::mutate(fraction_from_transportation = `TRUE` / (`TRUE` + `FALSE`)) |>
+  dplyr::pull(fraction_from_transportation) |>
+  scales::percent()
+```
+
+# In-line manuscript statistics
+
+- The transportation sector is a major source of global greenhouse gas (GHG) and local air pollution emissions, responsible for `r fraction_co2_from_transportation` of all CO$_{2}$ emissions globally in 2023 
+
+- For over `r scales::comma(signif(n_unique_vessels$n_unique_vessels,2))` AIS-broadcasting vessels, we quantify point-estimate emissions for each vessel using precise latitude/longitude/timestamp information for over `r scales::comma(signif(n_ais_messages$n_billion_ais_messages,3))` billion individual AIS messages

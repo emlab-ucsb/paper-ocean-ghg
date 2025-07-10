@@ -28,7 +28,7 @@ bq_project <- "world-fishing-827" # BQ project where data lives
 billing_project <- "emlab-gcp" # emLab's billing project
 bq_dataset <- "proj_ocean_ghg" # The dataset name for this project
 
-run_version_ais <- "v20241121" # Define the version of the AIS dataset to pull
+run_version_ais <- "v20250701" # Define the version of the AIS dataset to pull
 run_version_dark <- "v20250228" # Define the version of the dark fleet dataset to pull
 
 
@@ -49,6 +49,21 @@ download_gfw_data <- function(query_file_name, file_output_name) {
       "{project_directory}/data/processed/{file_output_name}.csv"
     ))
 }
+
+# Number of unique AIS messages for which we estimate AIS emissions
+# From 2016-2024
+download_gfw_data(
+  "sql/n_ais_messages.sql",
+  "n_ais_messages"
+)
+
+# Number of unique vessels for which we estimate AIS emissions
+# From 2016-2024
+download_gfw_data(
+  "sql/n_unique_vessels.sql",
+  "n_unique_vessels"
+)
+
 
 # Annual emissions data for AIS-broadcasting fleet and dark fleet,
 # broken apart by fishing and non-fishing vessels
@@ -178,8 +193,41 @@ pull_gfw_data_locally(
 
 
 # Download trip emissions estimates to replicate ICCT validation
-  download_gfw_data(
-    "sql/annual_trip_emissions_estimates_for_validation.sql",
-    "annual_trip_emissions_estimates_for_validation"
-  )
+download_gfw_data(
+  "sql/annual_trip_emissions_estimates_for_validation.sql",
+  "annual_trip_emissions_estimates_for_validation"
+)
 
+
+# Testing the new model (v07012025) vs the old model (v11212024)
+
+download_gfw_data(
+  "sql/new_model_comparison_all_pollutants.sql",
+  "new_model_comparison_all_pollutants"
+)
+
+download_gfw_data(
+  "sql/new_model_comparison_voyages.sql",
+  "new_model_comparison_voyages"
+)
+
+download_gfw_data(
+  "sql/new_model_comparison_port_visits.sql",
+  "new_model_comparison_port_visits"
+)
+
+download_gfw_data(
+  "sql/new_model_comparison_ct_schema.sql",
+  "new_model_comparison_ct_schema"
+)
+
+
+download_gfw_data(
+  "sql/new_monthly_data.sql",
+  "new_monthly_data"
+)
+
+download_gfw_data(
+  "sql/old_monthly_data.sql",
+  "old_monthly_data"
+)
