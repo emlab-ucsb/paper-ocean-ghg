@@ -126,6 +126,22 @@ list(
       )
     ),
     format = "file"
+  ),
+  # Download total monthly non-spatial emissions by pollutant
+  tar_file_read(
+    name = total_monthly_emissions_by_pollutant,
+    "sql/total_monthly_emissions_by_pollutant.sql",
+    download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_dark = run_version_dark
+        ),
+      file_path = here::here(
+        "data/gfw/total_monthly_emissions_by_pollutant.csv"
+      )
+    ),
+    format = "file"
   )
   # # Define monthly_ais_vessels_and_ratios_by_pixel query path
   # tar_target(

@@ -39,6 +39,13 @@ list(
     ),
     read = readr::read_csv(!!.x)
   ),
+  tar_file_read(
+    name = total_monthly_emissions_by_pollutant,
+    command = here::here(
+      "data/gfw/total_monthly_emissions_by_pollutant.csv"
+    ),
+    read = readr::read_csv(!!.x)
+  ),
   # Load other data ----
   # EDGAR - Emissions Database for Global Atmospheric Research
   # From the European Commission

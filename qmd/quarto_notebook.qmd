@@ -98,7 +98,8 @@ targets::tar_load(c(
   "annual_edgar_emissions",
   "annual_emissions_all_pollutants",
   "total_spatial_emissions_by_pollutant_2024",
-  "annual_ais_to_dark_activity_extrapolation"
+  "annual_ais_to_dark_activity_extrapolation",
+  "total_monthly_emissions_by_pollutant"
 ))
 ```
 
@@ -757,13 +758,141 @@ time_series_predicted_decomposition_df |>
   labs(
     x = "",
     y = ""
-    # title = expression(
-    #   Estimated ~ deomposition ~ of ~ change ~ of ~ total ~ CO[2] ~ emissions ~
-    #     from ~
-    #     2016 ~
-    #     baseline
-    # )
   ) +
   theme_plot() +
   theme(panel.grid.minor.x = element_blank())
+```
+
+# Supplementary figures
+
+```{r}
+#| label: fig-pollutant-maps
+#| fig-cap: Spatial map of 2024 emissions for each pollutant, aggregated across the AIS-broadcasting fleet and non-broadcasting, and shown at a 1x1 degree spatial resolution
+#| fig-width: 8
+#| fig-height: 6
+pollutant_map_data_all <- total_spatial_emissions_by_pollutant_2024 |>
+  dplyr::mutate(
+    pollutant = dplyr::case_when(
+      pollutant == "CO2" ~ "CO[2]",
+      pollutant == "N2O" ~ "N[2]*O",
+      pollutant == "CH4" ~ "CH[4]",
+      pollutant == "PM2.5" ~ "PM[2.5]",
+      pollutant == "PM10" ~ "PM[10]",
+      pollutant == "SOX" ~ "SO[X]",
+      pollutant == "NOX" ~ "NO[X]",
+      TRUE ~ pollutant
+    )
+  ) |>
+  dplyr::mutate(
+    pollutant = forcats::fct_relevel(pollutant, pollutant_factor_levels)
+  )
+
+make_pollutant_map(
+  pollutant_map_data_all,
+  scale_label = "2024 emissions (MT)"
+) +
+  facet_wrap(pollutant ~ ., ncol = 1, labeller = label_parsed) +
+  facet_wrap(
+    pollutant ~ .,
+    ncol = 3,
+    labeller = label_parsed
+  ) +
+  theme(
+    legend.position = "bottom",
+    legend.direction = "horizontal",
+    legend.key.height = unit(1.5, "cm"),
+    legend.key.width = unit(1.5, "cm")
+  )
+```
+
+```{r}
+#| label: fig-co2-emissions-time-series
+#| fig-cap: Time series of monthly global CO2 emissions, aggregated across AIS-broadcasting vessels and non-broadcasting vessels.
+#| fig-width: 8
+#| fig-height: 3
+
+# Total monthly non-spatial emissions by pollutant
+total_monthly_emissions_by_pollutant <- total_monthly_emissions_by_pollutant |>
+  dplyr::mutate(month = lubridate::ymd(month)) |>
+  tidyr::pivot_longer(
+    -month,
+    names_to = "pollutant",
+    values_to = "emissions_mt"
+  ) |>
+  dplyr::mutate(
+    pollutant = stringr::str_remove_all(pollutant, "emissions_") |>
+      stringr::str_remove_all("_total_mt") |>
+      stringr::str_to_upper() |>
+      stringr::str_replace_all("_", "."),
+    pollutant = ifelse(pollutant == "VOCS", "VOCs", pollutant)
+  ) |>
+  dplyr::filter(
+    lubridate::year(month) <= analysis_end_year,
+    lubridate::year(month) >= analysis_start_year
+  )
+
+pollutant_time_series_data_co2 <- total_monthly_emissions_by_pollutant |>
+  dplyr::filter(pollutant == "CO2")
+
+make_pollutant_time_series_figure <- function(
+  pollutant_time_series_data,
+  y_axis_label
+) {
+  {
+    ggplot(
+      data = pollutant_time_series_data,
+      aes(x = month, y = emissions_mt)
+    ) +
+      geom_line(linewidth = 1.1) +
+      scale_y_continuous(labels = scales::comma) +
+      theme_plot() +
+      labs(x = "", y = y_axis_label) +
+      theme(panel.grid.minor.x = element_blank()) +
+      scale_y_continuous(limits = c(0, NA))
+  }
+}
+
+make_pollutant_time_series_figure(
+  pollutant_time_series_data_co2,
+  y_axis_label = expression(Monthly ~ CO[2] ~ emissions ~ (MT))
+) +
+  scale_y_continuous(
+    labels = scales::unit_format(unit = "M", scale = 1e-6),
+    limits = c(0, NA)
+  )
+```
+
+```{r}
+#| label: fig-pollutant-time-series
+#| fig-cap: Time series of monthly global emissions for each pollutant, aggregated across AIS-broadcasting vessels and non-broadcasting vessels.
+#| fig-width: 8
+#| fig-height: 8
+
+pollutant_time_series_data_all <- total_monthly_emissions_by_pollutant |>
+  dplyr::mutate(
+    pollutant = dplyr::case_when(
+      pollutant == "CO2" ~ "CO[2]",
+      pollutant == "N2O" ~ "N[2]*O",
+      pollutant == "CH4" ~ "CH[4]",
+      pollutant == "PM2.5" ~ "PM[2.5]",
+      pollutant == "PM10" ~ "PM[10]",
+      pollutant == "SOX" ~ "SO[X]",
+      pollutant == "NOX" ~ "NO[X]",
+      TRUE ~ pollutant
+    )
+  ) |>
+  dplyr::mutate(
+    pollutant = forcats::fct_relevel(pollutant, pollutant_factor_levels)
+  )
+
+make_pollutant_time_series_figure(
+  pollutant_time_series_data_all,
+  y_axis_label = "Monthly emissions (MT)"
+) +
+  facet_wrap(
+    pollutant ~ .,
+    ncol = 3,
+    scales = "free_y",
+    labeller = label_parsed
+  )
 ```
