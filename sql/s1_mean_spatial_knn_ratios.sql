@@ -31,6 +31,7 @@ FROM
       TRUE inside_footprint
     FROM
       within_footprint)
+    USING(lon_bin,lat_bin,fishing)
     WHERE EXTRACT(YEAR FROM time) BETWEEN {analysis_start_year} and {analysis_end_year}
     AND inside_footprint IS NULL
 GROUP BY
