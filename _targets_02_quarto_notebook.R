@@ -81,6 +81,13 @@ list(
     ),
     read = readr::read_csv(!!.x)
   ),
+  tar_file_read(
+    name = s1_ais_vessel_size_class_comparison,
+    command = here::here(
+      "data/gfw/s1_ais_vessel_size_class_comparison.csv"
+    ),
+    read = readr::read_csv(!!.x)
+  ),
   # Load other data ----
   # EDGAR - Emissions Database for Global Atmospheric Research
   # From the European Commission

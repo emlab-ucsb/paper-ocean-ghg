@@ -53,7 +53,8 @@ targets::tar_load(c(
   "s1_mean_spatial_knn_ratios",
   "annual_global_emissions_by_receiver_type",
   "annual_global_emissions_by_receiver_type_and_flag",
-  "annual_spatial_emissions_by_receiver_type"
+  "annual_spatial_emissions_by_receiver_type",
+  "s1_ais_vessel_size_class_comparison"
 ))
 ```
 
@@ -314,6 +315,30 @@ total_spatial_emissions_by_pollutant_2024 <- total_spatial_emissions_by_pollutan
   )
 ```
 
+
+```{r}
+#| label: dark-fleet-inferred-stats
+percent_dark_emissions_inferred <- annual_non_broadcasting_detections_emissions |>
+  dplyr::group_by(ratio_inferred) |>
+  dplyr::summarize(emissions_co2_dark_mt = sum(emissions_co2_dark_mt)) |>
+  dplyr::ungroup() |>
+  tidyr::pivot_wider(
+    names_from = "ratio_inferred",
+    values_from = "emissions_co2_dark_mt"
+  ) |>
+  dplyr::mutate(percent_inferred = scales::percent(`TRUE` / (`TRUE` + `FALSE`)))
+
+percent_dark_emissions_inferred_by_type <- annual_non_broadcasting_detections_emissions |>
+  dplyr::group_by(fishing, ratio_inferred) |>
+  dplyr::summarize(emissions_co2_dark_mt = sum(emissions_co2_dark_mt)) |>
+  dplyr::ungroup() |>
+  tidyr::pivot_wider(
+    names_from = "ratio_inferred",
+    values_from = "emissions_co2_dark_mt"
+  ) |>
+  dplyr::mutate(percent_inferred = scales::percent(`TRUE` / (`TRUE` + `FALSE`)))
+```
+
 # In-line manuscript statistics
 
 - The transportation sector is a major source of global greenhouse gas (GHG) and local air pollution emissions, responsible for `r fraction_co2_from_transportation` of all CO$_{2}$ emissions globally in 2023 
@@ -322,6 +347,8 @@ total_spatial_emissions_by_pollutant_2024 <- total_spatial_emissions_by_pollutan
 
 
 - Because many vessels do not broadcast AIS, current approaches solely based on AIS \textit{underestimate} current global emissions by `r pollutant_ais_underestimation_overestimation_summary |> dplyr::filter(pollutant == "co2") |> dplyr::pull(ais_underestimation_2024)` (in 2024), and \textit{overestimate} the increasing trend by `r pollutant_ais_underestimation_overestimation_summary |> dplyr::filter(pollutant == "co2") |> dplyr::pull(trend_overestimation_2016_2024)` (from 2016 to 2024). 
+
+- Across the entire 2016 to 2024 time series, `r percent_dark_emissions_inferred$percent_inferred` of non-broadcasting emissions were estimated using inferred ratios from the KNN approach (`r percent_dark_emissions_inferred_by_type |> dplyr::filter(!fishing) |> dplyr::pull(percent_inferred)` for non-fishing vessels, and `r percent_dark_emissions_inferred_by_type |> dplyr::filter(fishing) |> dplyr::pull(percent_inferred)` for fishing vessels).
 
 # Figures
 
@@ -823,6 +850,43 @@ time_series_predicted_decomposition_df |>
 
 # Supplementary figures
 
+### Size distribution of vessel class for S1 and AIS data
+
+```{r}
+#| label: fig-s1-ais-size-class-comparison
+#| fig-cap: Figure summarizing the length distributions for each vessel type (fishing and non-fishing) and size class, separately for AIS-broadcasting vessels and S1 detections. The point represents the median value, the vertical bars represent the interquartile range (i.e., 25th percentile and 75th percentile), and the lightly colored horizonal lines represents the full range of values.
+#| fig-height: 6
+#| fig-width: 8
+
+s1_ais_vessel_size_class_comparison |>
+  dplyr::mutate(
+    fishing = ifelse(fishing, "Fishing", "Non-fishing") |>
+      forcats::fct_rev()
+  ) |>
+  dplyr::mutate(
+    SOURCE = dplyr::case_when(
+      source == "s1" ~ "S1 unmatched detections",
+      source == "ais" ~ "AIS-broadcasting"
+    ),
+    length_size_class_percentile = glue::glue(
+      "Length bin: {length_size_class_percentile}"
+    ) %>%
+      forcats::fct_relevel("Length bin: 10", after = Inf)
+  ) |>
+  ggplot(aes(x = median_length_m, y = SOURCE)) +
+  geom_point(size = 1) +
+  geom_errorbar(
+    aes(xmin = min_length_m, xmax = max_length_m),
+    width = 0,
+    alpha = 0.25
+  ) +
+  geom_errorbar(aes(xmin = iqr_lower_length_m, xmax = iqr_upper_length_m)) +
+  facet_grid(length_size_class_percentile ~ fishing, scales = "free_x") +
+  theme_plot() +
+  labs(x = "Vessel length (m)", y = "") +
+  scale_x_continuous(limits = c(0, NA))
+```
+
 ###  Fraction matched detections, by vessel size and type
 
 ```{r}
@@ -960,6 +1024,7 @@ summarized_s1_dark_fleet_data |>
   facet_grid(fishing ~ ., scales = "free_y") +
   paletteer::scale_fill_paletteer_d(palette = "jcolors::pal10")
 ```
+
 
 ```{r}
 #| label: fig-pollutant-maps
