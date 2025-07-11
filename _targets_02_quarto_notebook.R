@@ -53,6 +53,20 @@ list(
     ),
     read = readr::read_csv(!!.x)
   ),
+  tar_file_read(
+    name = annual_non_broadcasting_detections_emissions,
+    command = here::here(
+      "data/gfw/annual_non_broadcasting_detections_emissions.csv"
+    ),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
+    name = s1_mean_spatial_knn_ratios,
+    command = here::here(
+      "data/gfw/s1_mean_spatial_knn_ratios.csv"
+    ),
+    read = readr::read_csv(!!.x)
+  ),
   # Load other data ----
   # EDGAR - Emissions Database for Global Atmospheric Research
   # From the European Commission

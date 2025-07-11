@@ -160,6 +160,45 @@ list(
       )
     ),
     format = "file"
+  ),
+  # Annual non-broadcastin emissions and detections
+  # By vessel type
+  tar_file_read(
+    name = annual_non_broadcasting_detections_emissions,
+    "sql/annual_non_broadcasting_detections_emissions.sql",
+    download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_dark = run_version_dark,
+          analysis_start_year = analysis_start_year,
+          analysis_end_year = analysis_end_year
+        ),
+      file_path = here::here(
+        "data/gfw/annual_non_broadcasting_detections_emissions.csv"
+      )
+    ),
+    format = "file"
+  ),
+  # Average KNN ratios by pixel, within and outside the footprint
+  # Averaged across all years of data
+  # By vessel type
+  tar_file_read(
+    name = s1_mean_spatial_knn_ratios,
+    "sql/s1_mean_spatial_knn_ratios.sql",
+    download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_dark = run_version_dark,
+          analysis_start_year = analysis_start_year,
+          analysis_end_year = analysis_end_year
+        ),
+      file_path = here::here(
+        "data/gfw/s1_mean_spatial_knn_ratios.csv"
+      )
+    ),
+    format = "file"
   )
   # # Define monthly_ais_vessels_and_ratios_by_pixel query path
   # tar_target(

@@ -38,7 +38,45 @@ analysis_end_year <- 2024
 ```
 
 ```{r}
+#| label: load-data
+targets::tar_load(c(
+  "n_unique_vessels",
+  "n_ais_messages",
+  "annual_edgar_emissions",
+  "annual_emissions_all_pollutants",
+  "total_spatial_emissions_by_pollutant_2024",
+  "annual_ais_to_dark_activity_extrapolation",
+  "total_monthly_emissions_by_pollutant",
+  "annual_ais_co2_emissions_by_vessel_type",
+  "annual_non_broadcasting_detections_emissions",
+  "s1_mean_spatial_knn_ratios"
+))
+```
+
+```{r}
 #| label: setup-graphics
+
+# For figures and tables, order pollutants first for GHG pollutants,
+# then local pollutants. For figures, we use expressions to show subscripts
+pollutant_factor_levels <- c(
+  "CO[2]",
+  "CH[4]",
+  "N[2]*O",
+  "CO",
+  "NO[X]",
+  "SO[X]",
+  "PM[2.5]",
+  "PM[10]",
+  "VOCs"
+)
+
+# Set pollutant levels for tables
+# For tables, we don't use expressions
+pollutant_factor_levels_tables <- pollutant_factor_levels |>
+  stringr::str_remove_all("\\[") |>
+  stringr::str_remove_all("\\]") |>
+  stringr::str_remove_all("\\*]*")
+
 # Use Okabe-Ito colorblind-friendly colors
 all_data_source_color_palette <- c(
   "Marine vessels (AIS + S1)" = paletteer::paletteer_d(
@@ -48,15 +86,11 @@ all_data_source_color_palette <- c(
   "Terrestrial transportation (EDGAR)" = paletteer::paletteer_d(
     "colorblindr::OkabeIto"
   )[[6]],
-  "Terrestrial transportation  (IEA)" = paletteer::paletteer_d(
-    "colorblindr::OkabeIto"
-  )[[1]],
   "AIS (broadcasting)" = paletteer::paletteer_d("colorblindr::OkabeIto")[[3]],
   "S1 (non-broadcasting)" = paletteer::paletteer_d("colorblindr::OkabeIto")[[
     7
   ]],
-  "EDGAR" = paletteer::paletteer_d("colorblindr::OkabeIto")[[8]],
-  "EIA" = paletteer::paletteer_d("colorblindr::OkabeIto")[[4]]
+  "EDGAR" = paletteer::paletteer_d("colorblindr::OkabeIto")[[8]]
 )
 
 # Set consistent theme for all plots
@@ -88,20 +122,6 @@ world_bbox_sf <-
 
 land <- rnaturalearth::ne_countries(returnclass = "sf") |>
   dplyr::select(geometry)
-```
-
-```{r}
-#| label: load-data
-targets::tar_load(c(
-  "n_unique_vessels",
-  "n_ais_messages",
-  "annual_edgar_emissions",
-  "annual_emissions_all_pollutants",
-  "total_spatial_emissions_by_pollutant_2024",
-  "annual_ais_to_dark_activity_extrapolation",
-  "total_monthly_emissions_by_pollutant",
-  "annual_ais_co2_emissions_by_vessel_type"
-))
 ```
 
 ```{r}
@@ -230,6 +250,49 @@ total_percent_change_by_fleet <- annual_emissions |>
 ```
 
 ```{r}
+# For each pollutant, estimate how much emissions are underestimated by just using AIS
+# As compared to using AIS + S1
+ais_scale_underestimation_2024 <- total_percent_change_by_fleet |>
+  dplyr::filter(fleet != "S1 (non-broadcasting)") |>
+  dplyr::select(fleet, pollutant, `2024`) |>
+  tidyr::pivot_wider(names_from = "fleet", values_from = `2024`) |>
+  dplyr::mutate(
+    ais_underestimation_2024 = (1 - `AIS (broadcasting)` / `AIS + S1`) |>
+      scales::percent()
+  ) |>
+  dplyr::rename(
+    emissions_mt_2024_ais = `AIS (broadcasting)`,
+    emissions_mt_2024_ais_s1 = `AIS + S1`
+  )
+
+# For each pollutant, estimate how much the 2016->2024 trend in emissions is underestimated by just using AIS
+# As compared to using AIS + S1
+ais_trend_overestimation_2016_2024 <- total_percent_change_by_fleet |>
+  dplyr::filter(fleet != "S1 (non-broadcasting)") |>
+  dplyr::select(fleet, pollutant, percent_change) |>
+  tidyr::pivot_wider(names_from = "fleet", values_from = percent_change) |>
+  dplyr::mutate(
+    trend_overestimation_2016_2024 = (`AIS (broadcasting)` /
+      `AIS + S1` -
+      1) |>
+      scales::percent()
+  ) |>
+  dplyr::rename(
+    trend_2016_2024_ais = `AIS (broadcasting)`,
+    trend_2016_2024_ais_s1 = `AIS + S1`
+  )
+
+# Put all this information together
+pollutant_ais_underestimation_overestimation_summary <- ais_scale_underestimation_2024 |>
+  dplyr::left_join(ais_trend_overestimation_2016_2024, by = "pollutant") |>
+  dplyr::select(
+    pollutant,
+    ais_underestimation_2024,
+    trend_overestimation_2016_2024
+  )
+```
+
+```{r}
 #| label: wrangle-gfw-spatials-emissions-data
 # Total spatial emissions by pollutant for 2024
 total_spatial_emissions_by_pollutant_2024 <- total_spatial_emissions_by_pollutant_2024 |>
@@ -253,6 +316,9 @@ total_spatial_emissions_by_pollutant_2024 <- total_spatial_emissions_by_pollutan
 
 - For over `r scales::comma(signif(n_unique_vessels$n_unique_vessels,2))` AIS-broadcasting vessels, we quantify point-estimate emissions for each vessel using precise latitude/longitude/timestamp information for over `r scales::comma(signif(n_ais_messages$n_billion_ais_messages,3))` billion individual AIS messages
 
+
+- Because many vessels do not broadcast AIS, current approaches solely based on AIS \textit{underestimate} current global emissions by `r pollutant_ais_underestimation_overestimation_summary |> dplyr::filter(pollutant == "co2") |> dplyr::pull(ais_underestimation_2024)` (in 2024), and \textit{overestimate} the increasing trend by `r pollutant_ais_underestimation_overestimation_summary |> dplyr::filter(pollutant == "co2") |> dplyr::pull(trend_overestimation_2016_2024)` (from 2016 to 2024). 
+
 # Figures
 
 ## Figure 1
@@ -260,19 +326,6 @@ total_spatial_emissions_by_pollutant_2024 <- total_spatial_emissions_by_pollutan
 ### Figure 1, panel A
 
 ```{r}
-# For figures, order pollutants first for GHG pollutants,
-# then local pollutants
-pollutant_factor_levels <- c(
-  "CO[2]",
-  "CH[4]",
-  "N[2]*O",
-  "CO",
-  "NO[X]",
-  "SO[X]",
-  "PM[2.5]",
-  "PM[10]",
-  "VOCs"
-)
 pollutant_map_data_co2 <- total_spatial_emissions_by_pollutant_2024 |>
   dplyr::filter(pollutant %in% c("CO2"))
 
@@ -766,6 +819,144 @@ time_series_predicted_decomposition_df |>
 
 # Supplementary figures
 
+###  Fraction matched detections, by vessel size and type
+
+```{r}
+#| label: fig-dark-vessel-fraction-detected-time-series
+#| fig-cap: Fraction of S1-detected vessels matched AIS-broadcasting vessels over time, disaggregated by vessel type and length size class
+#| fig-height: 6
+#| fig-width: 8
+
+summarized_s1_dark_fleet_data <- annual_non_broadcasting_detections_emissions |>
+  dplyr::group_by(year, fishing, length_size_class_percentile) %>%
+  dplyr::summarize(across(
+    c(number_dark_detections, number_ais_detections, emissions_co2_dark_mt),
+    ~ sum(., na.rm = TRUE)
+  )) %>%
+  dplyr::ungroup() %>%
+  dplyr::mutate(
+    ratio_dark_to_ais_detections = number_dark_detections /
+      number_ais_detections,
+    fraction_tracked = number_ais_detections /
+      (number_ais_detections + number_dark_detections)
+  ) |>
+  dplyr::mutate(
+    fishing = ifelse(fishing, "Fishing", "Non-fishing") |>
+      forcats::fct_rev()
+  )
+
+summarized_s1_dark_fleet_data |>
+  ggplot(aes(
+    x = year,
+    y = ratio_dark_to_ais_detections,
+    color = factor(length_size_class_percentile),
+    group = length_size_class_percentile
+  )) +
+  geom_line(linewidth = 1.1) +
+  paletteer::scale_color_paletteer_d(palette = "jcolors::pal10") +
+  theme_plot() +
+  facet_grid(. ~ fishing) +
+  scale_y_continuous(limits = c(0, NA)) +
+  labs(
+    color = "Length bin",
+    x = "",
+    y = "Ratio of S1-detected dark vessels\nto matched AIS-broadcasting vessels"
+  ) +
+  guides(
+    linetype = guide_legend(order = 2, reverse = TRUE),
+    color = guide_legend(order = 1)
+  )
+```
+
+### Outside and within S1 footprint ratios
+
+```{r}
+#| label: fig-map-dark-to-ais-s1-ratio
+#| fig-cap: Mean ratio value within and outside S1 footprint, aggregated across all years, and vessel lengths, for representation purposes. Model inputs are disaggregated by pixel, month, vessel class and length bin.
+
+scale_limits <- c(
+  0.001,
+  max(s1_mean_spatial_knn_ratios$avg_neighbor_ratio, na.rm = TRUE)
+)
+
+s1_mean_spatial_knn_ratios |>
+  dplyr::mutate(
+    within_footprint = ifelse(
+      within_footprint,
+      "Within S1 footprint",
+      "Outside S1 footprint"
+    ) |>
+      forcats::fct_rev()
+  ) |>
+  dplyr::mutate(
+    fishing = ifelse(fishing, "Fishing", "Non-fishing") |>
+      forcats::fct_rev()
+  ) |>
+  ggplot() +
+  geom_sf(data = world_bbox_sf, fill = "black") +
+  ggspatial::geom_spatial_tile(aes(
+    x = lon_bin + 0.5,
+    y = lat_bin + 0.5,
+    fill = avg_neighbor_ratio,
+    color = avg_neighbor_ratio
+  )) +
+  theme_void() +
+  geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
+  scale_fill_viridis_c(
+    "Average ratios (log scale)",
+    trans = "log10",
+    option = "mako",
+    na.value = "black",
+    limits = scale_limits
+  ) +
+  scale_color_viridis_c(
+    "Average ratios (log scale)",
+    trans = "log10",
+    option = "mako",
+    na.value = "black",
+    limits = scale_limits
+  ) +
+  labs(x = "", y = "") +
+  theme(legend.position = "bottom") +
+  guides(
+    fill = guide_colorbar(
+      title.position = "top",
+      title.hjust = 0.5,
+      frame.colour = "black",
+      ticks.colour = "black",
+      barwidth = unit(10, "cm"),
+      barheight = unit(0.5, "cm")
+    )
+  ) +
+  scale_x_continuous(expand = c(0, 1)) +
+  scale_y_continuous(expand = c(0, 1)) +
+  facet_grid(fishing ~ within_footprint) +
+  coord_sf(crs = map_projection)
+```
+
+###  Dark fleet emissions, by vessel size and type
+
+```{r}
+#| label: fig-global-annual-co2-dark-emissions-by-type
+#| fig-cap: Summary of global annual CO2 dark emissions over time, disaggregated by vessel type.
+#| fig-height: 8
+#| fig-width: 8
+#|
+summarized_s1_dark_fleet_data |>
+  ggplot(aes(
+    x = year,
+    y = emissions_co2_dark_mt,
+    fill = factor(length_size_class_percentile)
+  )) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_x_continuous(breaks = unique(summarized_s1_dark_fleet_data$year)) +
+  labs(x = "", y = "CO2 dark emissions (MT)", fill = "Length bin") +
+  theme_plot() +
+  scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) +
+  facet_grid(fishing ~ ., scales = "free_y") +
+  paletteer::scale_fill_paletteer_d(palette = "jcolors::pal10")
+```
+
 ```{r}
 #| label: fig-pollutant-maps
 #| fig-cap: Spatial map of 2024 emissions for each pollutant, aggregated across the AIS-broadcasting fleet and non-broadcasting, and shown at a 1x1 degree spatial resolution
@@ -836,17 +1027,22 @@ pollutant_time_series_data_co2 <- total_monthly_emissions_by_pollutant |>
   dplyr::filter(pollutant == "CO2")
 
 make_pollutant_time_series_figure <- function(
-    pollutant_time_series_data,
-    y_axis_label) {{ ggplot(
-  data = pollutant_time_series_data,
-  aes(x = month, y = emissions_mt)
-) +
-  geom_line(linewidth = 1.1) +
-  scale_y_continuous(labels = scales::comma) +
-  theme_plot() +
-  labs(x = "", y = y_axis_label) +
-  theme(panel.grid.minor.x = element_blank()) +
-  scale_y_continuous(limits = c(0, NA)) }}
+  pollutant_time_series_data,
+  y_axis_label
+) {
+  {
+    ggplot(
+      data = pollutant_time_series_data,
+      aes(x = month, y = emissions_mt)
+    ) +
+      geom_line(linewidth = 1.1) +
+      scale_y_continuous(labels = scales::comma) +
+      theme_plot() +
+      labs(x = "", y = y_axis_label) +
+      theme(panel.grid.minor.x = element_blank()) +
+      scale_y_continuous(limits = c(0, NA))
+  }
+}
 
 make_pollutant_time_series_figure(
   pollutant_time_series_data_co2,
@@ -897,7 +1093,7 @@ make_pollutant_time_series_figure(
 #| label: fig-co2-emissions-by-vessel-type
 #| fig-cap: Total 2024 CO2 emissions by vessel type for AIS-broadcasting vessels (millions metric tonnes).
 #| fig-width: 4
-#| fig-height: 5
+#| fig-height: 6
 annual_ais_co2_emissions_by_vessel_type |>
   dplyr::filter(year == 2024) |>
   dplyr::mutate(
@@ -924,11 +1120,15 @@ annual_ais_co2_emissions_by_vessel_type |>
   dplyr::mutate(
     vessel_class = stringr::str_replace_all(
       vessel_class,
-      "cargo.",
-      "cargo: "
+      "\\.",
+      ": "
     ) |>
       stringr::str_replace_all("_", " ") |>
-      stringr::str_to_sentence()
+      stringr::str_to_sentence() |>
+      stringr::str_replace_all(
+        "chemical oil",
+        "chemical or oil"
+      )
   ) |>
   ggplot(aes(
     x = emissions_co2_mt,
@@ -945,4 +1145,78 @@ annual_ais_co2_emissions_by_vessel_type |>
     labels = scales::unit_format(unit = "M", scale = 1e-6),
     limits = c(0, NA)
   )
+```
+
+# Supplementary tables
+
+## Summary of 2016 and 2024 emissions, by pollutant and data source
+
+```{r}
+total_percent_change_by_fleet_tbl <- total_percent_change_by_fleet |>
+  dplyr::mutate(across(
+    c(`2016`, `2024`, percent_change),
+    ~ signif(., 3) |>
+      prettyNum(big.mark = ",")
+  )) |>
+  dplyr::mutate(
+    pollutant = stringr::str_to_upper(pollutant) |>
+      stringr::str_replace_all("_", "."),
+    pollutant = ifelse(pollutant == "VOCS", "VOCs", pollutant)
+  ) |>
+  dplyr::mutate(
+    pollutant = forcats::fct_relevel(pollutant, pollutant_factor_levels_tables)
+  ) |>
+  dplyr::arrange(pollutant) |>
+  dplyr::rename(
+    `Data source` = fleet,
+    Pollutant = pollutant,
+    `2016 emissions (MT)` = `2016`,
+    `2024 emissions (MT)` = `2024`,
+    `Percent 2024 total` = percent_total_2024,
+    `Percent change from 2016 to 2024` = percent_change
+  ) |>
+  knitr::kable(
+    format = "latex",
+    label = "total_percent_change_by_fleet",
+    caption = "Summary of 2016 and 2024 emissions, by pollutant and data source."
+  ) |>
+  kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
+
+writeLines(
+  total_percent_change_by_fleet_tbl,
+  here::here("tables/total_percent_change_by_fleet.tex")
+)
+```
+
+## Underestimation of 2024 emissions using only AIS data, and overestimation of 2016 to 2024 emissions trend using only AIS data, by pollutant.
+
+```{r}
+pollutant_ais_underestimation_overestimation_summary_tbl <- pollutant_ais_underestimation_overestimation_summary |>
+  dplyr::mutate(
+    pollutant = stringr::str_to_upper(pollutant) |>
+      stringr::str_replace_all("_", "."),
+    pollutant = ifelse(pollutant == "VOCS", "VOCs", pollutant)
+  ) |>
+  dplyr::mutate(
+    pollutant = forcats::fct_relevel(pollutant, pollutant_factor_levels_tables)
+  ) |>
+  dplyr::arrange(pollutant) |>
+  dplyr::rename(
+    Pollutant = pollutant,
+    "AIS-only underestimation of 2024 emissions" = ais_underestimation_2024,
+    "AIS-only overestimation of 2016-2024 emissions trend" = trend_overestimation_2016_2024
+  ) |>
+  knitr::kable(
+    format = "latex",
+    label = "pollutant_ais_underestimation_overestimation_summary",
+    caption = "Underestimation of 2024 emissions using only AIS data, and overestimation of 2016 to 2024 emissions trend using only AIS data, by pollutant."
+  ) |>
+  kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
+
+writeLines(
+  pollutant_ais_underestimation_overestimation_summary_tbl,
+  here::here(
+    "tables/pollutant_ais_underestimation_overestimation_summary.tex"
+  )
+)
 ```
