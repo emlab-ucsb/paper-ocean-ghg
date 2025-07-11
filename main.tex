@@ -312,7 +312,14 @@ Our AIS emissions estimates are consistent with estimates from the International
 
 We estimate emissions from the non-broadcasting fleet by spatiotemporally extrapolating AIS-based emissions to non-broadcasting vessels, leveraging vessel detections from S1 SAR data. S1 imagery enables identification and quantification of both broadcasting and non-broadcasting vessels at specific locations and times (Paolo et al. 2024). This extrapolation is further disaggregated by vessel type and length decile.
 
-We define a global spatial resolution of 1x1-degree pixels and use monthly aggregation units for temporal resolution. We divide vessels into 10 size classes according to length deciles derived from all S1 detections unmatched with AIS that occurred from 2016 to 2024. These length-based decile thresholds are consistently applied to both AIS-derived vessel characteristics and Sentinel-1 detected vessel lengths in order to bin all AIS-broadcasting vessels and all unmatched S1 detections into length bins. Using this classification, we perform extrapolations of AIS-based emissions to non-broadcasting vessels within the same length groups, vessel type (either fishing or non-fishing vessels), and by space and time. We extrapolate based on length bins because length is representative of vessel size, and vessels with larger engines emit more, all-else-equal. We extrapolate based on vessel type (fishing or non-fishing) because some fishing vessel types have fundamentally different emissions profiles than non-fishing vessels (i.e., trawlers and dredgers emit more at low speeds due to the nature of their energy-intensive gear deployment, which is reflected in their gear-specific main engine load factor adjustment.)
+We define a global spatial resolution of 1x1-degree pixels and use monthly aggregation units for temporal resolution. We divide vessels into 10 size classes according to length deciles derived from all S1 detections unmatched with AIS that occurred from 2016 to 2024. These length-based decile thresholds are consistently applied to both AIS-derived vessel characteristics and Sentinel-1 detected vessel lengths in order to bin all AIS-broadcasting vessels and all unmatched S1 detections into length bins (Fig. \ref{fig:fig-s1-ais-size-class-comparison}). Using this classification, we perform extrapolations of AIS-based emissions to non-broadcasting vessels within the same length groups, vessel type (either fishing or non-fishing vessels), and by space and time. We extrapolate based on length bins because length is representative of vessel size, and vessels with larger engines emit more, all-else-equal. We extrapolate based on vessel type (fishing or non-fishing) because some fishing vessel types have fundamentally different emissions profiles than non-fishing vessels (i.e., trawlers and dredgers emit more at low speeds due to the nature of their energy-intensive gear deployment, which is reflected in their gear-specific main engine load factor adjustment.)
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/fig-s1-ais-size-class-comparison-1.png}
+    \caption{Length distributions for each vessel type (non-fishing and fishing) and length bin decile, separately for AIS-broadcasting vessels and unmatched S1 detections. The point represents the median value, the vertical bars represent the interquartile range (i.e., 25th percentile and 75th percentile), and the lightly colored horizonal lines represents the full range of values..}
+    \label{fig:fig-s1-ais-size-class-comparison}
+\end{figure}
 
 For each pixel, month, vessel type, and vessel size bin, we use S1 data to determine: (1) the number of vessel detections matched to AIS-broadcasting vessels; (2) the number of vessel detections not matched to AIS-broadcasting vessels (i.e., non-broadcasting vessels); and (3) the ratio of non-broadcasting vessels to AIS-broadcasting vessels (Fig. \ref{fig:fig-dark-vessel-fraction-detected-time-series}).
 
@@ -332,7 +339,7 @@ S1 coverage is constrained by the satellite’s orbital path and the presence of
     \label{fig:fig-map-dark-to-ais-s1-ratio}
 \end{figure}
 
-We estimate non-broadcasting emissions by multiplying AIS-based emissions by the ratio of non-broadcasting to AIS-broadcasting vessels for each pollutant, pixel, month, vessel type, and vessel size bin (Fig. \ref{fig:fig-global-annual-co2-dark-emissions-by-type}). To select the appropriate ratio, we apply the following hierarchy: (1) where available, we use the precise monthly pixel-level ratio derived from Sentinel-1 data; or (2) if the precise pixel-level ratio is not available, we use the the imputed KNN-derived ratio.
+We estimate non-broadcasting emissions by multiplying AIS-based emissions by the ratio of non-broadcasting to AIS-broadcasting vessels for each pollutant, pixel, month, vessel type, and vessel size bin (Fig. \ref{fig:fig-global-annual-co2-dark-emissions-by-type}). To select the appropriate ratio, we apply the following hierarchy: (1) where available, we use the precise monthly pixel-level ratio derived from Sentinel-1 data; or (2) if the precise pixel-level ratio is not available, we use the the imputed KNN-derived ratio. Across the entire 2016 to 2024 time series, 68\% of non-broadcasting emissions were estimated based on inferred ratios derived from the KNN approach (71\% for non-fishing vessels, and 39\% for fishing vessels).
 
 \begin{figure}[H]
     \centering
@@ -410,7 +417,7 @@ AIS messages are broadcast from vessels and then received through one of three t
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{qmd/figures/fig-annual-emissions-by-ais-receiver-type-1.png}
+    \includegraphics[width=\columnwidth]{figures/fig-annual-emissions-by-ais-receiver-type-1.png}
     \caption{Annual total CO$_{2}$ emissions (metric tonnes) by the AIS-broadcasting fleet, disaggregated by AIS receiver type (satellite, terrestrial, and dynamic) and total aggregated across receiver types. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.}
     \label{fig:fig-annual-emissions-by-ais-receiver-type}
 \end{figure}
@@ -419,7 +426,7 @@ In Fig. \ref{fig:fig-annual-emissions-by-ais-receiver-type-top-flags}, we see th
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{qmd/figures/fig-annual-emissions-by-ais-receiver-type-top-flags-1.png}
+    \includegraphics[width=\columnwidth]{figures/fig-annual-emissions-by-ais-receiver-type-top-flags-1.png}
     \caption{Annual total CO$_{2}$ emissions (metric tonnes) by the AIS-broadcasting fleet, disaggregated by AIS receiver type (satellite, terrestrial, and dynamic) and total aggregated across receiver types, for the top 10 flags with the most emissions in 2024. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.}
     \label{fig:fig-annual-emissions-by-ais-receiver-type-top-flags}
 \end{figure}
@@ -428,7 +435,7 @@ Finally, in Fig. \ref{fig:fig-co2-emissions-change-map-by-receiver-type}, we see
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{qmd/figures/fig-co2-emissions-change-map-by-receiver-type-1.png}
+    \includegraphics[width=\columnwidth]{figures/fig-co2-emissions-change-map-by-receiver-type-1.png}
     \caption{Spatial change in CO$_{2}$ emissions by the AIS-broadcasting fleet between 2016 and 2024 (metric tonnes) by receiver type (satellite, terrestrial, and dynamic) and total across receiver types, at a 1x1 degree spatial resolution.}
     \label{fig:fig-co2-emissions-change-map-by-receiver-type}
 \end{figure}
