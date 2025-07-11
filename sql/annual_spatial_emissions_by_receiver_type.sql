@@ -5,7 +5,8 @@ SELECT
   lat_bin,
   SUM(emissions_co2_mt) emissions_co2_mt
 FROM
-  `{bq_project}.{bq_dataset}.monthly_spatial_vessel_emissions_by_receiver_type_{run_version_ais}`
+  `world-fishing-827.proj_ocean_ghg.monthly_spatial_vessel_emissions_by_receiver_type_{run_version_ais}`
+WHERE EXTRACT(YEAR FROM month) IN (2016,2024)
 GROUP BY
   year,
   receiver_type,
@@ -19,7 +20,8 @@ UNION ALL(
   lat_bin,
   SUM(emissions_co2_mt) emissions_co2_mt
 FROM
-  `{bq_project}.{bq_dataset}.monthly_spatial_vessel_emissions_by_receiver_type_{run_version_ais}`
+  `world-fishing-827.proj_ocean_ghg.monthly_spatial_vessel_emissions_by_receiver_type_{run_version_ais}`
+WHERE EXTRACT(YEAR FROM month) IN (2016,2024)
 GROUP BY
   year,
   lon_bin,

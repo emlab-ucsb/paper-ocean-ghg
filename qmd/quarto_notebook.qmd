@@ -50,7 +50,10 @@ targets::tar_load(c(
   "total_monthly_emissions_by_pollutant",
   "annual_ais_co2_emissions_by_vessel_type",
   "annual_non_broadcasting_detections_emissions",
-  "s1_mean_spatial_knn_ratios"
+  "s1_mean_spatial_knn_ratios",
+  "annual_global_emissions_by_receiver_type",
+  "annual_global_emissions_by_receiver_type_and_flag",
+  "annual_spatial_emissions_by_receiver_type"
 ))
 ```
 
@@ -1028,17 +1031,30 @@ pollutant_time_series_data_co2 <- total_monthly_emissions_by_pollutant |>
   dplyr::filter(pollutant == "CO2")
 
 make_pollutant_time_series_figure <- function(
-    pollutant_time_series_data,
-    y_axis_label) {{ ggplot(
-  data = pollutant_time_series_data,
-  aes(x = month, y = emissions_mt)
-) +
-  geom_line(linewidth = 1.1) +
-  scale_y_continuous(labels = scales::comma) +
-  theme_plot() +
-  labs(x = "", y = y_axis_label) +
-  theme(panel.grid.minor.x = element_blank()) +
-  scale_y_continuous(limits = c(0, NA)) }}
+  pollutant_time_series_data,
+  y_axis_label
+) {
+  {
+    ggplot(
+      data = pollutant_time_series_data,
+      aes(x = month, y = emissions_mt)
+    ) +
+      geom_line(linewidth = 1.1) +
+      scale_y_continuous(labels = scales::comma) +
+      theme_plot() +
+      labs(x = "", y = y_axis_label) +
+      theme(panel.grid.minor.x = element_blank()) +
+      scale_x_continuous(
+        breaks = seq(
+          lubridate::ymd(glue::glue("{analysis_start_year}-01-01")),
+          lubridate::ymd(glue::glue("{analysis_end_year+1}-01-01")),
+          by = "1 year"
+        ),
+        labels = seq(analysis_start_year, analysis_end_year + 1)
+      ) +
+      scale_y_continuous(limits = c(0, NA))
+  }
+}
 
 make_pollutant_time_series_figure(
   pollutant_time_series_data_co2,
@@ -1215,4 +1231,186 @@ writeLines(
     "tables/pollutant_ais_underestimation_overestimation_summary.tex"
   )
 )
+```
+
+### Dynamic AIS - annual emissions and vessels by AIS receiver type
+
+```{r}
+#| label: wrangle-receiver-type-data
+
+annual_global_emissions_by_receiver_type <- annual_global_emissions_by_receiver_type |>
+  # Don't include unknown receiver type
+  dplyr::filter(receiver_type != "unknown") |>
+  # Fill in missing values with 0s
+  tidyr::complete(
+    receiver_type,
+    tidyr::nesting(year),
+    fill = list(emissions_co2_mt = 0, n_distinct_ssvid = 0)
+  ) |>
+  dplyr::mutate(receiver_type = stringr::str_to_sentence(receiver_type)) |>
+  # Don't use 2025 data, since the year is incomplete
+  dplyr::filter(year < 2025)
+
+# Annual global emissions and number of unique vessels by receiver type (satellite; dynamic; or terrestrial) and flag
+annual_global_emissions_by_receiver_type_and_flag <- annual_global_emissions_by_receiver_type_and_flag |>
+  # Add column name for country name based on flag
+
+  dplyr::mutate(
+    flag = countrycode::countrycode(
+      flag,
+      origin = "iso3c",
+      destination = "country.name"
+    )
+  ) |>
+  # Don't include unknown receiver type
+  dplyr::filter(receiver_type != "unknown") |>
+  dplyr::mutate(
+    receiver_type = stringr::str_to_sentence(receiver_type) |>
+      forcats::fct_relevel("Satellite", "Terrestrial", "Dynamic")
+  ) |>
+  # Fill in missing values with 0s
+  tidyr::complete(
+    receiver_type,
+    tidyr::nesting(year, flag),
+    fill = list(emissions_co2_mt = 0, n_distinct_ssvid = 0)
+  ) |>
+  # Don't use 2025 data, since the year is incomplete
+  dplyr::filter(year < 2025)
+
+# Annual spatial CO2 emissions vt receiver type  (satellite; dynamic; or terrestrial)
+annual_spatial_emissions_by_receiver_type <- annual_spatial_emissions_by_receiver_type |>
+  dplyr::mutate(
+    receiver_type = stringr::str_to_sentence(receiver_type) |>
+      forcats::fct_relevel("Satellite", "Terrestrial", "Dynamic")
+  ) |>
+  # Don't use 2025 data, since the year is incomplete
+  dplyr::filter(year < 2025)
+```
+
+
+```{r}
+#| label: fig-annual-emissions-by-ais-receiver-type
+#| fig-cap: Annual total CO2 emissions (metric tonnes) by the AIS-broadcasting fleet, disaggregated by AIS receiver type (satellite, terrestrial, and dynamic) and total aggregated across receiver types. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.
+#| #| fig-width: 7.5
+#| fig-height: 6
+annual_global_emissions_by_receiver_type |>
+  dplyr::rename(
+    `CO[2]~emissions~(MT)` = emissions_co2_mt,
+    `Number~unique~vessels` = n_distinct_ssvid
+  ) |>
+  tidyr::pivot_longer(cols = -c(year, receiver_type)) |>
+  ggplot(aes(x = year, y = value, color = receiver_type)) +
+  facet_wrap(name ~ ., scales = "free_y", ncol = 1, labeller = label_parsed) +
+  geom_line(linewidth = 1.1) +
+  scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) +
+  scale_x_continuous(
+    breaks = unique(annual_global_emissions_by_receiver_type$year)
+  ) +
+  scale_color_brewer(
+    type = "qual",
+    palette = "Set2",
+    guide = guide_legend(reverse = TRUE)
+  ) +
+  theme_plot() +
+  labs(x = "", y = "", color = "AIS receiver type") +
+  theme(panel.grid.minor.x = element_blank()) +
+  geom_vline(xintercept = 2022, linetype = 2)
+```
+
+### Dynamic AIS - annual emissions by AIS receiver type for top flags
+
+```{r}
+#| label: fig-annual-emissions-by-ais-receiver-type-top-flags
+#| fig-cap: Annual total CO2 emissions (metric tonnes) by the AIS-broadcasting fleet, disaggregated by AIS receiver type (satellite, terrestrial, and dynamic) and total aggregated across receiver types, for the top 10 flags with the most emissions in 2024. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.
+#| fig-width: 7.5
+#| fig-height: 6
+
+top_n_flags_2024 <- annual_global_emissions_by_receiver_type_and_flag |>
+  dplyr::filter(year == 2024, receiver_type == "Total") |>
+  dplyr::slice_max(n = 10, order_by = emissions_co2_mt) |>
+  dplyr::select(flag)
+
+annual_global_emissions_by_receiver_type_and_flag |>
+  dplyr::inner_join(top_n_flags_2024, by = "flag") |>
+  dplyr::mutate(flag = forcats::fct_relevel(flag, top_n_flags_2024$flag)) |>
+  ggplot(aes(x = year, y = emissions_co2_mt, color = flag)) +
+  facet_grid(receiver_type ~ ., scales = "free_y") +
+  geom_line(linewidth = 1.1) +
+  scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) +
+  scale_x_continuous(
+    breaks = unique(annual_global_emissions_by_receiver_type_and_flag$year)
+  ) +
+  theme_plot() +
+  labs(x = "", y = expression(CO[2] ~ emissions ~ (MT)), color = "Flag") +
+  theme(panel.grid.minor.x = element_blank()) +
+  geom_vline(xintercept = 2022, linetype = 2) +
+  paletteer::scale_color_paletteer_d(palette = "rcartocolor::Safe")
+
+```
+
+
+### Dynamic AIS - map showing spatial change in emissions by AIS receiver type
+
+
+```{r}
+#| label: fig-co2-emissions-change-map-by-receiver-type
+#| fig-cap: Spatial change in CO2 emissions by the AIS-broadcasting fleet between 2016 and 2024 (metric tonnes) by receiver type (satellite, terrestrial, and dynamic) and total across receiver types, at a 1x1 degree spatial resolution.
+#| fig-width: 7.5
+#| fig-height: 8
+
+annual_spatial_emissions_by_receiver_type |>
+  dplyr::filter(year %in% c(2016, 2024)) |>
+  tidyr::pivot_wider(names_from = year, values_from = emissions_co2_mt) |>
+  dplyr::mutate(across(c(`2016`, `2024`), ~ tidyr::replace_na(., 0))) |>
+  dplyr::mutate(change_emissions_co2 = `2024` - `2016`) |>
+  ggplot() +
+  geom_sf(data = world_bbox_sf, fill = "black") +
+  ggspatial::geom_spatial_tile(aes(
+    x = lon_bin + 0.5,
+    y = lat_bin + 0.5,
+    fill = change_emissions_co2,
+    color = change_emissions_co2
+  )) +
+  geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
+  facet_wrap(receiver_type ~ ., ncol = 1) +
+  scico::scale_fill_scico(
+    expression(atop(
+      Change ~ of ~ CO[2] ~ emissions,
+      from ~ 2016 ~ to ~ 2024 ~ (MT)
+    )),
+    palette = "berlin",
+    midpoint = 0,
+    trans = ggallin::pseudolog10_trans,
+    na.value = "black",
+    breaks = c(-1e6, -1e3, 0, 1e3, 1e6),
+    labels = scales::comma
+  ) +
+  scico::scale_color_scico(
+    expression(atop(
+      Change ~ of ~ CO[2] ~ emissions,
+      from ~ 2016 ~ to ~ 2024 ~ (MT)
+    )),
+    palette = "berlin",
+    midpoint = 0,
+    trans = ggallin::pseudolog10_trans,
+    na.value = "black",
+    breaks = c(-1e6, -1e3, 0, 1e3, 1e6),
+    labels = scales::comma
+  ) +
+  labs(x = "", y = "") +
+  theme_void() +
+  theme(legend.position = "right", legend.direction = "vertical") +
+  guides(
+    fill = guide_colorbar(
+      title.position = "top",
+      title.hjust = 0.5,
+      frame.colour = "black",
+      ticks.colour = "black",
+      barwidth = unit(1, "cm"),
+      barheight = unit(5, "cm")
+    )
+  ) +
+  scale_x_continuous(expand = c(0, 1)) +
+  scale_y_continuous(expand = c(0, 1)) +
+  coord_sf(crs = map_projection)
 ```
