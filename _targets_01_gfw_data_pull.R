@@ -263,7 +263,8 @@ list(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
         stringr::str_glue(
-          run_version_ais = run_version_ais
+          run_version_ais = run_version_ais,
+          run_version_dark = run_version_dark
         ),
       file_path = here::here(
         "data/gfw/vessel_size_info.csv"

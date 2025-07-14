@@ -856,21 +856,21 @@ time_series_predicted_decomposition_df |>
 ```{r}
 #| label: fig-ais-length-power-relationship
 #| fig-cap: The relationship between main engine power (kilowatts) and length (meters), where each point is a specific AIS-broadcasting vessel. The relationship is disaggregated for non-fishing vessels and fishing vessels.
-#| #| fig-height: 9
-#| fig-width: 6
+#| #| fig-height: 10
+#| #| fig-width: 6
 vessel_size_info |>
   dplyr::mutate(
-    on_fishing_list_best = ifelse(
-      on_fishing_list_best,
+    fishing = ifelse(
+      fishing,
       "Fishing",
       "Non-fishing"
     ) |>
       forcats::fct_rev()
   ) |>
   ggplot(aes(x = length_m, y = main_engine_power_kw)) +
-  geom_point(size = 0.1) +
+  geom_point(size = 0.1, alpha = 0.5) +
   theme_plot() +
-  facet_wrap(on_fishing_list_best ~ ., ncol = 1, scales = "free") +
+  facet_wrap(fishing ~ ., ncol = 1, scales = "free") +
   labs(x = "Length (m)", y = "Main engine power (kW)") +
   scale_y_continuous(labels = scales::comma)
 ```
