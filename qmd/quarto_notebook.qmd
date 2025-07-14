@@ -54,6 +54,7 @@ targets::tar_load(c(
   "annual_global_emissions_by_receiver_type",
   "annual_global_emissions_by_receiver_type_and_flag",
   "annual_spatial_emissions_by_receiver_type",
+  "vessel_size_info",
   "s1_ais_vessel_size_class_comparison"
 ))
 ```
@@ -850,14 +851,38 @@ time_series_predicted_decomposition_df |>
 
 # Supplementary figures
 
+### Relationship between length and engine power
+
+```{r}
+#| label: fig-ais-length-power-relationship
+#| fig-cap: The relationship between main engine power (kilowatts) and length (meters), where each point is a specific AIS-broadcasting vessel. The relationship is disaggregated for non-fishing vessels and fishing vessels.
+#| #| fig-height: 9
+#| fig-width: 6
+vessel_size_info |>
+  dplyr::mutate(
+    on_fishing_list_best = ifelse(
+      on_fishing_list_best,
+      "Fishing",
+      "Non-fishing"
+    ) |>
+      forcats::fct_rev()
+  ) |>
+  ggplot(aes(x = length_m, y = main_engine_power_kw)) +
+  geom_point(size = 0.1) +
+  theme_plot() +
+  facet_wrap(on_fishing_list_best ~ ., ncol = 1, scales = "free") +
+  labs(x = "Length (m)", y = "Main engine power (kW)") +
+  scale_y_continuous(labels = scales::comma)
+```
+
 ### Size distribution of vessel class for S1 and AIS data
 
 ```{r}
 #| label: fig-s1-ais-size-class-comparison
-#| fig-cap: Figure summarizing the length distributions for each vessel type (fishing and non-fishing) and size class, separately for AIS-broadcasting vessels and S1 detections. The point represents the median value, the vertical bars represent the interquartile range (i.e., 25th percentile and 75th percentile), and the lightly colored horizonal lines represents the full range of values.
+#| #| fig-cap: Figure summarizing the length distributions for each vessel type (fishing and non-fishing) and size class, separately for AIS-broadcasting vessels and S1 detections. The point represents the median value, the vertical bars represent the interquartile range (i.e., 25th percentile and 75th percentile), and the lightly colored horizonal lines represents the full range of values.
 #| fig-height: 6
 #| fig-width: 8
-
+#|
 s1_ais_vessel_size_class_comparison |>
   dplyr::mutate(
     fishing = ifelse(fishing, "Fishing", "Non-fishing") |>

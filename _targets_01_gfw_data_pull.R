@@ -254,6 +254,23 @@ list(
     ),
     format = "file"
   ),
+  # Get length and engine power of all vessels
+  # For plotting this relationship
+  tar_file_read(
+    name = vessel_size_info,
+    "sql/vessel_size_info.sql",
+    download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_ais = run_version_ais
+        ),
+      file_path = here::here(
+        "data/gfw/vessel_size_info.csv"
+      )
+    ),
+    format = "file"
+  ),
   # Compare vessel size class distributions of S1 data and AIS data
   # For each of unmatched S1 detections and AIS vessels, each vessel type (fishing and non-fishing), and each size class
   # Calculate the minimum, maximum, standard devation, and average length

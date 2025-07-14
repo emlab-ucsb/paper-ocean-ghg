@@ -82,6 +82,13 @@ list(
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
+    name = vessel_size_info,
+    command = here::here(
+      "data/gfw/vessel_size_info.csv"
+    ),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
     name = s1_ais_vessel_size_class_comparison,
     command = here::here(
       "data/gfw/s1_ais_vessel_size_class_comparison.csv"
