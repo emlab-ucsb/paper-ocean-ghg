@@ -130,14 +130,14 @@ To correctly estimate both the magnitude and trends of marine emissions, data fu
     \label{fig:fig-emissions-by-data-source-and-maps}
 \end{figure}
 
-Fusing AIS and S1 data also provides a comprehensive picture of spatial marine vessel emissions patterns and how those patterns change over time (Fig. \ref{fig:fig-emissions-by-data-source-and-maps}C and Fig. \ref{fig:fig-pollutant-maps}). This allows for analysis of the GHG emissions that drive climate change, as well as of other air pollutants that impact local air quality and health. These data can be used for spatial analysis necessary to design and evaluate interventions such as port regulations, fuel standards, carbon credits, and vessel speed reduction zones, as well as for analyses that investigate the spatial health impacts of air pollution related to shipping and fishing activity. Spatial trends in how emissions have changed over time also show clear increases and decreases in major shipping lanes.
+Fusing AIS and S1 data also provides a comprehensive picture of spatial marine vessel emissions patterns and how those patterns change over time (Fig. \ref{fig:fig-emissions-by-data-source-and-maps}C and Fig. \ref{fig:fig-pollutant-maps}). Our data reveal clear spatial trends in how emissions have changed over time in major shipping lanes. These spatiotemporal data would allow for analysis of the GHG emissions that drive climate change, as well as of other air pollutants that impact local air quality and health. These analyses could inform the design and evaluation of interventions such as port regulations, fuel standards, carbon credits, and vessel speed reduction zones. They could also be used to quantify the spatial health impacts of air pollution related to shipping and fishing activity, along with the associated environmental justice implications.
 
-We estimate that in 2023, marine vessels accounted for 15\% of all transportation-related CO$_{2}$ emissions (Fig. \ref{fig:fig-emissions-marine-terretrial}A). Marine vessel CO$_{2}$ emissions increased by 22\% between 2016 and 2023, five times faster than the growth rate of terrestrial transportation emissions (Fig. \ref{fig:fig-emissions-marine-terretrial}B, \cite{JRC138862}).
+Using the latest data available from the EU's Emissions Database for Global Atmospheric Research (EDGAR), we estimate that in 2023 marine vessels accounted for 15\% of all transportation-related CO$_{2}$ emissions (Fig. \ref{fig:fig-emissions-marine-terretrial}A). Marine vessel CO$_{2}$ emissions increased by 22\% between 2016 and 2023, five times faster than the growth rate of terrestrial transportation emissions (Fig. \ref{fig:fig-emissions-marine-terretrial}B, \cite{JRC138862}).
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\columnwidth]{figures/fig-emissions-marine-terrestrial-1.png}
-    \caption{(A)Annual CO$_{2}$ emissions by sector: marine vessels using our fused AIS+S1 dataset; and terrestrial transportation from the Emissions Database for Global Atmospheric Research (EDGAR). (B) Change in annual CO$_{2}$ emissions from a 2016 baseline, by sector .}
+    \caption{(A)Annual CO$_{2}$ emissions separated by sector into marine vessels (using our fused AIS+S1 dataset) and terrestrial transportation (from the Emissions Database for Global Atmospheric Research, EDGAR). (B) Change in annual CO$_{2}$ emissions from a 2016 baseline, by sector.}
     \label{fig:fig-emissions-marine-terretrial}
 \end{figure}
 
@@ -150,14 +150,6 @@ Our high temporal resolution time series data reveal strong seasonal trends and 
     \includegraphics[width=\columnwidth]{figures/fig-co2-emissions-time-series-1.png}
     \caption{Time series of monthly marine vessel CO$_{2}$ emission, aggregated across AIS-broadcasting vessels and non-broadcasting vessels for which we only have Sentinel-1 data.}
     \label{fig:fig-co2-emissions-time-series}
-\end{figure}
-
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\columnwidth]{figures/fig-total-annual-emissions-by-data-source-1.png}
-    \caption{(A) Annual marine vessel CO$_{2}$ emissions, by data source. (B) Change in annual marine vessel CO$_{2}$ emissions from a 2016 baseline, by data source.}
-    \label{fig:fig-total-annual-emissions-by-data-source}
 \end{figure}
 
 Total marine emission is determined by both the overall fleet size as well as the engine power and operating behavior of each individual vessel. We used a random forest model to predict CO$_2$ emissions based on the relative contributions of the following vessel features: total kW-hours, average speed, vessel size decile, and fishing/non-fishing vessel class (achieving a traditional $R^{2}$ of 0.99 for predicted versus observed CO$_2$ emissions). Our model results show that the increase in CO$_{2}$ emissions over 2016-2024 is primarily driven by increases in the total number of kW-hours, not by changes in operating speed (Fig. \ref{fig:fig-hours-speed-decomposition}A). Total kW-hours is itself determined by the total number of unique vessels, the number of hours each vessel operates, and the main engine power of each vessel.
