@@ -75,6 +75,13 @@ list(
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
+    name = annual_global_emissions_by_receiver_type_and_flag,
+    command = here::here(
+      "data/gfw/annual_global_emissions_by_receiver_type_and_flag.csv"
+    ),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
     name = annual_spatial_emissions_by_receiver_type,
     command = here::here(
       "data/gfw/annual_spatial_emissions_by_receiver_type.csv"
