@@ -1165,7 +1165,7 @@ pollutant_map_list <- purrr::map(
       ) +
       geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
       scico::scale_fill_scico(
-        name = bquote(.(pollutant_tmp) ~ emissions ~ (MT / km^2)),
+        name = expression(Emissions ~ (MT / km^2)),
         palette = "vik",
         midpoint = 0,
         trans = ggallin::pseudolog10_trans,
@@ -1173,7 +1173,7 @@ pollutant_map_list <- purrr::map(
         labels = scales::comma
       ) +
       scico::scale_color_scico(
-        name = bquote(.(pollutant_tmp) ~ emissions ~ (MT / km^2)),
+        name = expression(Emissions ~ (MT / km^2)),
         palette = "vik",
         midpoint = 0,
         trans = ggallin::pseudolog10_trans,
@@ -1196,7 +1196,8 @@ pollutant_map_list <- purrr::map(
         legend.position = "bottom",
         legend.direction = "horizontal",
         legend.key.width = unit(1, "cm")
-      )
+      ) +
+      facet_wrap(pollutant ~ ., labeller = label_parsed)
   }
 )
 
@@ -1233,30 +1234,25 @@ pollutant_time_series_data_co2 <- total_monthly_emissions_by_pollutant |>
   dplyr::filter(pollutant == "CO2")
 
 make_pollutant_time_series_figure <- function(
-  pollutant_time_series_data,
-  y_axis_label
-) {
-  {
-    ggplot(
-      data = pollutant_time_series_data,
-      aes(x = month, y = emissions_mt)
-    ) +
-      geom_line(linewidth = 1.1) +
-      scale_y_continuous(labels = scales::comma) +
-      theme_plot() +
-      labs(x = "", y = y_axis_label) +
-      theme(panel.grid.minor.x = element_blank()) +
-      scale_x_continuous(
-        breaks = seq(
-          lubridate::ymd(glue::glue("{analysis_start_year}-01-01")),
-          lubridate::ymd(glue::glue("{analysis_end_year+1}-01-01")),
-          by = "1 year"
-        ),
-        labels = seq(analysis_start_year, analysis_end_year + 1)
-      ) +
-      scale_y_continuous(limits = c(0, NA))
-  }
-}
+    pollutant_time_series_data,
+    y_axis_label) {{ ggplot(
+  data = pollutant_time_series_data,
+  aes(x = month, y = emissions_mt)
+) +
+  geom_line(linewidth = 1.1) +
+  scale_y_continuous(labels = scales::comma) +
+  theme_plot() +
+  labs(x = "", y = y_axis_label) +
+  theme(panel.grid.minor.x = element_blank()) +
+  scale_x_continuous(
+    breaks = seq(
+      lubridate::ymd(glue::glue("{analysis_start_year}-01-01")),
+      lubridate::ymd(glue::glue("{analysis_end_year+1}-01-01")),
+      by = "1 year"
+    ),
+    labels = seq(analysis_start_year, analysis_end_year + 1)
+  ) +
+  scale_y_continuous(limits = c(0, NA)) }}
 
 make_pollutant_time_series_figure(
   pollutant_time_series_data_co2,
