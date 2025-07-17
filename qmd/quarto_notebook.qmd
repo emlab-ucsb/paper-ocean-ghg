@@ -566,7 +566,7 @@ cowplot::plot_grid(
   ),
   co2_map,
   ncol = 2,
-  labels = c("", "B"),
+  labels = c("", "C"),
   rel_widths = c(0.4, 0.6),
   align = "vh"
 )
@@ -1234,25 +1234,30 @@ pollutant_time_series_data_co2 <- total_monthly_emissions_by_pollutant |>
   dplyr::filter(pollutant == "CO2")
 
 make_pollutant_time_series_figure <- function(
-    pollutant_time_series_data,
-    y_axis_label) {{ ggplot(
-  data = pollutant_time_series_data,
-  aes(x = month, y = emissions_mt)
-) +
-  geom_line(linewidth = 1.1) +
-  scale_y_continuous(labels = scales::comma) +
-  theme_plot() +
-  labs(x = "", y = y_axis_label) +
-  theme(panel.grid.minor.x = element_blank()) +
-  scale_x_continuous(
-    breaks = seq(
-      lubridate::ymd(glue::glue("{analysis_start_year}-01-01")),
-      lubridate::ymd(glue::glue("{analysis_end_year+1}-01-01")),
-      by = "1 year"
-    ),
-    labels = seq(analysis_start_year, analysis_end_year + 1)
-  ) +
-  scale_y_continuous(limits = c(0, NA)) }}
+  pollutant_time_series_data,
+  y_axis_label
+) {
+  {
+    ggplot(
+      data = pollutant_time_series_data,
+      aes(x = month, y = emissions_mt)
+    ) +
+      geom_line(linewidth = 1.1) +
+      scale_y_continuous(labels = scales::comma) +
+      theme_plot() +
+      labs(x = "", y = y_axis_label) +
+      theme(panel.grid.minor.x = element_blank()) +
+      scale_x_continuous(
+        breaks = seq(
+          lubridate::ymd(glue::glue("{analysis_start_year}-01-01")),
+          lubridate::ymd(glue::glue("{analysis_end_year+1}-01-01")),
+          by = "1 year"
+        ),
+        labels = seq(analysis_start_year, analysis_end_year + 1)
+      ) +
+      scale_y_continuous(limits = c(0, NA))
+  }
+}
 
 make_pollutant_time_series_figure(
   pollutant_time_series_data_co2,
