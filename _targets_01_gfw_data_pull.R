@@ -88,11 +88,11 @@ list(
     ),
     format = "file"
   ),
-  # Spatial gridded 2024 emissions by pollutant
+  # Spatial gridded 2016 and 2024 emissions by pollutant
   # Aggregated across AIS-broadcasting and non-broadcasting fleets
   tar_file_read(
-    name = total_spatial_emissions_by_pollutant_2024,
-    "sql/total_spatial_emissions_by_pollutant_2024.sql",
+    name = total_spatial_emissions_by_pollutant,
+    "sql/total_spatial_emissions_by_pollutant.sql",
     download_gfw_data(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
@@ -102,7 +102,7 @@ list(
           analysis_end_year = analysis_end_year
         ),
       file_path = here::here(
-        "data/gfw/total_spatial_emissions_by_pollutant_2024.csv"
+        "data/gfw/total_spatial_emissions_by_pollutant.csv"
       ),
     ),
     format = "file"

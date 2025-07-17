@@ -346,8 +346,8 @@ annual_ais_to_dark_activity_extrapolation <- glue::glue(
   # Don't use 2025 data, since the year is incomplete
   dplyr::filter(year < 2025)
 
-# Total spatial emissions by pollutant for 2024
-total_spatial_emissions_by_pollutant_2024 <- glue::glue(
+# Total spatial emissions by pollutant for 2016 and 2024
+total_spatial_emissions_by_pollutant <- glue::glue(
   "{project_directory}/data/processed/total_spatial_emissions_by_pollutant_2024.csv"
 ) |>
   readr::read_csv() |>
@@ -1152,21 +1152,17 @@ make_pollutant_map(
 
 ```{r}
 make_pollutant_time_series_figure <- function(
-  pollutant_time_series_data,
-  y_axis_label
-) {
-  {
-    ggplot(
-      data = pollutant_time_series_data,
-      aes(x = month, y = emissions_mt)
-    ) +
-      geom_line(linewidth = 1.1) +
-      scale_y_continuous(labels = scales::comma) +
-      theme_plot() +
-      labs(x = "", y = y_axis_label) +
-      theme(panel.grid.minor.x = element_blank()) +
-      scale_y_continuous(limits = c(0, NA))
-  }
+    pollutant_time_series_data,
+    y_axis_label) {{ ggplot(
+  data = pollutant_time_series_data,
+  aes(x = month, y = emissions_mt)
+) +
+  geom_line(linewidth = 1.1) +
+  scale_y_continuous(labels = scales::comma) +
+  theme_plot() +
+  labs(x = "", y = y_axis_label) +
+  theme(panel.grid.minor.x = element_blank()) +
+  scale_y_continuous(limits = c(0, NA)) }
 }
 ```
 
