@@ -133,17 +133,6 @@ To correctly estimate both the magnitude and trends of marine emissions, data fu
 
 Fusing AIS and S1 data also provides a comprehensive picture of spatial marine vessel emissions patterns and how those patterns change over time (Fig. \ref{fig:fig-emissions-by-data-source-and-maps}C and Fig. \ref{fig:fig-pollutant-maps}). Our data reveal clear spatial trends in how emissions have changed over time in major shipping lanes. These spatiotemporal data would allow for analysis of the GHG emissions that drive climate change, as well as of other air pollutants that impact local air quality and health. These analyses could inform the design and evaluation of interventions such as port regulations, fuel standards, carbon credits, and vessel speed reduction zones. They could also be used to quantify the spatial health impacts of air pollution related to shipping and fishing activity, along with the associated environmental justice implications.
 
-Using the latest data available from the EU's Emissions Database for Global Atmospheric Research (EDGAR), we estimate that in 2023 marine vessels accounted for 15\% of all transportation-related CO$_{2}$ emissions (Fig. \ref{fig:fig-emissions-marine-terretrial}A). Marine vessel CO$_{2}$ emissions increased by 22\% between 2016 and 2023, five times faster than the growth rate of terrestrial transportation emissions (Fig. \ref{fig:fig-emissions-marine-terretrial}B, \cite{JRC138862}).
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\columnwidth]{figures/fig-emissions-marine-terrestrial-1.png}
-    \caption{(A)Annual CO$_{2}$ emissions separated by sector into marine vessels (using our fused AIS+S1 dataset) and terrestrial transportation (from the Emissions Database for Global Atmospheric Research, EDGAR). (B) Change in annual CO$_{2}$ emissions from a 2016 baseline, by sector.}
-    \label{fig:fig-emissions-marine-terretrial}
-\end{figure}
-
-
-
 Our high temporal resolution time series data reveal strong seasonal trends and event-driven variations in marine GHG emissions. We see consistent dips during major holidays including Christmas, New Year’s Day, and Chinese New Year, as well as during the COVID-19 pandemic (Fig. \ref{fig:fig-data-richness}A and Fig. \ref{fig:fig-pollutant-time-series}). Emissions from AIS-broadcasting vessels can be assigned to port stays and port-to-port voyages by analyzing the movement tracks of each individual vessel. China, United States, and Indonesia had the most CO$_{2}$ emissions during port stays in 2024 (Fig. \ref{fig:fig-data-richness}B).  Emissions can also be aggregated across various vessel characteristics, such as their vessel type or flag. Chemical and oil tankers, some of which transport fossil fuels including crude oil, are themselves the largest emitters, while trawlers are the highest-emitting type of fishing vessel (Fig. \ref{fig:fig-data-richness}C). Similar aggregations can be conducted at the flag level. Tracking individual vessel movement over time also supports analyses of emissions associated with specific vessels, specific port visits, and specific port-to-port trips. While detections from Sentinel-1 do not provide information on the characteristics of each vessel such as its flag, or allow for the tracking of individual vessels over time, the vessel length and type (fishing or non-fishing vessel) are inferred for each detection \cite{paolo2024satellite}. This enables monthly 1x1-degree emissions from non-broadcasting vessels to be aggregated by vessel size decile and/or whether they are fishing or non-fishing vessels.
 
  \begin{figure}[H]
@@ -151,6 +140,17 @@ Our high temporal resolution time series data reveal strong seasonal trends and 
     \includegraphics[width=\columnwidth]{figures/fig-data-richness-1.png}
     \caption{(A) Time series of monthly global emissions for each pollutant, aggregated across AIS-broadcasting vessels and non-broadcasting vessels. (B) CO2 emissions during 2024 port stays, aggregated by country. (C) Total trip-level CO2 emissions in 2024 for domestic (within-country) trips for top 25 countries, and total trip-level CO2 emissions in 2024 for international trips for top 25 country-to-country paris. (D)  Total 2024 CO2 emissions by vessel type for AIS-broadcasting vessels.}
     \label{fig:fig-data-richness}
+\end{figure}
+
+
+Using the latest data available from the EU's Emissions Database for Global Atmospheric Research (EDGAR), we estimate that in 2023 marine vessels accounted for 15\% of all transportation-related CO$_{2}$ emissions (Fig. \ref{fig:fig-emissions-marine-terretrial}A). Marine vessel CO$_{2}$ emissions increased by 22\% between 2016 and 2023, five times faster than the growth rate of terrestrial transportation emissions (Fig. \ref{fig:fig-emissions-marine-terretrial}B, \cite{JRC138862}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/fig-emissions-marine-terrestrial-1.png}
+    \caption{(A)Annual CO$_{2}$ emissions separated by sector into marine vessels (using our fused AIS+S1 dataset) and terrestrial transportation (from the Emissions Database for Global Atmospheric Research, EDGAR). (B) Change in annual CO$_{2}$ emissions from a 2016 baseline, by sector.}
+    \label{fig:fig-emissions-marine-terretrial}
+
 \end{figure}
 
 Total marine emission is determined by both the overall fleet size as well as the engine power and operating behavior of each individual vessel. We used a random forest model to predict CO$_2$ emissions based on the relative contributions of the following vessel features: total kW-hours, average speed, vessel size decile, and fishing/non-fishing vessel class (achieving a traditional $R^{2}$ of 0.99 for predicted versus observed CO$_2$ emissions). Our model results show that the increase in CO$_{2}$ emissions over 2016-2024 is primarily driven by increases in the total number of kW-hours, not by changes in operating speed (Fig. \ref{fig:fig-hours-speed-decomposition}A). Total kW-hours is itself determined by the total number of unique vessels, the number of hours each vessel operates, and the main engine power of each vessel.
