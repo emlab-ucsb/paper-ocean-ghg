@@ -49,6 +49,7 @@ targets::tar_load(c(
   "annual_ais_to_dark_activity_extrapolation",
   "total_monthly_emissions_by_pollutant",
   "annual_ais_co2_emissions_by_vessel_type",
+  "port_visit_co2_emissions_by_country",
   "annual_non_broadcasting_detections_emissions",
   "s1_mean_spatial_knn_ratios",
   "annual_global_emissions_by_receiver_type",
@@ -126,8 +127,16 @@ world_bbox_sf <-
   sf::st_sf() %>%
   sf::st_transform(map_projection)
 
-land <- rnaturalearth::ne_countries(returnclass = "sf") |>
-  dplyr::select(geometry)
+# ESRI World Countries Generalized Shapefile
+# Downloaded from https://www.arcgis.com/home/item.html?id=fa510018bdd044b08fc64d2a16bc680a
+land <- sf::st_read(
+  here::here(
+    "data/World_Countries_Generalized_Shapefile/World_Countries_Generalized.shp"
+  )
+) |>
+  dplyr::mutate(
+    country_iso3 = countrycode::countrycode(ISO, "iso2c", "iso3c")
+  )
 
 
 # Convert lat/lon pixel area to square km
@@ -1230,6 +1239,14 @@ total_monthly_emissions_by_pollutant <- total_monthly_emissions_by_pollutant |>
 pollutant_time_series_data_co2 <- total_monthly_emissions_by_pollutant |>
   dplyr::filter(pollutant == "CO2")
 
+```
+
+
+```{r}
+#| label: fig-data-richness
+#| fig-cap: (A) Time series of monthly global emissions for each pollutant, aggregated across AIS-broadcasting vessels and non-broadcasting vessels. (B) CO2 emissions during 2024 port stays, aggregated by country. (C)  Total 2024 CO2 emissions by vessel type for AIS-broadcasting vessels (millions metric tonnes).
+#| fig-width: 8
+#| fig-height: 6
 make_pollutant_time_series_figure <- function(
   pollutant_time_series_data,
   y_axis_label
@@ -1264,10 +1281,46 @@ time_series_fig_co2 <- make_pollutant_time_series_figure(
     labels = scales::unit_format(unit = "M", scale = 1e-6),
     limits = c(0, NA)
   )
-```
 
-```{r}
-#| label: make-fig-co2-emissions-by-vessel-type
+port_stay_emissions_map <- ggplot() +
+  geom_sf(data = world_bbox_sf, fill = "grey90") +
+  geom_sf(
+    data = land |>
+      dplyr::rename(port_country_iso3 = country_iso3) |>
+      dplyr::left_join(
+        port_visit_co2_emissions_by_country,
+        by = c("port_country_iso3")
+      ),
+    aes(fill = emissions_co2_mt),
+    color = "white",
+    linewidth = 0.01
+  ) +
+  coord_sf(crs = map_projection) +
+  theme_void() +
+  scale_fill_viridis_c(
+    option = "A",
+    begin = 0.2,
+    end = 0.7,
+    na.value = "black",
+    labels = scales::unit_format(unit = "M", scale = 1e-6)
+  ) +
+  labs(
+    x = "",
+    fill = expression(2024 ~ port ~ stay ~ CO[2] ~ emissions ~ (MT))
+  ) +
+  guides(
+    fill = guide_colorbar(
+      title.position = "top",
+      title.hjust = 0.5,
+      frame.colour = "black",
+      ticks.colour = "black"
+    )
+  ) +
+  theme(
+    legend.position = "bottom",
+    legend.direction = "horizontal",
+    legend.key.width = unit(1, "cm")
+  )
 
 emissions_by_vessel_class_barplot <- annual_ais_co2_emissions_by_vessel_type |>
   dplyr::filter(year == 2024) |>
@@ -1313,25 +1366,41 @@ emissions_by_vessel_class_barplot <- annual_ais_co2_emissions_by_vessel_type |>
   ggforce::facet_col(~fishing, space = "free", scales = "free") +
   theme_plot() +
   labs(
-    x = "2024 global CO2 emissions (MT)",
+    x = "2024 CO2 emissions (MT)",
     y = ""
   ) +
   scale_x_continuous(
     labels = scales::unit_format(unit = "M", scale = 1e-6),
     limits = c(0, NA)
   )
+
+cowplot::plot_grid(
+  cowplot::plot_grid(
+    time_series_fig_co2,
+    port_stay_emissions_map,
+    ncol = 1,
+    rel_heights = c(0.45, 0.55),
+    labels = c("A", "B")
+  ),
+  emissions_by_vessel_class_barplot,
+  labels = c("", "C"),
+  rel_widths = c(0.55, 0.45)
+)
 ```
 
 ```{r}
-#| label: fig-data-richness
-#| fig-cap: (A) Time series of monthly global emissions for each pollutant, aggregated across AIS-broadcasting vessels and non-broadcasting vessels. (B)  Total 2024 CO2 emissions by vessel type for AIS-broadcasting vessels (millions metric tonnes).
-#| fig-width: 8
-#| fig-height: 6
-cowplot::plot_grid(
-  time_series_fig_co2,
-  emissions_by_vessel_class_barplot,
-  labels = c("A", "B")
-)
+#| label: tbl-top-port-stay-emissions-by-country
+#| tbl-cap: Top 10 countries in terms of 2024 port stay emissions.
+port_visit_co2_emissions_by_country |>
+  dplyr::mutate(
+    country = countrycode::countrycode(
+      port_country_iso3,
+      "iso3c",
+      "country.name"
+    )
+  ) |>
+  dplyr::slice_max(n = 10, order_by = emissions_co2_mt) |>
+  knitr::kable()
 ```
 
 ```{r}

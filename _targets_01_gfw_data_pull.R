@@ -163,6 +163,24 @@ list(
     ),
     format = "file"
   ),
+  # Total port visit CO2 emissions by country
+  tar_file_read(
+    name = port_visit_co2_emissions_by_country,
+    "sql/port_visit_co2_emissions_by_country.sql",
+    download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_ais = run_version_ais,
+          analysis_start_year = analysis_start_year,
+          analysis_end_year = analysis_end_year
+        ),
+      file_path = here::here(
+        "data/gfw/port_visit_co2_emissions_by_country.csv"
+      )
+    ),
+    format = "file"
+  ),
   # Annual non-broadcastin emissions and detections
   # By vessel type
   tar_file_read(
