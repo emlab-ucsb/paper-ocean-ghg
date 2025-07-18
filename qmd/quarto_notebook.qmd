@@ -1250,29 +1250,34 @@ pollutant_time_series_data_co2 <- total_monthly_emissions_by_pollutant |>
 #| fig-height: 8
 
 make_pollutant_time_series_figure <- function(
-    pollutant_time_series_data,
-    y_axis_label) {{ ggplot(
-  data = pollutant_time_series_data,
-  aes(x = month, y = emissions_mt)
-) +
-  geom_line(linewidth = 1.1) +
-  scale_y_continuous(labels = scales::comma) +
-  theme_plot() +
-  labs(x = "", y = y_axis_label) +
-  theme(panel.grid.minor.x = element_blank()) +
-  scale_x_continuous(
-    breaks = seq(
-      lubridate::ymd(glue::glue("{analysis_start_year}-01-01")),
-      lubridate::ymd(glue::glue("{analysis_end_year+1}-01-01")),
-      by = "1 year"
-    ),
-    labels = seq(analysis_start_year, analysis_end_year + 1)
-  ) +
-  scale_y_continuous(limits = c(0, NA)) }}
+  pollutant_time_series_data,
+  y_axis_label
+) {
+  {
+    ggplot(
+      data = pollutant_time_series_data,
+      aes(x = month, y = emissions_mt)
+    ) +
+      geom_line(linewidth = 1.1) +
+      scale_y_continuous(labels = scales::comma) +
+      theme_plot() +
+      labs(x = "", y = y_axis_label) +
+      theme(panel.grid.minor.x = element_blank()) +
+      scale_x_continuous(
+        breaks = seq(
+          lubridate::ymd(glue::glue("{analysis_start_year}-01-01")),
+          lubridate::ymd(glue::glue("{analysis_end_year+1}-01-01")),
+          by = "1 year"
+        ),
+        labels = seq(analysis_start_year, analysis_end_year + 1)
+      ) +
+      scale_y_continuous(limits = c(0, NA))
+  }
+}
 
 time_series_fig_co2 <- make_pollutant_time_series_figure(
   pollutant_time_series_data_co2,
-  y_axis_label = expression(atop(Monthly ~ CO[2] ~ emissions, (MT)))
+  y_axis_label = expression(Monthly ~ CO[2] ~ emissions ~ (MT))
 ) +
   scale_y_continuous(
     labels = scales::unit_format(unit = "M", scale = 1e-6),
@@ -1547,15 +1552,16 @@ cowplot::plot_grid(
 ```{r}
 #| label: tbl-top-port-stay-emissions-by-country
 #| tbl-cap: Top 10 countries in terms of 2024 port stay emissions.
-port_visit_co2_emissions_by_country |>
+all_port_and_trip_emissions |>
   dplyr::mutate(
     country = countrycode::countrycode(
-      port_country_iso3,
+      country_iso3,
       "iso3c",
       "country.name"
     )
   ) |>
-  dplyr::slice_max(n = 10, order_by = emissions_co2_mt) |>
+  dplyr::group_by(type) |>
+  dplyr::slice_max(n = 3, order_by = emissions_co2_mt) |>
   knitr::kable()
 ```
 
