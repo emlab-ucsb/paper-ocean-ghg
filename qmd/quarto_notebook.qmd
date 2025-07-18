@@ -1205,10 +1205,7 @@ cowplot::plot_grid(plotlist = pollutant_map_list, ncol = 3)
 ```
 
 ```{r}
-#| label: fig-co2-emissions-time-series
-#| fig-cap: Time series of monthly global CO2 emissions, aggregated across AIS-broadcasting vessels and non-broadcasting vessels.
-#| fig-width: 8
-#| fig-height: 3
+#| label: make-fig-co2-emissions-time-series
 
 # Total monthly non-spatial emissions by pollutant
 total_monthly_emissions_by_pollutant <- total_monthly_emissions_by_pollutant |>
@@ -1259,7 +1256,7 @@ make_pollutant_time_series_figure <- function(
   }
 }
 
-make_pollutant_time_series_figure(
+time_series_fig_co2 <- make_pollutant_time_series_figure(
   pollutant_time_series_data_co2,
   y_axis_label = expression(Monthly ~ CO[2] ~ emissions ~ (MT))
 ) +
@@ -1270,46 +1267,9 @@ make_pollutant_time_series_figure(
 ```
 
 ```{r}
-#| label: fig-pollutant-time-series
-#| fig-cap: Time series of monthly global emissions for each pollutant, aggregated across AIS-broadcasting vessels and non-broadcasting vessels.
-#| fig-width: 8
-#| fig-height: 8
+#| label: make-fig-co2-emissions-by-vessel-type
 
-pollutant_time_series_data_all <- total_monthly_emissions_by_pollutant |>
-  dplyr::mutate(
-    pollutant = dplyr::case_when(
-      pollutant == "CO2" ~ "CO[2]",
-      pollutant == "N2O" ~ "N[2]*O",
-      pollutant == "CH4" ~ "CH[4]",
-      pollutant == "PM2.5" ~ "PM[2.5]",
-      pollutant == "PM10" ~ "PM[10]",
-      pollutant == "SOX" ~ "SO[X]",
-      pollutant == "NOX" ~ "NO[X]",
-      TRUE ~ pollutant
-    )
-  ) |>
-  dplyr::mutate(
-    pollutant = forcats::fct_relevel(pollutant, pollutant_factor_levels)
-  )
-
-make_pollutant_time_series_figure(
-  pollutant_time_series_data_all,
-  y_axis_label = "Monthly emissions (MT)"
-) +
-  facet_wrap(
-    pollutant ~ .,
-    ncol = 3,
-    scales = "free_y",
-    labeller = label_parsed
-  )
-```
-
-```{r}
-#| label: fig-co2-emissions-by-vessel-type
-#| fig-cap: Total 2024 CO2 emissions by vessel type for AIS-broadcasting vessels (millions metric tonnes).
-#| fig-width: 4
-#| fig-height: 6
-annual_ais_co2_emissions_by_vessel_type |>
+emissions_by_vessel_class_barplot <- annual_ais_co2_emissions_by_vessel_type |>
   dplyr::filter(year == 2024) |>
   dplyr::mutate(
     fishing = ifelse(
@@ -1361,6 +1321,54 @@ annual_ais_co2_emissions_by_vessel_type |>
     limits = c(0, NA)
   )
 ```
+
+```{r}
+#| label: fig-data-richness
+#| fig-cap: (A) Time series of monthly global emissions for each pollutant, aggregated across AIS-broadcasting vessels and non-broadcasting vessels. (B)  Total 2024 CO2 emissions by vessel type for AIS-broadcasting vessels (millions metric tonnes).
+#| fig-width: 8
+#| fig-height: 6
+cowplot::plot_grid(
+  time_series_fig_co2,
+  emissions_by_vessel_class_barplot,
+  labels = c("A", "B")
+)
+```
+
+```{r}
+#| label: fig-pollutant-time-series
+#| fig-cap: Time series of monthly global emissions for each pollutant, aggregated across AIS-broadcasting vessels and non-broadcasting vessels.
+#| fig-width: 8
+#| fig-height: 8
+
+pollutant_time_series_data_all <- total_monthly_emissions_by_pollutant |>
+  dplyr::mutate(
+    pollutant = dplyr::case_when(
+      pollutant == "CO2" ~ "CO[2]",
+      pollutant == "N2O" ~ "N[2]*O",
+      pollutant == "CH4" ~ "CH[4]",
+      pollutant == "PM2.5" ~ "PM[2.5]",
+      pollutant == "PM10" ~ "PM[10]",
+      pollutant == "SOX" ~ "SO[X]",
+      pollutant == "NOX" ~ "NO[X]",
+      TRUE ~ pollutant
+    )
+  ) |>
+  dplyr::mutate(
+    pollutant = forcats::fct_relevel(pollutant, pollutant_factor_levels)
+  )
+
+make_pollutant_time_series_figure(
+  pollutant_time_series_data_all,
+  y_axis_label = "Monthly emissions (MT)"
+) +
+  facet_wrap(
+    pollutant ~ .,
+    ncol = 3,
+    scales = "free_y",
+    labeller = label_parsed
+  )
+```
+
 
 # Supplementary tables
 
