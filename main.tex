@@ -144,7 +144,7 @@ Using the latest data available from the EU's Emissions Database for Global Atmo
 
 
 
-Our high temporal resolution time series data reveal strong seasonal trends and event-driven variations in marine GHG emissions. We see consistent dips during major holidays including Christmas, New Year’s Day, and Chinese New Year, as well as during the COVID-19 pandemic (Fig. \ref{fig:fig-data-richness}A and Fig. \ref{fig:fig-pollutant-time-series}).
+Our high temporal resolution time series data reveal strong seasonal trends and event-driven variations in marine GHG emissions. We see consistent dips during major holidays including Christmas, New Year’s Day, and Chinese New Year, as well as during the COVID-19 pandemic (Fig. \ref{fig:fig-data-richness}A and Fig. \ref{fig:fig-pollutant-time-series}). Emissions from AIS-broadcasting vessels can be assigned to port stays and port-to-port voyages by analyzing the movement tracks of each individual vessel. China, United States, and Netherlands had the most CO$_{2}$ emissions during port stays in 2024 (Fig. \ref{fig:fig-data-richness}B).  Emissions can also be aggregated across various vessel characteristics, such as their vessel type or flag. Chemical and oil tankers, some of which transport fossil fuels including crude oil, are themselves the largest emitters, while trawlers are the highest-emitting type of fishing vessel (Fig. \ref{fig:fig-data-richness}C). Similar aggregations can be conducted at the flag level. Tracking individual vessel movement over time also supports analyses of emissions associated with specific vessels, specific port visits, and specific port-to-port trips. While detections from Sentinel-1 do not provide information on the characteristics of each vessel such as its flag, or allow for the tracking of individual vessels over time, the vessel length and type (fishing or non-fishing vessel) are inferred for each detection \cite{paolo2024satellite}. This enables monthly 1x1-degree emissions from non-broadcasting vessels to be aggregated by vessel size decile and/or whether they are fishing or non-fishing vessels.
 
  \begin{figure}[H]
     \centering
@@ -165,9 +165,6 @@ Total marine emission is determined by both the overall fleet size as well as th
 \section{Discussion}
 
 A high resolution picture of marine vessel emissions is essential to assess the impact of human activities on  the global climate and local population's health, and for designing effective policy solutions. However, incomplete vessel tracking and technical data processing challenges have hindered progress. Our proposed method overcomes these limitations by fusing two independent data sources and provides the first high-resolution view of the magnitude and trends of both greenhouse gas emissions and of other air pollutants from the majority of industrial marine vessels.  
-
-Emissions from AIS-broadcasting vessels can be aggregated across various vessel characteristics (e.g., vessel type or flag), as well as into port visits and port-to-port voyages by analyzing the movement tracks of each individual vessel. Tankers, vessels that mainly transport fossil fuels including crude oil and liquefied natural gas, are themselves the largest emitters, while trawlers are the highest-emitting type of fishing vessel (Fig. \ref{fig:fig-co2-emissions-by-vessel-type}). Similar aggregations can be conducted at the flag level. Tracking individual vessel movement over time also supports analyses of emissions associated with specific vessels, specific port visits, and specific port-to-port trips. While detections from Sentinel-1 do not provide information on the characteristics of each vessel such as its flag, or allow for the tracking of individual vessels over time, the vessel length and type (fishing or non-fishing vessel) are inferred for each detection \cite{paolo2024satellite}. This enables monthly 1x1-degree emissions from non-broadcasting vessels to be aggregated by vessel size decile and/or whether they are fishing or non-fishing vessels.
-
 
 Carbon markets could play a role in mitigating marine vessel emissions. The International Maritime Organization is calling for a global price on carbon for shipping emissions \cite{imo_carbon_price}. In recent years, the European Union Emissions Trading System has already been expanded to include marine transportation under the EU emissions cap, and to subject vessel activity to and from European Economic Area ports to a carbon price \cite{kotzampasakis2025maritime}. Our analysis shows that increasing emissions have largely been driven by an increase in the number of vessels (i.e., the extensive margin), not by increases in speed for those vessels (i.e., the intensive margin). This finding suggests that implementing a carbon market based on limiting emissions intensity (the amount of emissions per unit of activity or production) could be an effective strategy for mitigating marine vessel emissions, even with a growing number of vessels. Carbon markets that are based on carbon credits for emissions intensity rather than just on capping emissions, such as India's emerging carbon market \cite{gupta2023assessing}, allow for overall economic growth while still incentivizing more efficient activity. This is consistent with a review paper on current marine vessel emissions datasets, which concluded that measures aimed at increasing technical efficiency of ships could be an effective way to decouple emissions growth from global trade demand \cite{dengreview}.
 
@@ -408,13 +405,6 @@ In this way, (1) reconstructs predictions for our observed data. On the other en
     \includegraphics[width=\columnwidth]{figures/fig-pollutant-time-series-1.png}
     \caption{Time series of monthly global emissions for each pollutant, aggregated across AIS-broadcasting vessels and non-broadcasting vessels for which we only have Sentinel-1 data.}
     \label{fig:fig-pollutant-time-series}
-\end{figure}
-
- \begin{figure}[H]
-    \centering
-    \includegraphics[width=\columnwidth]{figures/fig-co2-emissions-by-vessel-type-1}
-    \caption{Total 2024 CO$_{2}$ emissions by vessel type for AIS-broadcasting vessels.}
-    \label{fig:fig-co2-emissions-by-vessel-type}
 \end{figure}
 
 \subsection{Supplementary Tables}
