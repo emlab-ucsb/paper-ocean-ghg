@@ -1245,9 +1245,10 @@ pollutant_time_series_data_co2 <- total_monthly_emissions_by_pollutant |>
 
 ```{r}
 #| label: fig-data-richness
-#| fig-cap: (A) Time series of monthly global emissions for each pollutant, aggregated across AIS-broadcasting vessels and non-broadcasting vessels. (B) CO2 emissions during 2024 port stays, aggregated by country. (C)  Total 2024 CO2 emissions by vessel type for AIS-broadcasting vessels (millions metric tonnes).
-#| fig-width: 8
-#| fig-height: 6
+#| fig-cap: (A) Time series of monthly global emissions for each pollutant, aggregated across AIS-broadcasting vessels and non-broadcasting vessels. (B) CO2 emissions during 2024 port stays, aggregated by country. (C) Total trip-level CO2 emissions in 2024 for domestic (within-country) trips for top 25 countries, and total trip-level CO2 emissions in 2024 for international trips for top 25 country-to-country paris. (D)  Total 2024 CO2 emissions by vessel type for AIS-broadcasting vessels (millions metric tonnes).
+#| fig-width: 11
+#| fig-height: 9
+#|
 make_pollutant_time_series_figure <- function(
     pollutant_time_series_data,
     y_axis_label) {{ ggplot(
@@ -1271,7 +1272,7 @@ make_pollutant_time_series_figure <- function(
 
 time_series_fig_co2 <- make_pollutant_time_series_figure(
   pollutant_time_series_data_co2,
-  y_axis_label = expression(Monthly ~ CO[2] ~ emissions ~ (MT))
+  y_axis_label = expression(atop(Monthly ~ CO[2] ~ emissions, (MT)))
 ) +
   scale_y_continuous(
     labels = scales::unit_format(unit = "M", scale = 1e-6),
@@ -1317,6 +1318,44 @@ port_stay_emissions_map <- ggplot() +
     legend.direction = "horizontal",
     legend.key.width = unit(1, "cm")
   )
+
+trip_emissions_fig <- trip_co2_emissions_by_from_to_countries |>
+  dplyr::mutate(
+    domestic = ifelse(from_country_iso3 == to_country_iso3, TRUE, FALSE)
+  ) |>
+  dplyr::group_by(domestic) |>
+  dplyr::slice_max(n = 25, order_by = emissions_co2_mt) |>
+  dplyr::ungroup() |>
+  dplyr::mutate(
+    from_country = countrycode::countrycode(
+      from_country_iso3,
+      "iso3c",
+      "country.name"
+    )
+  ) |>
+  dplyr::mutate(
+    to_country = countrycode::countrycode(
+      to_country_iso3,
+      "iso3c",
+      "country.name"
+    )
+  ) |>
+  dplyr::mutate(
+    label = ifelse(
+      domestic,
+      from_country,
+      glue::glue("{from_country} to {to_country}")
+    )
+  ) |>
+  dplyr::mutate(
+    domestic = ifelse(domestic, "Domestic trips", "International trips")
+  ) |>
+  ggplot(aes(x = emissions_co2_mt, y = reorder(label, emissions_co2_mt))) +
+  geom_bar(stat = "identity") +
+  facet_wrap(. ~ domestic, scales = "free_y") +
+  theme_plot() +
+  scale_x_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) +
+  labs(x = expression(2024 ~ CO[2] ~ emissions ~ (MT)), y = "")
 
 emissions_by_vessel_class_barplot <- annual_ais_co2_emissions_by_vessel_type |>
   dplyr::filter(year == 2024) |>
@@ -1374,13 +1413,14 @@ cowplot::plot_grid(
   cowplot::plot_grid(
     time_series_fig_co2,
     port_stay_emissions_map,
+    trip_emissions_fig,
     ncol = 1,
-    rel_heights = c(0.45, 0.55),
-    labels = c("A", "B")
+    rel_heights = c(0.25, 0.35, 0.4),
+    labels = c("A", "B", "C")
   ),
   emissions_by_vessel_class_barplot,
-  labels = c("", "C"),
-  rel_widths = c(0.55, 0.45)
+  labels = c("", "D"),
+  rel_widths = c(0.65, 0.35)
 )
 ```
 
