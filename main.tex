@@ -150,6 +150,7 @@ Using the latest data available from the EU's Emissions Database for Global Atmo
     \includegraphics[width=\columnwidth]{figures/fig-emissions-marine-terrestrial-1.png}
     \caption{(A)Annual CO$_{2}$ emissions separated by sector into marine vessels (using our fused AIS+S1 dataset) and terrestrial transportation (from the Emissions Database for Global Atmospheric Research, EDGAR). (B) Change in annual CO$_{2}$ emissions from a 2016 baseline, by sector.}
     \label{fig:fig-emissions-marine-terretrial}
+
 \end{figure}
 
 Total marine emission is determined by both the overall fleet size as well as the engine power and operating behavior of each individual vessel. We used a random forest model to predict CO$_2$ emissions based on the relative contributions of the following vessel features: total kW-hours, average speed, vessel size decile, and fishing/non-fishing vessel class (achieving a traditional $R^{2}$ of 0.99 for predicted versus observed CO$_2$ emissions). Our model results show that the increase in CO$_{2}$ emissions over 2016-2024 is primarily driven by increases in the total number of kW-hours, not by changes in operating speed (Fig. \ref{fig:fig-hours-speed-decomposition}A). Total kW-hours is itself determined by the total number of unique vessels, the number of hours each vessel operates, and the main engine power of each vessel.
