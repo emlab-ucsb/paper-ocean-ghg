@@ -61,6 +61,13 @@ list(
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
+    name = trip_co2_emissions_by_from_to_countries,
+    command = here::here(
+      "data/gfw/trip_co2_emissions_by_from_to_countries.csv"
+    ),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
     name = annual_non_broadcasting_detections_emissions,
     command = here::here(
       "data/gfw/annual_non_broadcasting_detections_emissions.csv"

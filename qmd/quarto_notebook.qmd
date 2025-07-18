@@ -50,6 +50,7 @@ targets::tar_load(c(
   "total_monthly_emissions_by_pollutant",
   "annual_ais_co2_emissions_by_vessel_type",
   "port_visit_co2_emissions_by_country",
+  "trip_co2_emissions_by_from_to_countries",
   "annual_non_broadcasting_detections_emissions",
   "s1_mean_spatial_knn_ratios",
   "annual_global_emissions_by_receiver_type",
@@ -1248,30 +1249,25 @@ pollutant_time_series_data_co2 <- total_monthly_emissions_by_pollutant |>
 #| fig-width: 8
 #| fig-height: 6
 make_pollutant_time_series_figure <- function(
-  pollutant_time_series_data,
-  y_axis_label
-) {
-  {
-    ggplot(
-      data = pollutant_time_series_data,
-      aes(x = month, y = emissions_mt)
-    ) +
-      geom_line(linewidth = 1.1) +
-      scale_y_continuous(labels = scales::comma) +
-      theme_plot() +
-      labs(x = "", y = y_axis_label) +
-      theme(panel.grid.minor.x = element_blank()) +
-      scale_x_continuous(
-        breaks = seq(
-          lubridate::ymd(glue::glue("{analysis_start_year}-01-01")),
-          lubridate::ymd(glue::glue("{analysis_end_year+1}-01-01")),
-          by = "1 year"
-        ),
-        labels = seq(analysis_start_year, analysis_end_year + 1)
-      ) +
-      scale_y_continuous(limits = c(0, NA))
-  }
-}
+    pollutant_time_series_data,
+    y_axis_label) {{ ggplot(
+  data = pollutant_time_series_data,
+  aes(x = month, y = emissions_mt)
+) +
+  geom_line(linewidth = 1.1) +
+  scale_y_continuous(labels = scales::comma) +
+  theme_plot() +
+  labs(x = "", y = y_axis_label) +
+  theme(panel.grid.minor.x = element_blank()) +
+  scale_x_continuous(
+    breaks = seq(
+      lubridate::ymd(glue::glue("{analysis_start_year}-01-01")),
+      lubridate::ymd(glue::glue("{analysis_end_year+1}-01-01")),
+      by = "1 year"
+    ),
+    labels = seq(analysis_start_year, analysis_end_year + 1)
+  ) +
+  scale_y_continuous(limits = c(0, NA)) }}
 
 time_series_fig_co2 <- make_pollutant_time_series_figure(
   pollutant_time_series_data_co2,
