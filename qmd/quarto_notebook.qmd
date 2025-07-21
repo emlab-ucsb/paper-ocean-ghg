@@ -105,10 +105,15 @@ all_data_source_color_palette <- c(
 theme_plot <- function() {
   theme_minimal() %+replace%
     theme(
-      axis.title.x = element_text(face = "bold"),
-      axis.title.y = element_text(angle = 90, face = "bold", vjust = 3),
-      strip.text.x = element_text(angle = 0, face = "bold"),
-      strip.text.y = element_text(angle = 0, face = "bold")
+      axis.title.x = element_text(face = "bold", size = 12),
+      axis.title.y = element_text(
+        angle = 90,
+        face = "bold",
+        vjust = 3,
+        size = 12
+      ),
+      strip.text.x = element_text(angle = 0, face = "bold", size = 14),
+      strip.text.y = element_text(angle = 0, face = "bold", size = 14)
     )
 }
 
@@ -471,8 +476,8 @@ normalized_annual_emissions_by_fleet_fig <- annual_emissions |>
   labs(
     x = "",
     y = expression(atop(
-      Relative ~ change ~ of ~ CO[2] ~ emissions,
-      from ~ 2016 ~ baseline
+      Relative ~ change ~ of ~ CO[2],
+      emissions ~ from ~ 2016 ~ baseline
     ))
   ) +
   theme(
@@ -565,8 +570,8 @@ co2_map <- pollutant_map_data_co2 |>
 ```{r}
 #| label: fig-emissions-by-data-source-and-maps
 #| #| fig-cap: (A) Annual marine vessel CO2 emissions, with each line colored based on the data source. (B) Relative change in annual marine vessel CO2 emissions from a 2016 baseline, with each line colored based on the data source. (C) Spatial map of CO2 emissions in 2024 (top) and change in CO2 emissions between 2016 and 2024 (bottom), aggregated across AIS-broadcasting vessels and non-broadcasting vessels, and shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel.
-#| fig-width: 11
-#| fig-height: 7
+#| fig-width: 9
+#| fig-height: 6
 cowplot::plot_grid(
   cowplot::plot_grid(
     total_annual_emissions_by_fleet_fig,
@@ -926,7 +931,10 @@ time_series_predicted_decomposition_df |>
   scale_y_continuous(labels = scales::percent) +
   labs(
     x = "",
-    y = ""
+    y = expression(atop(
+      Percent ~ change ~ of ~ total ~ CO[2],
+      emissions ~ from ~ 2016 ~ basline
+    )),
   ) +
   theme_plot() +
   theme(panel.grid.minor.x = element_blank())
@@ -1250,30 +1258,25 @@ pollutant_time_series_data_co2 <- total_monthly_emissions_by_pollutant |>
 #| fig-height: 8
 
 make_pollutant_time_series_figure <- function(
-  pollutant_time_series_data,
-  y_axis_label
-) {
-  {
-    ggplot(
-      data = pollutant_time_series_data,
-      aes(x = month, y = emissions_mt)
-    ) +
-      geom_line(linewidth = 1.1) +
-      scale_y_continuous(labels = scales::comma) +
-      theme_plot() +
-      labs(x = "", y = y_axis_label) +
-      theme(panel.grid.minor.x = element_blank()) +
-      scale_x_continuous(
-        breaks = seq(
-          lubridate::ymd(glue::glue("{analysis_start_year}-01-01")),
-          lubridate::ymd(glue::glue("{analysis_end_year+1}-01-01")),
-          by = "1 year"
-        ),
-        labels = seq(analysis_start_year, analysis_end_year + 1)
-      ) +
-      scale_y_continuous(limits = c(0, NA))
-  }
-}
+    pollutant_time_series_data,
+    y_axis_label) {{ ggplot(
+  data = pollutant_time_series_data,
+  aes(x = month, y = emissions_mt)
+) +
+  geom_line(linewidth = 1.1) +
+  scale_y_continuous(labels = scales::comma) +
+  theme_plot() +
+  labs(x = "", y = y_axis_label) +
+  theme(panel.grid.minor.x = element_blank()) +
+  scale_x_continuous(
+    breaks = seq(
+      lubridate::ymd(glue::glue("{analysis_start_year}-01-01")),
+      lubridate::ymd(glue::glue("{analysis_end_year+1}-01-01")),
+      by = "1 year"
+    ),
+    labels = seq(analysis_start_year, analysis_end_year + 1)
+  ) +
+  scale_y_continuous(limits = c(0, NA)) }}
 
 time_series_fig_co2 <- make_pollutant_time_series_figure(
   pollutant_time_series_data_co2,
