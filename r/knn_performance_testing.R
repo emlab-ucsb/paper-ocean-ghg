@@ -22,10 +22,31 @@ project_directory <- glue::glue(
   "{data_directory_base}/projects/current-projects/paper-ocean-ghg"
 )
 
+# Automatically set cores, based on emLab best practices
+n_cores <- ifelse(
+  Sys.info()["nodename"] == "quebracho" | Sys.info()["nodename"] == "sequoia",
+  20,
+  parallelly::availableCores() - 1
+)
+
+# knn_performance_testing <- glue::glue(
+#   "{project_directory}/data/processed/knn_performance_testing.csv"
+# ) |>
+#   readr::read_csv()
+
+# knn_performance_testing <- glue::glue(
+#   "{project_directory}/data/processed/knn_neighbors_by_year_2016_2024.csv"
+# ) |>
+#   readr::read_csv()
+
 knn_performance_testing <- glue::glue(
-  "{project_directory}/data/processed/knn_performance_testing.csv"
+  "{project_directory}/data/processed/knn_neighbors_by_month_2016_2024.csv"
 ) |>
   readr::read_csv()
+
+knn_performance_testing_streamlined <- knn_performance_testing |>
+  # Only really need 10 neighbors
+  dplyr::filter(nearest_neighbor_rank <= 20)
 
 # Define yardstick metrics we want to look at
 multi_metric <- yardstick::metric_set(
@@ -35,27 +56,49 @@ multi_metric <- yardstick::metric_set(
   yardstick::mae
 )
 
+# Set up parallel processing
+mirai::daemons(n_cores)
+
 performance_by_k <- purrr::map_dfr(
-  unique(knn_performance_testing$nearest_neighbor_rank),
-  function(k) {
-    knn_performance_testing |>
-      dplyr::filter(nearest_neighbor_rank <= k) |>
-      dplyr::select(-c(nearest_neighbor_rank, distance_m)) |>
-      dplyr::group_by(dplyr::across(-c(ratio_dark_to_ais_detections_to))) |>
-      dplyr::summarize(
-        ratio_dark_to_ais_detections_to = mean(
-          ratio_dark_to_ais_detections_to,
-          na.rm = TRUE
-        )
-      ) |>
-      dplyr::ungroup() |>
-      multi_metric(
-        truth = ratio_dark_to_ais_detections_from,
-        estimate = ratio_dark_to_ais_detections_to
-      ) |>
-      dplyr::mutate(k = k)
-  }
+  unique(knn_performance_testing_streamlined$nearest_neighbor_rank),
+  purrr::in_parallel(
+    function(k) {
+      knn_performance_testing_streamlined |>
+        dplyr::filter(nearest_neighbor_rank <= k) |>
+        dplyr::group_by(
+          time,
+          fishing,
+          lon_bin_from,
+          lat_bin_from,
+          length_size_class_percentile,
+          ratio_dark_to_ais_detections_from
+        ) |>
+        dplyr::summarize(
+          ratio_dark_to_ais_detections_to = mean(
+            ratio_dark_to_ais_detections_to,
+            na.rm = TRUE
+          )
+        ) |>
+        dplyr::ungroup() |>
+        multi_metric(
+          truth = ratio_dark_to_ais_detections_from,
+          estimate = ratio_dark_to_ais_detections_to
+        ) |>
+        dplyr::mutate(k = k)
+    },
+    multi_metric = multi_metric,
+    knn_performance_testing_streamlined = knn_performance_testing_streamlined
+  ),
+  .progress = TRUE
 )
+
+# Turn off parallel processing
+mirai::daemons(0)
+
+# saveRDS(
+#   performance_by_k,
+#   glue::glue("{project_directory}/data/processed/performance_by_k.rds")
+# )
 
 max_rsq_trad <- performance_by_k |>
   dplyr::filter(.metric == "rsq_trad") |>
@@ -85,12 +128,14 @@ performance_by_k |>
   ) +
   theme_minimal()
 
+performance_by_k |> filter(.metric == "rsq_trad") |> arrange(k)
+
 performance_by_k_and_vessel_type <- purrr::map_dfr(
   unique(knn_performance_testing$nearest_neighbor_rank),
   function(k) {
     knn_performance_testing |>
       dplyr::filter(nearest_neighbor_rank <= k) |>
-      dplyr::select(-c(nearest_neighbor_rank, distance_m)) |>
+      # dplyr::select(-c(nearest_neighbor_rank, distance_m)) |>
       dplyr::group_by(dplyr::across(-c(ratio_dark_to_ais_detections_to))) |>
       dplyr::summarize(
         ratio_dark_to_ais_detections_to = mean(

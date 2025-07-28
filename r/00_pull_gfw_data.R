@@ -29,7 +29,7 @@ billing_project <- "emlab-gcp" # emLab's billing project
 bq_dataset <- "proj_ocean_ghg" # The dataset name for this project
 
 run_version_ais <- "v20250701" # Define the version of the AIS dataset to pull
-run_version_dark <- "v20250228" # Define the version of the dark fleet dataset to pull
+run_version_dark <- "v20250701" # Define the version of the dark fleet dataset to pull
 
 
 # Function to download GFW data and save it in repo
@@ -137,6 +137,91 @@ download_gfw_data(
   "knn_performance_testing"
 )
 
+run_knn_by_year_sql <- function(
+  run_version_dark,
+  query_file_name,
+  file_output_name
+) {
+  years <- 2016:2024
+
+  results <- purrr::map_dfr(
+    years,
+    function(yr) {
+      message("Running year: ", yr)
+      query <- query_file_name |>
+        readr::read_file() |>
+        stringr::str_glue(
+          bq_project = bq_project,
+          bq_dataset = bq_dataset,
+          run_version_dark = run_version_dark,
+          year = yr
+        )
+
+      bigrquery::bq_project_query(billing_project, query) |>
+        bigrquery::bq_table_download(n_max = Inf)
+    }
+  )
+
+  readr::write_csv(
+    results,
+    glue::glue("{project_directory}/data/processed/{file_output_name}.csv")
+  )
+}
+
+
+run_knn_by_year_sql(
+  run_version_dark = "v20250701",
+  query_file_name = "sql/knn_performance_testing_by_year.sql",
+  file_output_name = "knn_neighbors_2016_2024"
+)
+
+
+run_knn_by_year_month_sql <- function(
+  run_version_dark,
+  query_file_name,
+  file_output_name
+) {
+  years <- 2016:2024
+  months <- 1:12
+
+  results <- purrr::cross_df(list(year = years, month = months)) |>
+    dplyr::mutate(
+      data = purrr::pmap(
+        list(year, month),
+        function(yr, mo) {
+          message("Running year: ", yr, " month: ", mo)
+          query <- query_file_name |>
+            readr::read_file() |>
+            stringr::str_glue(
+              bq_project = bq_project,
+              bq_dataset = bq_dataset,
+              run_version_dark = run_version_dark,
+              year = yr,
+              month = mo
+            )
+
+          bigrquery::bq_project_query(billing_project, query) |>
+            bigrquery::bq_table_download(n_max = Inf)
+        }
+      )
+    )
+
+  combined_results <- dplyr::bind_rows(results$data)
+
+  readr::write_csv(
+    combined_results,
+    glue::glue("{project_directory}/data/processed/{file_output_name}.csv")
+  )
+}
+
+
+run_knn_by_year_month_sql(
+  run_version_dark = "v20250701",
+  query_file_name = "sql/knn_performance_testing_by_month.sql",
+  file_output_name = "knn_neighbors_by_month_2016_2024"
+)
+
+
 # Download S&P consumption data for valiadtion
 pull_gfw_data_locally(
   bq_table_name = "snp_fuel_consumption_v20250404",
@@ -146,6 +231,7 @@ pull_gfw_data_locally(
   readr::write_csv(glue::glue(
     "{project_directory}/data/processed/snp_fuel_consumption_v20250404.csv"
   ))
+
 
 download_gfw_data(
   "sql/vessel_info_snp_match.sql", # using vessel_info_v20241121
