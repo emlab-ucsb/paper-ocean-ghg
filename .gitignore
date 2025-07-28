@@ -39,3 +39,7 @@ paper-ocean-ghg.Rproj
 *_targets/
 _targets/
 /_targets/
+
+# Don't save quarto cache - it gets big
+qmd/quarto_notebook_cache/
+qmd/quarto_notebook_cache/*
