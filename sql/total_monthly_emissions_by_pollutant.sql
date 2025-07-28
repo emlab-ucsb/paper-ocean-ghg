@@ -10,7 +10,7 @@ SELECT
     SUM(emissions_pm2_5_mt + emissions_pm2_5_dark_mt) emissions_pm2_5_total_mt,
     SUM(emissions_pm10_mt + emissions_pm10_dark_mt) emissions_pm10_total_mt
 FROM
-  `world-fishing-827.proj_ocean_ghg.s1_time_gridded_dark_fleet_model_append_{run_version_dark}`
+  `world-fishing-827.proj_ocean_ghg.s1_time_gridded_dark_fleet_model_{run_version_dark}`
 WHERE EXTRACT(YEAR FROM time) BETWEEN {analysis_start_year} AND {analysis_end_year}
 GROUP BY
   month

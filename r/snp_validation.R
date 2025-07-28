@@ -1,4 +1,3 @@
-
 library(tidyverse)
 library(bigrquery)
 library(yardstick)
@@ -30,12 +29,16 @@ project_directory <- glue::glue(
   "{data_directory_base}/projects/current-projects/paper-ocean-ghg"
 )
 
-vessel_info_snp_match <- read.csv(glue::glue("{project_directory}/data/processed/vessel_info_snp_match.csv"))
-snp_fuel_consumption <- read.csv(glue::glue("{project_directory}/data/processed/snp_fuel_consumption_v20250404.csv"))
+vessel_info_snp_match <- read.csv(glue::glue(
+  "{project_directory}/data/processed/vessel_info_snp_match.csv"
+))
+snp_fuel_consumption <- read.csv(glue::glue(
+  "{project_directory}/data/processed/snp_fuel_consumption_v20250404.csv"
+))
 
 # Data exploration and filtering ----
 
-## Consumption values 
+## Consumption values
 ggplot(snp_fuel_consumption, aes(y = consumption_value_1)) +
   geom_boxplot(fill = "lightblue", color = "darkblue") +
   labs(
@@ -44,13 +47,16 @@ ggplot(snp_fuel_consumption, aes(y = consumption_value_1)) +
   ) +
   theme_minimal()
 
-## Speed values 
-ggplot(snp_fuel_consumption|> filter(consumption_speed_1 < 300), aes(x = consumption_speed_1)) +
+## Speed values
+ggplot(
+  snp_fuel_consumption |> filter(consumption_speed_1 < 300),
+  aes(x = consumption_speed_1)
+) +
   geom_histogram(
-    bins = 30,              
-    fill = "#2c3e50",       
-    color = "white",       
-    alpha = 0.8             
+    bins = 30,
+    fill = "#2c3e50",
+    color = "white",
+    alpha = 0.8
   ) +
   labs(
     title = "Histogram of Consumption Speed",
@@ -59,7 +65,10 @@ ggplot(snp_fuel_consumption|> filter(consumption_speed_1 < 300), aes(x = consump
   ) +
   theme_minimal()
 
-ggplot(snp_fuel_consumption |> filter(consumption_speed_1 < 300), aes(y = consumption_speed_1)) +
+ggplot(
+  snp_fuel_consumption |> filter(consumption_speed_1 < 300),
+  aes(y = consumption_speed_1)
+) +
   geom_boxplot(fill = "lightblue", color = "darkblue") +
   labs(
     title = "Speeds < 300 knots",
@@ -81,20 +90,20 @@ filtered_repeated <- vessel_info_snp_match %>%
   inner_join(snp_fuel_consumption, by = c("imo_ais" = "imo")) %>%
   filter(
     ssvid == mmsi |
-    ship_name_registry == ship_name | 
-    ship_name_ais == ship_name
+      ship_name_registry == ship_name |
+      ship_name_ais == ship_name
   )
 
 # Generate final dataset of matches
 vessel_info_final <- vessel_info_snp_match %>%
-  filter(!imo_ais %in% repeated_imo_ais) |> 
-  bind_rows(filtered_repeated) |> 
-  dplyr::select(names(vessel_info_snp_match)) |> 
+  filter(!imo_ais %in% repeated_imo_ais) |>
+  bind_rows(filtered_repeated) |>
+  dplyr::select(names(vessel_info_snp_match)) |>
   inner_join(snp_fuel_consumption, by = c("imo_ais" = "imo"))
 
 ## Limit selection to direct IMO matches
 vessel_info_final <- vessel_info_snp_match %>%
-  filter(!imo_ais %in% repeated_imo_ais) |> 
+  filter(!imo_ais %in% repeated_imo_ais) |>
   inner_join(snp_fuel_consumption, by = c("imo_ais" = "imo"))
 
 
@@ -167,7 +176,9 @@ vessel_info_energy_use <- vessel_info_final |>
   )
 
 # Alternative dataset generated directly within BQ using vessel_info_snp_match_extended.sql
-vessel_info_snp_match_extended <- read.csv(glue::glue("{project_directory}/data/processed/vessel_info_snp_match_extended.csv"))
+vessel_info_snp_match_extended <- read.csv(glue::glue(
+  "{project_directory}/data/processed/vessel_info_snp_match_extended.csv"
+))
 vessel_info_energy_use <- vessel_info_snp_match_extended
 
 ## Filtering data between Q1 and Q3. OPTIONAL if we want to remove outliers
@@ -188,7 +199,7 @@ vessel_info_emissions <- vessel_info_energy_use |>
   mutate(
     co2_emissions_tonnes_estimate = (main_engine_energy_use_kwh * co2_ef) / 1e6,
     co2_emissions_tonnes_snp = consumption_value_1 * co2_fuel_factor
-  ) 
+  )
 
 
 # Validation ----
@@ -212,20 +223,30 @@ vessel_info_emissions %>%
       summarise(n = n(), .groups = "drop"),
     by = "vessel_class"
   ) |>
-  arrange(desc(.estimate ))|> 
+  arrange(desc(.estimate)) |>
   kableExtra::kable()
 
-  vessel_info_emissions %>%
-    multi_metric(
-      truth = co2_emissions_tonnes_snp,     
-      estimate = co2_emissions_tonnes_estimate  
-    ) |> kableExtra::kable()
+vessel_info_emissions %>%
+  multi_metric(
+    truth = co2_emissions_tonnes_snp,
+    estimate = co2_emissions_tonnes_estimate
+  ) |>
+  kableExtra::kable()
 
-ggplot(vessel_info_emissions, aes(x = co2_emissions_tonnes_estimate, y = co2_emissions_tonnes_snp)) +
+ggplot(
+  vessel_info_emissions,
+  aes(x = co2_emissions_tonnes_estimate, y = co2_emissions_tonnes_snp)
+) +
   geom_point(size = 3, alpha = 0.3, stroke = 0) +
-  geom_smooth(method = "lm", linewidth=0.5, color= "red", linetype = "solid", se = FALSE) +  
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey") +  
-  coord_fixed(ratio = 1, clip = "on") +  
+  geom_smooth(
+    method = "lm",
+    linewidth = 0.5,
+    color = "red",
+    linetype = "solid",
+    se = FALSE
+  ) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey") +
+  coord_fixed(ratio = 1, clip = "on") +
   labs(
     x = "Simulated CO2 Emissions (Tonnes)",
     y = "Observed CO2 Emissions (Tonnes)"
@@ -234,22 +255,31 @@ ggplot(vessel_info_emissions, aes(x = co2_emissions_tonnes_estimate, y = co2_emi
   scale_y_continuous(limits = c(0, 600)) +
   theme_minimal() +
   theme(
-    panel.grid.major = element_blank(),  
-    panel.grid.minor = element_blank(),  
-    axis.line = element_line(color = "black"), 
-    axis.ticks = element_line(color = "black"),  
-    axis.ticks.length = unit(0.25, "cm"),  
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"),
+    axis.ticks.length = unit(0.25, "cm"),
     legend.position = "right",
     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 7),
-    aspect.ratio = 1  
+    aspect.ratio = 1
   )
 
 
-ggplot(vessel_info_emissions, aes(x = co2_emissions_tonnes_estimate, y = co2_emissions_tonnes_snp)) +
+ggplot(
+  vessel_info_emissions,
+  aes(x = co2_emissions_tonnes_estimate, y = co2_emissions_tonnes_snp)
+) +
   geom_point(size = 3, alpha = 0.3, stroke = 0) +
-  geom_smooth(method = "lm", linewidth=0.5, color= "red", linetype = "solid", se = FALSE) +  
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey") +  
-  coord_fixed(ratio = 1, clip = "on") +  
+  geom_smooth(
+    method = "lm",
+    linewidth = 0.5,
+    color = "red",
+    linetype = "solid",
+    se = FALSE
+  ) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey") +
+  coord_fixed(ratio = 1, clip = "on") +
   labs(
     x = "AIS-model CO2 Emissions (Tonnes)",
     y = "S&P derived CO2 Emissions (Tonnes)"
@@ -258,20 +288,25 @@ ggplot(vessel_info_emissions, aes(x = co2_emissions_tonnes_estimate, y = co2_emi
   scale_y_continuous(limits = c(0, 600)) +
   theme_minimal() +
   theme(
-    panel.grid.major = element_blank(),  
-    panel.grid.minor = element_blank(),  
-    axis.line = element_line(color = "black"), 
-    axis.ticks = element_line(color = "black"),  
-    axis.ticks.length = unit(0.25, "cm"),  
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"),
+    axis.ticks.length = unit(0.25, "cm"),
     legend.position = "right",
     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 7),
-    aspect.ratio = 1  
+    aspect.ratio = 1
   )
 
 
 # Calculating Percentage Difference
 vessel_info_emissions <- vessel_info_emissions %>%
-  mutate(percentage_difference = ((co2_emissions_tonnes_estimate - co2_emissions_tonnes_snp) / co2_emissions_tonnes_snp) * 100)
+  mutate(
+    percentage_difference = ((co2_emissions_tonnes_estimate -
+      co2_emissions_tonnes_snp) /
+      co2_emissions_tonnes_snp) *
+      100
+  )
 
 ggplot(vessel_info_emissions, aes(x = factor(1), y = percentage_difference)) +
   geom_boxplot(outlier.size = 0.7) +
@@ -288,7 +323,6 @@ ggplot(vessel_info_emissions, aes(x = factor(1), y = percentage_difference)) +
 
 # Simplified model version ----
 # Following alternative steps suggested by Mark Powell (https://docs.google.com/document/d/1Wbge4KvavuPIJfGgWh3hMo_Tbs6pFuAoMz0iQQLSf5M/edit?tab=t.0)
-
 
 # Simplified version of the model for validation purposes
 
@@ -315,7 +349,7 @@ vessel_info_energy_use_simplified <- vessel_info_final |>
       hours = 24
     ),
     co2_emissions_tonnes_snp = consumption_value_1 * 3.12
-)
+  )
 
 multi_metric <- yardstick::metric_set(
   yardstick::rmse,
@@ -323,19 +357,29 @@ multi_metric <- yardstick::metric_set(
   yardstick::rsq_trad,
   yardstick::mae,
 )
-  
+
 vessel_info_emissions_simplified %>%
   multi_metric(
-    truth = co2_emissions_tonnes_snp,     
-    estimate = co2_emissions_tonnes_estimate  
-  ) |> kableExtra::kable()
+    truth = co2_emissions_tonnes_snp,
+    estimate = co2_emissions_tonnes_estimate
+  ) |>
+  kableExtra::kable()
 
 
-ggplot(vessel_info_emissions_simplified, aes(x = co2_emissions_tonnes_estimate, y = co2_emissions_tonnes_snp)) +
+ggplot(
+  vessel_info_emissions_simplified,
+  aes(x = co2_emissions_tonnes_estimate, y = co2_emissions_tonnes_snp)
+) +
   geom_point(size = 3, alpha = 0.3, stroke = 0) +
-  geom_smooth(method = "lm", linewidth=0.5, color= "red", linetype = "solid", se = FALSE) +  
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey") +  
-  coord_fixed(ratio = 1, clip = "on") +  
+  geom_smooth(
+    method = "lm",
+    linewidth = 0.5,
+    color = "red",
+    linetype = "solid",
+    se = FALSE
+  ) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey") +
+  coord_fixed(ratio = 1, clip = "on") +
   labs(
     x = "Simulated CO2 Emissions (Tonnes)",
     y = "Observed CO2 Emissions (Tonnes)"
@@ -344,27 +388,31 @@ ggplot(vessel_info_emissions_simplified, aes(x = co2_emissions_tonnes_estimate, 
   scale_y_continuous(limits = c(0, 600)) +
   theme_minimal() +
   theme(
-    panel.grid.major = element_blank(),  
-    panel.grid.minor = element_blank(),  
-    axis.line = element_line(color = "black"), 
-    axis.ticks = element_line(color = "black"),  
-    axis.ticks.length = unit(0.25, "cm"),  
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"),
+    axis.ticks.length = unit(0.25, "cm"),
     legend.position = "right",
     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 7),
-    aspect.ratio = 1  
+    aspect.ratio = 1
   )
-
 
 
 # Using updated metadata from rf_predictions_v20250516 ----
 
-vessel_info_snp_match_updated_metadata <- read.csv(glue::glue("{project_directory}/data/processed/vessel_info_snp_match_updated_metadata.csv"))
+vessel_info_snp_match_updated_metadata <- read.csv(glue::glue(
+  "{project_directory}/data/processed/vessel_info_snp_match_updated_metadata.csv"
+))
+snp_fuel_consumption <- read.csv(glue::glue(
+  "{project_directory}/data/processed/snp_fuel_consumption_v20250404.csv"
+))
 
 # # Identify the duplicated imo_ais values
-# repeated_imo_ais <- vessel_info_snp_match_updated_metadata %>%
-#   count(imo_ais) %>%
-#   filter(n > 1) %>%
-#   pull(imo_ais)
+repeated_imo_ais <- vessel_info_snp_match_updated_metadata %>%
+  count(imo_ais) %>%
+  filter(n > 1) %>%
+  pull(imo_ais)
 
 # # Match selection using MMSI and vessel name
 # filtered_repeated <- vessel_info_snp_match_updated_metadata %>%
@@ -372,20 +420,20 @@ vessel_info_snp_match_updated_metadata <- read.csv(glue::glue("{project_director
 #   inner_join(snp_fuel_consumption, by = c("imo_ais" = "imo")) %>%
 #   filter(
 #     ssvid == mmsi |
-#     ship_name_registry == ship_name | 
+#     ship_name_registry == ship_name |
 #     ship_name_ais == ship_name
 #   )
 
 # # Generate final dataset of matches
 # vessel_info_final <- vessel_info_snp_match_updated_metadata %>%
-#   filter(!imo_ais %in% repeated_imo_ais) |> 
-#   bind_rows(filtered_repeated) |> 
-#   dplyr::select(names(vessel_info_snp_match_updated_metadata)) |> 
+#   filter(!imo_ais %in% repeated_imo_ais) |>
+#   bind_rows(filtered_repeated) |>
+#   dplyr::select(names(vessel_info_snp_match_updated_metadata)) |>
 #   inner_join(snp_fuel_consumption, by = c("imo_ais" = "imo"))
 
 ## Alternatively: Limit selection to direct IMO matches
 vessel_info_final <- vessel_info_snp_match_updated_metadata %>%
-  filter(!imo_ais %in% repeated_imo_ais) |> 
+  filter(!imo_ais %in% repeated_imo_ais) |>
   inner_join(snp_fuel_consumption, by = c("imo_ais" = "imo"))
 
 
@@ -413,19 +461,29 @@ vessel_info_emissions <- vessel_info_energy_use |>
   mutate(
     co2_emissions_tonnes_estimate = (main_engine_energy_use_kwh * co2_ef) / 1e6,
     co2_emissions_tonnes_snp = consumption_value_1 * co2_fuel_factor
-  ) 
+  )
 
 vessel_info_emissions %>%
   multi_metric(
-    truth = co2_emissions_tonnes_snp,     
-    estimate = co2_emissions_tonnes_estimate  
-  ) |> kableExtra::kable()
+    truth = co2_emissions_tonnes_snp,
+    estimate = co2_emissions_tonnes_estimate
+  ) |>
+  kableExtra::kable()
 
-ggplot(vessel_info_emissions, aes(x = co2_emissions_tonnes_estimate, y = co2_emissions_tonnes_snp)) +
+ggplot(
+  vessel_info_emissions,
+  aes(x = co2_emissions_tonnes_estimate, y = co2_emissions_tonnes_snp)
+) +
   geom_point(size = 3, alpha = 0.3, stroke = 0) +
-  geom_smooth(method = "lm", linewidth=0.5, color= "red", linetype = "solid", se = FALSE) +  
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey") +  
-  coord_fixed(ratio = 1, clip = "on") +  
+  geom_smooth(
+    method = "lm",
+    linewidth = 0.5,
+    color = "red",
+    linetype = "solid",
+    se = FALSE
+  ) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey") +
+  coord_fixed(ratio = 1, clip = "on") +
   labs(
     x = "Simulated CO2 Emissions (Tonnes)",
     y = "Observed CO2 Emissions (Tonnes)"
@@ -434,12 +492,24 @@ ggplot(vessel_info_emissions, aes(x = co2_emissions_tonnes_estimate, y = co2_emi
   scale_y_continuous(limits = c(0, 600)) +
   theme_minimal() +
   theme(
-    panel.grid.major = element_blank(),  
-    panel.grid.minor = element_blank(),  
-    axis.line = element_line(color = "black"), 
-    axis.ticks = element_line(color = "black"),  
-    axis.ticks.length = unit(0.25, "cm"),  
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"),
+    axis.ticks.length = unit(0.25, "cm"),
     legend.position = "right",
     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 7),
-    aspect.ratio = 1  
+    aspect.ratio = 1
   )
+
+
+# Using rf_predictions_v20250613 and proj_ocean_ghg.snp_fuel_consumption_v20250607----
+
+pull_gfw_data_locally(
+  bq_table_name = "snp_fuel_consumption_v20250607",
+  bq_dataset,
+  billing_project
+) |>
+  readr::write_csv(glue::glue(
+    "{project_directory}/data/processed/snp_fuel_consumption_v20250607.csv"
+  ))
