@@ -3,11 +3,11 @@ WITH vessel_info_snp_match AS (
   SELECT 
     vi.*
   FROM 
-    `world-fishing-827.proj_ocean_ghg.vessel_info_v20241121` AS vi
+    `world-fishing-827.proj_ocean_ghg.vessel_info_v20250701` AS vi
   WHERE 
     CAST(COALESCE(vi.imo_registry, vi.imo_ais) AS INT64) IN (
       SELECT DISTINCT imo 
-      FROM `world-fishing-827.proj_ocean_ghg.snp_fuel_consumption_v20250404`
+      FROM `world-fishing-827.proj_ocean_ghg.snp_fuel_consumption_v20250607`
     )
 ),
 
@@ -24,7 +24,7 @@ filtered_repeated AS (
   SELECT vim.*, sf.*
   FROM vessel_info_snp_match AS vim
   JOIN repeated_imo_ais AS rep ON vim.imo_ais = rep.imo_ais
-  JOIN `world-fishing-827.proj_ocean_ghg.snp_fuel_consumption_v20250404` AS sf
+  JOIN `world-fishing-827.proj_ocean_ghg.snp_fuel_consumption_v20250607` AS sf
     ON CAST(vim.imo_ais AS STRING) = CAST(sf.imo AS STRING)
   WHERE CAST(vim.ssvid AS STRING) = CAST(sf.mmsi AS STRING)
      OR vim.ship_name_registry = sf.ship_name
@@ -36,7 +36,7 @@ non_repeated_matches AS (
   SELECT vim.*, sf.*
   FROM vessel_info_snp_match AS vim
   LEFT JOIN repeated_imo_ais AS rep ON vim.imo_ais = rep.imo_ais
-  JOIN `world-fishing-827.proj_ocean_ghg.snp_fuel_consumption_v20250404` AS sf
+  JOIN `world-fishing-827.proj_ocean_ghg.snp_fuel_consumption_v20250607` AS sf
     ON CAST(vim.imo_ais AS STRING) = CAST(sf.imo AS STRING)
   WHERE rep.imo_ais IS NULL
 ),

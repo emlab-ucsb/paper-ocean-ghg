@@ -358,46 +358,44 @@ multi_metric <- yardstick::metric_set(
   yardstick::mae,
 )
 
-vessel_info_emissions_simplified %>%
-  multi_metric(
-    truth = co2_emissions_tonnes_snp,
-    estimate = co2_emissions_tonnes_estimate
-  ) |>
-  kableExtra::kable()
+# vessel_info_emissions_simplified %>%
+#   multi_metric(
+#     truth = co2_emissions_tonnes_snp,
+#     estimate = co2_emissions_tonnes_estimate
+#   ) |>
+#   kableExtra::kable()
 
-
-ggplot(
-  vessel_info_emissions_simplified,
-  aes(x = co2_emissions_tonnes_estimate, y = co2_emissions_tonnes_snp)
-) +
-  geom_point(size = 3, alpha = 0.3, stroke = 0) +
-  geom_smooth(
-    method = "lm",
-    linewidth = 0.5,
-    color = "red",
-    linetype = "solid",
-    se = FALSE
-  ) +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey") +
-  coord_fixed(ratio = 1, clip = "on") +
-  labs(
-    x = "Simulated CO2 Emissions (Tonnes)",
-    y = "Observed CO2 Emissions (Tonnes)"
-  ) +
-  scale_x_continuous(limits = c(0, 600)) +
-  scale_y_continuous(limits = c(0, 600)) +
-  theme_minimal() +
-  theme(
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    axis.line = element_line(color = "black"),
-    axis.ticks = element_line(color = "black"),
-    axis.ticks.length = unit(0.25, "cm"),
-    legend.position = "right",
-    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 7),
-    aspect.ratio = 1
-  )
-
+# ggplot(
+#   vessel_info_emissions_simplified,
+#   aes(x = co2_emissions_tonnes_estimate, y = co2_emissions_tonnes_snp)
+# ) +
+#   geom_point(size = 3, alpha = 0.3, stroke = 0) +
+#   geom_smooth(
+#     method = "lm",
+#     linewidth = 0.5,
+#     color = "red",
+#     linetype = "solid",
+#     se = FALSE
+#   ) +
+#   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey") +
+#   coord_fixed(ratio = 1, clip = "on") +
+#   labs(
+#     x = "Simulated CO2 Emissions (Tonnes)",
+#     y = "Observed CO2 Emissions (Tonnes)"
+#   ) +
+#   scale_x_continuous(limits = c(0, 600)) +
+#   scale_y_continuous(limits = c(0, 600)) +
+#   theme_minimal() +
+#   theme(
+#     panel.grid.major = element_blank(),
+#     panel.grid.minor = element_blank(),
+#     axis.line = element_line(color = "black"),
+#     axis.ticks = element_line(color = "black"),
+#     axis.ticks.length = unit(0.25, "cm"),
+#     legend.position = "right",
+#     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 7),
+#     aspect.ratio = 1
+#   )
 
 # Using updated metadata from rf_predictions_v20250516 ----
 
@@ -502,14 +500,13 @@ ggplot(
     aspect.ratio = 1
   )
 
-
 # Using rf_predictions_v20250613 and proj_ocean_ghg.snp_fuel_consumption_v20250607----
 
-pull_gfw_data_locally(
-  bq_table_name = "snp_fuel_consumption_v20250607",
-  bq_dataset,
-  billing_project
-) |>
-  readr::write_csv(glue::glue(
-    "{project_directory}/data/processed/snp_fuel_consumption_v20250607.csv"
-  ))
+# pull_gfw_data_locally(
+#   bq_table_name = "snp_fuel_consumption_v20250607",
+#   bq_dataset,
+#   billing_project
+# ) |>
+#   readr::write_csv(glue::glue(
+#     "{project_directory}/data/processed/snp_fuel_consumption_v20250607.csv"
+#   ))
