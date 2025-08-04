@@ -1,5 +1,16 @@
 # Model validation
 
+## Setup ----
+library(tidyverse)
+library(RColorBrewer)
+library(bigrquery)
+
+source("r/functions.R")
+
+bq_dataset <- "proj_ocean_ghg"
+bq_project <- "world-fishing-827"
+billing_project <- "emlab-gcp"
+
 data_directory_base <- ifelse(
   Sys.info()["nodename"] == "quebracho" | Sys.info()["nodename"] == "sequoia",
   "/home/emlab",
@@ -23,16 +34,11 @@ project_directory <- glue::glue(
   "{data_directory_base}/projects/current-projects/paper-ocean-ghg"
 )
 
-# Load functions to access BQ data
-source("r/functions.R")
-
-library(RColorBrewer)
-library(tidyverse)
-library(bigrquery)
-
-## Registered data ----
+## Pull and read data ----
 
 # Pull latest registered fuel consumption data from BQ
+
+# Pull dataset as it is:
 # pull_gfw_data_locally(
 #   bq_table_name = "snp_fuel_consumption_v20250607",
 #   bq_dataset,
@@ -42,11 +48,34 @@ library(bigrquery)
 #     "{project_directory}/data/raw/registered_fuel_consumption_v20250607.csv"
 #   ))
 
+# Pull dataset and normalize IMO and ship name:
+query <- "
+SELECT
+  *,
+  `world-fishing-827.udfs.normalize_imo`(CAST(imo AS STRING)) AS imo_normalized,
+  `world-fishing-827.udfs.normalize_shipname`(ship_name) AS ship_name_normalized
+FROM
+  `world-fishing-827.proj_ocean_ghg.snp_fuel_consumption_v20250607`
+"
+
+# run_custom_bq_query(
+#   query = query,
+#   billing_project = billing_project
+# ) |>
+#   readr::write_csv(glue::glue(
+#     "{project_directory}/data/raw/registered_fuel_consumption_v20250607.csv"
+#   ))
+
 registered_fuel_consumption <- readr::read_csv(glue::glue(
   "{project_directory}/data/raw/registered_fuel_consumption_v20250607.csv"
 ))
 
+registered_fuel_consumption_renamed <- registered_fuel_consumption |>
+  rename_with(~ paste0(., "_registered"), .cols = -imo_normalized)
+
 # Pull latest vessel info data from BQ
+
+# Pull dataset as it is:
 # pull_gfw_data_locally(
 #   bq_table_name = "vessel_info_v20250701",
 #   bq_dataset,
@@ -56,76 +85,152 @@ registered_fuel_consumption <- readr::read_csv(glue::glue(
 #     "{project_directory}/data/raw/vessel_info_v20250701.csv"
 #   ))
 
+# Pull dataset and normalize IMO and ship name:
+query <- "
+SELECT
+  *,
+  `world-fishing-827.udfs.normalize_imo`(CAST(imo_registry AS STRING)) AS imo_registry_normalized,
+  `world-fishing-827.udfs.normalize_imo`(CAST(imo_ais AS STRING)) AS imo_ais_normalized,
+  `world-fishing-827.udfs.normalize_shipname`(ship_name_registry) AS ship_name_registry_normalized,
+  `world-fishing-827.udfs.normalize_shipname`(ship_name_ais) AS ship_name_ais_normalized
+
+FROM
+  `world-fishing-827.proj_ocean_ghg.vessel_info_v20250701`
+"
+
+# run_custom_bq_query(
+#   query = query,
+#   billing_project = billing_project
+# ) |>
+#   readr::write_csv(glue::glue(
+#     "{project_directory}/data/raw/vessel_info_v20250701.csv"
+#   ))
+
 vessel_info <- readr::read_csv(glue::glue(
   "{project_directory}/data/raw/vessel_info_v20250701.csv"
 ))
 
-# Pull previous vessel info data from BQ
-# pull_gfw_data_locally(
-#   bq_table_name = "vessel_info_v20241121",
-#   bq_dataset,
-#   billing_project
-# ) |>
-#   readr::write_csv(glue::glue(
-#     "{project_directory}/data/raw/vessel_info_v20241121.csv"
-#   ))
 
-vessel_info_v20241121 <- readr::read_csv(glue::glue(
-  "{project_directory}/data/raw/vessel_info_v20241121.csv"
-))
+# Match vessel info with registered data ----
 
+# Matching priority order:
+#   1. Matches by IMO, MMSI, and Name (all three)
+#   2. Matches by IMO and MMSI
+#   3. Matches by IMO and Name
+#   4. Matches by MMSI and Name
+#   5. Matches by IMO only
+#   6. Matches by MMSI only
+#   7. Matches by Name only
 
-ssvid_v20241121 <- vessel_info_v20241121 |> pull(ssvid) |> unique()
+# 1. Match on all three keys
+match_all <- vessel_info |>
+  inner_join(
+    registered_fuel_consumption_renamed,
+    by = c(
+      "imo_ais_normalized" = "imo_normalized",
+      "ssvid" = "mmsi_registered",
+      "ship_name_ais_normalized" = "ship_name_registered"
+    )
+  ) |>
+  mutate(match_type = "imo_mmsi_name")
 
-# Combine in a single dataset
+# Remove matched from pool
+remaining <- vessel_info |>
+  anti_join(match_all, by = "ssvid")
 
-registered_fuel_consumption_renamed <- registered_fuel_consumption |>
-  rename_with(~ paste0(., "_registered"), .cols = -imo)
+# 2. Match on IMO + MMSI
+match_imo_mmsi <- remaining |>
+  inner_join(
+    registered_fuel_consumption_renamed,
+    by = c("imo_ais_normalized" = "imo_normalized", "ssvid" = "mmsi_registered")
+  ) |>
+  mutate(match_type = "imo_mmsi")
 
+remaining <- remaining |> anti_join(match_imo_mmsi, by = "ssvid")
 
-## Select vessels and metadata from previous vessel_info table ----
-# vessel_info_v20241121_renamed <- vessel_info_v20241121 |>
-#   dplyr::select(ssvid, main_engine_power_kw, design_speed_knots) |>
-#   rename_with(~ paste0(., "_old"), .cols = -ssvid)
+# 3. Match on IMO + Name
+match_imo_name <- remaining |>
+  inner_join(
+    registered_fuel_consumption_renamed,
+    by = c(
+      "imo_ais_normalized" = "imo_normalized",
+      "ship_name_ais_normalized" = "ship_name_registered"
+    )
+  ) |>
+  mutate(match_type = "imo_name")
 
-# vessel_info_updated <- vessel_info |>
-#   inner_join(vessel_info_v20241121_renamed, by = "ssvid")
+remaining <- remaining |> anti_join(match_imo_name, by = "ssvid")
 
-# vessel_info_combined <- vessel_info_updated |>
-#   filter(!imo_ais %in% repeated_imo_ais) |>
-#   inner_join(registered_fuel_consumption_renamed, by = c("imo_ais" = "imo"))
+# 4. Match on MMSI + Name
+match_mmsi_name <- remaining |>
+  inner_join(
+    registered_fuel_consumption_renamed,
+    by = c(
+      "ssvid" = "mmsi_registered",
+      "ship_name_ais_normalized" = "ship_name_registered"
+    )
+  ) |>
+  mutate(match_type = "mmsi_name")
 
-## Select vessels from new vessel_info table that do not have repeated imo ids ----
-# Some imo ids are repeted for different vessels (i.e., more than one imo for a single ssvid)
-# repeated_imo_ais <- vessel_info |>
-#   count(imo_ais) |>
-#   filter(n > 1) |>
-#   pull(imo_ais)
+remaining <- remaining |> anti_join(match_mmsi_name, by = "ssvid")
 
-# # This limits selection to non duplicated IMO matches (8160 out of 21491 available vessels in the registered metadata)
-# vessel_info_combined <- vessel_info |>
-#   # filter(ssvid %in% ssvid_v20241121) |> # Limit selection to ssvids from previous vessel_info table to check previous performance assessment
-#   filter(!imo_ais %in% repeated_imo_ais) |>
-#   inner_join(registered_fuel_consumption_renamed, by = c("imo_ais" = "imo"))
+# 5. Match on IMO only (non-repeated)
+repeated_imo_ais <- vessel_info |>
+  count(imo_ais_normalized) |>
+  filter(n > 1) |>
+  pull(imo_ais_normalized)
 
-## Select vessels from new vessel_info table using imo and mmsi ----
-# Match selection using MMSI and vessel name
-filtered_repeated <- vessel_info %>%
-  # filter(ssvid %in% ssvid_v20241121) |> # Limit selection to ssvids from previous vessel_info table to check previous performance assessment
-  filter(imo_ais %in% repeated_imo_ais) %>%
-  inner_join(registered_fuel_consumption_renamed, by = c("imo_ais" = "imo")) %>%
+match_imo <- remaining |>
+  filter(!imo_ais_normalized %in% repeated_imo_ais) |>
+  inner_join(
+    registered_fuel_consumption_renamed,
+    by = c("imo_ais_normalized" = "imo_normalized")
+  ) |>
+  mutate(match_type = "imo")
+
+remaining <- remaining |> anti_join(match_imo, by = "ssvid")
+
+# 6. Match on MMSI only
+match_mmsi <- remaining |>
+  inner_join(
+    registered_fuel_consumption_renamed,
+    by = c("ssvid" = "mmsi_registered")
+  ) |>
+  mutate(match_type = "mmsi")
+
+remaining <- remaining |> anti_join(match_mmsi, by = "ssvid")
+
+# 7. Match on Name only (non-repeated)
+repeated_names <- vessel_info |>
+  count(ship_name_ais_normalized) |>
+  filter(n > 1) |>
+  pull(ship_name_ais_normalized)
+
+repeated_names_registered <- registered_fuel_consumption_renamed |>
+  count(ship_name_registered) |>
+  filter(n > 1) |>
+  pull(ship_name_registered)
+
+match_name <- remaining |>
   filter(
-    ssvid == mmsi_registered |
-      ship_name_registry == ship_name_registered |
-      ship_name_ais == ship_name_registered
-  )
+    !ship_name_ais_normalized %in% c(repeated_names, repeated_names_registered)
+  ) |>
+  inner_join(
+    registered_fuel_consumption_renamed,
+    by = c("ship_name_ais_normalized" = "ship_name_registered")
+  ) |>
+  mutate(match_type = "name")
 
-# # Generate final dataset of matches
-vessel_info_combined <- vessel_info %>%
-  filter(!imo_ais %in% repeated_imo_ais) |>
-  bind_rows(filtered_repeated) |>
-  dplyr::select(names(vessel_info)) |>
-  inner_join(registered_fuel_consumption_renamed, by = c("imo_ais" = "imo"))
+# Final combined matched table
+vessel_info_combined <- bind_rows(
+  match_all,
+  match_imo_mmsi,
+  # match_imo_name,
+  match_mmsi_name,
+  # match_imo,
+  # match_mmsi,
+  # match_name
+)
 
 # Define main engine model ----
 # We could alternatively do this within BQ using vessel_info_snp_match_extended.sql,
@@ -182,6 +287,7 @@ calculate_main_engine_energy_use_kwh <- function(
 }
 
 
+# Calculate energy use ----
 ## Apply function to each row
 vessel_info_energy_use <- vessel_info_combined |>
   mutate(
@@ -252,6 +358,7 @@ vessel_info_energy_use <- vessel_info_combined |>
     )
   )
 
+# Calculate emissions ----
 co2_ef <- 629.83333 # g pollutant / kwh
 co2_fuel_factor <- 3.12 # tonnes pollutant/tonne fuel
 
@@ -276,7 +383,7 @@ vessel_info_emissions <- vessel_info_energy_use |>
       co2_fuel_factor
   )
 
-
+# Assess model performance ----
 multi_metric <- yardstick::metric_set(
   yardstick::rsq,
   yardstick::rsq_trad
@@ -335,8 +442,9 @@ model_levels <- c(
 
 # Reshape and apply factor levels
 vessel_long <- vessel_info_emissions |>
-  select(
+  dplyr::select(
     co2_emissions_tonnes_registered,
+    # match_type,
     `Original IMO data` = co2_emissions_tonnes_estimate_original,
     `RF design speed` = co2_emissions_tonnes_estimate_rf_kn,
     `RF engine power` = co2_emissions_tonnes_estimate_rf_kw,
@@ -344,7 +452,10 @@ vessel_long <- vessel_info_emissions |>
     `Registered data` = co2_emissions_tonnes_estimate_registered
   ) |>
   pivot_longer(
-    cols = -co2_emissions_tonnes_registered,
+    cols = -c(
+      co2_emissions_tonnes_registered,
+      # match_type
+    ),
     names_to = "Model",
     values_to = "Estimate"
   ) |>
@@ -357,16 +468,35 @@ vessel_long <- vessel_info_emissions |>
   mutate(Model = factor(Model, levels = model_levels))
 
 r2_labels <- vessel_long |>
-  group_by(Model) |>
+  group_by(
+    # match_type,
+    Model
+  ) |>
   yardstick::rsq_trad(
     truth = co2_emissions_tonnes_registered,
     estimate = Estimate
   ) |>
   mutate(label = paste0("R² = ", round(.estimate, 2))) |>
-  select(Model, label)
+  select(
+    Model,
+    # match_type,
+    label
+  )
 
-ggplot(vessel_long, aes(x = Estimate, y = co2_emissions_tonnes_registered)) +
-  geom_point(size = 0.5, alpha = 0.2, color = "#104E8B") +
+# Create figures ----
+ggplot(
+  vessel_long, #|> filter(Model == "RF engine power\nand design speed"),
+  aes(
+    x = Estimate,
+    y = co2_emissions_tonnes_registered,
+    # color = match_type
+  )
+) +
+  geom_point(
+    size = 0.5,
+    alpha = 0.2,
+    color = "#104E8B"
+  ) +
   geom_smooth(
     method = "lm",
     linewidth = 0.5,
@@ -376,7 +506,7 @@ ggplot(vessel_long, aes(x = Estimate, y = co2_emissions_tonnes_registered)) +
   ) +
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey60") +
   geom_text(
-    data = r2_labels,
+    data = r2_labels, #|> filter(Model == "RF engine power\nand design speed"),
     aes(label = label),
     x = 500,
     y = 50,

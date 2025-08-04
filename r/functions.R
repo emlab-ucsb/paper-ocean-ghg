@@ -47,6 +47,19 @@ pull_gfw_data_locally <- function(
     bigrquery::bq_table_download(n_max = Inf)
 }
 
+run_custom_bq_query <- function(
+  query,
+  billing_project,
+  ...
+) {
+  job <- bigrquery::bq_project_query(
+    billing_project,
+    query
+  )
+
+  bigrquery::bq_table_download(job, n_max = Inf)
+}
+
 # Summarize spatial dark to AIS detection ratios by lat_bin, lon_bin, year, vessel type, and size class
 summarize_dark_fleet_ratios_spatial <- function(dark_fleet_model_results) {
   dark_fleet_model_results %>%
