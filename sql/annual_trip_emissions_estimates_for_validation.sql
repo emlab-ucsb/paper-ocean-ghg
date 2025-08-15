@@ -63,10 +63,10 @@ valid_ssvid AS (
         `world-fishing-827.proj_ocean_ghg.eu_validation_data_v20241121` AS evd
     ON 
         COALESCE(vi.imo_registry, vi.imo_ais) = evd.imo_number
-)
+),
 
 -- Filter out trips from vessels not available in the EU dataset and calculate totals by year and ssvid
-,trip_emissions AS (
+trip_emissions AS (
     SELECT 
         tlf.ssvid,
         vs.imo_number,

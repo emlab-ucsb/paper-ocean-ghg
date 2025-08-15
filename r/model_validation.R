@@ -580,18 +580,9 @@ perf_by_class <- vessel_long_by_class |>
   filter(n > 2) |>
   dplyr::arrange(dplyr::desc(n))
 
-# If you want quick faceted scatterplots per class (optional):
-# ggplot2::ggplot(vessel_long_by_class,
-#   ggplot2::aes(co2_emissions_tonnes_registered, Estimate, color = Model)) +
-#   ggplot2::geom_point(alpha = 0.5, size = 1) +
-#   ggplot2::geom_abline(slope = 1, intercept = 0, linetype = 2) +
-#   ggplot2::facet_wrap(~ vessel_class, scales = "free") +
-#   ggplot2::labs(x = "Registered emissions (t CO2)", y = "Estimated emissions (t CO2)") +
-#   ggplot2::theme_minimal()
-
 ## Registered data paper figure ----
 
-ggplot(
+registered_data_performance <- ggplot(
   vessel_long |> filter(!Model %in% c("RF design speed", "RF engine power")),
   aes(
     x = Estimate,
@@ -655,4 +646,413 @@ ggplot(
     panel.spacing = unit(1.5, "lines"),
     strip.placement = "outside",
     legend.position = "none", # Remove legend
+  )
+
+ggsave(
+  filename = "figures/fig-registered-data-performance.jpg",
+  plot = registered_data_performance,
+  width = 8,
+  height = 5,
+  dpi = 300
+)
+
+# MRV data validation ----
+
+## Pull and read data ----
+
+# Get MRV data already processed and available in GFW BQ
+
+# pull_gfw_data_locally(
+#   bq_table_name = "eu_validation_data_v20250701",
+#   bq_dataset,
+#   billing_project
+# ) |>
+#   readr::write_csv(glue::glue(
+#     "data/MRV/eu_validation_data_v20250701.csv"
+#   ))
+
+eu_validation_data <- readr::read_csv(glue::glue(
+  "data/MRV/eu_validation_data_v20250701.csv"
+))
+
+# Pull trip and port visit emissions from latest model version
+# Data is aggregated by year and ssvid to validate against MRV data
+
+# pull_gfw_data_locally(
+#   bq_table_name = "eu_validation_trip_v20250701",
+#   bq_dataset,
+#   billing_project
+# ) |>
+#   readr::write_csv(glue::glue(
+#     "data/MRV/eu_validation_trip_v20250701.csv"
+#   ))
+
+eu_validation_trip <- readr::read_csv(glue::glue(
+  "data/MRV/eu_validation_trip_v20250701.csv"
+))
+
+# pull_gfw_data_locally(
+#   bq_table_name = "eu_validation_port_v20250701",
+#   bq_dataset,
+#   billing_project
+# ) |>
+#   readr::write_csv(glue::glue(
+#     "data/MRV/eu_validation_port_v20250701.csv"
+#   ))
+
+# eu_validation_port <- readr::read_csv(glue::glue(
+#   "data/MRV/eu_validation_port_v20250701.csv"
+# ))
+
+## Emissions validation ----
+validation_performance_metrics <- yardstick::metric_set(
+  yardstick::rsq,
+  yardstick::rsq_trad
+)
+
+# EU dataset
+eu_validation_data_updated <- eu_validation_data |>
+  filter(total_time_spent_at_sea_hours != 0) |>
+  mutate(
+    co2_trip_emissions_eu = co2_emissions_from_all_voyages_between_ports_under_a_ms_jurisdiction_m_tonnes +
+      co2_emissions_from_all_voyages_which_departed_from_ports_under_a_ms_jurisdiction_m_tonnes +
+      co2_emissions_from_all_voyages_to_ports_under_a_ms_jurisdiction_m_tonnes
+  ) |>
+  rename(
+    total_time_spent_at_sea_hours_eu = total_time_spent_at_sea_hours
+  )
+# Emission results by trip
+eu_validation_trip_updated <- eu_validation_trip |>
+  filter(total_time_spent_at_sea_hours != 0) |>
+  rename(
+    co2_trip_emissions_gfw = total_emissions_co2_mt,
+    total_time_spent_at_sea_hours_gfw = total_time_spent_at_sea_hours
+  )
+
+find_duplicates <- function(data, key_columns) {
+  duplicate_indices <- duplicated(data[key_columns]) |
+    duplicated(data[key_columns], fromLast = TRUE)
+  duplicates <- data[duplicate_indices, ]
+  return(duplicates)
+}
+
+aggregate_duplicates <- function(data, group_by_cols, sum_cols, concat_cols) {
+  aggregated_data <- data |>
+    group_by(across(all_of(group_by_cols))) |>
+    summarise(
+      across(all_of(sum_cols), sum, .names = "{.col}"),
+      across(
+        all_of(concat_cols),
+        ~ paste(unique(.x), collapse = "-"),
+        .names = "{.col}"
+      ),
+      .groups = 'drop'
+    )
+
+  return(aggregated_data)
+}
+
+group_by_columns <- c("imo_number", "year")
+sum_columns <- c(
+  "total_time_spent_at_sea_hours_gfw",
+  "total_distance_nm",
+  "co2_trip_emissions_gfw"
+)
+
+concat_columns <- c("ssvid")
+
+eu_validation_trip_updated <- aggregate_duplicates(
+  eu_validation_trip_updated,
+  group_by_columns,
+  sum_columns,
+  concat_columns
+)
+
+# Data selection and filtering
+merged_df <- merge(
+  eu_validation_data_updated,
+  eu_validation_trip_updated,
+  by.x = c("imo_number", "reporting_period"),
+  by.y = c("imo_number", "year")
+)
+
+merged_df$diff <- abs(
+  merged_df$total_time_spent_at_sea_hours_eu -
+    merged_df$total_time_spent_at_sea_hours_gfw
+)
+merged_df$max <- pmax(
+  merged_df$total_time_spent_at_sea_hours_eu,
+  merged_df$total_time_spent_at_sea_hours_gfw
+)
+
+# Function to filter data and calculate performance metrics based on a threshold
+calculate_metrics <- function(threshold, merged_df) {
+  filtered_hours_df <- subset(merged_df, diff / max < threshold)
+  filtered_df <- filtered_hours_df |>
+    select(co2_trip_emissions_eu, co2_trip_emissions_gfw)
+
+  # Calculate performance metrics
+  comparison_results <- filtered_df |>
+    pivot_longer(
+      -co2_trip_emissions_eu,
+      names_to = "model",
+      values_to = "estimate"
+    ) |>
+    group_by(model) |>
+    validation_performance_metrics(
+      truth = co2_trip_emissions_eu,
+      estimate = estimate
+    ) |>
+    dplyr::select(-.estimator) |>
+    pivot_wider(names_from = .metric, values_from = .estimate)
+
+  # Return results with added threshold information
+  comparison_results <- comparison_results |>
+    mutate(threshold = threshold, n_observations = nrow(filtered_df))
+
+  return(comparison_results)
+}
+
+# Range of thresholds to test
+thresholds <- seq(0.05, 0.4, 0.05)
+# Apply calculate_metrics function over range of thresholds
+performance_results <- map_df(thresholds, ~ calculate_metrics(.x, merged_df))
+
+best_performance <- performance_results %>%
+  filter(rsq_trad == max(rsq_trad))
+
+# Select data with threshold of 0.15 the one showing best performance
+filtered_hours_df <- subset(merged_df, diff / max < best_performance$threshold)
+filtered_df <- filtered_hours_df |>
+  select(co2_trip_emissions_eu, co2_trip_emissions_gfw)
+
+
+knitr::kable(performance_results[, -1], digits = 3)
+
+mrv_performance <- ggplot(
+  filtered_df,
+  aes(
+    x = co2_trip_emissions_gfw,
+    y = co2_trip_emissions_eu
+  )
+) +
+  geom_point(
+    size = 1.5,
+    alpha = 0.5,
+    color = "#104E8B"
+  ) +
+  geom_smooth(
+    method = "lm",
+    linewidth = 0.5,
+    color = "red",
+    linetype = "solid",
+    se = FALSE
+  ) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey60") +
+  annotate(
+    geom = "text",
+    label = paste0("R² = ", format(best_performance$rsq_trad, digits = 3)),
+    x = 130000,
+    y = 10000,
+    size = 3,
+    fontface = "bold"
+  ) +
+  coord_fixed(ratio = 1, clip = "on") +
+  scale_x_continuous(limits = c(0, max(filtered_df))) +
+  scale_y_continuous(limits = c(0, max(filtered_df))) +
+  labs(
+    x = "GFW CO2 emissions (mt)",
+    y = "MRV CO2 emissions (mt)"
+  ) +
+  theme_minimal() +
+  theme(
+    strip.text = element_text(size = 11, face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
+    axis.text.y = element_text(size = 7),
+    axis.title = element_text(size = 10),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"),
+    axis.ticks.length = unit(0.25, "cm"),
+    panel.spacing = unit(1.5, "lines"),
+    strip.placement = "outside"
+  )
+
+ggsave(
+  filename = "figures/fig-mrv-performance.jpg",
+  plot = mrv_performance,
+  width = 8,
+  height = 5,
+  dpi = 300
+)
+
+## Intensity validation ----
+
+merged_df_ratio <- merged_df |>
+  mutate(
+    gfw_ratio = co2_trip_emissions_gfw / total_time_spent_at_sea_hours_gfw,
+    eu_ratio = co2_trip_emissions_eu / total_time_spent_at_sea_hours_eu
+  ) |>
+  group_by(ship_type) |>
+  mutate(
+    vessels_per_type = n_distinct(ssvid) # or imo_number if you want per IMO
+  ) |>
+  ungroup() |>
+  filter(vessels_per_type > 1)
+
+merged_df_ratio <- merged_df_ratio |>
+  mutate(
+    co2_error_percent = 100 * (gfw_ratio - eu_ratio) / eu_ratio
+  )
+
+percent_error_boxplot <- ggplot(
+  merged_df_ratio,
+  aes(
+    x = forcats::fct_reorder(ship_type, vessels_per_type, .desc = TRUE),
+    y = co2_error_percent
+  )
+) +
+  geom_boxplot(
+    outlier.shape = NA,
+    fill = "steelblue",
+    alpha = 0.7,
+    outliers = FALSE
+  ) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(
+    x = NULL,
+    y = "Error (%)"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.text = element_text(face = "bold")
+  )
+
+# Caption: Variability of the ratio between CO2 emissions and time at sea error by ship type
+ggsave(
+  filename = "figures/fig-mrv-percent-error.jpg",
+  plot = percent_error_boxplot,
+  width = 8,
+  height = 5,
+  dpi = 300
+)
+
+
+## Replicating ICCT validation
+# EU-MRV emissions
+
+mrv_validation_data <- eu_validation_data |>
+  dplyr::select(
+    imo_number,
+    eu_vessel_class = ship_type,
+    year = reporting_period,
+    annual_average_co2_emissions_per_distance_kg_co2_n_mile
+  ) |>
+  mutate(
+    annual_average_co2_emissions_per_distance_kg_co2_n_mile = as.numeric(
+      annual_average_co2_emissions_per_distance_kg_co2_n_mile
+    )
+  )
+
+# Our trip emissions
+repeated_imo <- eu_validation_trip |>
+  distinct(imo_number, year, ssvid) |>
+  count(imo_number, year) |>
+  filter(n > 1) |>
+  pull(imo_number)
+
+gfw_validation_data <- eu_validation_trip |>
+  filter(!imo_number %in% repeated_imo) |>
+  group_by(imo_number, ssvid, year, tonnage_gt, vessel_class) |>
+  summarise(
+    total_time_spent_at_sea_hours = sum(
+      total_time_spent_at_sea_hours,
+      rm.na = TRUE
+    ),
+    total_emissions_co2_mt = sum(total_emissions_co2_mt, rm.na = TRUE),
+    total_distance_nm = sum(total_distance_nm, rm.na = TRUE)
+  ) |>
+  ungroup() |>
+  rename(gfw_vessel_class = vessel_class)
+
+# Calculating emission intensity
+emission_intensities <- gfw_validation_data |>
+  inner_join(mrv_validation_data, by = c("year", "imo_number")) |>
+  # filter(tonnage_gt < quantile(tonnage_gt, 0.75),
+  #        tonnage_gt > quantile(tonnage_gt, 0.25)) |>
+  mutate(
+    eu_intensity = (annual_average_co2_emissions_per_distance_kg_co2_n_mile *
+      1e3) *
+      (1 / tonnage_gt),
+    gfw_intensity = (total_emissions_co2_mt * 1e6) /
+      (total_distance_nm * tonnage_gt),
+    gfw_emissions_distance = total_emissions_co2_mt * 1000 / total_distance_nm,
+    eu_emissions_distance = annual_average_co2_emissions_per_distance_kg_co2_n_mile
+  ) |>
+  dplyr::select(
+    imo_number,
+    gfw_vessel_class,
+    eu_vessel_class,
+    year,
+    eu_intensity,
+    gfw_intensity,
+    eu_emissions_distance,
+    gfw_emissions_distance
+  )
+
+
+performance_by_class <- emission_intensities |>
+  # filter(year == 2022) |>
+  group_by(eu_vessel_class) |>
+  summarise(
+    n = n(),
+    rsq_trad = yardstick::rsq_trad_vec(
+      truth = eu_intensity,
+      estimate = gfw_intensity
+    ),
+    rsq = yardstick::rsq_vec(
+      truth = eu_intensity,
+      estimate = gfw_intensity
+    ),
+    .groups = "drop"
+  ) |>
+  arrange(desc(n))
+
+performance_by_class |>
+  kableExtra::kable()
+
+
+ggplot(
+  emission_intensities |>
+    filter(eu_vessel_class == "Container ship"),
+  aes(x = gfw_intensity, y = eu_intensity)
+) +
+  geom_point(size = 1.5, alpha = 0.3, stroke = 0) +
+  geom_smooth(
+    method = "lm",
+    linewidth = 0.5,
+    color = "red",
+    linetype = "solid",
+    se = FALSE
+  ) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey") +
+  coord_fixed(ratio = 1, clip = "on") +
+  labs(
+    x = "CO2Intensity (GFW)",
+    y = "CO2 Intensity (MRV)"
+  ) +
+  scale_x_continuous(limits = c(0, 80)) +
+  scale_y_continuous(limits = c(0, 80)) +
+  theme_minimal() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"),
+    axis.ticks.length = unit(0.25, "cm"),
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 7),
+    aspect.ratio = 1
   )
