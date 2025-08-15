@@ -519,8 +519,8 @@ ggplot(
   coord_fixed(ratio = 1, clip = "on") +
   facet_wrap(~Model, nrow = 2, scales = "fixed") +
   labs(
-    x = "Simulated CO₂ Emissions for 24h (Tonnes)",
-    y = "Registered Emissions (Tonnes)"
+    x = "Simulated CO₂ Emissions (mt)",
+    y = "Registered CO₂ Emissions (mt)"
   ) +
   scale_x_continuous(limits = c(0, 600)) +
   scale_y_continuous(limits = c(0, 600)) +
@@ -627,8 +627,8 @@ registered_data_performance <- ggplot(
   coord_fixed(ratio = 1, clip = "on") +
   facet_wrap(~Model, nrow = 1, scales = "fixed") +
   labs(
-    x = "Simulated CO₂ Emissions for 24h (Tonnes)",
-    y = "Registered Emissions (Tonnes)"
+    x = "Simulated CO₂ Emissions (mt)",
+    y = "Registered CO₂ Emissions (mt)"
   ) +
   scale_x_continuous(limits = c(0, 600)) +
   scale_y_continuous(limits = c(0, 600)) +
@@ -903,7 +903,12 @@ merged_df_ratio <- merged_df |>
 
 merged_df_ratio <- merged_df_ratio |>
   mutate(
-    co2_error_percent = 100 * (gfw_ratio - eu_ratio) / eu_ratio
+    co2_error_percent = 100 * (gfw_ratio - eu_ratio) / eu_ratio,
+    ship_type = case_when(
+      ship_type == "Passenger ship (Cruise Passenger ship)" ~ "Passenger ship",
+      ship_type == "Container/ro-ro cargo ship" ~ "Ro-ro cargo ship",
+      TRUE ~ ship_type
+    )
   )
 
 percent_error_boxplot <- ggplot(
@@ -917,16 +922,18 @@ percent_error_boxplot <- ggplot(
     outlier.shape = NA,
     fill = "steelblue",
     alpha = 0.7,
+    linewidth = 0.3,
     outliers = FALSE
   ) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
   labs(
     x = NULL,
-    y = "Error (%)"
+    y = "Relative error in CO2 emissions\nper hour at sea (%)"
   ) +
   theme_minimal(base_size = 13) +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 9),
+    axis.title.y = element_text(size = 10),
     strip.text = element_text(face = "bold")
   )
 
@@ -1004,7 +1011,7 @@ emission_intensities <- gfw_validation_data |>
 
 
 performance_by_class <- emission_intensities |>
-  # filter(year == 2022) |>
+  filter(year == 2022) |>
   group_by(eu_vessel_class) |>
   summarise(
     n = n(),
