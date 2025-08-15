@@ -1,6 +1,6 @@
 # Model validation
 
-## Setup ----
+# Setup ----
 library(tidyverse)
 library(RColorBrewer)
 library(bigrquery)
@@ -33,6 +33,8 @@ data_directory_base <- ifelse(
 project_directory <- glue::glue(
   "{data_directory_base}/projects/current-projects/paper-ocean-ghg"
 )
+
+# Registered data validation ----
 
 ## Pull and read data ----
 
@@ -111,7 +113,7 @@ vessel_info <- readr::read_csv(glue::glue(
 ))
 
 
-# Match vessel info with registered data ----
+## Match vessel info with registered data ----
 
 # Matching priority order:
 #   1. Matches by IMO, MMSI, and Name (all three)
@@ -232,7 +234,7 @@ vessel_info_combined <- bind_rows(
   # match_name
 )
 
-# Define main engine model ----
+## Define main engine model ----
 # We could alternatively do this within BQ using vessel_info_snp_match_extended.sql,
 # results have been checked to be the same.
 
@@ -287,7 +289,7 @@ calculate_main_engine_energy_use_kwh <- function(
 }
 
 
-# Calculate energy use ----
+## Calculate energy use ----
 ## Apply function to each row
 vessel_info_energy_use <- vessel_info_combined |>
   mutate(
@@ -358,7 +360,7 @@ vessel_info_energy_use <- vessel_info_combined |>
     )
   )
 
-# Calculate emissions ----
+## Calculate emissions ----
 co2_ef <- 629.83333 # g pollutant / kwh
 co2_fuel_factor <- 3.12 # tonnes pollutant/tonne fuel
 
@@ -383,7 +385,7 @@ vessel_info_emissions <- vessel_info_energy_use |>
       co2_fuel_factor
   )
 
-# Assess model performance ----
+## Assess model performance ----
 multi_metric <- yardstick::metric_set(
   yardstick::rsq,
   yardstick::rsq_trad
@@ -436,7 +438,7 @@ model_levels <- c(
   "Original IMO data",
   "RF engine power",
   "RF design speed",
-  "RF engine power\nand design speed",
+  "New engine power and\n design speed data",
   "Registered data"
 )
 
@@ -462,7 +464,7 @@ vessel_long <- vessel_info_emissions |>
   mutate(
     Model = recode(
       Model,
-      "RF engine power and design speed" = "RF engine power\nand design speed"
+      "RF engine power and design speed" = "New engine power and\n design speed data"
     )
   ) |>
   mutate(Model = factor(Model, levels = model_levels))
@@ -483,7 +485,7 @@ r2_labels <- vessel_long |>
     label
   )
 
-# Create figures ----
+#Create figures
 ggplot(
   vessel_long, #|> filter(Model == "RF engine power\nand design speed"),
   aes(
@@ -537,11 +539,65 @@ ggplot(
     strip.placement = "outside"
   )
 
+### Performance by vessel class ----
 
-# Rule of three compliant
+# Reshape long, keeping vessel_class
+vessel_long_by_class <- vessel_info_emissions |>
+  dplyr::select(
+    vessel_class,
+    co2_emissions_tonnes_registered,
+    `Original IMO data` = co2_emissions_tonnes_estimate_original,
+    `RF engine power and design speed` = co2_emissions_tonnes_estimate_rf_kw_kn,
+    `Registered data` = co2_emissions_tonnes_estimate_registered
+  ) |>
+  tidyr::pivot_longer(
+    cols = -c(vessel_class, co2_emissions_tonnes_registered),
+    names_to = "Model",
+    values_to = "Estimate"
+  ) |>
+  dplyr::mutate(
+    Model = dplyr::recode(
+      Model,
+      "RF engine power and design speed" = "New engine power and\n design speed data"
+    ),
+    Model = factor(Model, levels = model_levels)
+  )
+
+perf_by_class <- vessel_long_by_class |>
+  dplyr::group_by(vessel_class, Model) |>
+  dplyr::summarise(
+    n = dplyr::n(),
+    rsq_trad = yardstick::rsq_trad_vec(
+      truth = co2_emissions_tonnes_registered,
+      estimate = Estimate
+    ),
+    rsq = yardstick::rsq_vec(
+      truth = co2_emissions_tonnes_registered,
+      estimate = Estimate
+    ),
+    .groups = "drop"
+  ) |>
+  filter(n > 2) |>
+  dplyr::arrange(dplyr::desc(n))
+
+# If you want quick faceted scatterplots per class (optional):
+# ggplot2::ggplot(vessel_long_by_class,
+#   ggplot2::aes(co2_emissions_tonnes_registered, Estimate, color = Model)) +
+#   ggplot2::geom_point(alpha = 0.5, size = 1) +
+#   ggplot2::geom_abline(slope = 1, intercept = 0, linetype = 2) +
+#   ggplot2::facet_wrap(~ vessel_class, scales = "free") +
+#   ggplot2::labs(x = "Registered emissions (t CO2)", y = "Estimated emissions (t CO2)") +
+#   ggplot2::theme_minimal()
+
+## Registered data paper figure ----
+
 ggplot(
-  vessel_long |> filter(Model == "RF engine power\nand design speed"),
-  aes(x = Estimate, y = co2_emissions_tonnes_registered)
+  vessel_long |> filter(!Model %in% c("RF design speed", "RF engine power")),
+  aes(
+    x = Estimate,
+    y = co2_emissions_tonnes_registered,
+    # color = match_type
+  )
 ) +
   geom_bin2d(
     bins = 30,
@@ -568,7 +624,8 @@ ggplot(
   ) +
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey60") +
   geom_text(
-    data = r2_labels |> filter(Model == "RF engine power\nand design speed"),
+    data = r2_labels |>
+      filter(!Model %in% c("RF design speed", "RF engine power")),
     aes(label = label),
     x = 500,
     y = 50,
@@ -577,6 +634,7 @@ ggplot(
     fontface = "bold"
   ) +
   coord_fixed(ratio = 1, clip = "on") +
+  facet_wrap(~Model, nrow = 1, scales = "fixed") +
   labs(
     x = "Simulated CO₂ Emissions for 24h (Tonnes)",
     y = "Registered Emissions (Tonnes)"
@@ -585,12 +643,16 @@ ggplot(
   scale_y_continuous(limits = c(0, 600)) +
   theme_minimal() +
   theme(
-    panel.grid.major = element_blank(), # Remove major grid lines
-    panel.grid.minor = element_blank(), # Remove minor grid lines
-    axis.line = element_line(color = "black"), # Add contour (axis lines)
-    axis.ticks = element_line(color = "black"), # Add axis ticks
-    axis.ticks.length = unit(0.25, "cm"), # Adjust tick length
+    strip.text = element_text(size = 11, face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
+    axis.text.y = element_text(size = 7),
+    axis.title = element_text(size = 10),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"),
+    axis.ticks.length = unit(0.25, "cm"),
+    panel.spacing = unit(1.5, "lines"),
+    strip.placement = "outside",
     legend.position = "none", # Remove legend
-    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 7), # Rotate x-axis tick labels
-    aspect.ratio = 1 # Enforce square aspect in layout regardless of device
   )
