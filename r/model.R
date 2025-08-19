@@ -1,3 +1,21 @@
+#' Random Forest Model for CO2 Emission Prediction
+#' 
+#' This script develops and validates a Random Forest model to predict total CO2 emissions
+#' from vessels, combining both AIS-tracked and dark fleet (untracked) vessel activity.
+#' The model uses vessel characteristics and operational parameters as predictors.
+#'
+#' Model Features:
+#' - fishing: Whether the vessel is engaged in fishing activities
+#' - length_size_class_percentile: Vessel size class as percentile
+#' - hours_total: Total operational hours (AIS + estimated dark fleet)
+#' - avg_speed_knots: Average vessel speed in knots
+#'
+#' Target Variable:
+#' - emissions_co2_mt_total: Total CO2 emissions in metric tons (AIS + dark fleet)
+#'
+#' The model uses a 80/20 train-test split and 1000 trees with importance scoring.
+
+# Data Preparation: Combine AIS and dark fleet estimates
 annual_extrapolation_dataset <- annual_ais_to_dark_activity_extrapolation |>
   dplyr::mutate(emissions_co2_mt_total = emissions_co2_mt + emissions_co2_mt_dark,
                    kw_hours_total = kw_hours + kw_hours_dark,
@@ -7,8 +25,8 @@ annual_extrapolation_dataset <- annual_ais_to_dark_activity_extrapolation |>
                    kw_hours, kw_hours_dark, 
                    distance_nm, distance_nm_dark, 
                    hours, hours_dark))
-# Using annual_extrapolation_dataset, use tidymodels to train a random forest model
-# to predict emissions
+
+# Model Development: Random Forest for CO2 emission prediction
 set.seed(123)
 
 # Set initial split of data

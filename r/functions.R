@@ -1,13 +1,42 @@
-# This function pulls the necessary GFW data and stores it into a destination table
-# This requires special permissions, and is also very expensive to run, so will not be done often
+#' Execute GFW Query and Save to BigQuery Table
+#'
+#' This function runs a SQL query against Global Fishing Watch data and saves 
+#' the results to a specified BigQuery destination table. This operation requires 
+#' special permissions and can be expensive to run frequently.
+#'
+#' @param sql Character string containing the SQL query to execute
+#' @param bq_table_name Character string specifying the destination table name
+#' @param bq_dataset Character string specifying the BigQuery dataset name
+#' @param billing_project Character string specifying the Google Cloud billing project
+#' @param bq_project Character string specifying the BigQuery project
+#' @param write_disposition Character string specifying write behavior. 
+#'   'WRITE_TRUNCATE' (default) overwrites existing data, 
+#'   'WRITE_APPEND' appends to existing data
+#' @param ... Additional arguments passed to bigrquery functions
+#'
+#' @return BigQuery table metadata object for tracking changes
+#'
+#' @details This function is designed for large-scale data operations and should
+#' be used sparingly due to cost considerations. It executes the query and stores
+#' results directly in BigQuery without downloading locally.
+#'
+#' @examples
+#' \dontrun{
+#' # Save AIS vessel data to a new table
+#' run_gfw_query_and_save_table(
+#'   sql = "SELECT * FROM ais_vessel_data WHERE year = 2023",
+#'   bq_table_name = "ais_2023",
+#'   bq_dataset = "ocean_emissions",
+#'   billing_project = "my-project",
+#'   bq_project = "world-fishing-827"
+#' )
+#' }
 run_gfw_query_and_save_table <- function(
   sql,
   bq_table_name,
   bq_dataset,
   billing_project,
   bq_project,
-  # By default:  If the table already exists, BigQuery overwrites the table data
-  # With "WRITE_APPEND": If the table already exists, BigQuery appends the data to the table.
   write_disposition = 'WRITE_TRUNCATE',
   ...
 ) {
@@ -32,8 +61,31 @@ run_gfw_query_and_save_table <- function(
   bigrquery::bq_table_meta(bq_table)
 }
 
-# This function pulls GFW data locally from a specific table
-# This simply gets all data from the table
+#' Pull GFW Data Locally from BigQuery Table
+#'
+#' Downloads all data from a specified Global Fishing Watch BigQuery table
+#' to the local R environment for analysis.
+#'
+#' @param bq_table_name Character string specifying the source table name
+#' @param bq_dataset Character string specifying the BigQuery dataset name  
+#' @param billing_project Character string specifying the Google Cloud billing project
+#' @param ... Additional arguments passed to bigrquery functions
+#'
+#' @return A tibble containing all data from the specified table
+#'
+#' @details This function constructs a simple SELECT * query and downloads
+#' the complete table contents. Use with caution for large tables as it
+#' downloads all rows without limit.
+#'
+#' @examples
+#' \dontrun{
+#' # Download vessel characteristics data
+#' vessel_data <- pull_gfw_data_locally(
+#'   bq_table_name = "vessel_characteristics",
+#'   bq_dataset = "ocean_emissions", 
+#'   billing_project = "my-project"
+#' )
+#' }
 pull_gfw_data_locally <- function(
   bq_table_name,
   bq_dataset,
@@ -47,6 +99,28 @@ pull_gfw_data_locally <- function(
     bigrquery::bq_table_download(n_max = Inf)
 }
 
+#' Execute Custom BigQuery Query
+#'
+#' Runs a custom SQL query against BigQuery and downloads the results
+#' to the local R environment.
+#'
+#' @param query Character string containing the SQL query to execute
+#' @param billing_project Character string specifying the Google Cloud billing project
+#' @param ... Additional arguments passed to bigrquery functions
+#'
+#' @return A tibble containing the query results
+#'
+#' @details This function provides a simple interface for executing arbitrary
+#' SQL queries against BigQuery. Results are downloaded without row limits.
+#'
+#' @examples
+#' \dontrun{
+#' # Query vessel emissions for a specific year
+#' emissions_2023 <- run_custom_bq_query(
+#'   query = "SELECT vessel_id, co2_emissions FROM emissions WHERE year = 2023",
+#'   billing_project = "my-project"
+#' )
+#' }
 run_custom_bq_query <- function(
   query,
   billing_project,
@@ -60,7 +134,37 @@ run_custom_bq_query <- function(
   bigrquery::bq_table_download(job, n_max = Inf)
 }
 
-# Summarize spatial dark to AIS detection ratios by lat_bin, lon_bin, year, vessel type, and size class
+#' Summarize Spatial Dark Fleet Detection Ratios
+#'
+#' Calculates spatial ratios of dark vessel detections to AIS detections,
+#' aggregated by geographic bins, year, vessel type, and size class.
+#'
+#' @param dark_fleet_model_results A data frame containing dark fleet model results
+#'   with columns: time, fishing, length_size_class_percentile, lat_bin, lon_bin,
+#'   number_dark_detections, number_ais_detections
+#'
+#' @return A tibble with columns:
+#'   \describe{
+#'     \item{year}{Year extracted from time}
+#'     \item{fishing}{Fishing activity status ("Fishing" or "Non-fishing")}
+#'     \item{length_size_class_percentile}{Vessel size class percentile}
+#'     \item{lat_bin, lon_bin}{Geographic bin coordinates}
+#'     \item{number_dark_detections}{Total dark vessel detections}
+#'     \item{number_ais_detections}{Total AIS detections}
+#'     \item{ratio_dark_to_ais_detections}{Ratio of dark to AIS detections}
+#'     \item{fraction_tracked}{Fraction of vessels tracked by AIS}
+#'   }
+#'
+#' @details This function aggregates detection data spatially and temporally,
+#' computing key metrics for understanding dark fleet distribution patterns.
+#' The fraction_tracked represents the proportion of total vessel activity 
+#' that is captured by AIS tracking systems.
+#'
+#' @examples
+#' \dontrun{
+#' # Summarize detection ratios from model results
+#' spatial_ratios <- summarize_dark_fleet_ratios_spatial(dark_fleet_results)
+#' }
 summarize_dark_fleet_ratios_spatial <- function(dark_fleet_model_results) {
   dark_fleet_model_results %>%
     # filter(null_ratio == FALSE) %>% # Only including those for which ratios could be calculated without using knn
@@ -80,7 +184,46 @@ summarize_dark_fleet_ratios_spatial <- function(dark_fleet_model_results) {
     )
 }
 
-# Summarize total emissions by time (year or month), lat, lon, pollutant, fishing/non-fishing and dark status
+#' Summarize Dark Fleet Model Results by Emissions
+#'
+#' Aggregates dark fleet model results by time period, converting wide-format
+#' emission data to long format and summarizing by spatial and temporal units.
+#'
+#' @param dark_fleet_model_results A data frame containing dark fleet model results
+#'   with emission columns for different pollutants (both AIS and dark estimates)
+#' @param time_extrapolation Character string specifying temporal aggregation.
+#'   Either "YEAR" (default) or "MONTH"
+#'
+#' @return A tibble with emission data in long format, containing:
+#'   \describe{
+#'     \item{year}{Year (and month if time_extrapolation = "MONTH")}
+#'     \item{lat_bin, lon_bin}{Geographic bin coordinates}
+#'     \item{pollutant}{Pollutant type (CO2, CH4, N2O, etc.) in uppercase}
+#'     \item{dark}{Logical indicating if emissions are from dark (untracked) vessels}
+#'     \item{fishing}{Fishing activity status}
+#'     \item{length_size_class_percentile}{Vessel size class (for yearly aggregation)}
+#'     \item{emissions_mt}{Total emissions in metric tons}
+#'   }
+#'
+#' @details This function processes emission estimates from both AIS-tracked and
+#' dark fleet models, reshaping the data for analysis and visualization. The
+#' 'dark' flag distinguishes between tracked vessel emissions and estimated
+#' emissions from untracked vessels. Pollutant names are standardized to uppercase.
+#'
+#' @examples
+#' \dontrun{
+#' # Aggregate emissions by year
+#' yearly_emissions <- summarize_dark_fleet_model_results_emissions(
+#'   dark_fleet_results, 
+#'   time_extrapolation = "YEAR"
+#' )
+#' 
+#' # Aggregate emissions by month
+#' monthly_emissions <- summarize_dark_fleet_model_results_emissions(
+#'   dark_fleet_results,
+#'   time_extrapolation = "MONTH"
+#' )
+#' }
 summarize_dark_fleet_model_results_emissions <- function(
   dark_fleet_model_results,
   time_extrapolation = "YEAR"
@@ -159,8 +302,31 @@ summarize_dark_fleet_model_results_emissions <- function(
   }
 }
 
-# Function to download GFW data and save it in repo
-# Returns file path, for keeping track with targets
+#' Download GFW Data and Save to Local File
+#'
+#' Executes a BigQuery SQL query against Global Fishing Watch data and saves
+#' the results to a local CSV file.
+#'
+#' @param sql Character string containing the SQL query to execute
+#' @param bq_billing_project Character string specifying the Google Cloud billing project
+#' @param file_path Character string specifying the local file path for saving results
+#' @param ... Additional arguments passed to bigrquery functions
+#'
+#' @return Character string of the file path (for use with targets pipeline)
+#'
+#' @details This function combines query execution and local file saving in a
+#' single operation. It's designed for use with the targets workflow system,
+#' returning the file path to enable dependency tracking.
+#'
+#' @examples
+#' \dontrun{
+#' # Download vessel data and save locally
+#' file_path <- download_gfw_data(
+#'   sql = "SELECT * FROM vessel_emissions WHERE year = 2023",
+#'   bq_billing_project = "my-project",
+#'   file_path = "data/vessel_emissions_2023.csv"
+#' )
+#' }
 download_gfw_data <- function(sql, bq_billing_project, file_path, ...) {
   bigrquery::bq_project_query(
     bq_billing_project,

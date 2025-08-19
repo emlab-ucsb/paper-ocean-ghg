@@ -1,4 +1,23 @@
-# Model validation
+#' Model Validation for Ocean GHG Emissions
+#'
+#' This script validates the emission prediction models by comparing model outputs
+#' against registered vessel data and alternative emission calculation methods.
+#' It performs cross-validation of:
+#' 
+#' 1. Vessel characteristics (engine power, design speed) from Random Forest models
+#' 2. Emission calculations using different parameter sources (IMO vs RF estimates)
+#' 3. Model performance against known vessel registry data
+#'
+#' The validation process includes:
+#' - Comparison of RF-predicted vs. IMO table vessel characteristics
+#' - Energy use calculations with different correction factors
+#' - Statistical validation of emission estimates
+#' - Visualization of model performance and residuals
+#'
+#' Correction Factors Applied:
+#' - Hull fouling: 1.07 (7% increase in fuel consumption)
+#' - Draft conditions: 0.85 (15% reduction for typical loading)
+#' - Weather: 1.15 offshore / 1.10 nearshore (wind/wave resistance)
 
 # Setup ----
 library(tidyverse)
@@ -7,10 +26,12 @@ library(bigrquery)
 
 source("r/functions.R")
 
+# BigQuery configuration
 bq_dataset <- "proj_ocean_ghg"
 bq_project <- "world-fishing-827"
 billing_project <- "emlab-gcp"
 
+# Cross-platform directory configuration
 data_directory_base <- ifelse(
   Sys.info()["nodename"] == "quebracho" | Sys.info()["nodename"] == "sequoia",
   "/home/emlab",
@@ -234,20 +255,58 @@ vessel_info_combined <- bind_rows(
   # match_name
 )
 
-## Define main engine model ----
+## Define main engine model parameters ----
 # We could alternatively do this within BQ using vessel_info_snp_match_extended.sql,
 # results have been checked to be the same.
 
-hull_fouling_correction_factor <- 1.07
-draft_correction_factor <- 0.85
+# Environmental and operational correction factors for energy consumption
+hull_fouling_correction_factor <- 1.07  # 7% increase due to hull fouling
+draft_correction_factor <- 0.85         # 15% reduction for typical loading conditions
 
-## Weather factor is dependant on distance from shore
-## Since we don't have such information we'll set this factor for offshore navigation
+#' Assign Weather Correction Factor Based on Distance from Shore
+#'
+#' Determines weather correction factor for fuel consumption based on 
+#' distance from shore, accounting for different wave and wind conditions.
+#'
+#' @param distance_from_shore_m Numeric value for distance from shore in meters
+#'
+#' @return Numeric correction factor (1.15 for offshore, 1.1 for nearshore)
+#'
+#' @details Offshore vessels (>5 nautical miles from shore) experience higher
+#' wind and wave resistance, requiring 15% more fuel. Nearshore vessels
+#' require 10% more fuel compared to calm water conditions.
 assign_weather_correction <- function(distance_from_shore_m) {
-  ifelse(distance_from_shore_m > 5 * 1852, 1.15, 1.1)
+  ifelse(distance_from_shore_m > 5 * 1852, 1.15, 1.1)  # 5 nautical miles = 5 * 1852 meters
 }
+
+# Apply weather correction for offshore conditions (10km from shore)
 weather_correction_factor <- assign_weather_correction(10000)
 
+#' Calculate Main Engine Energy Use
+#'
+#' Estimates vessel main engine energy consumption in kilowatt-hours based on
+#' vessel characteristics, operational parameters, and environmental correction factors.
+#'
+#' @param vessel_class Character string indicating vessel type (e.g., "trawlers", "dredge_fishing")
+#' @param fishing Logical indicating if vessel is actively fishing
+#' @param on_fishing_list_best Logical indicating if vessel is on GFW fishing vessel list
+#' @param hours Numeric value for time period (default 24 hours)
+#' @param main_engine_power_kw Numeric value for main engine power in kilowatts
+#' @param speed_knots Numeric value for vessel speed in knots
+#' @param design_speed_knots Numeric value for vessel design speed in knots
+#' @param hull_fouling_correction_factor Numeric correction for hull fouling (typically 1.07)
+#' @param weather_correction_factor Numeric correction for weather conditions (1.10-1.15)
+#' @param draft_correction_factor Numeric correction for vessel loading (typically 0.85)
+#'
+#' @return Numeric value representing energy consumption in kilowatt-hours
+#'
+#' @details The function applies different power factors based on vessel type and activity:
+#' - Trawlers/dredgers while fishing: Fixed 0.75 power factor
+#' - Fishing vessels: Power factor based on speed ratio with corrections, capped at 0.2-0.9
+#' - Non-fishing vessels: Similar calculation but capped at higher maximum (0.98)
+#' 
+#' The power factor calculation uses the cube of the speed-to-design-speed ratio,
+#' adjusted for operational and environmental conditions.
 calculate_main_engine_energy_use_kwh <- function(
   vessel_class,
   fishing,
@@ -260,31 +319,35 @@ calculate_main_engine_energy_use_kwh <- function(
   weather_correction_factor,
   draft_correction_factor
 ) {
+  # Calculate power factor based on vessel type and fishing activity
   power_factor <- ifelse(
     vessel_class %in% c("trawlers", "dredge_fishing") & fishing,
-    0.75,
+    0.75,  # Fixed power factor for active trawlers/dredgers
     ifelse(
       on_fishing_list_best,
+      # Fishing vessels: apply speed-based power curve with corrections
       pmax(
         pmin(
-          (pmin(speed_knots / design_speed_knots, 1))^3 *
-            hull_fouling_correction_factor *
-            weather_correction_factor *
-            draft_correction_factor,
-          0.9
+          (pmin(speed_knots / design_speed_knots, 1))^3 *  # Cubic relationship with speed ratio
+            hull_fouling_correction_factor *               # Hull condition adjustment
+            weather_correction_factor *                    # Weather resistance adjustment  
+            draft_correction_factor,                       # Loading condition adjustment
+          0.9   # Maximum power factor for fishing vessels
         ),
-        0.2
+        0.2     # Minimum power factor for fishing vessels
       ),
+      # Non-fishing vessels: similar calculation with higher maximum
       pmin(
         (pmin(speed_knots / design_speed_knots, 1))^3 *
           hull_fouling_correction_factor *
           weather_correction_factor *
           draft_correction_factor,
-        0.98
+        0.98    # Higher maximum power factor for non-fishing vessels
       )
     )
   )
 
+  # Calculate total energy use: time × power factor × engine power
   return(hours * power_factor * main_engine_power_kw)
 }
 

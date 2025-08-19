@@ -1,3 +1,26 @@
+#' Quarto Notebook Analysis Pipeline  
+#'
+#' This targets workflow manages the analysis and visualization pipeline that
+#' processes the data extracted from the GFW data pipeline and generates the
+#' final research outputs including figures, tables, and the analysis notebook.
+#'
+#' Pipeline Overview:
+#' - Loads processed datasets from the data pipeline
+#' - Performs statistical analysis and modeling
+#' - Generates publication-quality figures and tables
+#' - Renders the main Quarto analysis notebook
+#' 
+#' Dependencies:
+#' - Requires completion of 01_gfw_data_pull pipeline
+#' - Uses processed CSV files from data/gfw/ directory
+#' - Sources analysis functions from r/ directory
+#'
+#' Outputs:
+#' - Rendered Quarto notebook with complete analysis
+#' - Publication figures in figures/ directory
+#' - Summary tables in tables/ directory
+#' - Statistical model results and validation plots
+
 # Load packages required to define the pipeline:
 library(targets)
 library(tarchetypes) # Load other packages as needed.

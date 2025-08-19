@@ -1,3 +1,28 @@
+#' Global Fishing Watch Data Pipeline
+#'
+#' This targets workflow manages the extraction and processing of Global Fishing Watch
+#' (GFW) data from BigQuery for ocean greenhouse gas emission analysis.
+#' 
+#' Pipeline Overview:
+#' - Extracts AIS vessel tracking data and dark fleet detection data
+#' - Processes vessel characteristics and emission calculations
+#' - Downloads and stores processed datasets locally for analysis
+#' 
+#' Data Sources:
+#' - AIS vessel activity data (world-fishing-827 BigQuery project)
+#' - Dark fleet detection results from satellite imagery
+#' - Vessel registry and characteristics data
+#' 
+#' Outputs:
+#' - Processed emission estimates by vessel and spatial grid
+#' - Dark fleet extrapolation datasets
+#' - Validation datasets for model comparison
+#'
+#' Prerequisites:
+#' - Google Cloud Platform access with BigQuery permissions
+#' - Global Fishing Watch data access permissions
+#' - Configured billing project for BigQuery operations
+
 # Load packages required to define the pipeline:
 library(targets)
 library(tarchetypes) # Load other packages as needed.
