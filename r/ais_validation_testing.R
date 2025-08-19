@@ -1,3 +1,27 @@
+#' AIS Validation Testing
+#'
+#' This script performs comprehensive validation of AIS (Automatic Identification System)
+#' data quality and emission estimates against various reference datasets and
+#' alternative calculation methods.
+#'
+#' Validation Components:
+#' - AIS data completeness and quality assessment
+#' - Comparison of emission estimates with alternative methodologies
+#' - Statistical validation of vessel activity patterns
+#' - Cross-validation of dark fleet extrapolation methods
+#'
+#' Data Sources:
+#' - AIS vessel tracking data from Global Fishing Watch
+#' - Alternative emission calculation methods
+#' - Vessel registry data for independent validation
+#' - Satellite-based activity validation data
+#'
+#' Outputs:
+#' - Validation statistics and performance metrics
+#' - Diagnostic plots for data quality assessment
+#' - Comparison tables showing different estimation methods
+#' - Recommendations for model improvements
+
 library(dplyr)
 library(tidyr)
 library(tidyverse)
@@ -5,7 +29,7 @@ library(ggplot2)
 library(purrr)
 library(yardstick)
 
-
+# Cross-platform directory configuration
 data_directory_base <- ifelse(
   Sys.info()["nodename"] == "quebracho" | Sys.info()["nodename"] == "sequoia",
   "/home/emlab",

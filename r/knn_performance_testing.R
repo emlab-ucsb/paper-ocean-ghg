@@ -1,4 +1,30 @@
+#' K-Nearest Neighbors Performance Testing
+#'
+#' This script evaluates the performance of K-Nearest Neighbors (KNN) algorithms
+#' used for estimating vessel characteristics and dark fleet activity patterns
+#' in spatial regions where direct observations are limited.
+#'
+#' KNN Applications:
+#' - Spatial interpolation of vessel detection ratios
+#' - Estimation of dark fleet activity in data-sparse regions  
+#' - Cross-validation of spatial extrapolation methods
+#' - Performance comparison of different distance metrics and k values
+#'
+#' Testing Framework:
+#' - Leave-one-out cross-validation for spatial predictions
+#' - Performance metrics across different spatial scales
+#' - Comparison with alternative spatial interpolation methods
+#' - Sensitivity analysis for KNN hyperparameters
+#'
+#' Outputs:
+#' - KNN performance statistics (RMSE, MAE, R²)
+#' - Spatial validation maps showing prediction accuracy
+#' - Hyperparameter optimization results
+#' - Recommendations for optimal KNN configurations
+
 library(ggplot2)
+
+# Cross-platform directory configuration  
 data_directory_base <- ifelse(
   Sys.info()["nodename"] == "quebracho" | Sys.info()["nodename"] == "sequoia",
   "/home/emlab",

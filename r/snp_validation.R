@@ -1,11 +1,32 @@
+#' S&P Validation Analysis
+#'
+#' This script performs validation of vessel characteristics and emission estimates
+#' against Shipbuilding & Marine Engineering (S&P) dataset, which provides independent
+#' vessel registry data for comparison with model predictions.
+#'
+#' Validation Process:
+#' - Compares Random Forest model predictions with S&P registry data
+#' - Validates vessel power and design speed estimates
+#' - Assesses model performance using statistical metrics
+#' - Generates validation plots and summary statistics
+#'
+#' Data Sources:
+#' - S&P vessel registry data (independent validation dataset)
+#' - Random Forest model predictions from main analysis
+#' - GFW vessel characteristics data
+#'
+#' Outputs:
+#' - Validation statistics (R², RMSE, bias metrics)
+#' - Comparison plots showing model vs. registry values
+#' - Residual analysis for model diagnostics
+
 library(tidyverse)
 library(bigrquery)
 library(yardstick)
 
-# S&P validation
-
 source("r/functions.R")
 
+# Cross-platform directory configuration
 data_directory_base <- ifelse(
   Sys.info()["nodename"] == "quebracho" | Sys.info()["nodename"] == "sequoia",
   "/home/emlab",

@@ -1,3 +1,24 @@
+#' GFW Data Extraction Script
+#'
+#' This script handles the extraction of Global Fishing Watch data from BigQuery
+#' and saves it locally as CSV files. This is a standalone script that requires
+#' special BigQuery permissions and is not included in the main analysis pipeline
+#' due to access and cost considerations.
+#'
+#' Purpose:
+#' - Extract AIS vessel tracking data from GFW BigQuery datasets
+#' - Download vessel characteristics and emission factor data
+#' - Process and save data locally for use in analysis pipeline
+#'
+#' Prerequisites:
+#' - Access to GFW data in BigQuery (world-fishing-827 project)
+#' - emLab billing project permissions
+#' - Sufficient BigQuery quota for large data extractions
+#'
+#' Note: This script is typically run once to extract data, then the analysis
+#' pipeline uses the saved CSV files to avoid repeated expensive BigQuery operations.
+
+# Cross-platform directory configuration
 data_directory_base <- ifelse(
   Sys.info()["nodename"] == "quebracho" | Sys.info()["nodename"] == "sequoia",
   "/home/emlab",
@@ -21,7 +42,7 @@ project_directory <- glue::glue(
   "{data_directory_base}/projects/current-projects/paper-ocean-ghg"
 )
 
-#This function pulls the necessary GFW data and saves it locally as a CSVs
+# BigQuery configuration for GFW data extraction
 # This requires special BigQuery permissions to run, so it is not included in the main analysis pipeline
 
 bq_project <- "world-fishing-827" # BQ project where data lives

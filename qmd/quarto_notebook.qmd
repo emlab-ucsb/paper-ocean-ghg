@@ -37,6 +37,25 @@ analysis_start_year <- 2016
 analysis_end_year <- 2024
 ```
 
+## Introduction
+
+This analysis quantifies global marine vessel greenhouse gas emissions by combining Automatic Identification System (AIS) vessel tracking data with satellite-based detection of dark (untracked) vessels. The approach integrates multiple data sources to provide the most comprehensive estimate of maritime emissions to date.
+
+### Key Components
+
+- **AIS Data Analysis**: Processing Global Fishing Watch vessel tracking data to estimate emissions from tracked vessels
+- **Dark Fleet Detection**: Using satellite imagery to identify and quantify untracked vessel activity  
+- **Machine Learning Models**: Random Forest models to predict vessel characteristics and emission patterns
+- **Spatial Extrapolation**: Combining tracked and untracked activity to estimate total global emissions
+- **Validation**: Cross-validation against vessel registries and alternative emission methodologies
+
+### Data Coverage
+
+- **Time Period**: `r analysis_start_year` - `r analysis_end_year`
+- **Spatial Coverage**: Global oceans with 0.1° × 0.1° spatial resolution
+- **Vessel Types**: All maritime vessels with focus on fishing fleet analysis
+- **Pollutants**: CO₂, CH₄, N₂O, NOₓ, SO₂, and other greenhouse gases
+
 ```{r}
 #| label: load-data
 #| cache: FALSE
