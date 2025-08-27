@@ -95,15 +95,19 @@ all_data_source_color_palette <- c(
   "Marine vessels (AIS + S1)" = paletteer::paletteer_d(
     "colorblindr::OkabeIto"
   )[[5]],
+  "GFW (AIS + S1)" = paletteer::paletteer_d("colorblindr::OkabeIto")[[5]],
   "AIS + S1" = paletteer::paletteer_d("colorblindr::OkabeIto")[[5]],
   "Terrestrial transportation (EDGAR)" = paletteer::paletteer_d(
     "colorblindr::OkabeIto"
   )[[6]],
+  "GFW (AIS)" = paletteer::paletteer_d("colorblindr::OkabeIto")[[3]],
   "AIS" = paletteer::paletteer_d("colorblindr::OkabeIto")[[3]],
   "S1" = paletteer::paletteer_d("colorblindr::OkabeIto")[[
     7
   ]],
-  "EDGAR" = paletteer::paletteer_d("colorblindr::OkabeIto")[[8]]
+  "EDGAR" = paletteer::paletteer_d("colorblindr::OkabeIto")[[8]],
+  "OECD" = paletteer::paletteer_d("colorblindr::OkabeIto")[[6]],
+  "IMO" = paletteer::paletteer_d("colorblindr::OkabeIto")[[1]]
 )
 
 # Set consistent theme for all plots
@@ -230,6 +234,8 @@ fraction_co2_from_transportation <- annual_edgar_tranportation_emissions |>
   scales::percent()
 ```
 
+
+
 ```{r}
 #| label: wrangle-gfw-time-series-emissions-data
 
@@ -344,7 +350,6 @@ land_based_transportation_emissions_edgar <- annual_edgar_tranportation_emission
   dplyr::ungroup() |>
   dplyr::mutate(data_source = "Terrestrial transportation (EDGAR)")
 
-
 all_tranportation_data <- land_based_transportation_emissions_edgar |>
   dplyr::bind_rows(
     annual_emissions |>
@@ -391,6 +396,90 @@ percent_increase_from_2016_to_2023 <- all_tranportation_data_normalized |>
     emissions_co2_mt_normalized_percent = scales::percent(
       emissions_co2_mt_normalized
     )
+  )
+```
+
+```{r}
+#| label: fig-inventory-comparison
+#| #| fig-cap: Comparison of marine vessel CO$_{2}$ emissions inventory estimates, by year.
+#| fig-width: 9
+#| fig-height: 6
+marine_based_transportation_emissions_edgar <- annual_edgar_tranportation_emissions |>
+  dplyr::filter(sector == "Water-borne Navigation") |>
+  dplyr::group_by(year) |>
+  dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt, na.rm = TRUE)) |>
+  dplyr::ungroup() |>
+  dplyr::mutate(data_source = "EDGAR")
+
+# Downloaded from here on August 27, 2025: https://data-explorer.oecd.org/vis?fs[0]=Topic%2C1%7CEnvironment%20and%20climate%20change%23ENV%23%7CAir%20and%20climate%23ENV_AC%23&pg=0&fc=Topic&bp=true&snb=17&df[ds]=dsDisseminateFinalDMZ&df[id]=DSD_MARITIME_TRANSPORT%40DF_MARITIME_TRANSPORT&df[ag]=OECD.SDD.NAD.SEEA&df[vs]=1.0&dq=W.A......ALL_VESSELS&pd=2019%2C2024&to[TIME_PERIOD]=false&vw=tb&isAvailabilityDisabled=false
+oecd_data <- readr::read_csv(here::here(
+  "data/oecd/annual_oecd_experimental_data.csv"
+)) |>
+  dplyr::select(year = TIME_PERIOD, emissions_co2_mt = OBS_VALUE) |>
+  dplyr::mutate(data_source = "OECD")
+
+imo_data <- tibble::tibble(
+  year = c(2016, 2017, 2018),
+  emissions_co2_mt = c(1.026e9, 1.064e9, 1.056e9)
+) |>
+  dplyr::mutate(data_source = "IMO")
+
+all_inventory_data <- all_tranportation_data |>
+  dplyr::filter(data_source == "Marine vessels (AIS + S1)") |>
+  dplyr::mutate(data_source = "GFW (AIS + S1)") |>
+  dplyr::bind_rows(marine_based_transportation_emissions_edgar) |>
+  dplyr::bind_rows(oecd_data) |>
+  dplyr::bind_rows(imo_data) |>
+  dplyr::bind_rows(
+    annual_emissions |>
+      dplyr::filter(pollutant == "co2", fleet == "AIS-broadcasting") |>
+      dplyr::select(year, emissions_co2_mt = emissions_mt) |>
+      dplyr::mutate(data_source = "GFW (AIS)")
+  )
+
+all_inventory_data |>
+  ggplot(aes(x = year, y = emissions_co2_mt, color = data_source)) +
+  geom_line(linewidth = 1) +
+  scale_y_continuous(
+    labels = scales::unit_format(unit = "B", scale = 1e-9),
+    limits = c(0, 1.5e9),
+    breaks = seq(0, 1.5e9, 0.25e9)
+  ) +
+  theme_plot() +
+  scale_x_continuous(
+    breaks = unique(annual_emissions$year),
+    limits = c(2016, 2024)
+  ) +
+  labs(
+    x = "",
+    y = expression(Annual ~ CO[2] ~ emissions ~ (MT))
+  ) +
+  theme(panel.grid.minor = element_blank()) +
+  scale_color_manual(
+    name = "Emissions inventory",
+    values = all_data_source_color_palette,
+    breaks = c("GFW (AIS + S1)", "IMO", "GFW (AIS)", "OECD", "EDGAR")
+  )
+
+all_inventory_data |>
+  dplyr::mutate(
+    emissions_co2_mt = as.character(signif(emissions_co2_mt, 3) / 1e9)
+  ) |>
+  tidyr::pivot_wider(
+    names_from = "data_source",
+    values_from = "emissions_co2_mt"
+  ) |>
+  dplyr::rename(Year = year) |>
+  dplyr::relocate(Year, `GFW (AIS + S1)`, `GFW (AIS)`) |>
+  dplyr::mutate(across(everything(), ~ tidyr::replace_na(., "-"))) |>
+  knitr::kable(
+    format = "latex",
+    label = "inventory_comparison",
+    caption = "Comparison of marine vessel CO$_{2}$ emissions inventory estimates, by year."
+  ) |>
+  kableExtra::kable_styling(font_size = 8, latex_options = "hold_position") |>
+  writeLines(
+    here::here("tables/inventory_comparison.tex")
   )
 ```
 
