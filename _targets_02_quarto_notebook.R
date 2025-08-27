@@ -21,6 +21,11 @@ list(
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
+    name = n_s1_detections,
+    command = here::here("data/gfw/n_s1_detections.csv"),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
     name = annual_emissions_all_pollutants,
     command = here::here("data/gfw/annual_emissions_all_pollutants.csv"),
     read = readr::read_csv(!!.x)

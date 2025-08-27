@@ -43,6 +43,7 @@ analysis_end_year <- 2024
 targets::tar_load(c(
   "n_unique_vessels",
   "n_ais_messages",
+  "n_s1_detections",
   "annual_edgar_emissions",
   "annual_emissions_all_pollutants",
   "total_spatial_emissions_by_pollutant",
@@ -447,6 +448,8 @@ percent_dark_emissions_inferred_by_type <- annual_non_broadcasting_detections_em
 - The transportation sector is a major source of global greenhouse gas (GHG) and local air pollution emissions, responsible for `r fraction_co2_from_transportation` of all CO$_{2}$ emissions globally in 2023 
 
 - For over `r scales::comma(signif(n_unique_vessels$n_unique_vessels,2))` AIS-broadcasting vessels, we quantify point-estimate emissions for each vessel using precise latitude/longitude/timestamp information for over `r scales::comma(signif(n_ais_messages$n_billion_ais_messages,3))` billion individual AIS messages
+
+- For non-broadcasting vessels, we leverage over `r floor(n_s1_detections$n_million_s1_detections)` million vessel detections from across more than `r floor(n_s1_detections$n_thousand_s1_scenes)` S1 scenes.
 
 
 - Because many vessels do not broadcast AIS, current approaches solely based on AIS \textit{underestimate} current global emissions by `r pollutant_ais_underestimation_overestimation_summary |> dplyr::filter(pollutant == "co2") |> dplyr::pull(ais_underestimation_2024)` (in 2024), and \textit{overestimate} the increasing trend by `r pollutant_ais_underestimation_overestimation_summary |> dplyr::filter(pollutant == "co2") |> dplyr::pull(trend_overestimation_2016_2024)` (from 2016 to 2024). 

@@ -70,6 +70,22 @@ list(
     ),
     format = "file"
   ),
+  # Number of S1 detections used during our time period
+  tar_file_read(
+    name = n_s1_detections,
+    "sql/n_s1_detections.sql",
+    download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_dark = run_version_dark,
+          analysis_start_year = analysis_start_year,
+          analysis_end_year = analysis_end_year
+        ),
+      file_path = here::here("data/gfw/n_s1_detections.csv"),
+    ),
+    format = "file"
+  ),
   # Annual emissions data for AIS-broadcasting fleet and non-broadcasting vessels,
   # broken apart by fishing and non-fishing vessels
   # For all pollutants
