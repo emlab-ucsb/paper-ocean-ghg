@@ -2203,13 +2203,14 @@ performance_results |>
   dplyr::select(
     Tolerance = threshold,
     `Number of vessels` = n_observations,
-    `R$^{2}$` = rsq,
-    `Traditional R$^{2}$` = rsq_trad
+    "R$^{2}$" = rsq,
+    "Traditional R$^{2}$" = rsq_trad
   ) |>
   knitr::kable(
     format = "latex",
     label = "tab-performance-tolerance-table",
-    caption = "Performance summary across different thresholds for the hours at sea tolerance between datasets. Results are shown using the R$^{2}$ (measuring linear association between observed and predicted values) and traditional R$^{2}$ (proportion of variance explained compared to the mean-only baseline)."
+    caption = "Performance summary across different thresholds for the hours at sea tolerance between datasets. Results are shown using the R$^{2}$ (measuring linear association between observed and predicted values) and traditional R$^{2}$ (proportion of variance explained compared to the mean-only baseline).",
+    escape = FALSE
   ) |>
   kableExtra::kable_styling(font_size = 8, latex_options = "hold_position") |>
   writeLines(
