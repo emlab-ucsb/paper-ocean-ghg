@@ -475,7 +475,7 @@ all_inventory_data |>
   knitr::kable(
     format = "latex",
     label = "inventory_comparison",
-    caption = "Comparison of marine vessel CO$_{2}$ emissions inventory estimates, by year."
+    caption = "Comparison of annual marine vessel CO$_{2}$ emissions inventory estimates (billions of metric tonnes)."
   ) |>
   kableExtra::kable_styling(font_size = 8, latex_options = "hold_position") |>
   writeLines(
