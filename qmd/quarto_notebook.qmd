@@ -2208,7 +2208,7 @@ performance_results |>
   ) |>
   knitr::kable(
     format = "latex",
-    label = "tab:tab-performance-tolerance-table",
+    label = "tab-performance-tolerance-table",
     caption = "Performance summary across different thresholds for the hours at sea tolerance between datasets. Results are shown using the R$^{2}$ (measuring linear association between observed and predicted values) and traditional R$^{2}$ (proportion of variance explained compared to the mean-only baseline)."
   ) |>
   kableExtra::kable_styling(font_size = 8, latex_options = "hold_position") |>
