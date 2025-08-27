@@ -60,7 +60,8 @@ targets::tar_load(c(
   "s1_ais_vessel_size_class_comparison",
   "registered_validation_data",
   "mrv_data_validation",
-  "trip_emissions_for_mrv_validation"
+  "trip_emissions_for_mrv_validation",
+  "registered_validation_data"
 ))
 ```
 
@@ -1643,36 +1644,40 @@ make_pollutant_time_series_figure(
 ###  Registered data validation
 
 ```{r}
+#| label: fig-registered-data-performance
+#| fig-cap: Comparison of registered and simulated CO$_{2}$ emissions from main engine fuel consumption over 24 hours. Estimates are shown using main engine power and design speed from IMO (left), our machine learning random forest models (center), and the same registered dataset (right). The solid red line shows a linear regression fit, while the dashed line represents the 1:1 line. Performance values for traditional R$^{2}$ are shown for each set of vessel characteristics. Blue shading indicates point density. All data are rule-of-three compliant, meaning each cell (20×20 mt) displayed contains at least three vessels.
+#| fig-width: 8
+#| fig-height: 4
 model_levels <- c(
   "IMO report lookup table",
-  "New engine power\nand design speed",
+  "ML-derived engine power\nand design speed",
   "Registered data"
 )
 
-vessel_long <- registered_data_validation |>
+vessel_long <- registered_validation_data |>
   dplyr::select(
     co2_emissions_tonnes_registered,
     "IMO report lookup table" = co2_emissions_tonnes_estimate_imo,
-    "New engine power\nand design speed" = co2_emissions_tonnes_estimate_rf,
+    "ML-derived engine power\nand design speed" = co2_emissions_tonnes_estimate_rf,
     "Registered data" = co2_emissions_tonnes_estimate_registered
   ) |>
-  pivot_longer(
+  tidyr::pivot_longer(
     cols = -co2_emissions_tonnes_registered,
     names_to = "Model",
     values_to = "Estimate"
-  ) |> 
-   mutate(Model = factor(Model, levels = model_levels)) # Order levels
+  ) |>
+  dplyr::mutate(Model = factor(Model, levels = model_levels)) # Order levels
 
 
 r2_labels <- vessel_long |>
-  group_by(Model) |>
+  dplyr::group_by(Model) |>
   yardstick::rsq_trad(
     truth = co2_emissions_tonnes_registered,
     estimate = Estimate
   ) |>
-  mutate(label = paste0("R² = ", round(.estimate, 2)))
+  dplyr::mutate(label = paste0("Traditional R² = ", round(.estimate, 2)))
 
-registered_data_performance <- ggplot(
+ggplot(
   vessel_long,
   aes(
     x = Estimate,
@@ -1687,7 +1692,7 @@ registered_data_performance <- ggplot(
     )
   ) +
   scale_fill_gradientn(
-    colours = colorRampPalette(brewer.pal(9, "Blues"))(256),
+    colours = colorRampPalette(RColorBrewer::brewer.pal(9, "Blues"))(256),
     trans = "log10",
     name = "Count",
     guide = guide_colorbar(
@@ -1705,16 +1710,16 @@ registered_data_performance <- ggplot(
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey60") +
   geom_text(
     data = r2_labels |>
-      filter(!Model %in% c("RF design speed", "RF engine power")),
+      dplyr::filter(!Model %in% c("RF design speed", "RF engine power")),
     aes(label = label),
-    x = 500,
+    x = 450,
     y = 50,
     inherit.aes = FALSE,
     size = 3,
     fontface = "bold"
   ) +
   coord_fixed(ratio = 1, clip = "on") +
-  facet_wrap(~Model, nrow = 1, scales = "fixed") +
+  facet_wrap(Model ~ ., nrow = 1, scales = "fixed") +
   labs(
     x = "Simulated CO₂ Emissions (mt)",
     y = "Registered CO₂ Emissions (mt)"
@@ -1736,21 +1741,15 @@ registered_data_performance <- ggplot(
     strip.placement = "outside",
     legend.position = "none", # Remove legend
   )
-
-# ggsave(
-#   filename = "figures/fig-registered-data-performance.jpg",
-#   plot = registered_data_performance,
-#   width = 8,
-#   height = 4,
-#   dpi = 300
-# )
-
 ```
 
 ### MRV validation
 
 ```{r}
-
+#| label: fig-mrv-performance
+#| fig-cap: Comparison of published MRV emissions and simulated CO$_{2}$ emissions. The sample includes 2,276 observations from yearly aggregated vessel trips where hours at sea differ by no more than 15\% between our data and the MRV dataset. The solid red line shows the linear regression fit, and the dashed line represents the 1:1 line.}.
+#| fig-width: 8
+#| fig-height: 5
 
 ## Emissions validation ----
 validation_performance_metrics <- yardstick::metric_set(
@@ -1760,19 +1759,19 @@ validation_performance_metrics <- yardstick::metric_set(
 
 # EU dataset
 eu_validation_data_updated <- mrv_data_validation |>
-  filter(total_time_spent_at_sea_hours != 0) |>
-  mutate(
+  dplyr::filter(total_time_spent_at_sea_hours != 0) |>
+  dplyr::mutate(
     co2_trip_emissions_eu = co2_emissions_from_all_voyages_between_ports_under_a_ms_jurisdiction_m_tonnes +
       co2_emissions_from_all_voyages_which_departed_from_ports_under_a_ms_jurisdiction_m_tonnes +
       co2_emissions_from_all_voyages_to_ports_under_a_ms_jurisdiction_m_tonnes
   ) |>
-  rename(
+  dplyr::rename(
     total_time_spent_at_sea_hours_eu = total_time_spent_at_sea_hours
   )
 # Emission results by trip
 eu_validation_trip_updated <- trip_emissions_for_mrv_validation |>
-  filter(total_time_spent_at_sea_hours != 0) |>
-  rename(
+  dplyr::filter(total_time_spent_at_sea_hours != 0) |>
+  dplyr::rename(
     co2_trip_emissions_gfw = total_emissions_co2_mt,
     total_time_spent_at_sea_hours_gfw = total_time_spent_at_sea_hours
   )
@@ -1786,11 +1785,11 @@ find_duplicates <- function(data, key_columns) {
 
 aggregate_duplicates <- function(data, group_by_cols, sum_cols, concat_cols) {
   aggregated_data <- data |>
-    group_by(across(all_of(group_by_cols))) |>
-    summarise(
-      across(all_of(sum_cols), sum, .names = "{.col}"),
-      across(
-        all_of(concat_cols),
+    dplyr::group_by(dplyr::across(dplyr::all_of(group_by_cols))) |>
+    dplyr::summarise(
+      dplyr::across(dplyr::all_of(sum_cols), sum, .names = "{.col}"),
+      dplyr::across(
+        dplyr::all_of(concat_cols),
         ~ paste(unique(.x), collapse = "-"),
         .names = "{.col}"
       ),
@@ -1837,26 +1836,26 @@ merged_df$max <- pmax(
 calculate_metrics <- function(threshold, merged_df) {
   filtered_hours_df <- subset(merged_df, diff / max < threshold)
   filtered_df <- filtered_hours_df |>
-    select(co2_trip_emissions_eu, co2_trip_emissions_gfw)
+    dplyr::select(co2_trip_emissions_eu, co2_trip_emissions_gfw)
 
   # Calculate performance metrics
   comparison_results <- filtered_df |>
-    pivot_longer(
+    tidyr::pivot_longer(
       -co2_trip_emissions_eu,
       names_to = "model",
       values_to = "estimate"
     ) |>
-    group_by(model) |>
+    dplyr::group_by(model) |>
     validation_performance_metrics(
       truth = co2_trip_emissions_eu,
       estimate = estimate
     ) |>
     dplyr::select(-.estimator) |>
-    pivot_wider(names_from = .metric, values_from = .estimate)
+    tidyr::pivot_wider(names_from = .metric, values_from = .estimate)
 
   # Return results with added threshold information
   comparison_results <- comparison_results |>
-    mutate(threshold = threshold, n_observations = nrow(filtered_df))
+    dplyr::mutate(threshold = threshold, n_observations = nrow(filtered_df))
 
   return(comparison_results)
 }
@@ -1864,17 +1863,20 @@ calculate_metrics <- function(threshold, merged_df) {
 # Range of thresholds to test
 thresholds <- seq(0.05, 0.4, 0.05)
 # Apply calculate_metrics function over range of thresholds
-performance_results <- map_df(thresholds, ~ calculate_metrics(.x, merged_df))
+performance_results <- purrr::map_df(
+  thresholds,
+  ~ calculate_metrics(.x, merged_df)
+)
 
-best_performance <- performance_results %>%
-  filter(rsq_trad == max(rsq_trad))
+best_performance <- performance_results |>
+  dplyr::filter(rsq_trad == max(rsq_trad))
 
 # Select data with threshold of 0.15 the one showing best performance
 filtered_hours_df <- subset(merged_df, diff / max < best_performance$threshold)
 filtered_df <- filtered_hours_df |>
-  select(co2_trip_emissions_eu, co2_trip_emissions_gfw)
+  dplyr::select(co2_trip_emissions_eu, co2_trip_emissions_gfw)
 
-mrv_performance <- ggplot(
+ggplot(
   filtered_df,
   aes(
     x = co2_trip_emissions_gfw,
@@ -1896,7 +1898,10 @@ mrv_performance <- ggplot(
   geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey60") +
   annotate(
     geom = "text",
-    label = paste0("R² = ", format(best_performance$rsq_trad, digits = 3)),
+    label = paste0(
+      "Traditional R² = ",
+      format(best_performance$rsq_trad, digits = 2)
+    ),
     x = 130000,
     y = 10000,
     size = 3,
@@ -1923,15 +1928,6 @@ mrv_performance <- ggplot(
     panel.spacing = unit(1.5, "lines"),
     strip.placement = "outside"
   )
-
-# ggsave(
-#   filename = "figures/fig-mrv-performance.jpg",
-#   plot = mrv_performance,
-#   width = 8,
-#   height = 5,
-#   dpi = 300
-# )
-
 ```
 
 # Supplementary tables
@@ -2195,8 +2191,28 @@ annual_spatial_emissions_by_receiver_type |>
 ```
 
 
-## MRV validation table
+## MRV performance validation table
 
 ```{r}
-knitr::kable(performance_results[, -1], digits = 3)
+performance_results |>
+  dplyr::mutate(
+    rsq = signif(rsq, 2),
+    rsq_trad = signif(rsq_trad, 2),
+    n_observations = prettyNum(n_observations, big.mark = ",")
+  ) |>
+  dplyr::select(
+    Tolerance = threshold,
+    `Number of vessels` = n_observations,
+    `R$^{2}$` = rsq,
+    `Traditional R$^{2}$` = rsq_trad
+  ) |>
+  knitr::kable(
+    format = "latex",
+    label = "tab:tab-performance-tolerance-table",
+    caption = "Performance summary across different thresholds for the hours at sea tolerance between datasets. Results are shown using the R$^{2}$ (measuring linear association between observed and predicted values) and traditional R$^{2}$ (proportion of variance explained compared to the mean-only baseline)."
+  ) |>
+  kableExtra::kable_styling(font_size = 8, latex_options = "hold_position") |>
+  writeLines(
+    here::here("tables/mrv_performance_results.tex")
+  )
 ```
