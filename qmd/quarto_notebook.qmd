@@ -58,7 +58,9 @@ targets::tar_load(c(
   "annual_spatial_emissions_by_receiver_type",
   "vessel_size_info",
   "s1_ais_vessel_size_class_comparison",
-  "registered_data_validation"
+  "registered_validation_data",
+  "mrv_data_validation",
+  "trip_emissions_for_mrv_validation"
 ))
 ```
 
@@ -1745,6 +1747,193 @@ registered_data_performance <- ggplot(
 
 ```
 
+### MRV validation
+
+```{r}
+
+
+## Emissions validation ----
+validation_performance_metrics <- yardstick::metric_set(
+  yardstick::rsq,
+  yardstick::rsq_trad
+)
+
+# EU dataset
+eu_validation_data_updated <- mrv_data_validation |>
+  filter(total_time_spent_at_sea_hours != 0) |>
+  mutate(
+    co2_trip_emissions_eu = co2_emissions_from_all_voyages_between_ports_under_a_ms_jurisdiction_m_tonnes +
+      co2_emissions_from_all_voyages_which_departed_from_ports_under_a_ms_jurisdiction_m_tonnes +
+      co2_emissions_from_all_voyages_to_ports_under_a_ms_jurisdiction_m_tonnes
+  ) |>
+  rename(
+    total_time_spent_at_sea_hours_eu = total_time_spent_at_sea_hours
+  )
+# Emission results by trip
+eu_validation_trip_updated <- trip_emissions_for_mrv_validation |>
+  filter(total_time_spent_at_sea_hours != 0) |>
+  rename(
+    co2_trip_emissions_gfw = total_emissions_co2_mt,
+    total_time_spent_at_sea_hours_gfw = total_time_spent_at_sea_hours
+  )
+
+find_duplicates <- function(data, key_columns) {
+  duplicate_indices <- duplicated(data[key_columns]) |
+    duplicated(data[key_columns], fromLast = TRUE)
+  duplicates <- data[duplicate_indices, ]
+  return(duplicates)
+}
+
+aggregate_duplicates <- function(data, group_by_cols, sum_cols, concat_cols) {
+  aggregated_data <- data |>
+    group_by(across(all_of(group_by_cols))) |>
+    summarise(
+      across(all_of(sum_cols), sum, .names = "{.col}"),
+      across(
+        all_of(concat_cols),
+        ~ paste(unique(.x), collapse = "-"),
+        .names = "{.col}"
+      ),
+      .groups = 'drop'
+    )
+
+  return(aggregated_data)
+}
+
+group_by_columns <- c("imo_number", "year")
+sum_columns <- c(
+  "total_time_spent_at_sea_hours_gfw",
+  "total_distance_nm",
+  "co2_trip_emissions_gfw"
+)
+
+concat_columns <- c("ssvid")
+
+eu_validation_trip_updated <- aggregate_duplicates(
+  eu_validation_trip_updated,
+  group_by_columns,
+  sum_columns,
+  concat_columns
+)
+
+# Data selection and filtering
+merged_df <- merge(
+  eu_validation_data_updated,
+  eu_validation_trip_updated,
+  by.x = c("imo_number", "reporting_period"),
+  by.y = c("imo_number", "year")
+)
+
+merged_df$diff <- abs(
+  merged_df$total_time_spent_at_sea_hours_eu -
+    merged_df$total_time_spent_at_sea_hours_gfw
+)
+merged_df$max <- pmax(
+  merged_df$total_time_spent_at_sea_hours_eu,
+  merged_df$total_time_spent_at_sea_hours_gfw
+)
+
+# Function to filter data and calculate performance metrics based on a threshold
+calculate_metrics <- function(threshold, merged_df) {
+  filtered_hours_df <- subset(merged_df, diff / max < threshold)
+  filtered_df <- filtered_hours_df |>
+    select(co2_trip_emissions_eu, co2_trip_emissions_gfw)
+
+  # Calculate performance metrics
+  comparison_results <- filtered_df |>
+    pivot_longer(
+      -co2_trip_emissions_eu,
+      names_to = "model",
+      values_to = "estimate"
+    ) |>
+    group_by(model) |>
+    validation_performance_metrics(
+      truth = co2_trip_emissions_eu,
+      estimate = estimate
+    ) |>
+    dplyr::select(-.estimator) |>
+    pivot_wider(names_from = .metric, values_from = .estimate)
+
+  # Return results with added threshold information
+  comparison_results <- comparison_results |>
+    mutate(threshold = threshold, n_observations = nrow(filtered_df))
+
+  return(comparison_results)
+}
+
+# Range of thresholds to test
+thresholds <- seq(0.05, 0.4, 0.05)
+# Apply calculate_metrics function over range of thresholds
+performance_results <- map_df(thresholds, ~ calculate_metrics(.x, merged_df))
+
+best_performance <- performance_results %>%
+  filter(rsq_trad == max(rsq_trad))
+
+# Select data with threshold of 0.15 the one showing best performance
+filtered_hours_df <- subset(merged_df, diff / max < best_performance$threshold)
+filtered_df <- filtered_hours_df |>
+  select(co2_trip_emissions_eu, co2_trip_emissions_gfw)
+
+mrv_performance <- ggplot(
+  filtered_df,
+  aes(
+    x = co2_trip_emissions_gfw,
+    y = co2_trip_emissions_eu
+  )
+) +
+  geom_point(
+    size = 1.5,
+    alpha = 0.5,
+    color = "#104E8B"
+  ) +
+  geom_smooth(
+    method = "lm",
+    linewidth = 0.5,
+    color = "red",
+    linetype = "solid",
+    se = FALSE
+  ) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey60") +
+  annotate(
+    geom = "text",
+    label = paste0("R² = ", format(best_performance$rsq_trad, digits = 3)),
+    x = 130000,
+    y = 10000,
+    size = 3,
+    fontface = "bold"
+  ) +
+  coord_fixed(ratio = 1, clip = "on") +
+  scale_x_continuous(limits = c(0, max(filtered_df))) +
+  scale_y_continuous(limits = c(0, max(filtered_df))) +
+  labs(
+    x = "GFW CO2 emissions (mt)",
+    y = "MRV CO2 emissions (mt)"
+  ) +
+  theme_minimal() +
+  theme(
+    strip.text = element_text(size = 11, face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
+    axis.text.y = element_text(size = 7),
+    axis.title = element_text(size = 10),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"),
+    axis.ticks.length = unit(0.25, "cm"),
+    panel.spacing = unit(1.5, "lines"),
+    strip.placement = "outside"
+  )
+
+# ggsave(
+#   filename = "figures/fig-mrv-performance.jpg",
+#   plot = mrv_performance,
+#   width = 8,
+#   height = 5,
+#   dpi = 300
+# )
+
+```
+
 # Supplementary tables
 
 ## Summary of 2016 and 2024 emissions, by pollutant and data source
@@ -2003,4 +2192,11 @@ annual_spatial_emissions_by_receiver_type |>
   scale_x_continuous(expand = c(0, 1)) +
   scale_y_continuous(expand = c(0, 1)) +
   coord_sf(crs = map_projection)
+```
+
+
+## MRV validation table
+
+```{r}
+knitr::kable(performance_results[, -1], digits = 3)
 ```

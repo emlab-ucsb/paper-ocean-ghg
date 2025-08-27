@@ -117,9 +117,23 @@ list(
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
-    name = registered_data_validation,
+    name = registered_validation_data,
     command = here::here(
-      "data/registered_data_validation/registered_data_validation.csv"
+      "data/registered_validation_data/registered_validation_data.csv"
+    ),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
+    name = mrv_data_validation,
+    command = here::here(
+      "data/MRV/mrv_data_validation.csv"
+    ),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
+    name = trip_emissions_for_mrv_validation,
+    command = here::here(
+      "data/MRV/trip_emissions_for_mrv_validation.csv"
     ),
     read = readr::read_csv(!!.x)
   ),

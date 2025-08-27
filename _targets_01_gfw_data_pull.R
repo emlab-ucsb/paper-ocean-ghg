@@ -328,7 +328,7 @@ list(
   ),
   # Registered data validation
   tar_file_read(
-    name = registered_data_validation,
+    name = registered_validation_data,
     "sql/registered_data_validation.sql",
     download_gfw_data(
       bq_billing_project,
@@ -337,7 +337,28 @@ list(
           run_version_dark = run_version_dark
         ),
       file_path = here::here(
-        "data/registered_data_validation/registered_data_validation.csv"
+        "data/registered_validation_data/registered_validation_data.csv"
+      )
+    ),
+    format = "file"
+  ),
+  # MRV data validation
+  tar_target(
+    name = mrv_data_validation,
+    combine_EU_data(here::here("data/MRV/mrv_data_validation.csv")),
+  ),
+  # Trip emissions to validate using MRV data
+  tar_file_read(
+    name = trip_emissions_for_mrv_validation,
+    "sql/trip_emissions_for_mrv_validation.sql",
+    download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_ais = run_version_ais
+        ),
+      file_path = here::here(
+        "data/MRV/trip_emissions_for_mrv_validation.csv"
       )
     ),
     format = "file"
