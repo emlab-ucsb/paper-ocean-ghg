@@ -116,6 +116,13 @@ list(
     ),
     read = readr::read_csv(!!.x)
   ),
+  tar_file_read(
+    name = registered_data_validation,
+    command = here::here(
+      "data/registered_data_validation/registered_data_validation.csv"
+    ),
+    read = readr::read_csv(!!.x)
+  ),
   # Load other data ----
   # EDGAR - Emissions Database for Global Atmospheric Research
   # From the European Commission

@@ -325,5 +325,21 @@ list(
       )
     ),
     format = "file"
+  ),
+  # Registered data validation
+  tar_file_read(
+    name = registered_data_validation,
+    "sql/registered_data_validation.sql",
+    download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_dark = run_version_dark
+        ),
+      file_path = here::here(
+        "data/registered_data_validation/registered_data_validation.csv"
+      )
+    ),
+    format = "file"
   )
 )

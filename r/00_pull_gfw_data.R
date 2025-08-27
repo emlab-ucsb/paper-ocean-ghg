@@ -109,6 +109,7 @@ download_gfw_data(
   "annual_spatial_emissions_by_receiver_type"
 )
 
+
 # Annual extrapolation of AIS activity to dark activity
 # Use method we use for extrapolating emissions (by pixel, month, fishing, and vessel size class)
 # To also extrapolate hours, kw-hours
@@ -129,6 +130,12 @@ download_gfw_data(
 download_gfw_data(
   "sql/total_monthly_emissions_by_pollutant.sql",
   "total_monthly_emissions_by_pollutant"
+)
+
+# Download validation data using registered dataset
+download_gfw_data(
+  "sql/registered_data_validation.sql",
+  "registered_data_validation"
 )
 
 # Download KNN testing data

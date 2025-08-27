@@ -141,7 +141,7 @@ remaining <- vessel_info |>
   anti_join(match_all, by = "ssvid")
 
 # 2. Match on IMO + MMSI
-match_imo_mmsi <- remaining |>
+match_imo_mmsi <- vessel_info |>
   inner_join(
     registered_fuel_consumption_renamed,
     by = c("imo_ais_normalized" = "imo_normalized", "ssvid" = "mmsi_registered")
@@ -151,17 +151,17 @@ match_imo_mmsi <- remaining |>
 remaining <- remaining |> anti_join(match_imo_mmsi, by = "ssvid")
 
 # 3. Match on IMO + Name
-match_imo_name <- remaining |>
-  inner_join(
-    registered_fuel_consumption_renamed,
-    by = c(
-      "imo_ais_normalized" = "imo_normalized",
-      "ship_name_ais_normalized" = "ship_name_registered"
-    )
-  ) |>
-  mutate(match_type = "imo_name")
+# match_imo_name <- remaining |>
+#   inner_join(
+#     registered_fuel_consumption_renamed,
+#     by = c(
+#       "imo_ais_normalized" = "imo_normalized",
+#       "ship_name_ais_normalized" = "ship_name_registered"
+#     )
+#   ) |>
+#   mutate(match_type = "imo_name")
 
-remaining <- remaining |> anti_join(match_imo_name, by = "ssvid")
+# remaining <- remaining |> anti_join(match_imo_name, by = "ssvid")
 
 # 4. Match on MMSI + Name
 match_mmsi_name <- remaining |>
@@ -176,59 +176,59 @@ match_mmsi_name <- remaining |>
 
 remaining <- remaining |> anti_join(match_mmsi_name, by = "ssvid")
 
-# 5. Match on IMO only (non-repeated)
-repeated_imo_ais <- vessel_info |>
-  count(imo_ais_normalized) |>
-  filter(n > 1) |>
-  pull(imo_ais_normalized)
+# # 5. Match on IMO only (non-repeated)
+# repeated_imo_ais <- vessel_info |>
+#   count(imo_ais_normalized) |>
+#   filter(n > 1) |>
+#   pull(imo_ais_normalized)
 
-match_imo <- remaining |>
-  filter(!imo_ais_normalized %in% repeated_imo_ais) |>
-  inner_join(
-    registered_fuel_consumption_renamed,
-    by = c("imo_ais_normalized" = "imo_normalized")
-  ) |>
-  mutate(match_type = "imo")
+# match_imo <- remaining |>
+#   filter(!imo_ais_normalized %in% repeated_imo_ais) |>
+#   inner_join(
+#     registered_fuel_consumption_renamed,
+#     by = c("imo_ais_normalized" = "imo_normalized")
+#   ) |>
+#   mutate(match_type = "imo")
 
-remaining <- remaining |> anti_join(match_imo, by = "ssvid")
+# remaining <- remaining |> anti_join(match_imo, by = "ssvid")
 
-# 6. Match on MMSI only
-match_mmsi <- remaining |>
-  inner_join(
-    registered_fuel_consumption_renamed,
-    by = c("ssvid" = "mmsi_registered")
-  ) |>
-  mutate(match_type = "mmsi")
+# # 6. Match on MMSI only
+# match_mmsi <- remaining |>
+#   inner_join(
+#     registered_fuel_consumption_renamed,
+#     by = c("ssvid" = "mmsi_registered")
+#   ) |>
+#   mutate(match_type = "mmsi")
 
-remaining <- remaining |> anti_join(match_mmsi, by = "ssvid")
+# remaining <- remaining |> anti_join(match_mmsi, by = "ssvid")
 
-# 7. Match on Name only (non-repeated)
-repeated_names <- vessel_info |>
-  count(ship_name_ais_normalized) |>
-  filter(n > 1) |>
-  pull(ship_name_ais_normalized)
+# # 7. Match on Name only (non-repeated)
+# repeated_names <- vessel_info |>
+#   count(ship_name_ais_normalized) |>
+#   filter(n > 1) |>
+#   pull(ship_name_ais_normalized)
 
-repeated_names_registered <- registered_fuel_consumption_renamed |>
-  count(ship_name_registered) |>
-  filter(n > 1) |>
-  pull(ship_name_registered)
+# repeated_names_registered <- registered_fuel_consumption_renamed |>
+#   count(ship_name_registered) |>
+#   filter(n > 1) |>
+#   pull(ship_name_registered)
 
-match_name <- remaining |>
-  filter(
-    !ship_name_ais_normalized %in% c(repeated_names, repeated_names_registered)
-  ) |>
-  inner_join(
-    registered_fuel_consumption_renamed,
-    by = c("ship_name_ais_normalized" = "ship_name_registered")
-  ) |>
-  mutate(match_type = "name")
+# match_name <- remaining |>
+#   filter(
+#     !ship_name_ais_normalized %in% c(repeated_names, repeated_names_registered)
+#   ) |>
+#   inner_join(
+#     registered_fuel_consumption_renamed,
+#     by = c("ship_name_ais_normalized" = "ship_name_registered")
+#   ) |>
+#   mutate(match_type = "name")
 
 # Final combined matched table
 vessel_info_combined <- bind_rows(
-  match_all,
+  # match_all,
   match_imo_mmsi,
   # match_imo_name,
-  match_mmsi_name,
+  # match_mmsi_name,
   # match_imo,
   # match_mmsi,
   # match_name
@@ -435,7 +435,7 @@ bind_rows(
 # Plot
 # Define model order
 model_levels <- c(
-  "Original IMO data",
+  "IMO report lookup table",
   "RF engine power",
   "RF design speed",
   "New engine power and\n design speed data",
@@ -447,7 +447,7 @@ vessel_long <- vessel_info_emissions |>
   dplyr::select(
     co2_emissions_tonnes_registered,
     # match_type,
-    `Original IMO data` = co2_emissions_tonnes_estimate_original,
+    `IMO report lookup table` = co2_emissions_tonnes_estimate_original,
     `RF design speed` = co2_emissions_tonnes_estimate_rf_kn,
     `RF engine power` = co2_emissions_tonnes_estimate_rf_kw,
     `RF engine power and design speed` = co2_emissions_tonnes_estimate_rf_kw_kn,
@@ -546,7 +546,7 @@ vessel_long_by_class <- vessel_info_emissions |>
   dplyr::select(
     vessel_class,
     co2_emissions_tonnes_registered,
-    `Original IMO data` = co2_emissions_tonnes_estimate_original,
+    `IMO report lookup table` = co2_emissions_tonnes_estimate_original,
     `RF engine power and design speed` = co2_emissions_tonnes_estimate_rf_kw_kn,
     `Registered data` = co2_emissions_tonnes_estimate_registered
   ) |>
@@ -1063,3 +1063,169 @@ ggplot(
     axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 7),
     aspect.ratio = 1
   )
+
+
+# TESTING ----
+
+registered_data_emissions_old <- readr::read_csv(glue::glue(
+  "{project_directory}/data/processed/registered_data_emissions_old.csv"
+))
+
+registered_data_emissions <- readr::read_csv(glue::glue(
+  "{project_directory}/data/processed/registered_data_emissions.csv"
+))
+
+
+## Calculate energy use ----
+## Apply function to each row
+vessel_info_energy_use <- registered_data_emissions_old |>
+  mutate(
+    # Original:
+    main_engine_energy_use_original = calculate_main_engine_energy_use_kwh(
+      vessel_class,
+      FALSE,
+      on_fishing_list_best,
+      24,
+      imo_table_81_avg_main_engine_power_kw, # Using previous power estimates from IMO report table # Use main_engine_power_kw_old when testing vessel_info_v20241121
+      consumption_speed_1,
+      imo_table_81_avg_design_speed_knots, # Using previous speed estimates from IMO report table # Use design_speed_knots_old when testing vessel_info_v20241121
+      hull_fouling_correction_factor,
+      weather_correction_factor,
+      draft_correction_factor
+    ),
+    # RF engine power and design speed:
+    main_engine_energy_use_rf_kw_kn = calculate_main_engine_energy_use_kwh(
+      vessel_class,
+      FALSE,
+      on_fishing_list_best,
+      24,
+      main_engine_power_kw, # Using new power estimates from RF model
+      consumption_speed_1,
+      design_speed_knots, # Using new speed estimates from RF model
+      hull_fouling_correction_factor,
+      weather_correction_factor,
+      draft_correction_factor
+    ),
+    # Registered estimates:
+    main_engine_energy_use = calculate_main_engine_energy_use_kwh(
+      vessel_class,
+      FALSE,
+      on_fishing_list_best,
+      24,
+      engine_power,
+      consumption_speed_1,
+      max_speed,
+      hull_fouling_correction_factor,
+      weather_correction_factor,
+      draft_correction_factor
+    )
+  )
+
+
+## Calculate emissions ----
+co2_ef <- 629.83333 # g pollutant / kwh
+co2_fuel_factor <- 3.12 # tonnes pollutant/tonne fuel
+
+vessel_info_emissions <- vessel_info_energy_use |>
+  mutate(
+    co2_emissions_tonnes_estimate_imo = (main_engine_energy_use_original *
+      co2_ef) /
+      1e6,
+    co2_emissions_tonnes_estimate_rf = (main_engine_energy_use_rf_kw_kn *
+      co2_ef) /
+      1e6,
+    co2_emissions_tonnes_estimate_registered = (main_engine_energy_use *
+      co2_ef) /
+      1e6,
+    co2_emissions_tonnes = consumption_value_1 *
+      co2_fuel_factor
+  )
+
+vessel_info_emissions <- registered_data_emissions |>
+  mutate(
+    co2_emissions_tonnes_estimate_imo = (main_engine_energy_use_kwh_imo *
+      co2_ef) /
+      1e6,
+    co2_emissions_tonnes_estimate_rf = (main_engine_energy_use_kwh_rf *
+      co2_ef) /
+      1e6,
+    co2_emissions_tonnes_estimate_registered = (main_engine_energy_use_kwh_registered *
+      co2_ef) /
+      1e6,
+    co2_emissions_tonnes = consumption_value_1 *
+      co2_fuel_factor
+  )
+
+vessel_info_emissions <- registered_data_emissions_old |>
+  mutate(
+    co2_emissions_tonnes_estimate_imo = (main_engine_energy_use_kwh_imo *
+      co2_ef) /
+      1e6,
+    co2_emissions_tonnes_estimate_rf = (main_engine_energy_use_kwh_rf *
+      co2_ef) /
+      1e6,
+    co2_emissions_tonnes_estimate_registered = (main_engine_energy_use_kwh_registered *
+      co2_ef) /
+      1e6,
+    co2_emissions_tonnes = consumption_value_1 *
+      co2_fuel_factor
+  )
+
+## Assess model performance ----
+multi_metric <- yardstick::metric_set(
+  yardstick::rsq,
+  yardstick::rsq_trad
+)
+
+bind_rows(
+  vessel_info_emissions |>
+    multi_metric(
+      truth = co2_emissions_tonnes,
+      estimate = co2_emissions_tonnes_estimate_imo
+    ) |>
+    mutate(metadata = "Original"),
+
+  vessel_info_emissions |>
+    multi_metric(
+      truth = co2_emissions_tonnes,
+      estimate = co2_emissions_tonnes_estimate_rf
+    ) |>
+    mutate(metadata = "RF engine power and design speed"),
+
+  vessel_info_emissions |>
+    multi_metric(
+      truth = co2_emissions_tonnes,
+      estimate = co2_emissions_tonnes_estimate_registered
+    ) |>
+    mutate(metadata = "Registered data")
+) |>
+  select(metadata, .metric, .estimate) |>
+  pivot_wider(names_from = .metric, values_from = .estimate) |>
+  kableExtra::kable(digits = 3)
+
+
+bind_rows(
+  registered_data_emissions |>
+    multi_metric(
+      truth = co2_emissions_tonnes_registered,
+      estimate = co2_emissions_tonnes_estimate_imo
+    ) |>
+    mutate(metadata = "Original"),
+
+  registered_data_emissions |>
+    multi_metric(
+      truth = co2_emissions_tonnes_registered,
+      estimate = co2_emissions_tonnes_estimate_rf
+    ) |>
+    mutate(metadata = "RF engine power and design speed"),
+
+  registered_data_emissions |>
+    multi_metric(
+      truth = co2_emissions_tonnes_registered,
+      estimate = co2_emissions_tonnes_estimate_registered
+    ) |>
+    mutate(metadata = "Registered data")
+) |>
+  select(metadata, .metric, .estimate) |>
+  pivot_wider(names_from = .metric, values_from = .estimate) |>
+  kableExtra::kable(digits = 3)

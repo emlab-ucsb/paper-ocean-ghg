@@ -51,7 +51,20 @@ combined_dataset AS (
 
 -- Apply BQ function to calculate main engine use
 SELECT *,
-  `world-fishing-827.proj_ocean_ghg.calculate_main_engine_energy_use_kwh`(
+  `world-fishing-827.proj_ocean_ghg.calculate_main_engine_energy_use_kwh_old`(
+    24,  -- hours
+    consumption_speed_1, ---speed_knots
+    imo_table_81_avg_design_speed_knots,
+    imo_table_81_avg_main_engine_power_kw,
+    `world-fishing-827.proj_ocean_ghg.hull_fouling_correction_factor`(),
+    `world-fishing-827.proj_ocean_ghg.weather_correction_factor`(10000),  -- distance_from_shore_m (set to 10000m to define offshore navigation)
+    `world-fishing-827.proj_ocean_ghg.draft_correction_factor`(),
+    vessel_class,
+    on_fishing_list_best,
+    FALSE  -- fishing_activity
+  ) AS main_engine_energy_use_kwh_imo,
+
+  `world-fishing-827.proj_ocean_ghg.calculate_main_engine_energy_use_kwh_old`(
     24,  -- hours
     consumption_speed_1, ---speed_knots
     design_speed_knots,
@@ -62,5 +75,19 @@ SELECT *,
     vessel_class,
     on_fishing_list_best,
     FALSE  -- fishing_activity
-  ) AS main_engine_energy_use_kwh
+  ) AS main_engine_energy_use_kwh_rf,
+
+
+  `world-fishing-827.proj_ocean_ghg.calculate_main_engine_energy_use_kwh_old`(
+    24,  -- hours
+    consumption_speed_1, ---speed_knots
+    max_speed,
+    engine_power,
+    `world-fishing-827.proj_ocean_ghg.hull_fouling_correction_factor`(),
+    `world-fishing-827.proj_ocean_ghg.weather_correction_factor`(10000),  -- distance_from_shore_m (set to 10000m to define offshore navigation)
+    `world-fishing-827.proj_ocean_ghg.draft_correction_factor`(),
+    vessel_class,
+    on_fishing_list_best,
+    FALSE  -- fishing_activity
+  ) AS main_engine_energy_use_kwh_registered
 FROM combined_dataset

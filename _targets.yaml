@@ -4,3 +4,5 @@
 02_quarto_notebook:
   script: _targets_02_quarto_notebook.R
   store: _targets/02_quarto_notebook
+main:
+  inherits: 02_quarto_notebook
