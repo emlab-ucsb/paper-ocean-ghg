@@ -313,7 +313,7 @@ This comparison shows that the updated vessel metadata using random forest model
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{figures/fig-registered-data-performance.jpg}
+    \includegraphics[width=\columnwidth]{figures/fig-registered-data-performance-1.png}
     \caption{Comparison of registered and simulated CO$_{2}$ emissions from main engine fuel consumption over 24 hours. Estimates are shown using main engine power and design speed from IMO (left), our machine learning random forest models (center), and the same registered dataset (right). The solid red line shows a linear regression fit, while the dashed line represents the 1:1 line. Performance values for traditional R$^{2}$ are shown for each set of vessel characteristics. Blue shading indicates point density. All data are rule-of-three compliant, meaning each cell (20×20 mt) displayed contains at least three vessels.}
     \label{fig:fig-registered-data-performance}
 \end{figure}
@@ -326,32 +326,12 @@ Our AIS-derived emissions dataset does not contain detailed information on vesse
 
 \input{tables/mrv_performance_results}
 
-\begin{table}[H]
-    \centering
-    \begin{tabular}{lcccc}
-        \hline
-        R$^{2}$ & Traditional R$^{2}$ & Tolerance & Number of vessels \\
-        \hline
-        0.801 & 0.792 & 0.05 & 926 \\
-        0.798 & 0.794 & 0.10 & 1598 \\
-        0.807 & 0.805 & 0.15 & 2276 \\
-        0.766 & 0.749 & 0.20 & 2918 \\
-        0.760 & 0.734 & 0.25 & 3620 \\
-        0.655 & 0.523 & 0.30 & 4395 \\
-        0.670 & 0.476 & 0.35 & 5288 \\
-        0.681 & 0.399 & 0.40 & 6340 \\
-        \hline
-    \end{tabular}
-    \caption{Performance summary across different thresholds for the hours at sea tolerance between datasets. Results are shown using the R$^{2}$ (measuring linear association between observed and predicted values) and traditional R$^{2}$ (proportion of variance explained compared to the mean-only baseline)}
-    \label{tab:tab-performance-tolerance-table}
-\end{table}
-
-In Table \ref{tab:tab-performance-tolerance-table}, performance peaks at a traditional R$^{2}$ of 0.807 for vessels whose times at sea in our dataset are within 15\% of the MRV-reported values (validation sample of 2276 vessel-year observations). Beyond this threshold, performance declines as discrepancies grow between our annual aggregated trip activity and that recorded in the MRV dataset.
+In Table \ref{tab:tab-performance-tolerance-table}, performance peaks at a traditional R$^{2}$ of 0.81 for vessels whose times at sea in our dataset are within 15\% of the MRV-reported values (validation sample of 2,276 vessel-year observations). Beyond this threshold, performance declines as discrepancies grow between our annual aggregated trip activity and that recorded in the MRV dataset.
 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{figures/fig-mrv-performance.jpg}
+    \includegraphics[width=\columnwidth]{figures/fig-mrv-performance-1.png}
     \caption{Comparison of published MRV emissions and simulated CO$_{2}$ emissions. The sample includes 2,276 observations from yearly aggregated vessel trips where hours at sea differ by no more than 15\% between our data and the MRV dataset. The solid red line shows the linear regression fit, and the dashed line represents the 1:1 line.}
     \label{fig:fig-mrv-performance}
 \end{figure}
