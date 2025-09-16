@@ -65,7 +65,7 @@
 \author{
 	% You can write out first names or use initials - either way is acceptable, but be consistent
 	Gavin~McDonald$^{1,2,3\ast}$,\and
-    Pol~Carbo-Mestre$^{1,2,3}$\and
+    Pol~Carbó-Mestre$^{1,2,3}$\and
     Olivier~Deschenes$^{3,4}$,\and
     Jennifer~Bone$^{1,2,3}$,\and
     E.~Fernando~Cagua$^{5}$,\and
@@ -336,33 +336,6 @@ In Table \ref{tab:tab-performance-tolerance-table}, performance peaks at a tradi
     \label{fig:fig-mrv-performance}
 \end{figure}
 
-\subsection{Comparing AIS-based emissions to other inventories}
-
-Our AIS emissions estimates are consistent with estimates from other globally accepted inventories: the International Maritime Organization (IMO), the Emissions Database for Global Atmospheric Research (EDGAR), and the Organization for Economic Co-operation and Development (OECD). Estimates of total shipping emissions for 2023 are shown in Table \ref{tab:co2_estimates}, excluding emissions from non-broadcasting vessels and comparing our data with three additional sources. The most recent IMO total is for 2018 \cite{fourth2020greenhouse}, while the OECD total only accounts for international vessel emissions. Results from these sources are presented as both unadjusted emissions and adjusted totals to align vessel and temporal coverage. These adjustments reflect observed trends across all sources, including a 6\% increase in emissions from 2018 to 2023 and international emissions that account for 77\% of total emissions. The level of agreement for this complex estimate across four sources provides support for the reliability and utility of our methodology and results.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\columnwidth]{figures/fig-inventory-comparison-1.png}
-    \caption{Comparison of annual marine vessel CO$_{2}$ emissions inventory estimates.}
-    \label{fig:fig-inventory-compariso}
-\end{figure}
-
-\input{tables/inventory_comparison}
-
-\begin{table}[H]
-    \centering
-    \begin{tabular}{lcccc}
-        \hline
-        & OECD-Intl & GFW & EDGAR & IMO-2018 \\
-        \hline
-        Unadjusted & 862,856,901 & 1,085,212,897 & 909,912,000 & 1,066,700,000 \\
-        Adjusted to all vessels, 2023 & 1,150,000,000 & 1,113,453,396 & 909,912,000 & 1,130,700,000 \\
-        \hline
-    \end{tabular}
-    \caption{Total metric tonnes of CO$_{2}$ per year for 2023, except for the IMO estimate, which corresponds to 2018, the most recent year available. Adjustments include: international emissions estimated at approximately 77\% of total emissions and a 6\% increase from 2018 to 2023. The adjustments were derived using the average of all sources with the relevant data.}
-    \label{tab:co2_estimates}
-\end{table}
-
 \subsection{Non-broadcasting vessels}
 
 \paragraph{Sentinel-1 SAR data description}
@@ -427,6 +400,19 @@ We aggregate vessel-level AIS-based CO$_{2}$ emissions to match the analysis uni
 Following the same procedure as for the primary non-broadcasting vessel emissions model, we calculate the ratio of simulated non-broadcasting vessels to simulated AIS-broadcasting vessels within each analysis unit inside the S1 footprint. Outside the footprint, we apply the ratio observed across all covered pixels for a given month, vessel type, and size class. We then estimate total emissions from the training dataset vessels and multiply this value by the ratio of simulated non-broadcasting  vessels to simulated AIS vessels to obtain the predicted emissions from simulated non-broadcasting vessels.
 
 Since the simulated non-broadcasting vessels actually broadcast AIS, we can also calculate their observed emissions from the AIS-based emissions model for each analysis unit. By comparing the predicted simulated non-broadcasting emissions with the observed emissions for each analysis unit, we can assess the overall performance which yields an $ R^2 $ of 0.98.
+
+\subsection{Comparing our emission estimates to other inventories}
+
+Our emissions estimates are consistent with other well-known global inventories: the International Maritime Organization (IMO) \cite{fourth2020greenhouse}, the EU's Emissions Database for Global Atmospheric Research (EDGAR) \cite{JRC138862}, and the Organization for Economic Co-operation and Development (OECD) experimental shipping database \cite{clarke2023co2} (Fig. \ref{fig:fig-inventory-comparison} and Table \ref{tab:inventory_comparison}). For each inventory, we pull all available years of data from 2016 through 2024. Both the IMO and OECD inventories leverage AIS data, with IMO using a bottom-up engineering model similar to ours, and OECD leveraging a machine learning model trained on the EU MRV database that uses AIS movement data to inform certain model features and which uses this model to make predictions for AIS-broadcasting vessels not contained in the EU MRV database. The EDGAR inventory uses a top-down approach that leverages regional fuel use statistics. Our approach combining AIS and S1 data yields the highest estimates, as expected. The level of general agreement for this complex estimate across multiple sources provides support for the reliability and utility of our methodology and results.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/fig-inventory-comparison-1.png}
+    \caption{Comparison of annual marine vessel CO$_{2}$ emissions inventory estimates.}
+    \label{fig:fig-inventory-comparison}
+\end{figure}
+
+\input{tables/inventory_comparison}
 
 \subsection{Decomposition analysis}
 
