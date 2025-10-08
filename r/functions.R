@@ -1,5 +1,51 @@
-# This function pulls the necessary GFW data and stores it into a destination table
-# This requires special permissions, and is also very expensive to run, so will not be done often
+#' Get the project directory path
+#'
+#' This function determines the appropriate base directory path based on the
+#' operating system and machine name. It centralizes directory configuration
+#' to avoid code duplication across multiple scripts.
+#'
+#' @return A string containing the full path to the project directory
+#' @export
+#' @examples
+#' get_project_directory()
+get_project_directory <- function() {
+  data_directory_base <- if (Sys.info()["nodename"] %in% c("quebracho", "sequoia")) {
+    "/home/emlab"
+  } else if (Sys.info()["sysname"] == "Darwin") {
+    "/Users/Shared/nextcloud/emLab"
+  } else if (Sys.info()["sysname"] == "Windows") {
+    "G:/Shared drives/nextcloud/emLab"
+  } else {
+    # For Linux machines, try to use an environment variable or default
+    base_path <- Sys.getenv("EMLAB_DATA_DIR", "/home/your_username/Nextcloud")
+    if (base_path == "/home/your_username/Nextcloud") {
+      warning(
+        "Using default Linux path. Please set EMLAB_DATA_DIR environment variable ",
+        "or manually edit get_project_directory() in r/functions.R"
+      )
+    }
+    base_path
+  }
+  
+  glue::glue("{data_directory_base}/projects/current-projects/paper-ocean-ghg")
+}
+
+#' Run a BigQuery query and save results to a table
+#'
+#' This function executes a SQL query on BigQuery and saves the results to a
+#' specified destination table. It requires special BigQuery permissions and
+#' may incur significant costs for large queries.
+#'
+#' @param sql Character string containing the SQL query to execute
+#' @param bq_table_name Name of the destination table
+#' @param bq_dataset Name of the BigQuery dataset
+#' @param billing_project Project ID for billing
+#' @param bq_project Project ID where the table will be created
+#' @param write_disposition How to handle existing tables. Default is 'WRITE_TRUNCATE'
+#' @param ... Additional arguments (not currently used)
+#'
+#' @return BigQuery table metadata object
+#' @export
 run_gfw_query_and_save_table <- function(
   sql,
   bq_table_name,
@@ -11,56 +57,128 @@ run_gfw_query_and_save_table <- function(
   write_disposition = 'WRITE_TRUNCATE',
   ...
 ) {
-  # Specify table where query results will be saved
-  bq_table <- bigrquery::bq_table(
-    project = bq_project,
-    table = bq_table_name,
-    dataset = bq_dataset
-  )
+  # Input validation
+  if (missing(sql) || is.null(sql) || nchar(sql) == 0) {
+    stop("Parameter 'sql' is required and cannot be empty")
+  }
+  if (missing(bq_table_name) || is.null(bq_table_name)) {
+    stop("Parameter 'bq_table_name' is required")
+  }
+  
+  tryCatch({
+    # Specify table where query results will be saved
+    bq_table <- bigrquery::bq_table(
+      project = bq_project,
+      table = bq_table_name,
+      dataset = bq_dataset
+    )
 
-  # Run query and save on BQ. We don't pull this locally yet.
-  bigrquery::bq_project_query(
-    billing_project,
-    sql,
-    destination_table = bq_table,
-    use_legacy_sql = FALSE,
-    allowLargeResults = TRUE,
-    write_disposition = write_disposition
-  )
+    # Run query and save on BQ. We don't pull this locally yet.
+    bigrquery::bq_project_query(
+      billing_project,
+      sql,
+      destination_table = bq_table,
+      use_legacy_sql = FALSE,
+      allowLargeResults = TRUE,
+      write_disposition = write_disposition
+    )
 
-  # Return table metadata, for targets to know if something changed
-  bigrquery::bq_table_meta(bq_table)
+    # Return table metadata, for targets to know if something changed
+    bigrquery::bq_table_meta(bq_table)
+  }, error = function(e) {
+    stop(sprintf(
+      "BigQuery operation failed for table '%s':\n  %s",
+      bq_table_name,
+      conditionMessage(e)
+    ))
+  })
 }
 
-# This function pulls GFW data locally from a specific table
-# This simply gets all data from the table
+#' Pull GFW data locally from a BigQuery table
+#'
+#' Downloads all data from a specified BigQuery table to a local data frame.
+#' Note: This loads the entire table into memory, which may cause issues with
+#' very large tables.
+#'
+#' @param bq_table_name Name of the table to download
+#' @param bq_dataset Name of the BigQuery dataset
+#' @param billing_project Project ID for billing
+#' @param ... Additional arguments (not currently used)
+#'
+#' @return A tibble containing the downloaded data
+#' @export
 pull_gfw_data_locally <- function(
   bq_table_name,
   bq_dataset,
   billing_project,
   ...
 ) {
-  bigrquery::bq_project_query(
-    billing_project,
-    glue::glue("SELECT * FROM world-fishing-827.{bq_dataset}.{bq_table_name}")
-  ) |>
-    bigrquery::bq_table_download(n_max = Inf)
+  # Input validation
+  if (missing(bq_table_name) || is.null(bq_table_name)) {
+    stop("Parameter 'bq_table_name' is required")
+  }
+  
+  tryCatch({
+    bigrquery::bq_project_query(
+      billing_project,
+      glue::glue("SELECT * FROM world-fishing-827.{bq_dataset}.{bq_table_name}")
+    ) |>
+      bigrquery::bq_table_download(n_max = Inf)
+  }, error = function(e) {
+    stop(sprintf(
+      "Failed to download table '%s' from dataset '%s':\n  %s",
+      bq_table_name,
+      bq_dataset,
+      conditionMessage(e)
+    ))
+  })
 }
 
+#' Run a custom BigQuery query
+#'
+#' Executes a custom SQL query on BigQuery and downloads the results.
+#'
+#' @param query Character string containing the SQL query to execute
+#' @param billing_project Project ID for billing
+#' @param ... Additional arguments (not currently used)
+#'
+#' @return A tibble containing the query results
+#' @export
 run_custom_bq_query <- function(
   query,
   billing_project,
   ...
 ) {
-  job <- bigrquery::bq_project_query(
-    billing_project,
-    query
-  )
+  # Input validation
+  if (missing(query) || is.null(query) || nchar(query) == 0) {
+    stop("Parameter 'query' is required and cannot be empty")
+  }
+  
+  tryCatch({
+    job <- bigrquery::bq_project_query(
+      billing_project,
+      query
+    )
 
-  bigrquery::bq_table_download(job, n_max = Inf)
+    bigrquery::bq_table_download(job, n_max = Inf)
+  }, error = function(e) {
+    stop(sprintf(
+      "BigQuery query execution failed:\n  %s\nQuery: %s",
+      conditionMessage(e),
+      substr(query, 1, 200)  # Show first 200 chars of query for debugging
+    ))
+  })
 }
 
-# Summarize spatial dark to AIS detection ratios by lat_bin, lon_bin, year, vessel type, and size class
+#' Summarize spatial dark fleet ratios
+#'
+#' Summarizes dark to AIS detection ratios by spatial bins (lat/lon), year,
+#' vessel type, and size class.
+#'
+#' @param dark_fleet_model_results Data frame containing dark fleet model results
+#'
+#' @return A data frame with summarized ratios by spatial and temporal dimensions
+#' @export
 summarize_dark_fleet_ratios_spatial <- function(dark_fleet_model_results) {
   dark_fleet_model_results %>%
     # filter(null_ratio == FALSE) %>% # Only including those for which ratios could be calculated without using knn
@@ -80,7 +198,16 @@ summarize_dark_fleet_ratios_spatial <- function(dark_fleet_model_results) {
     )
 }
 
-# Summarize total emissions by time (year or month), lat, lon, pollutant, fishing/non-fishing and dark status
+#' Summarize dark fleet emissions by time and space
+#'
+#' Summarizes total emissions by time period (year or month), spatial location
+#' (lat/lon), pollutant type, fishing status, and dark fleet status.
+#'
+#' @param dark_fleet_model_results Data frame containing dark fleet model results
+#' @param time_extrapolation Time aggregation level: "YEAR" or "MONTH"
+#'
+#' @return A data frame with emissions summarized by specified dimensions
+#' @export
 summarize_dark_fleet_model_results_emissions <- function(
   dark_fleet_model_results,
   time_extrapolation = "YEAR"
@@ -159,21 +286,59 @@ summarize_dark_fleet_model_results_emissions <- function(
   }
 }
 
-# Function to download GFW data and save it in repo
-# Returns file path, for keeping track with targets
+#' Download GFW data and save to a CSV file
+#'
+#' Executes a BigQuery query and saves the results to a CSV file in the
+#' repository. Returns the file path for use with the targets package.
+#'
+#' @param sql Character string containing the SQL query to execute
+#' @param bq_billing_project Project ID for billing
+#' @param file_path Path where the CSV file should be saved
+#' @param ... Additional arguments (not currently used)
+#'
+#' @return The file path where data was saved (for targets tracking)
+#' @export
 download_gfw_data <- function(sql, bq_billing_project, file_path, ...) {
-  bigrquery::bq_project_query(
-    bq_billing_project,
-    query = sql
-  ) |>
-    bigrquery::bq_table_download(n_max = Inf) |>
-    readr::write_csv(file_path)
-  return(file_path)
+  # Input validation
+  if (missing(sql) || is.null(sql) || nchar(sql) == 0) {
+    stop("Parameter 'sql' is required and cannot be empty")
+  }
+  if (missing(file_path) || is.null(file_path)) {
+    stop("Parameter 'file_path' is required")
+  }
+  
+  tryCatch({
+    # Create directory if it doesn't exist
+    dir.create(dirname(file_path), recursive = TRUE, showWarnings = FALSE)
+    
+    # Execute query and save results
+    bigrquery::bq_project_query(
+      bq_billing_project,
+      query = sql
+    ) |>
+      bigrquery::bq_table_download(n_max = Inf) |>
+      readr::write_csv(file_path)
+    
+    return(file_path)
+  }, error = function(e) {
+    stop(sprintf(
+      "Failed to download and save data to '%s':\n  %s",
+      file_path,
+      conditionMessage(e)
+    ))
+  })
 }
 
-# Function to access and combine CO2 emissions data from EU maritime transport
-# Downloaded from https://mrv.emsa.europa.eu/# on July 10, 2025
-# Each year is download separately for 2018-2024; we then combine them
+#' Combine EU Maritime Transport CO2 emissions data
+#'
+#' Accesses and combines annual CO2 emissions data from EU maritime transport.
+#' Data is downloaded from https://mrv.emsa.europa.eu/ and each year (2018-2024)
+#' is downloaded separately then combined.
+#'
+#' @param save_path Path where the combined CSV file should be saved
+#'
+#' @return NULL (function saves data to file as a side effect)
+#' @export
 combine_EU_data <- function(save_path) {
   all_files <- list.files(
     here::here("data/MRV/raw"),
