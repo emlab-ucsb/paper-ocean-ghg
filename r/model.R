@@ -12,15 +12,15 @@ annual_extrapolation_dataset <- annual_ais_to_dark_activity_extrapolation |>
 set.seed(123)
 
 # Set initial split of data
-inital_split <- annual_extrapolation_dataset |>
+initial_split <- annual_extrapolation_dataset |>
   rsample::initial_split(prop = 0.8)
 
-training_data <-rsample::training(inital_split)
-testing_data <- rsample::testing(inital_split)
+training_data <- rsample::training(initial_split)
+testing_data <- rsample::testing(initial_split)
 
 # Specify recipe for model
 model_recipe <- recipes::recipe(emissions_co2_mt_total ~ fishing + length_size_class_percentile + hours_total + avg_speed_knots, 
-                                data = head(rsample::training(inital_split))) |>
+                                data = head(rsample::training(initial_split))) |>
   recipes::step_num2factor(length_size_class_percentile,
                            levels = as.character(unique(annual_extrapolation_dataset$length_size_class_percentile)))
 
@@ -39,12 +39,12 @@ workflow_fit <- parsnip::fit(model_workflow,
                              training_data)
 
 # Make predictions on testing data, and augment this to testing data frame
-worflow_predictions <- parsnip::augment(workflow_fit,
+workflow_predictions <- parsnip::augment(workflow_fit,
                                         testing_data)
 
 
 # Calculate performance metrics
-metrics <- yardstick::rsq_trad(data = worflow_predictions,
+metrics <- yardstick::rsq_trad(data = workflow_predictions,
                                truth = emissions_co2_mt_total,
                                estimate = .pred)
 

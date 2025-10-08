@@ -1,8 +1,4 @@
-library(dplyr)
-library(tidyr)
-library(tidyverse)
-library(ggplot2)
-library(purrr)
+library(tidyverse)  # Includes dplyr, tidyr, ggplot2, and purrr
 library(yardstick)
 
 
@@ -60,9 +56,9 @@ trip_emissions <- eu_validation_trip %>%
   summarise(
     total_time_spent_at_sea_hours = sum(
       total_time_spent_at_sea_hours,
-      rm.na = TRUE
+      na.rm = TRUE
     ),
-    total_emissions_co2_mt = sum(total_emissions_co2_mt, rm.na = TRUE)
+    total_emissions_co2_mt = sum(total_emissions_co2_mt, na.rm = TRUE)
   ) %>%
   ungroup()
 
@@ -70,7 +66,7 @@ port_emissions <- eu_validation_port %>%
   filter(!imo_number %in% repeated_imo) %>%
   group_by(imo_number, year) %>%
   summarise(
-    total_emissions_co2_mt = sum(total_emissions_co2_mt, rm.na = TRUE)
+    total_emissions_co2_mt = sum(total_emissions_co2_mt, na.rm = TRUE)
   ) %>%
   ungroup()
 
@@ -573,10 +569,11 @@ ggplot(emission_intensities, aes(x = gfw_intensity, y = eu_intensity)) +
     aspect.ratio = 1
   )
 
-trip_emissions_2022 |>
-  filter(imo_number == 9103386)
-
-
-mrv_2022 |>
-  filter(imo_number == 9103386) |>
-  View()
+# Debug code - commented out to prevent errors in non-interactive environments
+# trip_emissions_2022 |>
+#   filter(imo_number == 9103386)
+#
+#
+# mrv_2022 |>
+#   filter(imo_number == 9103386) |>
+#   View()
