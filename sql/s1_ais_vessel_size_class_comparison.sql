@@ -16,7 +16,7 @@ s1_size_distribution AS (
     APPROX_QUANTILES(length_m, 100)[OFFSET(25)] iqr_lower_length_m,
     's1' AS source
   FROM
-    `world-fishing-827.proj_ocean_ghg.s1_detections_size_classified_{run_version_dark}`
+    `world-fishing-827.proj_ocean_ghg.rf_s1_detections_size_classified_{run_version_dark}`
   WHERE detect_ssvid IS NULL
   GROUP BY
     fishing,
@@ -36,7 +36,7 @@ ais_size_distribution AS (
     APPROX_QUANTILES(length_m, 100)[OFFSET(25)] iqr_lower_length_m,
     'ais' AS source
   FROM
-    `world-fishing-827.proj_ocean_ghg.s1_ais_vessels_size_classified_{run_version_dark}`
+    `world-fishing-827.proj_ocean_ghg.rf_s1_ais_vessels_size_classified_{run_version_dark}`
   GROUP BY
     fishing,
     length_size_class_percentile

@@ -20,7 +20,7 @@ SELECT
     SUM(emissions_pm10_dark_mt) AS emissions_pm10_dark_mt,
   fishing
 FROM
-  `world-fishing-827.proj_ocean_ghg.s1_time_gridded_dark_fleet_model_{run_version_dark}`
+  `world-fishing-827.proj_ocean_ghg.rf_s1_time_gridded_dark_fleet_model_{run_version_dark}`
 WHERE EXTRACT(YEAR from time) BETWEEN {analysis_start_year} and {analysis_end_year}
 GROUP BY
   year,

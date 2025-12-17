@@ -1,20 +1,12 @@
 CREATE TEMPORARY FUNCTION
   pixel_size() AS (1);
 WITH
-  vessel_size_class_info AS (
-    -- Get info for whether each vessel is classified by GFW as fishing or not
-    -- Also determine each vessel's size class
-  SELECT
-    ssvid,
-    fishing,
-    length_size_class_percentile
-  FROM
-    `world-fishing-827.proj_ocean_ghg.s1_ais_vessels_size_classified_{run_version_dark}` ),
-  vessel_engine_power_info AS(
+  vessel_info AS(
     -- Get main engine power for each vessel
   SELECT
     ssvid,
-    main_engine_power_kw
+    main_engine_power_kw,
+    on_fishing_list_best fishing
   FROM
     `world-fishing-827.proj_ocean_ghg.vessel_info_{run_version_ais}` ),
   dark_to_ais_ratios AS (
@@ -24,10 +16,9 @@ WITH
     lon_bin,
     lat_bin,
     fishing,
-    length_size_class_percentile,
     COALESCE(ratio_dark_to_ais_detections, global_time_ratio_dark_to_ais_detections) AS ratio_dark_to_ais
   FROM
-    `world-fishing-827.proj_ocean_ghg.s1_time_gridded_dark_fleet_model_{run_version_dark}` ),
+    `world-fishing-827.proj_ocean_ghg.rf_s1_time_gridded_dark_fleet_model_{run_version_dark}` ),
   ais_activity_summary AS (
     -- Summarize total hours and kW hours, and average speed, by fishing, pixel, month,and size class
   SELECT
@@ -35,7 +26,6 @@ WITH
     FLOOR(lat_bin / pixel_size()) * pixel_size() AS lat_bin,
     TIMESTAMP_TRUNC(TIMESTAMP(date), MONTH) AS time,
     fishing,
-    length_size_class_percentile,
     SUM(hours) hours,
     SUM(hours * main_engine_power_kw) kw_hours,
     SUM(emissions_co2_mt) emissions_co2_mt,
@@ -44,10 +34,6 @@ WITH
   FROM
     `world-fishing-827.proj_ocean_ghg.daily_gridded_emissions_by_vessel_{run_version_ais}`
   JOIN
-    vessel_size_class_info
-  USING
-    (ssvid)
-  JOIN
     vessel_engine_power_info
   USING
     (ssvid)
@@ -55,12 +41,7 @@ WITH
   # Only use last full year of data
     EXTRACT(YEAR
     FROM
-      date) <= 2024
-  # Don't need 2015, since dark fleet wasn't available then
-    AND
-        EXTRACT(YEAR
-    FROM
-      date) >= 2016
+      date) BETWEEN {analysis_start_year} AND {analysis_end_year}
   GROUP BY
     lon_bin,
     lat_bin,
