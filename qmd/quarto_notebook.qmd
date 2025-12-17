@@ -2091,8 +2091,69 @@ ggplot(
 
 # Supplementary tables
 
-## Summary of 2017 and 2024 emissions, by pollutant and data source
+## Dark fleet model performance metrics 
 
+```{r}
+#| results = 'asis'
+all_performance_metrics_table <- all_performance_metrics |>
+  dplyr::mutate(
+    model = stringr::str_replace_all(model, "_", "; ") |>
+      stringr::str_to_sentence(),
+    test = stringr::str_replace_all(test, "_", " ") |>
+      stringr::str_to_sentence()
+  ) |>
+  dplyr::select(
+    Model = model,
+    Test = test,
+    Metric = metric,
+    Estimate = estimate
+  ) |>
+  dplyr::filter(
+    !(Metric %in%
+      c(
+        "rsq_trad_backtransformed_naive",
+        "rsq_trad_backtransformed_regression",
+        "rsq_trad_backtransformed_rmse",
+        "rsq_trad_untransformed_log_scale"
+      ))
+  ) |>
+  dplyr::mutate(
+    Metric = dplyr::case_when(
+      Metric == "accuracy" ~ "Accuracy",
+      Metric == "f_meas" ~ "F1 score",
+      Metric == "pr_auc" ~ "Precision-recall AUC",
+      Metric == "roc_auc" ~ "ROC AUC",
+      Metric == "precision" ~ "Precision",
+      Metric == "sensitivity" ~ "Sensitivity",
+      Metric == "specificity" ~ "Specificity",
+      Metric ==
+        "rsq_trad_backtransformed_residuals" ~ "Traditional R² (backtransformed)",
+      Metric == "rsq_trad" ~ "Traditional R²",
+      Metric == "mae" ~ "MAE",
+      TRUE ~ Metric
+    )
+  ) |>
+  dplyr::mutate(Model = forcats::fct_relevel(Model, "Emissions; regression")) |>
+  dplyr::arrange(Model) |>
+  tidyr::pivot_wider(values_from = Estimate, names_from = Test) |>
+  knitr::kable(
+    format = "latex",
+    label = "all_performance_metrics_table",
+    caption = "Summary of dark fleet model performance metrics for the: 1) emissions regression model; 2) detections classification mode; and 3) detections regression model. Performance estimates for each metric are shown for both the inside S1 footprint and outside S1 footprint tests.",
+    digits = 3
+  ) |>
+  kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
+
+all_performance_metrics_table
+
+writeLines(
+  all_performance_metrics_table,
+  here::here("tables/all_performance_metrics_table.tex")
+)
+```
+
+## Summary of 2017 and 2024 emissions, by pollutant and data source
+  
 ```{r}
 test <- 1 + 1
 total_percent_change_by_fleet_tbl <- total_percent_change_by_fleet |>

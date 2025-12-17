@@ -1,0 +1,31 @@
+\begin{table}[!h]
+\centering
+\caption{\label{tab:all_performance_metrics_table}Summary of dark fleet model performance metrics for the: 1) emissions regression model; 2) detections classification mode; and 3) detections regression model. Performance estimates for each metric are shown for both the inside S1 footprint and outside S1 footprint tests.}
+\centering
+\fontsize{8}{10}\selectfont
+\begin{tabular}[t]{l|l|r|r}
+\hline
+Model & Metric & Inside footprint & Outside footprint\\
+\hline
+Emissions; regression & Traditional R² (backtransformed) & 0.939 & 0.804\\
+\hline
+Detections; classification & Accuracy & 0.841 & 0.862\\
+\hline
+Detections; classification & F1 score & 0.671 & 0.376\\
+\hline
+Detections; classification & Precision-recall AUC & 0.781 & 0.358\\
+\hline
+Detections; classification & Precision & 0.556 & 0.265\\
+\hline
+Detections; classification & recall & 0.847 & 0.648\\
+\hline
+Detections; classification & ROC AUC & 0.923 & 0.845\\
+\hline
+Detections; classification & Sensitivity & 0.847 & 0.648\\
+\hline
+Detections; classification & Specificity & 0.839 & 0.877\\
+\hline
+Detections; regression & Traditional R² & 0.761 & 0.173\\
+\hline
+\end{tabular}
+\end{table}
