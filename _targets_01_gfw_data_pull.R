@@ -290,7 +290,7 @@ list(
     ),
     format = "file"
   ),
-  # Spatial AIS-broadcasting emissions by receiver type for 2016 and 2024
+  # Spatial AIS-broadcasting emissions by receiver type for starting and ending years
   tar_file_read(
     name = annual_spatial_emissions_by_receiver_type,
     "sql/annual_spatial_emissions_by_receiver_type.sql",
@@ -298,7 +298,9 @@ list(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
         stringr::str_glue(
-          run_version_ais = run_version_ais
+          run_version_ais = run_version_ais,
+          analysis_start_year = analysis_start_year,
+          analysis_end_year = analysis_end_year
         ),
       file_path = here::here(
         "data/gfw/annual_spatial_emissions_by_receiver_type.csv"
