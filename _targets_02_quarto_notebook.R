@@ -26,6 +26,11 @@ list(
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
+    name = all_performance_metrics,
+    command = here::here("data/gfw/all_performance_metrics.csv"),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
     name = monthly_aggregated_time_series,
     command = here::here("data/gfw/monthly_aggregated_time_series.csv"),
     read = readr::read_csv(!!.x)

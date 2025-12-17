@@ -60,12 +60,7 @@ list(
     "sql/n_ais_messages.sql",
     download_gfw_data(
       bq_billing_project,
-      sql = readr::read_file(!!.x) |>
-        stringr::str_glue(
-          run_version_ais = run_version_ais,
-          analysis_start_year = analysis_start_year,
-          analysis_end_year = analysis_end_year
-        ),
+      sql = "SELECT * FROM ",
       file_path = here::here("data/gfw/n_ais_messages.csv"),
     ),
     format = "file"
@@ -85,6 +80,18 @@ list(
       file_path = here::here("data/gfw/n_s1_detections.csv"),
     ),
     format = "file"
+  ),
+  # Performance estimates for dark fleet model
+  tar_file(
+    name = all_performance_metrics,
+    download_gfw_data(
+      bq_billing_project,
+      sql = "SELECT * FROM `world-fishing-827.proj_ocean_ghg.rf_s1_time_gridded_dark_fleet_model_performance_metrics_{run_version_dark}`" |>
+        stringr::str_glue(
+          run_version_dark = run_version_dark
+        ),
+      file_path = here::here("data/gfw/all_performance_metrics.csv"),
+    )
   ),
   # Monthly summary of Co2 emissions for AIS-broadcasting fleet and non-broadcasting vessels,
   # broken apart by fishing and non-fishing vessels,
