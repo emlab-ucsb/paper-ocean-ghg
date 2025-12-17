@@ -516,28 +516,18 @@ total_spatial_emissions_by_pollutant <- total_spatial_emissions_by_pollutant |>
   )
 ```
 
-
 ```{r}
-#| label: dark-fleet-inferred-stats
-percent_dark_emissions_inferred <- annual_non_broadcasting_detections_emissions |>
-  dplyr::group_by(ratio_inferred) |>
-  dplyr::summarize(emissions_co2_dark_mt = sum(emissions_co2_dark_mt)) |>
+# Summarize fraction of all estimate dark emissions that occurred inside the S1 footprint and in months that were imaged; inside the S1 footprint and in months that weren't imaged; and outside the S1 footprint entirely
+dark_emissions_by_area <- monthly_aggregated_time_series |>
+  dplyr::group_by(inside_footprint, s1_imaged) |>
+  dplyr::summarise(emissions_co2_dark_mt = sum(emissions_co2_dark_mt)) |>
   dplyr::ungroup() |>
-  tidyr::pivot_wider(
-    names_from = "ratio_inferred",
-    values_from = "emissions_co2_dark_mt"
-  ) |>
-  dplyr::mutate(percent_inferred = scales::percent(`TRUE` / (`TRUE` + `FALSE`)))
-
-percent_dark_emissions_inferred_by_type <- annual_non_broadcasting_detections_emissions |>
-  dplyr::group_by(fishing, ratio_inferred) |>
-  dplyr::summarize(emissions_co2_dark_mt = sum(emissions_co2_dark_mt)) |>
-  dplyr::ungroup() |>
-  tidyr::pivot_wider(
-    names_from = "ratio_inferred",
-    values_from = "emissions_co2_dark_mt"
-  ) |>
-  dplyr::mutate(percent_inferred = scales::percent(`TRUE` / (`TRUE` + `FALSE`)))
+  dplyr::mutate(
+    percent_total = scales::percent(
+      emissions_co2_dark_mt / sum(emissions_co2_dark_mt),
+      accuracy = 0.1
+    )
+  )
 ```
 
 # In-line manuscript statistics
@@ -553,7 +543,7 @@ percent_dark_emissions_inferred_by_type <- annual_non_broadcasting_detections_em
 
 - Using the latest data available from the EU's Emissions Database for Global Atmospheric Research (EDGAR), we estimate that in 2023 marine vessels accounted for `r percent_transportation_emmissions_from_marine_2023` of all transportation-related CO$_{2}$ emissions. Marine vessel CO$_{2}$ emissions increased by `r percent_increase_from_2017_to_2023 |> dplyr::filter(data_source == "Marine vessels (AIS + S1)") |> dplyr::pull(emissions_co2_mt_normalized_percent)` between `r analysis_start_year` and 2023, `r round((percent_increase_from_2017_to_2023 |> dplyr::filter(data_source == "Marine vessels (AIS + S1)") |> dplyr::pull(emissions_co2_mt_normalized))/(percent_increase_from_2017_to_2023 |> dplyr::filter(data_source == "Terrestrial transportation (EDGAR)") |> dplyr::pull(emissions_co2_mt_normalized)))` times faster than the growth rate of terrestrial transportation emissions
 
-- Across the entire `r analysis_start_year` to `r analysis_end_year` time series, `r percent_dark_emissions_inferred$percent_inferred` of non-broadcasting emissions were estimated using inferred ratios from the KNN approach (`r percent_dark_emissions_inferred_by_type |> dplyr::filter(!fishing) |> dplyr::pull(percent_inferred)` for non-fishing vessels, and `r percent_dark_emissions_inferred_by_type |> dplyr::filter(fishing) |> dplyr::pull(percent_inferred)` for fishing vessels).
+- Across the entire `r analysis_start_year` to `r analysis_end_year` time series, `r dark_emissions_by_area |> dplyr::filter(inside_footprint & s1_imaged) |> dplyr::pull(percent_total)` of non-broadcasting emissions occurred inside the S1 footprint and in pixel-months that were imaged; `r dark_emissions_by_area |> dplyr::filter(inside_footprint & !s1_imaged) |> dplyr::pull(percent_total)` occurred inside the S1 footprint but in pixel-months that weren't imaged; and `r dark_emissions_by_area |> dplyr::filter(!inside_footprint) |> dplyr::pull(percent_total)` occurred outside the S1 footprint entirely.
 
 # Figures
 
