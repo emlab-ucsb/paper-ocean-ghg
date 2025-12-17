@@ -81,7 +81,8 @@ list(
     ),
     format = "file"
   ),
-  # Performance estimates for dark fleet model
+  # Performance estimates for dark fleet models (emissions regression; detections classification; and detections regrions).
+  # Includes performance estimates for both inside and outside the S1 footprint
   tar_file(
     name = all_performance_metrics,
     download_gfw_data(
