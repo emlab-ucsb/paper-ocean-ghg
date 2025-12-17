@@ -2106,8 +2106,10 @@ writeLines(
 ### Dynamic AIS - annual emissions and vessels by AIS receiver type
 
 ```{r}
-#| label: wrangle-receiver-type-data
-
+#| label: fig-annual-emissions-by-ais-receiver-type
+#| fig-cap: Annual total CO2 emissions (metric tonnes) by the AIS-broadcasting fleet, disaggregated by AIS receiver type (satellite, terrestrial, and dynamic) and total aggregated across receiver types. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.
+#| #| fig-width: 7.5
+#| fig-height: 6
 annual_global_emissions_by_receiver_type <- annual_global_emissions_by_receiver_type |>
   # Don't include unknown receiver type
   dplyr::filter(receiver_type != "unknown") |>
@@ -2121,52 +2123,6 @@ annual_global_emissions_by_receiver_type <- annual_global_emissions_by_receiver_
   # Don't use 2025 data, since the year is incomplete
   dplyr::filter(year < 2025)
 
-# Annual global emissions and number of unique vessels by receiver type (satellite; dynamic; or terrestrial) and flag
-annual_global_emissions_by_receiver_type_and_flag <- annual_global_emissions_by_receiver_type_and_flag |>
-  # Add column name for country name based on flag
-
-  dplyr::mutate(
-    flag = countrycode::countrycode(
-      flag,
-      origin = "iso3c",
-      destination = "country.name"
-    )
-  ) |>
-  # Don't include unknown receiver type
-  dplyr::filter(receiver_type != "unknown") |>
-  dplyr::mutate(
-    receiver_type = stringr::str_to_sentence(receiver_type) |>
-      forcats::fct_relevel("Satellite", "Terrestrial", "Dynamic")
-  ) |>
-  # Fill in missing values with 0s
-  tidyr::complete(
-    receiver_type,
-    tidyr::nesting(year, flag),
-    fill = list(emissions_co2_mt = 0, n_distinct_ssvid = 0)
-  ) |>
-  # Don't use 2025 data, since the year is incomplete
-  dplyr::filter(year < 2025)
-
-# Annual spatial CO2 emissions vt receiver type  (satellite; dynamic; or terrestrial)
-annual_spatial_emissions_by_receiver_type <- annual_spatial_emissions_by_receiver_type |>
-  dplyr::mutate(
-    receiver_type = stringr::str_to_sentence(receiver_type) |>
-      forcats::fct_relevel("Satellite", "Terrestrial", "Dynamic")
-  ) |>
-  # Don't use 2025 data, since the year is incomplete
-  dplyr::filter(year < 2025) |>
-  dplyr::mutate(
-    emissions_mt_per_km2 = emissions_co2_mt / lat_to_area(lat_bin)
-  ) |>
-  dplyr::select(-emissions_co2_mt)
-```
-
-
-```{r}
-#| label: fig-annual-emissions-by-ais-receiver-type
-#| fig-cap: Annual total CO2 emissions (metric tonnes) by the AIS-broadcasting fleet, disaggregated by AIS receiver type (satellite, terrestrial, and dynamic) and total aggregated across receiver types. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.
-#| #| fig-width: 7.5
-#| fig-height: 6
 annual_global_emissions_by_receiver_type |>
   dplyr::rename(
     `CO[2]~emissions~(MT)` = emissions_co2_mt,
@@ -2198,6 +2154,30 @@ annual_global_emissions_by_receiver_type |>
 #| fig-cap: Annual total CO2 emissions (metric tonnes) by the AIS-broadcasting fleet, disaggregated by AIS receiver type (satellite, terrestrial, and dynamic) and total aggregated across receiver types, for the top 10 flags with the most emissions in 2024. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.
 #| fig-width: 7.5
 #| fig-height: 6
+annual_global_emissions_by_receiver_type_and_flag <- annual_global_emissions_by_receiver_type_and_flag |>
+  # Add column name for country name based on flag
+
+  dplyr::mutate(
+    flag = countrycode::countrycode(
+      flag,
+      origin = "iso3c",
+      destination = "country.name"
+    )
+  ) |>
+  # Don't include unknown receiver type
+  dplyr::filter(receiver_type != "unknown") |>
+  dplyr::mutate(
+    receiver_type = stringr::str_to_sentence(receiver_type) |>
+      forcats::fct_relevel("Satellite", "Terrestrial", "Dynamic")
+  ) |>
+  # Fill in missing values with 0s
+  tidyr::complete(
+    receiver_type,
+    tidyr::nesting(year, flag),
+    fill = list(emissions_co2_mt = 0, n_distinct_ssvid = 0)
+  ) |>
+  # Don't use 2025 data, since the year is incomplete
+  dplyr::filter(year < 2025)
 
 top_n_flags_2024 <- annual_global_emissions_by_receiver_type_and_flag |>
   dplyr::filter(year == 2024, receiver_type == "Total") |>
@@ -2231,6 +2211,18 @@ annual_global_emissions_by_receiver_type_and_flag |>
 #| fig-cap: Spatial change in CO2 emissions by the AIS-broadcasting fleet between 2017 and 2024 (metric tonnes) by receiver type (satellite, terrestrial, and dynamic) and total across receiver types, at a 1x1 degree spatial resolution.
 #| fig-width: 7.5
 #| fig-height: 8
+# Annual spatial CO2 emissions vt receiver type  (satellite; dynamic; or terrestrial)
+annual_spatial_emissions_by_receiver_type <- annual_spatial_emissions_by_receiver_type |>
+  dplyr::mutate(
+    receiver_type = stringr::str_to_sentence(receiver_type) |>
+      forcats::fct_relevel("Satellite", "Terrestrial", "Dynamic")
+  ) |>
+  # Don't use 2025 data, since the year is incomplete
+  dplyr::filter(year < 2025) |>
+  dplyr::mutate(
+    emissions_mt_per_km2 = emissions_co2_mt / lat_to_area(lat_bin)
+  ) |>
+  dplyr::select(-emissions_co2_mt)
 
 annual_spatial_emissions_by_receiver_type |>
   dplyr::filter(year %in% c(analysis_start_year, analysis_end_year)) |>
