@@ -235,8 +235,6 @@ fraction_co2_from_transportation <- annual_edgar_tranportation_emissions |>
   scales::percent()
 ```
 
-
-
 ```{r}
 #| label: wrangle-gfw-time-series-emissions-data
 
@@ -528,29 +526,105 @@ dark_emissions_by_area <- monthly_aggregated_time_series |>
       accuracy = 0.1
     )
   )
+
+# Summarize fraction of 2024 CO2 emissions that came from non-broadcasting vessels,
+# disaggregated by fishing and non-fishing
+dark_emissions_by_fishing <- monthly_aggregated_time_series |>
+  dplyr::filter(lubridate::year(time) == 2024) |>
+  dplyr::group_by(fishing) |>
+  dplyr::summarise(
+    emissions_co2_mt = sum(emissions_co2_mt),
+    emissions_co2_dark_mt = sum(emissions_co2_dark_mt)
+  ) |>
+  dplyr::ungroup() |>
+  dplyr::mutate(
+    percent_dark = scales::percent(
+      emissions_co2_dark_mt / (emissions_co2_dark_mt + emissions_co2_mt),
+      accuracy = 0.1
+    )
+  )
+
+monthly_fraction_fig <- monthly_aggregated_time_series |>
+  dplyr::group_by(fishing, year = lubridate::year(time)) |>
+  dplyr::summarise(
+    emissions_co2_mt = sum(emissions_co2_mt),
+    emissions_co2_dark_mt = sum(emissions_co2_dark_mt)
+  ) |>
+  dplyr::ungroup() |>
+  dplyr::mutate(
+    fraction = emissions_co2_dark_mt /
+      (emissions_co2_dark_mt + emissions_co2_mt)
+  ) |>
+  ggplot(aes(x = year, y = fraction, color = fishing)) +
+  geom_line() +
+  scale_y_continuous(labels = scales::percent, limits = c(0, NA))
 ```
 
-# In-line manuscript statistics
+\# In-line manuscript statistics
 
-- The transportation sector is a major source of global greenhouse gas (GHG) and local air pollution emissions, responsible for `r fraction_co2_from_transportation` of all CO$_{2}$ emissions globally in 2023 
+-   The transportation sector is a major source of global greenhouse gas
+    (GHG) and local air pollution emissions, responsible for
+    `r fraction_co2_from_transportation` of all CO$_{2}$ emissions
+    globally in 2023
 
-- For over `r scales::comma(signif(n_unique_vessels$n_unique_vessels,2))` AIS-broadcasting vessels, we quantify point-estimate emissions for each vessel using precise latitude/longitude/timestamp information for over `r scales::comma(signif(n_ais_messages$n_billion_ais_messages,3))` billion individual AIS messages
+-   For over
+    `r scales::comma(signif(n_unique_vessels$n_unique_vessels, 2))`
+    AIS-broadcasting vessels, we quantify point-estimate emissions for
+    each vessel using precise latitude/longitude/timestamp information
+    for over
+    `r scales::comma(signif(n_ais_messages$n_billion_ais_messages, 3))`
+    billion individual AIS messages
 
-- For non-broadcasting vessels, we leverage over `r floor(n_s1_detections$n_million_s1_detections)` million vessel detections from across more than `r floor(n_s1_detections$n_thousand_s1_scenes)` thousand S1 scenes.
+-   For non-broadcasting vessels, we leverage over
+    `r floor(n_s1_detections$n_million_s1_detections)` million vessel
+    detections from across more than
+    `r floor(n_s1_detections$n_thousand_s1_scenes)` thousand S1 scenes.
 
+-   Because many vessels do not broadcast AIS, current approaches solely
+    based on AIS \textit{underestimate} current global emissions by
+    `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(ais_underestimation_2024)`
+    (in 2024), and \textit{overestimate} the increasing trend by
+    `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(trend_overestimation_2017_2024)`
+    (from `r analysis_start_year` to `r analysis_end_year`).
 
-- Because many vessels do not broadcast AIS, current approaches solely based on AIS \textit{underestimate} current global emissions by `r pollutant_ais_underestimation_overestimation_summary |> dplyr::filter(pollutant == "co2") |> dplyr::pull(ais_underestimation_2024)` (in 2024), and \textit{overestimate} the increasing trend by `r pollutant_ais_underestimation_overestimation_summary |> dplyr::filter(pollutant == "co2") |> dplyr::pull(trend_overestimation_2017_2024)` (from `r analysis_start_year` to `r analysis_end_year`). 
+-   Using the latest data available from the EU's Emissions Database for
+    Global Atmospheric Research (EDGAR), we estimate that in 2023 marine
+    vessels accounted for
+    `r percent_transportation_emmissions_from_marine_2023` of all
+    transportation-related CO$_{2}$ emissions. Marine vessel CO$_{2}$
+    emissions increased by
+    `r percent_increase_from_2017_to_2023 |>   dplyr::filter(data_source == "Marine vessels (AIS + S1)") |>   dplyr::pull(emissions_co2_mt_normalized_percent)`
+    between `r analysis_start_year` and 2023,
+    `r round(   (percent_increase_from_2017_to_2023 |>     dplyr::filter(data_source == "Marine vessels (AIS + S1)") |>     dplyr::pull(emissions_co2_mt_normalized)) /     (percent_increase_from_2017_to_2023 |>       dplyr::filter(data_source == "Terrestrial transportation (EDGAR)") |>       dplyr::pull(emissions_co2_mt_normalized)) )`
+    times faster than the growth rate of terrestrial transportation
+    emissions
 
-- Using the latest data available from the EU's Emissions Database for Global Atmospheric Research (EDGAR), we estimate that in 2023 marine vessels accounted for `r percent_transportation_emmissions_from_marine_2023` of all transportation-related CO$_{2}$ emissions. Marine vessel CO$_{2}$ emissions increased by `r percent_increase_from_2017_to_2023 |> dplyr::filter(data_source == "Marine vessels (AIS + S1)") |> dplyr::pull(emissions_co2_mt_normalized_percent)` between `r analysis_start_year` and 2023, `r round((percent_increase_from_2017_to_2023 |> dplyr::filter(data_source == "Marine vessels (AIS + S1)") |> dplyr::pull(emissions_co2_mt_normalized))/(percent_increase_from_2017_to_2023 |> dplyr::filter(data_source == "Terrestrial transportation (EDGAR)") |> dplyr::pull(emissions_co2_mt_normalized)))` times faster than the growth rate of terrestrial transportation emissions
+-   Across the entire `r analysis_start_year` to `r analysis_end_year`
+    time series,
+    `r dark_emissions_by_area |>   dplyr::filter(inside_footprint & s1_imaged) |>   dplyr::pull(percent_total)`
+    of non-broadcasting emissions occurred inside the S1 footprint and
+    in pixel-months that were imaged;
+    `r dark_emissions_by_area |>   dplyr::filter(inside_footprint & !s1_imaged) |>   dplyr::pull(percent_total)`
+    occurred inside the S1 footprint but in pixel-months that weren't
+    imaged; and
+    `r dark_emissions_by_area |>   dplyr::filter(!inside_footprint) |>   dplyr::pull(percent_total)`
+    occurred outside the S1 footprint entirely.
 
-- Across the entire `r analysis_start_year` to `r analysis_end_year` time series, `r dark_emissions_by_area |> dplyr::filter(inside_footprint & s1_imaged) |> dplyr::pull(percent_total)` of non-broadcasting emissions occurred inside the S1 footprint and in pixel-months that were imaged; `r dark_emissions_by_area |> dplyr::filter(inside_footprint & !s1_imaged) |> dplyr::pull(percent_total)` occurred inside the S1 footprint but in pixel-months that weren't imaged; and `r dark_emissions_by_area |> dplyr::filter(!inside_footprint) |> dplyr::pull(percent_total)` occurred outside the S1 footprint entirely.
+-   In `r analysis_end_year`,
+    `r dark_emissions_by_fishing |> dplyr::filter(fishing) |> dplyr::pull(percent_dark)`
+    of CO$_{2}$ emissions from fishing vessels were from
+    non-broadcasting vessels, and
+    `r dark_emissions_by_fishing |> dplyr::filter(!fishing) |> dplyr::pull(percent_dark)`
+    of CO$_{2}$ emissions from non-fishing vessels were from
+    non-broadcasting vessels. For both types of vessels, this fraction
+    of emissions from non-broadcasting vessels has been declining
+    steadily since 2020.
 
-# Figures
+    # Figures
 
+    ## Figure 1
 
-## Figure 1
-
-### Figure 1, panel A
+    ### Figure 1, panel A
 
 ```{r}
 total_annual_emissions_by_fleet_fig <- annual_emissions |>
@@ -718,7 +792,6 @@ co2_map <- pollutant_map_data_co2 |>
   )
 ```
 
-
 ### Figure 1, combined
 
 ```{r}
@@ -829,9 +902,6 @@ cowplot::plot_grid(
   labels = c("A", "B")
 )
 ```
-
-
-
 
 ## Figure 3
 
@@ -1126,7 +1196,7 @@ s1_ais_vessel_size_class_comparison |>
   scale_x_continuous(limits = c(0, NA))
 ```
 
-###  Fraction matched detections, by vessel size and type
+### Fraction matched detections, by vessel size and type
 
 ```{r}
 #| label: fig-dark-vessel-fraction-detected-time-series
@@ -1241,7 +1311,7 @@ s1_mean_spatial_knn_ratios |>
   coord_sf(crs = map_projection)
 ```
 
-###  Dark fleet emissions, by vessel size and type
+### Dark fleet emissions, by vessel size and type
 
 ```{r}
 #| label: fig-global-annual-co2-dark-emissions-by-type
@@ -1263,7 +1333,6 @@ summarized_s1_dark_fleet_data |>
   facet_grid(fishing ~ ., scales = "free_y") +
   paletteer::scale_fill_paletteer_d(palette = "jcolors::pal10")
 ```
-
 
 ```{r}
 #| label: fig-pollutant-maps
@@ -1372,7 +1441,6 @@ pollutant_time_series_data_co2 <- total_monthly_emissions_by_pollutant |>
   dplyr::filter(pollutant == "CO2")
 
 ```
-
 
 ```{r}
 #| label: fig-data-richness
@@ -1731,7 +1799,7 @@ make_pollutant_time_series_figure(
   )
 ```
 
-###  Registered data validation
+### Registered data validation
 
 ```{r}
 #| label: fig-registered-data-performance
@@ -2195,9 +2263,7 @@ annual_global_emissions_by_receiver_type_and_flag |>
 
 ```
 
-
 ### Dynamic AIS - map showing spatial change in emissions by AIS receiver type
-
 
 ```{r}
 #| label: fig-co2-emissions-change-map-by-receiver-type
@@ -2273,7 +2339,6 @@ annual_spatial_emissions_by_receiver_type |>
   scale_y_continuous(expand = c(0, 1)) +
   coord_sf(crs = map_projection)
 ```
-
 
 ## MRV performance validation table
 
