@@ -26,12 +26,12 @@ list(
   # Define the version of the dark fleet dataset to pull
   tar_target(
     name = run_version_dark,
-    "v20250901"
+    "v20251216"
   ),
   # Set analysis start year
   tar_target(
     name = analysis_start_year,
-    2016
+    2017
   ),
   # Set analysis end year
   tar_target(
@@ -315,8 +315,7 @@ list(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
         stringr::str_glue(
-          run_version_ais = run_version_ais,
-          run_version_dark = run_version_dark
+          run_version_ais = run_version_ais
         ),
       file_path = here::here(
         "data/gfw/vessel_size_info.csv"
@@ -334,7 +333,8 @@ list(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
         stringr::str_glue(
-          run_version_dark = run_version_dark
+          # Update this to run_version_dark once s1_ratios_sf has made new tables
+          run_version_dark = "v20251005"
         ),
       file_path = here::here(
         "data/gfw/s1_ais_vessel_size_class_comparison.csv"
