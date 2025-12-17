@@ -33,7 +33,7 @@ knitr::opts_chunk$set(
 library(ggplot2)
 library(sf)
 
-analysis_start_year <- 2016
+analysis_start_year <- 2017
 analysis_end_year <- 2024
 ```
 
@@ -276,7 +276,10 @@ annual_emissions <- annual_emissions_all_pollutants_with_total |>
 
 # Calculate the total percent change in emissions by fleet
 total_percent_change_by_fleet <- annual_emissions |>
-  dplyr::filter(year %in% c(2016, 2024), fleet != "Total") |>
+  dplyr::filter(
+    year %in% c(analysis_start_year, analysis_end_year),
+    fleet != "Total"
+  ) |>
   tidyr::pivot_wider(names_from = year, values_from = emissions_mt) |>
   dplyr::arrange(pollutant) |>
   dplyr::group_by(pollutant) |>
@@ -287,7 +290,11 @@ total_percent_change_by_fleet <- annual_emissions |>
   tidyr::fill(pollutant, .direction = "down") |>
   # janitor::adorn_totals("row") |>
   dplyr::mutate(percent_total_2024 = scales::percent(percent_total_2024)) |>
-  dplyr::mutate(percent_change = 100 * (`2024` - `2016`) / `2016`) |>
+  dplyr::mutate(
+    percent_change = 100 *
+      (`2024` - `analysis_start_year`) /
+      `analysis_start_year`
+  ) |>
   dplyr::mutate(
     fleet = dplyr::case_when(
       fleet == "Total" ~ "AIS + S1",
@@ -313,30 +320,30 @@ ais_scale_underestimation_2024 <- total_percent_change_by_fleet |>
     emissions_mt_2024_ais_s1 = `AIS + S1`
   )
 
-# For each pollutant, estimate how much the 2016->2024 trend in emissions is underestimated by just using AIS
+# For each pollutant, estimate how much the 2017->2024 trend in emissions is underestimated by just using AIS
 # As compared to using AIS + S1
-ais_trend_overestimation_2016_2024 <- total_percent_change_by_fleet |>
+ais_trend_overestimation_2017_2024 <- total_percent_change_by_fleet |>
   dplyr::filter(fleet != "S1 (non-broadcasting)") |>
   dplyr::select(fleet, pollutant, percent_change) |>
   tidyr::pivot_wider(names_from = "fleet", values_from = percent_change) |>
   dplyr::mutate(
-    trend_overestimation_2016_2024 = (`AIS (broadcasting)` /
+    trend_overestimation_2017_2024 = (`AIS (broadcasting)` /
       `AIS + S1` -
       1) |>
       scales::percent()
   ) |>
   dplyr::rename(
-    trend_2016_2024_ais = `AIS (broadcasting)`,
-    trend_2016_2024_ais_s1 = `AIS + S1`
+    trend_2017_2024_ais = `AIS (broadcasting)`,
+    trend_2017_2024_ais_s1 = `AIS + S1`
   )
 
 # Put all this information together
 pollutant_ais_underestimation_overestimation_summary <- ais_scale_underestimation_2024 |>
-  dplyr::left_join(ais_trend_overestimation_2016_2024, by = "pollutant") |>
+  dplyr::left_join(ais_trend_overestimation_2017_2024, by = "pollutant") |>
   dplyr::select(
     pollutant,
     ais_underestimation_2024,
-    trend_overestimation_2016_2024
+    trend_overestimation_2017_2024
   )
 ```
 
@@ -360,9 +367,9 @@ all_tranportation_data <- land_based_transportation_emissions_edgar |>
   )
 
 
-# Get 2016 values for time-series normalization
+# Get analysis_start_year values for time-series normalization
 all_tranportation_data_starting <- all_tranportation_data |>
-  dplyr::filter(year == 2016) |>
+  dplyr::filter(year == analysis_start_year) |>
   dplyr::mutate(emissions_co2_mt_starting = emissions_co2_mt) |>
   dplyr::select(-c(year, emissions_co2_mt))
 
@@ -390,7 +397,7 @@ percent_transportation_emmissions_from_marine_2023 <- all_tranportation_data |>
   ) |>
   dplyr::pull(percent)
 
-percent_increase_from_2016_to_2023 <- all_tranportation_data_normalized |>
+percent_increase_from_2017_to_2023 <- all_tranportation_data_normalized |>
   dplyr::filter(year == 2023) |>
   dplyr::mutate(
     emissions_co2_mt_normalized_percent = scales::percent(
@@ -448,7 +455,7 @@ all_inventory_data |>
   theme_plot() +
   scale_x_continuous(
     breaks = unique(annual_emissions$year),
-    limits = c(2016, 2024)
+    limits = c(analysis_start_year, analysis_end_year)
   ) +
   labs(
     x = "",
@@ -485,7 +492,7 @@ all_inventory_data |>
 
 ```{r}
 #| label: wrangle-gfw-spatials-emissions-data
-# Total spatial emissions by pollutant for 2016 and 2024
+# Total spatial emissions by pollutant for analysis_start_year and 2024
 total_spatial_emissions_by_pollutant <- total_spatial_emissions_by_pollutant |>
   tidyr::pivot_longer(
     -c(lat_bin, lon_bin, year),
@@ -541,11 +548,11 @@ percent_dark_emissions_inferred_by_type <- annual_non_broadcasting_detections_em
 - For non-broadcasting vessels, we leverage over `r floor(n_s1_detections$n_million_s1_detections)` million vessel detections from across more than `r floor(n_s1_detections$n_thousand_s1_scenes)` S1 scenes.
 
 
-- Because many vessels do not broadcast AIS, current approaches solely based on AIS \textit{underestimate} current global emissions by `r pollutant_ais_underestimation_overestimation_summary |> dplyr::filter(pollutant == "co2") |> dplyr::pull(ais_underestimation_2024)` (in 2024), and \textit{overestimate} the increasing trend by `r pollutant_ais_underestimation_overestimation_summary |> dplyr::filter(pollutant == "co2") |> dplyr::pull(trend_overestimation_2016_2024)` (from 2016 to 2024). 
+- Because many vessels do not broadcast AIS, current approaches solely based on AIS \textit{underestimate} current global emissions by `r pollutant_ais_underestimation_overestimation_summary |> dplyr::filter(pollutant == "co2") |> dplyr::pull(ais_underestimation_2024)` (in 2024), and \textit{overestimate} the increasing trend by `r pollutant_ais_underestimation_overestimation_summary |> dplyr::filter(pollutant == "co2") |> dplyr::pull(trend_overestimation_2017_2024)` (from `r analysis_start_year` to `r analysis_end_year`). 
 
-- Using the latest data available from the EU's Emissions Database for Global Atmospheric Research (EDGAR), we estimate that in 2023 marine vessels accounted for `r percent_transportation_emmissions_from_marine_2023` of all transportation-related CO$_{2}$ emissions. Marine vessel CO$_{2}$ emissions increased by `r percent_increase_from_2016_to_2023 |> dplyr::filter(data_source == "Marine vessels (AIS + S1)") |> dplyr::pull(emissions_co2_mt_normalized_percent)` between 2016 and 2023, `r round((percent_increase_from_2016_to_2023 |> dplyr::filter(data_source == "Marine vessels (AIS + S1)") |> dplyr::pull(emissions_co2_mt_normalized))/(percent_increase_from_2016_to_2023 |> dplyr::filter(data_source == "Terrestrial transportation (EDGAR)") |> dplyr::pull(emissions_co2_mt_normalized)))` times faster than the growth rate of terrestrial transportation emissions
+- Using the latest data available from the EU's Emissions Database for Global Atmospheric Research (EDGAR), we estimate that in 2023 marine vessels accounted for `r percent_transportation_emmissions_from_marine_2023` of all transportation-related CO$_{2}$ emissions. Marine vessel CO$_{2}$ emissions increased by `r percent_increase_from_2017_to_2023 |> dplyr::filter(data_source == "Marine vessels (AIS + S1)") |> dplyr::pull(emissions_co2_mt_normalized_percent)` between `r analysis_start_year` and 2023, `r round((percent_increase_from_2017_to_2023 |> dplyr::filter(data_source == "Marine vessels (AIS + S1)") |> dplyr::pull(emissions_co2_mt_normalized))/(percent_increase_from_2017_to_2023 |> dplyr::filter(data_source == "Terrestrial transportation (EDGAR)") |> dplyr::pull(emissions_co2_mt_normalized)))` times faster than the growth rate of terrestrial transportation emissions
 
-- Across the entire 2016 to 2024 time series, `r percent_dark_emissions_inferred$percent_inferred` of non-broadcasting emissions were estimated using inferred ratios from the KNN approach (`r percent_dark_emissions_inferred_by_type |> dplyr::filter(!fishing) |> dplyr::pull(percent_inferred)` for non-fishing vessels, and `r percent_dark_emissions_inferred_by_type |> dplyr::filter(fishing) |> dplyr::pull(percent_inferred)` for fishing vessels).
+- Across the entire `r analysis_start_year` to 2`r analysis_end_year`024 time series, `r percent_dark_emissions_inferred$percent_inferred` of non-broadcasting emissions were estimated using inferred ratios from the KNN approach (`r percent_dark_emissions_inferred_by_type |> dplyr::filter(!fishing) |> dplyr::pull(percent_inferred)` for non-fishing vessels, and `r percent_dark_emissions_inferred_by_type |> dplyr::filter(fishing) |> dplyr::pull(percent_inferred)` for fishing vessels).
 
 # Figures
 
@@ -573,7 +580,7 @@ total_annual_emissions_by_fleet_fig <- annual_emissions |>
   ) +
   scale_x_continuous(
     breaks = unique(annual_emissions$year),
-    limits = c(2016, 2024)
+    limits = c(analysis_start_year, analysis_end_year)
   ) +
   scale_color_manual(
     values = all_data_source_color_palette,
@@ -595,9 +602,9 @@ total_annual_emissions_by_fleet_fig <- annual_emissions |>
 ### Figure 2, panel B
 
 ```{r}
-# Get 2016 values for time-series normalization
+# Get analysis_start_year values for time-series normalization
 annual_co2_emissions_starting <- annual_emissions |>
-  dplyr::filter(pollutant == "co2", year == 2016) |>
+  dplyr::filter(pollutant == "co2", year == analysis_start_year) |>
   dplyr::mutate(emissions_co2_mt_starting = emissions_mt) |>
   dplyr::select(-c(year, emissions_mt))
 
@@ -622,7 +629,7 @@ normalized_annual_emissions_by_fleet_fig <- annual_emissions |>
   ) +
   scale_x_continuous(
     breaks = unique(annual_emissions$year),
-    limits = c(2016, 2024)
+    limits = c(analysis_start_year, analysis_end_year)
   ) +
   scale_color_manual(
     values = all_data_source_color_palette,
@@ -633,7 +640,7 @@ normalized_annual_emissions_by_fleet_fig <- annual_emissions |>
     x = "",
     y = expression(atop(
       Relative ~ change ~ of ~ CO[2],
-      emissions ~ from ~ 2016 ~ baseline
+      emissions ~ from ~ 2017 ~ baseline
     ))
   ) +
   theme(
@@ -651,7 +658,7 @@ pollutant_map_data_co2 <- total_spatial_emissions_by_pollutant |>
   dplyr::filter(pollutant %in% c("CO2")) |>
   dplyr::mutate(
     emissions_mt_per_km2_delta_abs = emissions_mt_per_km2_2024 -
-      emissions_mt_per_km2_2016
+      emissions_mt_per_km2_2017
   ) |>
   dplyr::select(
     lon_bin,
@@ -667,7 +674,7 @@ co2_map <- pollutant_map_data_co2 |>
   dplyr::mutate(
     name = ifelse(
       name == "emissions_mt_per_km2_delta_abs",
-      "Change in emissions from 2016 to 2024",
+      "Change in emissions from 2017 to 2024",
       "2024 emissions"
     )
   ) |>
@@ -725,7 +732,7 @@ co2_map <- pollutant_map_data_co2 |>
 
 ```{r}
 #| label: fig-emissions-by-data-source-and-maps
-#| #| fig-cap: (A) Annual marine vessel CO2 emissions, with each line colored based on the data source. (B) Relative change in annual marine vessel CO2 emissions from a 2016 baseline, with each line colored based on the data source. (C) Spatial map of CO2 emissions in 2024 (top) and change in CO2 emissions between 2016 and 2024 (bottom), aggregated across AIS-broadcasting vessels and non-broadcasting vessels, and shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel.
+#| #| fig-cap: (A) Annual marine vessel CO2 emissions, with each line colored based on the data source. (B) Relative change in annual marine vessel CO2 emissions from a 2017 baseline, with each line colored based on the data source. (C) Spatial map of CO2 emissions in 2024 (top) and change in CO2 emissions between 2017 and 2024 (bottom), aggregated across AIS-broadcasting vessels and non-broadcasting vessels, and shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel.
 #| fig-width: 9
 #| fig-height: 6
 cowplot::plot_grid(
@@ -757,7 +764,7 @@ emissions_comparison_figure <- all_tranportation_data |>
   geom_line(linewidth = 1.05) +
   scale_x_continuous(
     breaks = unique(all_tranportation_data_normalized$year),
-    limits = c(2016, 2023)
+    limits = c(analysis_start_year, 2023)
   ) +
   scale_y_continuous(
     labels = scales::unit_format(unit = "B", scale = 1e-9),
@@ -796,7 +803,7 @@ emissions_comparison_figure_normalized <- all_tranportation_data_normalized |>
   geom_line(linewidth = 1.1) +
   scale_x_continuous(
     breaks = unique(all_tranportation_data_normalized$year),
-    limits = c(2016, 2023)
+    limits = c(analysis_start_year, 2023)
   ) +
   scale_y_continuous(
     labels = scales::percent
@@ -806,7 +813,7 @@ emissions_comparison_figure_normalized <- all_tranportation_data_normalized |>
     x = "",
     y = expression(atop(
       Relative ~ change ~ of,
-      CO[2] ~ emissions ~ from ~ 2016 ~ baseline
+      CO[2] ~ emissions ~ from ~ 2017 ~ baseline
     ))
   ) +
   theme(
@@ -942,9 +949,9 @@ performance_metrics |>
 
 ```{r}
 #| label: predict-using-decomposition-model
-# Find initial/starting 2016 values of kw-hours and speed, by fishing and length_size_class_percentile, for decomposition
+# Find initial/starting 2017 values of kw-hours and speed, by fishing and length_size_class_percentile, for decomposition
 starting_values <- annual_extrapolation_dataset |>
-  dplyr::filter(year == 2016) |>
+  dplyr::filter(year == analysis_start_year) |>
   dplyr::select(
     fishing,
     length_size_class_percentile,
@@ -971,7 +978,7 @@ final_prediction_dataset <- predictions_dataset |>
       predictions_dataset
     )$.pred
   ) |>
-  # Add model predictions using observed kw-hours and constant speed (from 2016)
+  # Add model predictions using observed kw-hours and constant speed (from 2017)
   dplyr::bind_cols(
     observed_kw_hours_constant_speed = predict(
       final_model_fit,
@@ -980,7 +987,7 @@ final_prediction_dataset <- predictions_dataset |>
         dplyr::rename(avg_speed_knots = avg_speed_knots_starting)
     )$.pred
   ) |>
-  # Add model predictions using constant kw-hours (from 2016) and observed speed
+  # Add model predictions using constant kw-hours (from 2017) and observed speed
   dplyr::bind_cols(
     constant_kw_hours_observed_speed = predict(
       final_model_fit,
@@ -989,7 +996,7 @@ final_prediction_dataset <- predictions_dataset |>
         dplyr::rename(kw_hours_total = kw_hours_total_starting)
     )$.pred
   ) |>
-  # Add model predictions using constant kw-hours (from 2016) and constant speed (from 2016)
+  # Add model predictions using constant kw-hours (from 2017) and constant speed (from 2017)
   dplyr::bind_cols(
     constant_kw_hours_constant_speed = predict(
       final_model_fit,
@@ -1006,7 +1013,7 @@ final_prediction_dataset <- predictions_dataset |>
 
 ```{r}
 #| label: fig-hours-speed-decomposition
-#| fig-cap: Estimated decomposition of change in total CO2 emissions from 2016 baseline (aggregating across both broadcasting and non-broadcasting vessels), using the random forest model outputs of four different scenarios that decompose the relative impact of changes in total kW-hours and changes in average speed/
+#| fig-cap: Estimated decomposition of change in total CO2 emissions from 2017 baseline (aggregating across both broadcasting and non-broadcasting vessels), using the random forest model outputs of four different scenarios that decompose the relative impact of changes in total kW-hours and changes in average speed/
 #| fig-width: 7.5
 #| fig-height: 3
 # Aggregate prediction values by year (across vessel size classes and type)
@@ -1029,9 +1036,9 @@ final_annual_prediction_dataset <- final_prediction_dataset |>
   ) |>
   tidyr::pivot_longer(-year)
 
-# We will normalize all of these predictions to the 2016 starting prediction
+# We will normalize all of these predictions to the 2017 starting prediction
 starting_value_from_prediction <- final_annual_prediction_dataset |>
-  dplyr::filter(year == 2016) |>
+  dplyr::filter(year == analysis_start_year) |>
   dplyr::rename(starting_value = value) |>
   dplyr::select(-year)
 
@@ -1058,7 +1065,7 @@ time_series_predicted_decomposition_df |>
     x = "",
     y = expression(atop(
       Percent ~ change ~ of ~ total ~ CO[2],
-      emissions ~ from ~ 2016 ~ basline
+      emissions ~ from ~ 2017 ~ basline
     )),
   ) +
   theme_plot() +
@@ -2024,12 +2031,12 @@ ggplot(
 
 # Supplementary tables
 
-## Summary of 2016 and 2024 emissions, by pollutant and data source
+## Summary of 2017 and 2024 emissions, by pollutant and data source
 
 ```{r}
 total_percent_change_by_fleet_tbl <- total_percent_change_by_fleet |>
   dplyr::mutate(across(
-    c(`2016`, `2024`, percent_change),
+    c(`2017`, `2024`, percent_change),
     ~ signif(., 3) |>
       prettyNum(big.mark = ",")
   )) |>
@@ -2045,15 +2052,15 @@ total_percent_change_by_fleet_tbl <- total_percent_change_by_fleet |>
   dplyr::rename(
     `Data source` = fleet,
     Pollutant = pollutant,
-    `2016 emissions (MT)` = `2016`,
+    `2017 emissions (MT)` = `2017`,
     `2024 emissions (MT)` = `2024`,
     `Percent 2024 total` = percent_total_2024,
-    `Percent change from 2016 to 2024` = percent_change
+    `Percent change from 2017 to 2024` = percent_change
   ) |>
   knitr::kable(
     format = "latex",
     label = "total_percent_change_by_fleet",
-    caption = "Summary of 2016 and 2024 emissions, by pollutant and data source."
+    caption = "Summary of 2017 and 2024 emissions, by pollutant and data source."
   ) |>
   kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
 
@@ -2063,7 +2070,7 @@ writeLines(
 )
 ```
 
-## Underestimation of 2024 emissions using only AIS data, and overestimation of 2016 to 2024 emissions trend using only AIS data, by pollutant.
+## Underestimation of 2024 emissions using only AIS data, and overestimation of 2017 to 2024 emissions trend using only AIS data, by pollutant.
 
 ```{r}
 pollutant_ais_underestimation_overestimation_summary_tbl <- pollutant_ais_underestimation_overestimation_summary |>
@@ -2079,12 +2086,12 @@ pollutant_ais_underestimation_overestimation_summary_tbl <- pollutant_ais_undere
   dplyr::rename(
     Pollutant = pollutant,
     "AIS-only underestimation of 2024 emissions" = ais_underestimation_2024,
-    "AIS-only overestimation of 2016-2024 emissions trend" = trend_overestimation_2016_2024
+    "AIS-only overestimation of 2017-2024 emissions trend" = trend_overestimation_2017_2024
   ) |>
   knitr::kable(
     format = "latex",
     label = "pollutant_ais_underestimation_overestimation_summary",
-    caption = "Underestimation of 2024 emissions using only AIS data, and overestimation of 2016 to 2024 emissions trend using only AIS data, by pollutant."
+    caption = "Underestimation of 2024 emissions using only AIS data, and overestimation of 2017 to 2024 emissions trend using only AIS data, by pollutant."
   ) |>
   kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
 
@@ -2221,15 +2228,15 @@ annual_global_emissions_by_receiver_type_and_flag |>
 
 ```{r}
 #| label: fig-co2-emissions-change-map-by-receiver-type
-#| fig-cap: Spatial change in CO2 emissions by the AIS-broadcasting fleet between 2016 and 2024 (metric tonnes) by receiver type (satellite, terrestrial, and dynamic) and total across receiver types, at a 1x1 degree spatial resolution.
+#| fig-cap: Spatial change in CO2 emissions by the AIS-broadcasting fleet between 2017 and 2024 (metric tonnes) by receiver type (satellite, terrestrial, and dynamic) and total across receiver types, at a 1x1 degree spatial resolution.
 #| fig-width: 7.5
 #| fig-height: 8
 
 annual_spatial_emissions_by_receiver_type |>
-  dplyr::filter(year %in% c(2016, 2024)) |>
+  dplyr::filter(year %in% c(analysis_start_year, analysis_end_year)) |>
   tidyr::pivot_wider(names_from = year, values_from = emissions_mt_per_km2) |>
-  dplyr::mutate(across(c(`2016`, `2024`), ~ tidyr::replace_na(., 0))) |>
-  dplyr::mutate(emissions_mt_per_km2 = `2024` - `2016`) |>
+  dplyr::mutate(across(c(`2017`, `2024`), ~ tidyr::replace_na(., 0))) |>
+  dplyr::mutate(emissions_mt_per_km2 = `2024` - `2017`) |>
   ggplot() +
   geom_sf(data = world_bbox_sf, fill = "grey90") +
   ggspatial::geom_spatial_tile(aes(
@@ -2243,7 +2250,7 @@ annual_spatial_emissions_by_receiver_type |>
   scico::scale_fill_scico(
     expression(atop(
       Change ~ of ~ CO[2] ~ emissions,
-      from ~ 2016 ~ to ~ 2024 ~ (MT / km^2)
+      from ~ 2017 ~ to ~ 2024 ~ (MT / km^2)
     )),
     palette = "vik",
     midpoint = 0,
@@ -2255,7 +2262,7 @@ annual_spatial_emissions_by_receiver_type |>
   scico::scale_color_scico(
     expression(atop(
       Change ~ of ~ CO[2] ~ emissions,
-      from ~ 2016 ~ to ~ 2024 ~ (MT / km^2)
+      from ~ 2017 ~ to ~ 2024 ~ (MT / km^2)
     )),
     palette = "vik",
     midpoint = 0,
