@@ -292,8 +292,8 @@ total_percent_change_by_fleet <- annual_emissions |>
   dplyr::mutate(percent_total_2024 = scales::percent(percent_total_2024)) |>
   dplyr::mutate(
     percent_change = 100 *
-      (`2024` - `analysis_start_year`) /
-      `analysis_start_year`
+      (`2024` - `2017`) /
+      `2017`
   ) |>
   dplyr::mutate(
     fleet = dplyr::case_when(
@@ -336,7 +336,7 @@ ais_trend_overestimation_2017_2024 <- total_percent_change_by_fleet |>
     trend_2017_2024_ais = `AIS (broadcasting)`,
     trend_2017_2024_ais_s1 = `AIS + S1`
   )
-
+test <- 1 + 1
 # Put all this information together
 pollutant_ais_underestimation_overestimation_summary <- ais_scale_underestimation_2024 |>
   dplyr::left_join(ais_trend_overestimation_2017_2024, by = "pollutant") |>
@@ -545,14 +545,14 @@ percent_dark_emissions_inferred_by_type <- annual_non_broadcasting_detections_em
 
 - For over `r scales::comma(signif(n_unique_vessels$n_unique_vessels,2))` AIS-broadcasting vessels, we quantify point-estimate emissions for each vessel using precise latitude/longitude/timestamp information for over `r scales::comma(signif(n_ais_messages$n_billion_ais_messages,3))` billion individual AIS messages
 
-- For non-broadcasting vessels, we leverage over `r floor(n_s1_detections$n_million_s1_detections)` million vessel detections from across more than `r floor(n_s1_detections$n_thousand_s1_scenes)` S1 scenes.
+- For non-broadcasting vessels, we leverage over `r floor(n_s1_detections$n_million_s1_detections)` million vessel detections from across more than `r floor(n_s1_detections$n_thousand_s1_scenes)` thousand S1 scenes.
 
 
 - Because many vessels do not broadcast AIS, current approaches solely based on AIS \textit{underestimate} current global emissions by `r pollutant_ais_underestimation_overestimation_summary |> dplyr::filter(pollutant == "co2") |> dplyr::pull(ais_underestimation_2024)` (in 2024), and \textit{overestimate} the increasing trend by `r pollutant_ais_underestimation_overestimation_summary |> dplyr::filter(pollutant == "co2") |> dplyr::pull(trend_overestimation_2017_2024)` (from `r analysis_start_year` to `r analysis_end_year`). 
 
 - Using the latest data available from the EU's Emissions Database for Global Atmospheric Research (EDGAR), we estimate that in 2023 marine vessels accounted for `r percent_transportation_emmissions_from_marine_2023` of all transportation-related CO$_{2}$ emissions. Marine vessel CO$_{2}$ emissions increased by `r percent_increase_from_2017_to_2023 |> dplyr::filter(data_source == "Marine vessels (AIS + S1)") |> dplyr::pull(emissions_co2_mt_normalized_percent)` between `r analysis_start_year` and 2023, `r round((percent_increase_from_2017_to_2023 |> dplyr::filter(data_source == "Marine vessels (AIS + S1)") |> dplyr::pull(emissions_co2_mt_normalized))/(percent_increase_from_2017_to_2023 |> dplyr::filter(data_source == "Terrestrial transportation (EDGAR)") |> dplyr::pull(emissions_co2_mt_normalized)))` times faster than the growth rate of terrestrial transportation emissions
 
-- Across the entire `r analysis_start_year` to 2`r analysis_end_year`024 time series, `r percent_dark_emissions_inferred$percent_inferred` of non-broadcasting emissions were estimated using inferred ratios from the KNN approach (`r percent_dark_emissions_inferred_by_type |> dplyr::filter(!fishing) |> dplyr::pull(percent_inferred)` for non-fishing vessels, and `r percent_dark_emissions_inferred_by_type |> dplyr::filter(fishing) |> dplyr::pull(percent_inferred)` for fishing vessels).
+- Across the entire `r analysis_start_year` to `r analysis_end_year` time series, `r percent_dark_emissions_inferred$percent_inferred` of non-broadcasting emissions were estimated using inferred ratios from the KNN approach (`r percent_dark_emissions_inferred_by_type |> dplyr::filter(!fishing) |> dplyr::pull(percent_inferred)` for non-fishing vessels, and `r percent_dark_emissions_inferred_by_type |> dplyr::filter(fishing) |> dplyr::pull(percent_inferred)` for fishing vessels).
 
 # Figures
 
@@ -2073,6 +2073,7 @@ writeLines(
 ## Underestimation of 2024 emissions using only AIS data, and overestimation of 2017 to 2024 emissions trend using only AIS data, by pollutant.
 
 ```{r}
+test <- 1 + 1
 pollutant_ais_underestimation_overestimation_summary_tbl <- pollutant_ais_underestimation_overestimation_summary |>
   dplyr::mutate(
     pollutant = stringr::str_to_upper(pollutant) |>
