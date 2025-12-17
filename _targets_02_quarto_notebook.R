@@ -26,6 +26,11 @@ list(
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
+    name = monthly_aggregated_time_series,
+    command = here::here("data/gfw/monthly_aggregated_time_series.csv"),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
     name = annual_emissions_all_pollutants,
     command = here::here("data/gfw/annual_emissions_all_pollutants.csv"),
     read = readr::read_csv(!!.x)

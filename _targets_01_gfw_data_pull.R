@@ -86,6 +86,22 @@ list(
     ),
     format = "file"
   ),
+  # Monthly summary of Co2 emissions for AIS-broadcasting fleet and non-broadcasting vessels,
+  # broken apart by fishing and non-fishing vessels,
+  # inside and outside the S1 footprint; and imaged and not imaged in the S1 footprint
+  tar_file_read(
+    name = monthly_aggregated_time_series,
+    "sql/monthly_aggregated_time_series.sql",
+    download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_dark = run_version_dark
+        ),
+      file_path = here::here("data/gfw/monthly_aggregated_time_series.csv"),
+    ),
+    format = "file"
+  ),
   # Annual emissions data for AIS-broadcasting fleet and non-broadcasting vessels,
   # broken apart by fishing and non-fishing vessels
   # For all pollutants

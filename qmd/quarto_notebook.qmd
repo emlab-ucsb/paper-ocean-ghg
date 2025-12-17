@@ -45,6 +45,7 @@ targets::tar_load(c(
   "n_ais_messages",
   "n_s1_detections",
   "annual_edgar_emissions",
+  "monthly_aggregated_time_series",
   "annual_emissions_all_pollutants",
   "total_spatial_emissions_by_pollutant",
   "annual_ais_to_dark_activity_extrapolation",
