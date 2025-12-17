@@ -2034,6 +2034,7 @@ ggplot(
 ## Summary of 2017 and 2024 emissions, by pollutant and data source
 
 ```{r}
+test <- 1 + 1
 total_percent_change_by_fleet_tbl <- total_percent_change_by_fleet |>
   dplyr::mutate(across(
     c(`2017`, `2024`, percent_change),
