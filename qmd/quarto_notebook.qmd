@@ -2235,22 +2235,26 @@ writeLines(
 ```{r}
 #| label: fig-feature-importance
 #| fig-cap: Feature importance plots for the three final model fit random forests
+#| fig-height: 9
 
 all_varimp_data |>
   dplyr::mutate(
     model = stringr::str_replace_all(model, "_", "; ") |>
-      stringr::str_to_sentence(),
-    test = stringr::str_replace_all(test, "_", " ") |>
-      stringr::str_to_sentence()
+      stringr::str_to_sentence() |>
+      forcats::fct_relevel(
+        "Emissions; regression",
+        "Detections; classification",
+        "Detections; regression"
+      ),
   ) |>
-    ggplot(aes(x = Importance, y = reorder(Variable, Importance))) +
+    ggplot(aes(x = importance, y = tidytext::reorder_within(model, importance, model_feature))) +
     geom_bar(stat = "identity") +
     labs(
       x = "Feature importance score (Gini impurtity corrected)",
       y = "",
     ) +
     theme_plot() +
-  facet_wrap(model~test,ncol=1)
+  facet_wrap(model~.,ncol=1,scales="free")
 ```
 
 ### Classification model performance
@@ -2269,8 +2273,7 @@ performance_detections_cls_pr_curve |>
       x = "Recall",
       y = "Precision",
     ) +
-    theme_plot() +
-  facet_wrap(test~.,ncol=1)
+    theme_plot()
 ```
 
 ```{r}
@@ -2285,10 +2288,9 @@ performance_detections_cls_roc_curve |>
   facet_wrap(test~.,) +
     labs(
       x = "False positive rate (1 - specificity)",
-      y = "Recall (sensitivity)",
+      y = "True positive rate (sensitivity)",
     ) +
-    theme_plot() +
-  facet_wrap(test~.,ncol=1)
+    theme_plot()
 ```
 
 
