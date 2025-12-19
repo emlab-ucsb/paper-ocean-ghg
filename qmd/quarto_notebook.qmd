@@ -2247,13 +2247,14 @@ all_varimp_data |>
         "Detections; regression"
       ),
   ) |>
-    ggplot(aes(x = importance, y = tidytext::reorder_within(model, importance, model_feature))) +
+    ggplot(aes(x = importance, y = tidytext::reorder_within(model_feature, importance, model))) +
     geom_bar(stat = "identity") +
     labs(
       x = "Feature importance score (Gini impurtity corrected)",
       y = "",
     ) +
     theme_plot() +
+  tidytext::scale_y_reordered() +
   facet_wrap(model~.,ncol=1,scales="free")
 ```
 
