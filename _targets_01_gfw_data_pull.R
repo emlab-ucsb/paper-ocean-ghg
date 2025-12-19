@@ -106,31 +106,17 @@ list(
       file_path = here::here("data/gfw/all_varimp_data.csv"),
     )
   ),
-  # Pull PR curves for classification model performance assessment
+  # Pull ROC and PR curves for classification model performance assessment
   tar_file(
-    name = performance_detections_cls_pr_curve,
+    name = performance_detections_cls_roc_pr_curves,
     download_gfw_data(
       bq_billing_project,
-      sql = "SELECT * FROM `world-fishing-827.proj_ocean_ghg.rf_s1_time_gridded_dark_fleet_model_rf_s1_time_gridded_dark_fleet_model_performance_detections_cls_pr_curve_{run_version_dark}`" |>
+      sql = "SELECT * FROM `world-fishing-827.proj_ocean_ghg.rf_s1_time_gridded_dark_fleet_model_performance_detections_cls_roc_pr_curves_{run_version_dark}`" |>
         stringr::str_glue(
           run_version_dark = run_version_dark
         ),
       file_path = here::here(
-        "data/gfw/performance_detections_cls_pr_curve.csv"
-      ),
-    )
-  ),
-  # Pull ROC curves for classification model performance assessment
-  tar_file(
-    name = performance_detections_cls_roc_curve,
-    download_gfw_data(
-      bq_billing_project,
-      sql = "SELECT * FROM `world-fishing-827.proj_ocean_ghg.rf_s1_time_gridded_dark_fleet_model_rf_s1_time_gridded_dark_fleet_model_performance_detections_cls_roc_curve_{run_version_dark}`" |>
-        stringr::str_glue(
-          run_version_dark = run_version_dark
-        ),
-      file_path = here::here(
-        "data/gfw/performance_detections_cls_roc_curve.csv"
+        "data/gfw/performance_detections_cls_roc_pr_curves.csv"
       ),
     )
   ),
@@ -139,7 +125,7 @@ list(
     name = performance_detections_cls_conf_mat,
     download_gfw_data(
       bq_billing_project,
-      sql = "SELECT * FROM `world-fishing-827.proj_ocean_ghg.rf_s1_time_gridded_dark_fleet_model_rf_s1_time_gridded_dark_fleet_model_performance_detections_cls_conf_mat_{run_version_dark}`" |>
+      sql = "SELECT * FROM `world-fishing-827.proj_ocean_ghg.rf_s1_time_gridded_dark_fleet_model_performance_detections_cls_conf_mat_{run_version_dark}`" |>
         stringr::str_glue(
           run_version_dark = run_version_dark
         ),
@@ -308,26 +294,6 @@ list(
         ),
       file_path = here::here(
         "data/gfw/annual_non_broadcasting_detections_emissions.csv"
-      )
-    ),
-    format = "file"
-  ),
-  # Average KNN ratios by pixel, within and outside the footprint
-  # Averaged across all years of data
-  # By vessel type
-  tar_file_read(
-    name = s1_mean_spatial_knn_ratios,
-    "sql/s1_mean_spatial_knn_ratios.sql",
-    download_gfw_data(
-      bq_billing_project,
-      sql = readr::read_file(!!.x) |>
-        stringr::str_glue(
-          run_version_dark = run_version_dark,
-          analysis_start_year = analysis_start_year,
-          analysis_end_year = analysis_end_year
-        ),
-      file_path = here::here(
-        "data/gfw/s1_mean_spatial_knn_ratios.csv"
       )
     ),
     format = "file"

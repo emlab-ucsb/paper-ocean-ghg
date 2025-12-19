@@ -1,0 +1,9 @@
+prediction,truth,count,model,test
+TRUE,TRUE,617930,detections_classification,inside_footprint
+FALSE,TRUE,110732,detections_classification,inside_footprint
+TRUE,FALSE,486796,detections_classification,inside_footprint
+FALSE,FALSE,2583737,detections_classification,inside_footprint
+TRUE,TRUE,67944,detections_classification,outside_footprint
+FALSE,TRUE,91210,detections_classification,outside_footprint
+TRUE,FALSE,320886,detections_classification,outside_footprint
+FALSE,FALSE,3323040,detections_classification,outside_footprint

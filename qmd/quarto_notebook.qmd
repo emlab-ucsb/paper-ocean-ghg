@@ -55,7 +55,6 @@ targets::tar_load(c(
   "port_visit_co2_emissions_by_country",
   "trip_co2_emissions_by_from_to_countries",
   "annual_non_broadcasting_detections_emissions",
-  "s1_mean_spatial_knn_ratios",
   "annual_global_emissions_by_receiver_type",
   "annual_global_emissions_by_receiver_type_and_flag",
   "annual_spatial_emissions_by_receiver_type",
@@ -66,8 +65,7 @@ targets::tar_load(c(
   "trip_emissions_for_mrv_validation",
   "registered_validation_data",
   "all_varimp_data",
-  "performance_detections_cls_pr_curve",
-  "performance_detections_cls_roc_curve",
+  "performance_detections_cls_roc_pr_curves",
   "performance_detections_cls_conf_mat"
 ))
 ```
@@ -340,7 +338,7 @@ ais_trend_overestimation_2017_2024 <- total_percent_change_by_fleet |>
     trend_2017_2024_ais = `AIS (broadcasting)`,
     trend_2017_2024_ais_s1 = `AIS + S1`
   )
-test <- 1 + 1
+
 # Put all this information together
 pollutant_ais_underestimation_overestimation_summary <- ais_scale_underestimation_2024 |>
   dplyr::left_join(ais_trend_overestimation_2017_2024, by = "pollutant") |>
@@ -1250,72 +1248,6 @@ summarized_s1_dark_fleet_data |>
   )
 ```
 
-### Outside and within S1 footprint ratios
-
-```{r}
-#| label: fig-map-dark-to-ais-s1-ratio
-#| fig-cap: Mean ratio value within and outside S1 footprint, aggregated across all years, and vessel lengths, for representation purposes. Model inputs are disaggregated by pixel, month, vessel class and length bin.
-
-scale_limits <- c(
-  0.001,
-  max(s1_mean_spatial_knn_ratios$avg_neighbor_ratio, na.rm = TRUE)
-)
-
-s1_mean_spatial_knn_ratios |>
-  dplyr::mutate(
-    within_footprint = ifelse(
-      within_footprint,
-      "Within S1 footprint",
-      "Outside S1 footprint"
-    ) |>
-      forcats::fct_rev()
-  ) |>
-  dplyr::mutate(
-    fishing = ifelse(fishing, "Fishing", "Non-fishing") |>
-      forcats::fct_rev()
-  ) |>
-  ggplot() +
-  geom_sf(data = world_bbox_sf, fill = "black") +
-  ggspatial::geom_spatial_tile(aes(
-    x = lon_bin + 0.5,
-    y = lat_bin + 0.5,
-    fill = avg_neighbor_ratio,
-    color = avg_neighbor_ratio
-  )) +
-  theme_void() +
-  geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
-  scale_fill_viridis_c(
-    "Average ratios (log scale)",
-    trans = "log10",
-    option = "mako",
-    na.value = "black",
-    limits = scale_limits
-  ) +
-  scale_color_viridis_c(
-    "Average ratios (log scale)",
-    trans = "log10",
-    option = "mako",
-    na.value = "black",
-    limits = scale_limits
-  ) +
-  labs(x = "", y = "") +
-  theme(legend.position = "bottom") +
-  guides(
-    fill = guide_colorbar(
-      title.position = "top",
-      title.hjust = 0.5,
-      frame.colour = "black",
-      ticks.colour = "black",
-      barwidth = unit(10, "cm"),
-      barheight = unit(0.5, "cm")
-    )
-  ) +
-  scale_x_continuous(expand = c(0, 1)) +
-  scale_y_continuous(expand = c(0, 1)) +
-  facet_grid(fishing ~ within_footprint) +
-  coord_sf(crs = map_projection)
-```
-
 ### Dark fleet emissions, by vessel size and type
 
 ```{r}
@@ -2159,7 +2091,6 @@ writeLines(
 ## Summary of 2017 and 2024 emissions, by pollutant and data source
   
 ```{r}
-test <- 1 + 1
 total_percent_change_by_fleet_tbl <- total_percent_change_by_fleet |>
   dplyr::mutate(across(
     c(`2017`, `2024`, percent_change),
@@ -2199,7 +2130,6 @@ writeLines(
 ## Underestimation of 2024 emissions using only AIS data, and overestimation of 2017 to 2024 emissions trend using only AIS data, by pollutant.
 
 ```{r}
-test <- 1 + 1
 pollutant_ais_underestimation_overestimation_summary_tbl <- pollutant_ais_underestimation_overestimation_summary |>
   dplyr::mutate(
     pollutant = stringr::str_to_upper(pollutant) |>
@@ -2264,7 +2194,8 @@ all_varimp_data |>
 #| label: fig-pr-curves
 #| fig-cap: Precision recall curves for the detection classification model, shown for the inside S1 footprint and outside S1 footprint performance tests
 
-performance_detections_cls_pr_curve |>
+performance_detections_cls_roc_pr_curves |>
+  tidyr::pivot_wider(names_from = "metric", values_from = "estimate") |>
   dplyr::mutate(test = stringr::str_replace_all(test, "_", " ")
                 |> stringr::str_to_title()) |>
   ggplot(aes(x = recall, y = precision)) +
@@ -2282,6 +2213,7 @@ performance_detections_cls_pr_curve |>
 #| fig-cap: ROC curves for the detection classification model, shown for the inside S1 footprint and outside S1 footprint performance tests
 
 performance_detections_cls_roc_curve |>
+  tidyr::pivot_wider(names_from = "metric", values_from = "estimate")|>
   dplyr::mutate(test = stringr::str_replace_all(test, "_", " ")
                 |> stringr::str_to_title()) |>
   ggplot(aes(x = 1-specificity, y = sensitivity)) +

@@ -36,13 +36,10 @@ list(
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
-    name = performance_detections_cls_pr_curve,
-    command = here::here("data/gfw/performance_detections_cls_pr_curve.csv"),
-    read = readr::read_csv(!!.x)
-  ),
-  tar_file_read(
-    name = performance_detections_cls_roc_curve,
-    command = here::here("data/gfw/performance_detections_cls_roc_curve.csv"),
+    name = performance_detections_cls_roc_pr_curves,
+    command = here::here(
+      "data/gfw/performance_detections_cls_roc_pr_curves.csv"
+    ),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
@@ -106,13 +103,6 @@ list(
     name = annual_non_broadcasting_detections_emissions,
     command = here::here(
       "data/gfw/annual_non_broadcasting_detections_emissions.csv"
-    ),
-    read = readr::read_csv(!!.x)
-  ),
-  tar_file_read(
-    name = s1_mean_spatial_knn_ratios,
-    command = here::here(
-      "data/gfw/s1_mean_spatial_knn_ratios.csv"
     ),
     read = readr::read_csv(!!.x)
   ),
