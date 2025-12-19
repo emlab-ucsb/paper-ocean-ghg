@@ -43,6 +43,9 @@
 % Provides the \url command, and fixes a crash if URLs or DOIs contain underscores
 \usepackage{url}
 
+% Allows you to comment out large chunks of code
+\usepackage{verbatim}
+
 %%%%%%%%%%%% CUSTOM COMMANDS AND PACKAGES %%%%%%%%%%%%
 
 % Please DO NOT import additional external packages or .sty files.
@@ -132,7 +135,7 @@ To correctly estimate both the magnitude and trends of marine emissions, data fu
     \label{fig:fig-emissions-by-data-source-and-maps}
 \end{figure}
 
-In 2024, 26\% of CO$_{2}$ emissions from fishing vessels were from non-broadcasting vessels, and 7.3\% of CO$_{2}$ emissions from non-fishing vessels were from non-broadcasting vessels. For both types of vessels, this fraction of emissions from non-broadcasting vessels has been declining steadily since 2020. Across the entire 2017 to 2024 time series, 87.9\% of non-broadcasting emissions occurred inside the S1 footprint and in pixel-months that were imaged; 11.6\% occurred inside the S1 footprint but in pixel-months that weren't imaged; and 0.6\% occurred outside the S1 footprint entirely.
+In 2024, 26\% of CO$_{2}$ emissions from fishing vessels were from non-broadcasting vessels, and 7.3\% of CO$_{2}$ emissions from non-fishing vessels were from non-broadcasting vessels. For both types of vessels, this fraction of emissions from non-broadcasting vessels has been declining steadily since 2020. Across the entire 2017 to 2024 time series, 87.9\% of non-broadcasting emissions occurred inside the S1 footprint and in pixel-months that were imaged; 11.6\% occurred inside the S1 footprint but in pixel-months that weren't imaged; and 0.6\% occurred outside the S1 footprint entirely. Therefore, 87.9\% of our estimated non-broadcasting emissions are modeled purely using our emissions regression model (traditional R$^{2}$ = 0.94 inside the S1 footprint) (Table \ref{tab:all_performance_metrics_table}). 11.6\%  of our estimated non-broadcasting emissions are modeled using the detections classification model (F1 Score = 0.67 inside the S1 footprint), the detections regression model (traditional R$^{2}$ =0.76 inside the S1 footprint), and the emissions regression model (traditional R$^{2}$ = 0.94 inside the S1 footprint) (Table \ref{tab:all_performance_metrics_table})..
 
 Our novel methods for quantifying key vessel characteristics that are necessary for bottom-up emissions modeling allow us to accurately estimate vessel-level AIS-based emissions. Using the main engine power and design speed values that are derived from our machine learning models, we achieve an out-of-sample model performance of 0.82 traditional R$^{2}$ when comparing our daily vessel-specific CO$_{2}$ emissions estimates against those derived from a proprietary vessel registry dataset of over 15,000 vessel-specific fuel consumption values that were measured during at-sea trials (Fig. \ref{fig:fig-registered-data-performance}). This can be compared to a value of 0.74 traditional R$^{2}$ which was obtained when instead using vessel characteristics from the lookup tables in \cite{fourth2020greenhouse}, which provides average main engine power and design speed for different vessel classes and sizes. Our approach therefore provides a performance improvement over the publicly available vessel characteristic data currently available in \cite{fourth2020greenhouse}. We also measured the performance of our model's ability to estimate annual vessel-level CO$_{2}$ emissions estimates by comparing our estimates to those available in the publicly available European Maritime Safety Agency’s Monitoring, Reporting, and Verification (MRV) database. Using a set of over 2,000 matched vessel-specific annual emissions estimates, we found a performance value of 0.81 traditional R$^{2}$ (Table \ref{tab:tab-performance-tolerance-table}).
 
@@ -347,6 +350,11 @@ For our non-broadcasting vessel emission estimates, we use vessel detections fro
 
 \subsection{Emissions model for non-broadcasting emissions}
 
+Here we look at a summary of how well the three dark fleet models perform in out-of-sample testing (Table \ref{tab:all_performance_metrics_table}).
+
+\input{tables/all_performance_metrics_table}
+\begin{comment}
+THIS SECTION WILL BE REPLACED
 We estimate emissions from non-broadcasting vessels by spatiotemporally extrapolating AIS-based emissions to non-broadcasting vessels, leveraging vessel detections from S1 SAR data. S1 imagery enables identification and quantification of both broadcasting and non-broadcasting vessels at specific locations and times, and also allows for the estimation of inferred vessel length for every detection \cite{paolo2024satellite}. 
 
 We define a global spatial resolution of 1x1-degree pixels and use monthly aggregation units for temporal resolution. We divide vessels into 10 size classes according to length deciles derived from all S1 detections unmatched with AIS that occurred from 2017 to 2024. These length-based decile thresholds are consistently applied to both AIS-derived vessel characteristics and Sentinel-1 detected vessel lengths in order to bin all AIS-broadcasting vessels and all unmatched S1 detections into length bins (Fig. \ref{fig:fig-s1-ais-size-class-comparison}). Using this classification, we perform extrapolations of AIS-based emissions to non-broadcasting vessels within the same length groups, vessel type (either fishing or non-fishing vessels), and by space and time. We extrapolate based on length bins because inferred length is available for all S1 detections, length is representative of main engine power (Fig. \ref{fig:fig-ais-length-power-relationship}), and vessels with larger engines emit more all-else-equal. We extrapolate based on vessel type (fishing or non-fishing) because some fishing vessel types have fundamentally different emissions profiles than non-fishing vessels (i.e., trawlers and dredgers emit more at low speeds due to the nature of their energy-intensive gear deployment, which is reflected in their gear-specific main engine load factor adjustment.)
@@ -393,8 +401,11 @@ We estimate emissions from non-broadcasting vessels by multiplying AIS-based emi
 \end{figure}
 
 This approach provides corresponding non-broadcasting vessel emissions estimates for every month and location where AIS-based estimates are available. Adding both values gives us monthly gridded total emissions estimates from both AIS-broadcasting and non-broadcasting vessels.
+\end{comment}
 
-\subsection{Validating non-broadcasting emissions model}
+\subsection{Assessing performance of the non-broadcasting emissions models}
+\begin{comment}
+THIS SECTION WILL BE REPLACED
 
 Given the novelty of our methods, there is no existing validation dataset for measured emissions from non-broadcasting vessels against which to validate our estimates. Therefore, we use the AIS-based model results to simulate the likely performance of the S1-based emissions model, treating a subset of AIS-matched detections from S1 data as simulated proxies for non-broadcasting vessels. We focus on assessing the performance of CO$_{2}$ emissions estimates, although the performance of other GHGs and pollutants will be very similar since all emissions are highly correlated with each other.
 
@@ -403,6 +414,8 @@ We aggregate vessel-level AIS-based CO$_{2}$ emissions to match the analysis uni
 Following the same procedure as for the primary non-broadcasting vessel emissions model, we calculate the ratio of simulated non-broadcasting vessels to simulated AIS-broadcasting vessels within each analysis unit inside the S1 footprint. Outside the footprint, we apply the ratio observed across all covered pixels for a given month, vessel type, and size class. We then estimate total emissions from the training dataset vessels and multiply this value by the ratio of simulated non-broadcasting  vessels to simulated AIS vessels to obtain the predicted emissions from simulated non-broadcasting vessels.
 
 Since the simulated non-broadcasting vessels actually broadcast AIS, we can also calculate their observed emissions from the AIS-based emissions model for each analysis unit. By comparing the predicted simulated non-broadcasting emissions with the observed emissions for each analysis unit, we can assess the overall performance which yields an $ R^2 $ of 0.98.
+
+\end{comment}
 
 \subsection{Comparing our emission estimates to other inventories}
 
