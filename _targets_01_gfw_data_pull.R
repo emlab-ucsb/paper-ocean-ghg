@@ -94,6 +94,60 @@ list(
       file_path = here::here("data/gfw/all_performance_metrics.csv"),
     )
   ),
+  # Pull variable importance data for all final model fits
+  tar_file(
+    name = all_varimp_data,
+    download_gfw_data(
+      bq_billing_project,
+      sql = "SELECT * FROM `world-fishing-827.proj_ocean_ghg.rf_s1_time_gridded_dark_fleet_model_all_varimp_data_{run_version_dark}`" |>
+        stringr::str_glue(
+          run_version_dark = run_version_dark
+        ),
+      file_path = here::here("data/gfw/all_varimp_data.csv"),
+    )
+  ),
+  # Pull PR curves for classification model performance assessment
+  tar_file(
+    name = performance_detections_cls_pr_curve,
+    download_gfw_data(
+      bq_billing_project,
+      sql = "SELECT * FROM `world-fishing-827.proj_ocean_ghg.rf_s1_time_gridded_dark_fleet_model_rf_s1_time_gridded_dark_fleet_model_performance_detections_cls_pr_curve_{run_version_dark}`" |>
+        stringr::str_glue(
+          run_version_dark = run_version_dark
+        ),
+      file_path = here::here(
+        "data/gfw/performance_detections_cls_pr_curve.csv"
+      ),
+    )
+  ),
+  # Pull ROC curves for classification model performance assessment
+  tar_file(
+    name = performance_detections_cls_roc_curve,
+    download_gfw_data(
+      bq_billing_project,
+      sql = "SELECT * FROM `world-fishing-827.proj_ocean_ghg.rf_s1_time_gridded_dark_fleet_model_rf_s1_time_gridded_dark_fleet_model_performance_detections_cls_roc_curve_{run_version_dark}`" |>
+        stringr::str_glue(
+          run_version_dark = run_version_dark
+        ),
+      file_path = here::here(
+        "data/gfw/performance_detections_cls_roc_curve.csv"
+      ),
+    )
+  ),
+  # Pull confusion matrices for classification model performance assessment
+  tar_file(
+    name = performance_detections_cls_conf_mat,
+    download_gfw_data(
+      bq_billing_project,
+      sql = "SELECT * FROM `world-fishing-827.proj_ocean_ghg.rf_s1_time_gridded_dark_fleet_model_rf_s1_time_gridded_dark_fleet_model_performance_detections_cls_conf_mat_{run_version_dark}`" |>
+        stringr::str_glue(
+          run_version_dark = run_version_dark
+        ),
+      file_path = here::here(
+        "data/gfw/performance_detections_cls_conf_mat.csv"
+      ),
+    )
+  ),
   # Monthly summary of Co2 emissions for AIS-broadcasting fleet and non-broadcasting vessels,
   # broken apart by fishing and non-fishing vessels,
   # inside and outside the S1 footprint; and imaged and not imaged in the S1 footprint

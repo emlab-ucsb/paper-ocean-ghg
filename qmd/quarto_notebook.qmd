@@ -64,7 +64,11 @@ targets::tar_load(c(
   "registered_validation_data",
   "mrv_data_validation",
   "trip_emissions_for_mrv_validation",
-  "registered_validation_data"
+  "registered_validation_data",
+  "all_varimp_data",
+  "performance_detections_cls_pr_curve",
+  "performance_detections_cls_roc_curve",
+  "performance_detections_cls_conf_mat"
 ))
 ```
 
@@ -2225,6 +2229,88 @@ writeLines(
   )
 )
 ```
+
+### Feature importance
+
+```{r}
+#| label: fig-feature-importance
+#| fig-cap: Feature importance plots for the three final model fit random forests
+
+all_varimp_data |>
+  dplyr::mutate(
+    model = stringr::str_replace_all(model, "_", "; ") |>
+      stringr::str_to_sentence(),
+    test = stringr::str_replace_all(test, "_", " ") |>
+      stringr::str_to_sentence()
+  ) |>
+    ggplot(aes(x = Importance, y = reorder(Variable, Importance))) +
+    geom_bar(stat = "identity") +
+    labs(
+      x = "Feature importance score (Gini impurtity corrected)",
+      y = "",
+    ) +
+    theme_plot() +
+  facet_wrap(model~test,ncol=1)
+```
+
+### Classification model performance
+
+```{r}
+#| label: fig-pr-curves
+#| fig-cap: Precision recall curves for the detection classification model, shown for the inside S1 footprint and outside S1 footprint performance tests
+
+performance_detections_cls_pr_curve |>
+  dplyr::mutate(test = stringr::str_replace_all(test, "_", " ")
+                |> stringr::str_to_title()) |>
+  ggplot(aes(x = recall, y = precision)) +
+  geom_line() +
+  facet_wrap(test~.,) +
+    labs(
+      x = "Recall",
+      y = "Precision",
+    ) +
+    theme_plot() +
+  facet_wrap(test~.,ncol=1)
+```
+
+```{r}
+#| label: fig-roc-curves
+#| fig-cap: ROC curves for the detection classification model, shown for the inside S1 footprint and outside S1 footprint performance tests
+
+performance_detections_cls_roc_curve |>
+  dplyr::mutate(test = stringr::str_replace_all(test, "_", " ")
+                |> stringr::str_to_title()) |>
+  ggplot(aes(x = 1-specificity, y = sensitivity)) +
+  geom_line() +
+  facet_wrap(test~.,) +
+    labs(
+      x = "False positive rate (1 - specificity)",
+      y = "Recall (sensitivity)",
+    ) +
+    theme_plot() +
+  facet_wrap(test~.,ncol=1)
+```
+
+
+```{r}
+#| label: fig-conf-mat
+#| fig-cap: Confusion matricies for the detection classification model, shown for the inside S1 footprint and outside S1 footprint performance tests
+
+performance_detections_cls_conf_mat |>
+  dplyr::mutate(test = stringr::str_replace_all(test, "_", " ")
+                |> stringr::str_to_title()) |>
+  dplyr::mutate(prediction = forcats::fct_rev(prediction)) |>
+  ggplot(aes(x = truth, y = prediction)) +
+  geom_tile(aes(fill = count), color = "black") +
+  geom_label(aes(label = prettyNum(count,big.mark=",")), vjust = 1) +
+  scale_fill_gradient(low = "gray95", high = "gray10",guide="none") +
+  facet_wrap(test~.) +
+  coord_equal() +
+  labs(x = "Truth",
+       y = "Prediction") +
+  theme_minimal()
+```
+
 
 ### Dynamic AIS - annual emissions and vessels by AIS receiver type
 

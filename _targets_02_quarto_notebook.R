@@ -31,6 +31,26 @@ list(
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
+    name = all_varimp_data,
+    command = here::here("data/gfw/all_varimp_data.csv"),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
+    name = performance_detections_cls_pr_curve,
+    command = here::here("data/gfw/performance_detections_cls_pr_curve.csv"),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
+    name = performance_detections_cls_roc_curve,
+    command = here::here("data/gfw/performance_detections_cls_roc_curve.csv"),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
+    name = performance_detections_cls_conf_mat,
+    command = here::here("data/gfw/performance_detections_cls_conf_mat.csv"),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
     name = monthly_aggregated_time_series,
     command = here::here("data/gfw/monthly_aggregated_time_series.csv"),
     read = readr::read_csv(!!.x)
