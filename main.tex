@@ -434,13 +434,13 @@ Next we look the precision-recall curves (Fig. \ref{fig:fig-pr-curves}), and Rec
 
 \subsusection{Feature importance of the non-broadcasting emissions models}
 
-Next we look at the model feature importance plots of the three non-broadcasting emissions models (Fig \ref{fig:fig-feature-importance}). These leverage the Gini impurity-corrected feature importance method for random forests implemented in the Ranger package (ADD REFERENCES).
+Next we look at the model feature importance plots of the three non-broadcasting emissions models (Fig \ref{fig:fig-feature-importance}). Our feature importance score is the bias-corrected Gini index \cite{nembrini2018revival} which is calculated for random forests as implemented in the \emph{ranger} R package \cite{ranger}. This metric quantifies how much each model feature reduces node impurity when it is used to make splits in the random forest's decision trees.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\columnwidth]{figures/fig-feature-importance-1.png}
     \caption{Feature importance plots for the: 1) emissions regression model;
-2) detections classification mode; and 3) detections regression model. .}
+2) detections classification mode; and 3) detections regression model.}
     \label{fig:fig-feature-importance}
 \end{figure}
 
