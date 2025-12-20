@@ -2200,6 +2200,7 @@ performance_detections_cls_roc_pr_curves |>
                 |> stringr::str_to_title()) |>
   ggplot(aes(x = recall, y = precision)) +
   geom_line() +
+  coord_equal() +
   facet_wrap(test~.,) +
     labs(
       x = "Recall",
@@ -2212,12 +2213,13 @@ performance_detections_cls_roc_pr_curves |>
 #| label: fig-roc-curves
 #| fig-cap: ROC curves for the detection classification model, shown for the inside S1 footprint and outside S1 footprint performance tests
 
-performance_detections_cls_roc_curve |>
+performance_detections_cls_roc_pr_curves |>
   tidyr::pivot_wider(names_from = "metric", values_from = "estimate")|>
   dplyr::mutate(test = stringr::str_replace_all(test, "_", " ")
                 |> stringr::str_to_title()) |>
   ggplot(aes(x = 1-specificity, y = sensitivity)) +
   geom_line() +
+  coord_equal() +
   facet_wrap(test~.,) +
     labs(
       x = "False positive rate (1 - specificity)",
@@ -2234,7 +2236,7 @@ performance_detections_cls_roc_curve |>
 performance_detections_cls_conf_mat |>
   dplyr::mutate(test = stringr::str_replace_all(test, "_", " ")
                 |> stringr::str_to_title()) |>
-  dplyr::mutate(prediction = forcats::fct_rev(prediction)) |>
+  dplyr::mutate(prediction = forcats::fct_rev(as.factor(prediction))) |>
   ggplot(aes(x = truth, y = prediction)) +
   geom_tile(aes(fill = count), color = "black") +
   geom_label(aes(label = prettyNum(count,big.mark=",")), vjust = 1) +
