@@ -409,8 +409,42 @@ This approach provides corresponding non-broadcasting vessel emissions estimates
 
 Here we look at a summary of how well the three dark fleet models perform in out-of-sample testing (Table \ref{tab:all_performance_metrics_table}).
 
-Next we look
+Next we look the precision-recall curves (Fig. \ref{fig:fig-pr-curves}), and Receiver Operating Characteristic (ROC) curves (Fig. \ref{fig:fig-roc-curves}), and confusion matrices of the detection classification model (Fig. \ref{fig:fig-conf-mat}).
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/fig-pr-curves-1.png}
+    \caption{Precision-recall curves of the detection classification model, shown for both the inside S1 footprint test and outside S1 footprint test.}
+    \label{fig:fig-pr-curves}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/fig-roc-curves-1.png}
+    \caption{Receiver Operating Characteristic (ROC) curves of the detection classification model, shown for both the inside S1 footprint test and outside S1 footprint test.}
+    \label{fig:fig-roc-curves}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/fig-conf-mat-1.png}
+    \caption{Confusion matricies of the detection classification model, shown for both the inside S1 footprint test and outside S1 footprint test.}
+    \label{fig:fig-conf-mat}
+\end{figure}
+
+\subsusection{Feature importance of the non-broadcasting emissions models}
+
+Next we look at the model feature importance plots of the three non-broadcasting emissions models (Fig \ref{fig:fig-feature-importance}). These leverage the Gini impurity-corrected feature importance method for random forests implemented in the Ranger package (ADD REFERENCES).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/fig-feature-importance-1.png}
+    \caption{Feature importance plots for the: 1) emissions regression model;
+2) detections classification mode; and 3) detections regression model. .}
+    \label{fig:fig-feature-importance}
+\end{figure}
+
+\inser
 \begin{comment}
 THIS SECTION WILL BE REPLACED
 
