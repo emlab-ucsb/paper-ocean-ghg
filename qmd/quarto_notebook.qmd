@@ -909,6 +909,8 @@ cowplot::plot_grid(
 
 ```{r}
 #| label: build-decomposition-model
+#| include: false
+#| eval: false
 
 # For aggregate annual extrapolation dataset, calculated total emissions, kw-hours,distance, hours
 annual_extrapolation_dataset <- annual_ais_to_dark_activity_extrapolation |>
@@ -1005,6 +1007,8 @@ workflow_fit_final <- parsnip::fit(model_workflow, annual_extrapolation_dataset)
 ```{r}
 #| label: tbl-decomposition-model-performance
 #| tbl-cap: Performance metrics for random forest model that predicts annual CO2 emissions, by vessel size class and type, using hours and average speed.
+#| include: false
+#| eval: false
 
 performance_metrics |>
   knitr::kable(digits = 3)
@@ -1012,6 +1016,9 @@ performance_metrics |>
 
 ```{r}
 #| label: predict-using-decomposition-model
+#| include: false
+#| eval: false
+
 # Find initial/starting 2017 values of kw-hours and speed, by fishing and length_size_class_percentile, for decomposition
 starting_values <- annual_extrapolation_dataset |>
   dplyr::filter(year == analysis_start_year) |>
@@ -1079,6 +1086,9 @@ final_prediction_dataset <- predictions_dataset |>
 #| fig-cap: Estimated decomposition of change in total CO2 emissions from 2017 baseline (aggregating across both broadcasting and non-broadcasting vessels), using the random forest model outputs of four different scenarios that decompose the relative impact of changes in total kW-hours and changes in average speed/
 #| fig-width: 7.5
 #| fig-height: 3
+#| include: false
+#| eval: false
+
 # Aggregate prediction values by year (across vessel size classes and type)
 final_annual_prediction_dataset <- final_prediction_dataset |>
   dplyr::group_by(year) |>
@@ -1205,7 +1215,9 @@ s1_ais_vessel_size_class_comparison |>
 #| fig-cap: Summary of global annual CO2 dark emissions over time, disaggregated by vessel type.
 #| fig-height: 8
 #| fig-width: 8
-#|
+#| include: false
+#| eval: false
+
 summarized_s1_dark_fleet_data |>
   ggplot(aes(
     x = year,
