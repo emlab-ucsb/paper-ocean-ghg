@@ -2003,7 +2003,8 @@ all_performance_metrics_table <- all_performance_metrics |>
   dplyr::mutate(
     pollutant = stringr::str_to_upper(pollutant) |>
       stringr::str_replace_all("_", "."),
-    pollutant = ifelse(pollutant == "VOCS", "VOCs", pollutant)
+    pollutant = ifelse(pollutant == "VOCS", "VOCs", pollutant),
+    pollutant = tidyr::replace_na(pollutant, "-")
   ) |>
   dplyr::mutate(
     pollutant = forcats::fct_relevel(pollutant, pollutant_factor_levels_tables)
