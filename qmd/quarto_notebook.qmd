@@ -314,7 +314,7 @@ ais_scale_underestimation_2024 <- total_percent_change_by_fleet |>
   tidyr::pivot_wider(names_from = "fleet", values_from = `2024`) |>
   dplyr::mutate(
     ais_underestimation_2024 = (1 - `AIS (broadcasting)` / `AIS + S1`) |>
-      scales::percent()
+      scales::percent(accuracy = 0.01)
   ) |>
   dplyr::rename(
     emissions_mt_2024_ais = `AIS (broadcasting)`,
@@ -331,7 +331,7 @@ ais_trend_overestimation_2017_2024 <- total_percent_change_by_fleet |>
     trend_overestimation_2017_2024 = (`AIS (broadcasting)` /
       `AIS + S1` -
       1) |>
-      scales::percent()
+      scales::percent(accuracy = 0.01)
   ) |>
   dplyr::rename(
     trend_2017_2024_ais = `AIS (broadcasting)`,
@@ -1988,9 +1988,19 @@ all_performance_metrics_table <- all_performance_metrics |>
     test = stringr::str_replace_all(test, "_", " ") |>
       stringr::str_to_sentence()
   ) |>
+  dplyr::mutate(
+    pollutant = stringr::str_to_upper(pollutant) |>
+      stringr::str_replace_all("_", "."),
+    pollutant = ifelse(pollutant == "VOCS", "VOCs", pollutant)
+  ) |>
+  dplyr::mutate(
+    pollutant = forcats::fct_relevel(pollutant, pollutant_factor_levels_tables)
+  ) |>
+  dplyr::arrange(pollutant) |>
   dplyr::select(
     Model = model,
     Test = test,
+    Pollutant = pollutant,
     Metric = metric,
     Estimate = estimate
   ) |>
