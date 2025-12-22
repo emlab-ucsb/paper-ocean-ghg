@@ -3,29 +3,45 @@
 \caption{\label{tab:all_performance_metrics_table}Summary of dark fleet model performance metrics for the: 1) emissions regression model; 2) detections classification mode; and 3) detections regression model. Performance estimates for each metric are shown for both the inside S1 footprint and outside S1 footprint tests.}
 \centering
 \fontsize{8}{10}\selectfont
-\begin{tabular}[t]{l|l|l|l}
+\begin{tabular}[t]{l|l|l|r|r}
 \hline
-Model & Metric & Inside footprint & Outside footprint\\
+Model & Pollutant & Metric & Inside footprint & Outside footprint\\
 \hline
-Emissions; regression & Traditional R² (backtransformed) & 0.93633, 0.95021, 0.94441, 0.94593, 0.94221, 0.93349, 0.94443, 0.94081, 0.93974 & 0.79513, 0.78702, 0.79513, 0.79006, 0.79159, 0.79299, 0.78974, 0.79222, 0.79130\\
+Emissions; regression & CO2 & Traditional R² (backtransformed) & 0.936 & 0.795\\
 \hline
-Detections; classification & Accuracy & 0.84241 & 0.92602\\
+Emissions; regression & CH4 & Traditional R² (backtransformed) & 0.950 & 0.787\\
 \hline
-Detections; classification & F1 score & 0.67471 & 0.30057\\
+Emissions; regression & N2O & Traditional R² (backtransformed) & 0.944 & 0.795\\
 \hline
-Detections; classification & Precision-recall AUC & 0.78501 & 0.23684\\
+Emissions; regression & CO & Traditional R² (backtransformed) & 0.946 & 0.790\\
 \hline
-Detections; classification & Precision & 0.56058 & 0.24843\\
+Emissions; regression & NOX & Traditional R² (backtransformed) & 0.942 & 0.792\\
 \hline
-Detections; classification & recall & 0.84719 & 0.3804\\
+Emissions; regression & SOX & Traditional R² (backtransformed) & 0.933 & 0.793\\
 \hline
-Detections; classification & ROC AUC & 0.92399 & 0.80988\\
+Emissions; regression & PM2.5 & Traditional R² (backtransformed) & 0.941 & 0.792\\
 \hline
-Detections; classification & Sensitivity & 0.84719 & 0.3804\\
+Emissions; regression & PM10 & Traditional R² (backtransformed) & 0.940 & 0.791\\
 \hline
-Detections; classification & Specificity & 0.84127 & 0.94982\\
+Emissions; regression & VOCs & Traditional R² (backtransformed) & 0.944 & 0.790\\
 \hline
-Detections; regression & Traditional R² & 0.76248 & 0.15578\\
+Detections; classification & NA & Accuracy & 0.842 & 0.926\\
+\hline
+Detections; classification & NA & F1 score & 0.675 & 0.301\\
+\hline
+Detections; classification & NA & Precision-recall AUC & 0.785 & 0.237\\
+\hline
+Detections; classification & NA & Precision & 0.561 & 0.248\\
+\hline
+Detections; classification & NA & recall & 0.847 & 0.380\\
+\hline
+Detections; classification & NA & ROC AUC & 0.924 & 0.810\\
+\hline
+Detections; classification & NA & Sensitivity & 0.847 & 0.380\\
+\hline
+Detections; classification & NA & Specificity & 0.841 & 0.950\\
+\hline
+Detections; regression & NA & Traditional R² & 0.762 & 0.156\\
 \hline
 \end{tabular}
 \end{table}
