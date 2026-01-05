@@ -1648,6 +1648,98 @@ cowplot::plot_grid(
 ```
 
 ```{r}
+#| label: fig-data-richness-v2
+#| fig-cap: (A) Time series of monthly global emissions for each pollutant, aggregated across AIS-broadcasting vessels and non-broadcasting vessels. (B) CO2 emissions during 2024 port stays, aggregated by country. (C) Total trip-level CO2 emissions in 2024 for domestic (within-country) trips for top 25 countries, and total trip-level CO2 emissions in 2024 for international trips for top 25 country-to-country paris. (D)  Total 2024 CO2 emissions by vessel type for AIS-broadcasting vessels.
+#| fig-width: 9
+#| fig-height: 8
+
+time_series_data_monthly_emissions_by_fleet <- monthly_aggregated_time_series |>
+  group_by(time) |>
+  summarise(
+    emissions_co2_mt = sum(emissions_co2_mt),
+    emissions_co2_dark_mt = sum(emissions_co2_dark_mt)
+  ) |>
+  ungroup() |>
+  mutate(time = lubridate::ymd(time)) |>
+  pivot_longer(
+    cols = c(emissions_co2_mt, emissions_co2_dark_mt),
+    names_to = "fleet",
+    values_to = "emissions_mt"
+  ) |>
+  mutate(
+    fleet = case_when(
+      fleet == "emissions_co2_mt" ~ "AIS",
+      fleet == "emissions_co2_dark_mt" ~ "S1"
+    ),
+    fleet = factor(fleet, levels = c("AIS", "S1"))
+  )
+
+make_pollutant_by_fleet_time_series_figure <- function(
+  pollutant_time_series_data,
+  y_axis_label
+) {
+    ggplot(
+      pollutant_time_series_data,
+      aes(x = time, y = emissions_mt, fill = fleet)
+    ) +
+      geom_area(position = 'stack', alpha = 0.9) +
+      geom_line(
+        data = subset(pollutant_time_series_data, fleet == "S1"),
+        aes(x = time, y = emissions_mt),
+        color = "white"
+      ) +
+      scale_y_continuous(
+        labels = scales::comma,
+        limits = c(0, NA)
+      ) +
+      scale_fill_manual(
+        values = all_data_source_color_palette,
+        breaks = c("AIS", "S1")
+      ) +
+      scale_x_continuous(
+        breaks = seq(
+          lubridate::ymd(glue::glue("{analysis_start_year}-01-01")),
+          lubridate::ymd(glue::glue("{analysis_end_year+1}-01-01")),
+          by = "1 year"
+        ),
+        labels = seq(analysis_start_year, analysis_end_year + 1)
+      ) +
+      theme_plot() +
+      labs(x = "", y = y_axis_label) +
+      theme(
+        panel.grid.minor = element_blank(),
+        legend.position = c(0.15, 0.92),
+        legend.background = element_rect(fill = "white", color = "gray"),
+        legend.title = element_blank()
+      )
+  }
+
+
+time_series_by_fleet_fig_co2 <- make_pollutant_by_fleet_time_series_figure(
+  time_series_data_monthly_emissions_by_fleet,
+  y_axis_label = expression(Monthly ~ CO[2] ~ emissions ~ (MT))
+) +
+  scale_y_continuous(
+    labels = scales::unit_format(unit = "M", scale = 1e-6),
+    limits = c(0, NA)
+  )
+
+cowplot::plot_grid(
+  cowplot::plot_grid(
+    time_series_by_fleet_fig_co2,
+    emissions_by_vessel_class_barplot,
+    ncol = 1,
+    rel_heights = c(0.4, 0.6),
+    labels = c("A", "B")
+  ),
+  port_trip_emissions_fig,
+  labels = c("", "C"),
+  rel_widths = c(0.52, 0.48)
+)
+```
+
+
+```{r}
 #| label: tbl-top-port-stay-emissions-by-country
 #| tbl-cap: Top 10 countries in terms of 2024 port stay emissions.
 all_port_and_trip_emissions |>
