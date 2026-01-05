@@ -1799,7 +1799,6 @@ make_pollutant_time_series_figure(
 #| fig-width: 8
 #| fig-height: 4
 
-
 # s1_ais_spatial_co2_emissions <- read.csv(glue::glue(
 #   "data/gfw/s1_ais_spatial_co2_emissions.csv"
 # ))
@@ -1908,8 +1907,8 @@ total_s1_ais_spatial_co2_emissions |>
     fill = guide_colorbar(
       title.position = "top",
       title.hjust = 0.5,
-      frame.colour = "black",
-      ticks.colour = "black",
+      frame.colour = "white",
+      ticks.colour = "white",
       barwidth = unit(10, "cm"),
       barheight = unit(0.5, "cm")
     )
