@@ -135,7 +135,7 @@ To correctly estimate both the magnitude and trends of marine emissions, data fu
     \label{fig:fig-emissions-by-data-source-and-maps}
 \end{figure}
 
-Estimating emissions from non-broadcasting vessels not only offers new insights on the overall magnitude and temporal trends of global emissions, but provides nuanced spatial information and information disaggregated by fishing and non-fishing vessels. Across the entire 2017 to 2024 time series, 87.9\% of non-broadcasting emissions occurred inside the S1 footprint and in pixel-months that were imaged; 11.6\% occurred inside the S1 footprint but in pixel-months that weren't imaged; and 0.6\% occurred outside the S1 footprint entirely. Therefore, 87.9\% of our estimated non-broadcasting emissions are modeled purely using our emissions regression model (traditional R$^{2}$ = 0.94 inside the S1 footprint) (Table \ref{tab:all_performance_metrics_table}). 11.6\%  of our estimated non-broadcasting emissions are modeled using the detections classification model (F1 Score = 0.67 inside the S1 footprint), the detections regression model (traditional R$^{2}$ =0.76 inside the S1 footprint), and the emissions regression model (traditional R$^{2}$ = 0.94 inside the S1 footprint) (Table \ref{tab:all_performance_metrics_table}). In 2024, 26\% of CO$_{2}$ emissions from fishing vessels were from non-broadcasting vessels, and 7.3\% of CO$_{2}$ emissions from non-fishing vessels were from non-broadcasting vessels. For both types of vessels, this fraction of emissions from non-broadcasting vessels has been declining steadily since 2020. 
+Estimating emissions from non-broadcasting vessels not only offers new insights on the overall magnitude and temporal trends of global emissions, but also provides nuanced spatial information and information disaggregated by fishing and non-fishing vessels. Across the entire 2017 to 2024 time series, 87.9\% of non-broadcasting emissions occurred inside the S1 footprint and in pixel-months that were imaged; 11.6\% occurred inside the S1 footprint but in pixel-months that weren't imaged; and 0.6\% occurred outside the S1 footprint entirely. Therefore, 87.9\% of our estimated non-broadcasting emissions are modeled purely using our emissions regression model (traditional R$^{2}$ = 0.94 inside the S1 footprint) (Table \ref{tab:all_performance_metrics_table}). 11.6\%  of our estimated non-broadcasting emissions are modeled using the detections classification model (F1 Score = 0.67 inside the S1 footprint), the detections regression model (traditional R$^{2}$ =0.76 inside the S1 footprint), and the emissions regression model (traditional R$^{2}$ = 0.94 inside the S1 footprint) (Table \ref{tab:all_performance_metrics_table}). In 2024, 26\% of CO$_{2}$ emissions from fishing vessels were from non-broadcasting vessels, and 7.3\% of CO$_{2}$ emissions from non-fishing vessels were from non-broadcasting vessels. For both types of vessels, this fraction of emissions from non-broadcasting vessels has been declining steadily since 2020. 
 
 Our novel methods for quantifying key vessel characteristics that are necessary for bottom-up emissions modeling allow us to accurately estimate vessel-level AIS-based emissions. Using the main engine power and design speed values that are derived from our machine learning models, we achieve an out-of-sample model performance of 0.82 traditional R$^{2}$ when comparing our daily vessel-specific CO$_{2}$ emissions estimates against those derived from a proprietary vessel registry dataset of over 15,000 vessel-specific fuel consumption values that were measured during at-sea trials (Fig. \ref{fig:fig-registered-data-performance}). This can be compared to a value of 0.74 traditional R$^{2}$ which was obtained when instead using vessel characteristics from the lookup tables in \cite{fourth2020greenhouse}, which provides average main engine power and design speed for different vessel classes and sizes. Our approach therefore provides a performance improvement over the publicly available vessel characteristic data currently available in \cite{fourth2020greenhouse}. We also measured the performance of our model's ability to estimate annual vessel-level CO$_{2}$ emissions estimates by comparing our estimates to those available in the publicly available European Maritime Safety Agency’s Monitoring, Reporting, and Verification (MRV) database. Using a set of over 2,000 matched vessel-specific annual emissions estimates, we found a performance value of 0.81 traditional R$^{2}$ (Table \ref{tab:tab-performance-tolerance-table}).
 
@@ -268,11 +268,11 @@ Table S1 to S3\\
 \setcounter{section}{1}
 \section*{Materials and Methods}
 
-This work relies on multiple sources of spatial and tabular data to assess marine vessel emissions globally. We use AIS data, vessel registry information, and Sentinel-1 SAR derived data to construct our AIS-based emission model and the non-broadcasting emissions model (Fig. \ref{fig:gfw_emissions_framework_flowchart}).
+This work relies on multiple sources of spatial and tabular data to assess marine vessel emissions globally. We use AIS data, vessel registry information, Sentinel-1 and Sentinel-2 derived data to construct our AIS-based emission model and the non-broadcasting emissions model (Fig. \ref{fig:gfw_emissions_framework_flowchart}).
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{figures/gfw_emissions_framework_flowchart.png}
+    \includegraphics[width=\columnwidth]{figures/fig-framework-flowchart.png}
     \caption{Conceptual flowchart for estimating emissions using the AIS-based emissions model and the non-broadcasting emissions model.}
     \label{fig:gfw_emissions_framework_flowchart}
 \end{figure}
@@ -351,10 +351,122 @@ In Table \ref{tab:tab-performance-tolerance-table}, performance peaks at a tradi
 
 For our non-broadcasting vessel emission estimates, we use vessel detections from Sentinel-1 (S1) Synthetic Aperture Radar (SAR) imagery. The GFW dataset provides spatiotemporal information on each detection, including inferred vessel length and the likelihood of being classified as either a fishing vessel or non-fishing vessel. By identifying AIS-broadcasting vessels that are spatiotemporally matched to S1 detections, the dataset categorizes each detection as either a non-broadcasting vessel or an AIS-broadcasting vessel (Kroodsma et al. 2022). Additionally, detections are filtered to exclude repeated detections of vessels in anchorages, offshore infrastructure, potential ice, and other other ambiguities, such as the radar aliasing effect (Paolo et al. 2024). As a result, we obtained a dataset containing 31,835,861 vessel detections from 2017 to 2024, of which 18,823,780 were matched to a broadcasting vessel.
 
-\subsection{Emissions model for non-broadcasting emissions}
+\subsection{Emissions model for non-broadcasting vessels}
+
+We estimate emissions from non-broadcasting vessels by assigning AIS-derived emissions to S1 detections using a three-step modeling framework. First, a random forest regression model estimates emissions directly from S1 detections and associated covariates. For cases in which S1 detections are unavailable, we apply a hurdle model composed of (1) a random forest classification model to predict the presence of detections and (2) a random forest regression model to estimate the number of detections within a given pixel, from which emissions are then inferred.
+
+\subsubsection{Non-broadcasting model features}
+
+We define a global spatial resolution of 1x1-degree and use monthly temporal units for all model features and dependent variables when available. The grid includes only pixels intersecting ocean areas, including coastal waters beyond 1 km buffer from shore, corresponding to coverage of S1 detections in coastal areas.
+
+\paragraph{S1 detection features}
+
+S1 imagery enables identification and quantification of both broadcasting and non-broadcasting vessel at specific locations and times, and also allows for the estimation of inferred vessel length, and whether they correspond to fishing/non-fishing class for every detection \cite{paolo2024satellite}. We divide vessels into 10 size classes according to length deciles derived from all S1 detections unmatched with AIS that occurred from 2017 to 2024. These length-based decile thresholds are consistently applied to both AIS-derived vessel characteristics and Sentinel-1 detected vessel lengths in order to bin all AIS-broadcasting vessels and all unmatched S1 detections into length bins. Detections smaller than the minimum vessel size represented in the AIS-broadcasting dataset are excluded to avoid assigning emissions to vessel sizes not characterized by the AIS emissions model. We model based on length bins because inferred length is available for all S1 detections, length is representative of main engine power (Fig. \ref{fig:fig-ais-length-power-relationship}), and vessels with larger engines emit more all-else-equal. We additionally stratify by vessel type (fishing or non-fishing) because some fishing vessel types have fundamentally different emissions profiles than non-fishing vessels (i.e., trawlers and dredgers emit more at low speeds due to the nature of their energy-intensive gear deployment, which is reflected in their gear-specific main engine load factor adjustment.). Additionally, to ensure emissions are correctly assigned from our AIS-based model, any matched detection that cannot be associated with a vessel in the AIS model is treated as a non-broadcasting vessel and classified as an unmatched detection. This prevents assigning emissions to vessels for which no emission estimates are available. We also standardize detections by the km² imaged within each pixel and month to control for variation in Sentinel-1 sampling effort.
+
+\paragraph{Geographical features}
+
+For each pixel and month, we extract spatial information, such as depth, distance to shore, and distance to the nearest port, from a higher-resolution GFW subproduct (0.01x0.01-degree) and aggregate it to our grid resolution, computing the minimum, maximum, and average values. Based on performance testing, we retained only the minimum values, which proved most representative. In addition to distance from the nearest port, we found that some pixels exhibited unusually large deviations between expected emissions and S1 detections, primarily driven by patterns specific to high traffic areas near the world’s top ports. This is expected, as traffic density, loitering practices, and navigation behavior in major ports differ from those in regular ports. To account for this, we define a separate top-port distance feature, measuring the distance from each pixel centroid to the nearest of the top 20 container ports according to the Lloyd's list of 2024 \cite{LloydsList_TopPorts_2024}. Additional geographic features include the water area within each pixel (excluding land and the 1 km S1 buffer from shore) and a categorical variable indicating which of the five major ocean basins each pixel falls within.
+
+\paragraph{Weather features}
+
+We found that weather influences both emissions and S1 detections. This is expected because sea conditions affect not only vessel presence at sea (e.g., smaller vessels may remain in port during storms) but also navigation behavior \cite{majamaki2025improving}. In addition, capillary waves generated by wind modify SAR background signal, directly affecting the ability of the S1 detection model to accurately identify vessels. To account for these effects, we extracted weather data from ECMWF Reanalysis v5 (ERA5), the fifth-generation atmospheric reanalysis of the global climate, produced by the Copernicus Climate Change Service. We used Google Earth Engine to extract hourly ERA5 data and aggregate it to monthly minimum, maximum, and average values. Because ERA5 has higher spatial resolution than our 1×1-degree grid, we re-aggregated the data for each pixel, excluding land and the 1 km S1 buffer from shore, computing the mean of the monthly minimum, maximum, and average values, as well as the overall minimum and maximum across all sub-pixels (i.e., five values for each parameter). The parameters selected were: wind speed, which influences both navigation conditions and S1 detection; primary swell height and period, which affect navigation and vessel activity; and sea surface temperature (SST), which relates to fishing activity. We also explored average directional values for wind and swell. Based on performance testing, we retained only maximum wind speed, average swell height, and minimum swell period for our models.
+
+\paragraph{AIS features}
+
+We included several covariates related to AIS signal quality and signal type. To account for reception quality, we used two features: messages per day for AIS Type A and Type B transponders, capturing regional variation in AIS reception. Additionally, because AIS signals are received via different systems (i.e., terrestrial receivers, satellite receivers, and more recently dynamic receivers) we identified the associated receiver type for each ping and calculated the proportion of each type per pixel and month, summing to one. These features informing on AIS coverage and the predominance of receiver types, influence the fraction of broadcasting versus non-broadcasting vessels, and thus the associated emissions and detections. We tested both, using these covariates directly and reducing them to two components via PCA, with the latter considerably improving model performance.
+
+\paragraph{Sentinel features}
+
+The temporal and spatial variability of S1 coverage can influence the estimation of emissions mainly derived through S1 detections. For each pixel and month in the emissions model, we therefore defined the average scene area by dividing the total pixel area imaged by the number of scenes, and calculated the ratio of this average scene area to the water area in the pixel. As a complementary measure of vessel presence at sea, we also incorporated Sentinel-2 (S2) detections. While S2 imagery was processed similarly to S1, providing aggregated fishing and non-fishing detections per km², we did not stratify S2 detections by length bins or fit a separate hurdle model for missing detections. Instead, we included an aggregate value of S2 detections per km², along with the average scene area and area ratio (as for S1), to help inform vessel presence. For the S1 detection hurdle model, the average scene areas and area ratios for S1 were calculated across the entire time series rather than monthly, to provide contextual information about historic satellite coverage. The hurdle model also included the total number of S1 scenes and total S1 pixel area imaged, while excluding S2 coverage features, and only considering unmatched S2 detections per km² imaged. For all three models, the corresponding variables proved more informative when reduced to two components via PCA. We did not include S2 in the same way as S1 due to (1) less consistent temporal and spatial coverage of S2, which is strongly affected by cloud conditions, whereas S1 coverage is more constant throughout the year (i.e., S1 can see through clouds), and (2) greater confidence in the S1 detection products from GFW \cite{paolo2024satellite}.
+
+\paragraph{Additional features}
+
+We included year, month and day since start variables in all three models to account for temporal variability.
+
+\subsubsection{Non-broadcasting model training}
+
+We defined three independent Random Forest models using the tidymodel framework in R. We preprocessed the model input data using the recipes package in R to filter model features, handle missing values, and transform predictors. Numeric predictors with near-zero variance or high correlation were removed, while categorical variables were converted to factors, with rare or novel levels handled appropriately. Natural splines were applied to latitude, longitude, and time to capture spatial and temporal trends, and missing numeric values were imputed based on these variables using linear regression. Principal component analysis (PCA) was applied to AIS reception and S1/S2 coverage features to reduce dimensionality, retaining the most informative components and boosting performance (2 components each). Model fitting was done using the ranger engine in parsnip, with 500 trees, hyperparameters tuned using a grid of size 25, and 5-fold cross-validation.
+
+\paragraph{Hurdle detections model}
+
+While 87.9\% of estimated non-broadcasting emissions are modeled directly from actual S1 detections, a fraction of the total area covered by S1 might lack detection information at a given time, due to either the satellite’s revisit cycle or detection limits. To address this, we built a hurdle model to estimate S1 detections in these areas, which are then used to model the corresponding emissions. Because the pixel-month detection distribution is highly right-skewed, with most pixel-months having zero detections, we first trained a classification model to predict the presence/absence of S1 detections, followed by a regression model to estimate the number of detections in pixel-months where presence is predicted. All data is disaggregated by fishing/non-fishing detection type and for each of the 10 length bins. The hurdle models read:
+
+\bigskip
+\textit{\textbf{presence/absence of unmatched detections} $\sim$ detection features (fishing vessel type, minimum vessel length, maximum vessel length, vessel length percentile class) + temporal features (month, year, days since start of study) + geographic features (ocean, pixel water area, minimum depth, minimum distance from shore, minimum distance from nearest port, distance to top 20 ports) + sentinel features PCA (total number of S1 scenes across, total S1 pixel area imaged, average S1 scene area, ratio of average S1 scene area to pixel water area, unmatched S2 detections per km² of area imaged) + AIS features PCA (positions reported by AIS Type A, positions reported by AIS Type B, proportion of dynamic AIS receivers, proportion of unknown AIS receivers, proportion of terrestrial AIS receivers, proportion of satellite AIS receivers) + weather features (maximum wind speed, mean primary wave height, minimum primary wave period)}
+
+\bigskip
+\textit{\textbf{unmatched detections per km2 imaged} $\sim$ vessel features (fishing vessel type, minimum vessel length, maximum vessel length, vessel length percentile class) + temporal features (month, year, days since start of study) + geographic features (ocean, pixel water area, minimum depth, minimum distance from shore, minimum distance from nearest port, distance to top 20 ports) + sentinel features PCA (total number of S1 scenes across, total S1 pixel area imaged, average S1 scene area, ratio of average S1 scene area to pixel water area, unmatched S2 detections per km² of area imaged) + AIS features PCA (positions reported by AIS Type A, positions reported by AIS Type B, proportion of dynamic AIS receivers, proportion of unknown AIS receivers, proportion of terrestrial AIS receivers, proportion of satellite AIS receivers) + weather features (maximum wind speed, mean primary wave height, minimum primary wave period)}
+
+\paragraph{Emissions model}
+
+We built nine Random Forest regression models, one for each pollutant, that predicts AIS-based emissions from AIS-matched detections. For model training, we used the emissions from the AIS model, extracting AIS ping emissions occurring in ocean and coastal areas while excluding the 1km S1 buffer from shore as well as inland emissions (i.e., port and fluvial emissions). Emissions were aggregated by vessel type (i.e., fishing/non-fishing), vessel length class, month, and pixel. Observations with zero emissions were excluded. The same vessel length classes were used for both emissions and detections models. While a larger number of length bins improved emissions model performance, it reduced performance in the detection models. We therefore selected a compromise at 10 bins. Unlike the detection models, where vessel length class was treated as a factor variable, we represented vessel length in the emissions model by including separate predictor columns corresponding to the number of matched detections by km2 in each length bin rather than separate rows. Because emissions were highly right-skewed, we also used the log of absolute emissions as the dependent variable. The emissions models reads:
+
+\bigskip
+\textit{\textbf{log(AIS emissions)} $\sim$ detection features (fishing vessel type, matched S1 detections per km² of area imaged for each length bin) + temporal features (month, year, days since start of study) + geographic features (ocean, pixel water area, minimum depth, minimum distance from shore, minimum distance from nearest port, distance to top 20 ports) + sentinel features PCA (monthly average S1 scene area, monthly ratio of average S1 scene area to pixel water area, monthly average S2 scene area, monthly ratio of average S2 scene area to pixel water area, matched S2 detections per km² of area imaged) + AIS features PCA (positions reported by AIS Type A, positions reported by AIS Type B, proportion of dynamic AIS receivers, proportion of unknown AIS receivers, proportion of terrestrial AIS receivers, proportion of satellite AIS receivers) + weather features (maximum wind speed, mean primary wave height, minimum primary wave period)}
+
+\subsubsection{Non-broadcasting model testing}
+
+We assessed model performance using a two-tiered evaluation approach designed to test both predictive power within areas covered by S1 (inside footprint) and generalization to locations lacking direct detection information (outside footprint).
+
+Because both emissions and detection predictions inside the S1 footprint are made for locations where emissions and detections data is available for training, (i.e., inside the footprint we are not generalizing to regions with unknown emissions and detections), we first evaluated performance inside the footprint using a random 75/25 train/test split. Then, to assess spatial transferability when predicting emissions in areas outside the footprint or near its edges that are poorly represented in the training data, we additionally implemented a geographically structured split, training on nearshore pixels and testing on offshore pixels. This nearshore/offshore split is constructed separately for each of the five major ocean basins by ranking pixels according to their minimum distance to port and designating the farthest 25\% as offshore, with the remaining 75\% used for training. This strategy tests the ability of the modeling framework to predict emissions in regions outside the S1 footprint, although such areas contribute only 0.5\% to the total non-broadcasting emissions.
+
+To handle class imbalance in the classification model, the data split was stratified by the presence/absence of unmatched S1 detections, and the classifier was trained with downsampling of majority-class pixels, while testing was performed on the full dataset. Classifier performance is reported using precision-recall curves (Fig. \ref{fig:fig-pr-curves}), receiver operating characteristic (ROC) curves (Fig. \ref{fig:fig-roc-curves}), and confusion matrices (Fig. \ref{fig:fig-conf-mat}). Table \ref{tab:all_performance_metrics_table} also summarizes regression performance for detections, both inside and outside the footprint, alongside the emissions model performance. To assess the performance of the emissions model, predicted log emissions were back-transformed using Duan’s smearing coefficient, calculated from the residuals of the training data \cite{duan1983smearing}. The same transformation was applied to the final model prediction.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/fig-pr-curves-1.png}
+    \caption{Precision-recall curves of the detection classification model, shown for both the inside S1 footprint test and outside S1 footprint test.}
+    \label{fig:fig-pr-curves}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/fig-roc-curves-1.png}
+    \caption{Receiver Operating Characteristic (ROC) curves of the detection classification model, shown for both the inside S1 footprint test and outside S1 footprint test.}
+    \label{fig:fig-roc-curves}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/fig-conf-mat-1.png}
+    \caption{Confusion matricies of the detection classification model, shown for both the inside S1 footprint test and outside S1 footprint test.}
+    \label{fig:fig-conf-mat}
+\end{figure}
 
 
-\input{tables/all_performance_metrics_table}
+\begin{table}[H]
+    \centering
+    \input{tables/all_performance_metrics_table}
+\end{table}
+
+\subsubsection{Feature importance}
+
+After hyperparameter tuning on the full dataset, we performed a final fit using the best model and analyzed the feature importance for the three non-broadcasting emissions models (Fig \ref{fig:fig-feature-importance}). Feature importance was quantified using the bias-corrected Gini index \cite{nembrini2018revival}, as implemented for random forests in the ranger R package \cite{ranger}. This metric quantifies how much each model feature reduces node impurity when it is used to make splits in the random forest's decision trees.
+
+\begin{figure}[!p]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/fig-feature-importance-1.png}
+    \caption{Feature importance plots for the: 1) emissions regression model;
+2) detections classification mode; and 3) detections regression model.}
+    \label{fig:fig-feature-importance}
+\end{figure}
+
+\subsubsection{Predicting non-broadcasting emissions}
+
+To generate the final global estimates of non-broadcasting vessel emissions, we applied the trained models across all ocean pixels on a monthly basis for the study period, matching the period of the training data. The prediction workflow followed a conditional logic based on the availability of S1 detections.
+
+\paragraph{Direct estimation}
+
+For 87.9\% of the total estimated non-broadcasting emissions, we applied the primary emissions model. For this, we replaced the matched detections used in training with the unmatched vessels detected in both the 10-length-bin S1 detections and the non-stratified-by-length unmatched S2 detections PCA feature to calculate emissions directly.
+
+\paragraph{Indirect estimation}
+
+For pixel-months where S1 detections were unavailable, due to either the satellite’s revisit cycle or detection limits, we first applied the classification model to predict the probability of vessel presence. If presence was predicted, the subsequent detection regression model estimated the likely number of unmatched S1 detections per km². These predicted detections were then fed into the emissions regression model to infer the resulting emissions. Of the total predicted non-broadcasting emissions, 11.6\% corresponded to indirect estimations within the S1 footprint, while only 0.5\% occurred entirely outside the footprint.
+
+\bigskip
+The final output provides a continuous global dataset of monthly non-broadcasting emissions at 1×1-degree resolution, disaggregated by fishing/non-fishing class and 10 vessel length classes from 2017 to 2024.
+
+
 \begin{comment}
 THIS SECTION WILL BE REPLACED
 We estimate emissions from non-broadcasting vessels by spatiotemporally extrapolating AIS-based emissions to non-broadcasting vessels, leveraging vessel detections from S1 SAR data. S1 imagery enables identification and quantification of both broadcasting and non-broadcasting vessels at specific locations and times, and also allows for the estimation of inferred vessel length for every detection \cite{paolo2024satellite}. 
@@ -405,6 +517,7 @@ We estimate emissions from non-broadcasting vessels by multiplying AIS-based emi
 This approach provides corresponding non-broadcasting vessel emissions estimates for every month and location where AIS-based estimates are available. Adding both values gives us monthly gridded total emissions estimates from both AIS-broadcasting and non-broadcasting vessels.
 \end{comment}
 
+\begin{comment}
 \subsusection{Assessing performance of the non-broadcasting emissions models}
 
 Here we look at a summary of how well the three dark fleet models perform in out-of-sample testing (Table \ref{tab:all_performance_metrics_table}).
@@ -443,6 +556,7 @@ Next we look at the model feature importance plots of the three non-broadcasting
 2) detections classification mode; and 3) detections regression model.}
     \label{fig:fig-feature-importance}
 \end{figure}
+\end{comment}
 
 \inser
 \begin{comment}
