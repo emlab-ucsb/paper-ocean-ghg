@@ -212,6 +212,26 @@ list(
     ),
     format = "file"
   ),
+  # Disaggregated CO2 emissions falling within and outside the S1 footprint
+  tar_file_read(
+    name = total_spatial_co2_emissions_ais_dark_by_footprint,
+    command = here::here(
+      "sql/total_spatial_co2_emissions_ais_dark_by_footprint.sql"
+    ),
+    read = download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_dark = run_version_dark,
+          analysis_start_year = analysis_start_year,
+          analysis_end_year = analysis_end_year
+        ),
+      file_path = here::here(
+        "data/gfw/total_spatial_co2_emissions_ais_dark_by_footprint.csv"
+      ),
+    ),
+    format = "file"
+  ),
   # # Annual extrapolation of AIS activity to dark activity
   # # Use method we use for extrapolating emissions (by pixel, month, fishing, and vessel size class)
   # # To also extrapolate hours, kw-hours

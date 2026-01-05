@@ -66,7 +66,8 @@ targets::tar_load(c(
   "all_varimp_data",
   "performance_detections_cls_roc_pr_curves",
   "performance_detections_cls_conf_mat",
-  "total_spatial_co2_emissions_ais_dark_by_fleet"
+  "total_spatial_co2_emissions_ais_dark_by_fleet",
+  "total_spatial_co2_emissions_ais_dark_by_footprint"
 ))
 ```
 
@@ -1799,9 +1800,9 @@ make_pollutant_time_series_figure(
 #| fig-width: 8
 #| fig-height: 4
 
-total_spatial_co2_emissions_ais_dark_by_fleet <- read.csv(glue::glue(
-  "data/gfw/total_spatial_co2_emissions_ais_dark_by_fleet.csv"
-))
+# total_spatial_co2_emissions_ais_dark_by_fleet <- read.csv(glue::glue(
+#   "data/gfw/total_spatial_co2_emissions_ais_dark_by_fleet.csv"
+# ))
 
 target_lons <- unique(as.integer(longs))
 target_lats <- unique(as.integer(lats))
@@ -1920,6 +1921,66 @@ spatial_co2_emissions_ais_dark_by_fleet |>
 
 ```
 
+### Spatial emissions by footprint group
+
+```{r}
+#| label: fig-spatial-coverage-footprint
+#| fig-cap: Spatial coverage of the non-broadcasting emissions model. Areas are classified according to whether they fall inside or outside the S1 footprint and whether they have been imaged by S1 at any point in time. A given pixel may be imaged in some months but not in others. Pixels outside the footprint have never been imaged. The percentage of total CO$_{2}$ emissions from non-broadcasting vessels attributed to each category is shown.
+#| fig-width: 4
+#| fig-height: 8
+
+# total_spatial_co2_emissions_ais_dark_by_footprint <- read.csv(glue::glue(
+#   "data/gfw/total_spatial_co2_emissions_ais_dark_by_footprint.csv"
+# ))
+
+total_spatial_co2_emissions_ais_dark_by_footprint |>
+  mutate(
+    footprint = case_when(
+      inside_footprint == FALSE ~ "Outside S1 footprint",
+      inside_footprint == TRUE &
+        s1_imaged == TRUE ~ "Inside S1 footprint imaged",
+      inside_footprint == TRUE &
+        s1_imaged == FALSE ~ "Inside S1 footprint not imaged",
+      TRUE ~ NA_character_
+    )
+  ) |>
+  filter(!is.na(footprint)) |>
+  mutate(total_emissions_global = sum(emissions_co2_dark_mt, na.rm = TRUE)) |>
+  group_by(footprint) |>
+  mutate(
+    pct_emissions = (sum(emissions_co2_dark_mt, na.rm = TRUE) /
+      total_emissions_global) *
+      100,
+    facet_label = paste0(
+      footprint,
+      " (",
+      round(pct_emissions, 1),
+      "% of emissions)"
+    )
+  ) |>
+  ungroup() |>
+  ggplot() +
+  geom_sf(data = world_bbox_sf, fill = "grey90", color = NA) +
+  ggspatial::geom_spatial_tile(
+    aes(
+      x = lon_bin + 0.5,
+      y = lat_bin + 0.5,
+      fill = footprint
+    ),
+    color = NA
+  ) +
+  geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
+  scale_fill_manual(
+    name = "",
+    values = c(
+      "Outside S1 footprint" = "#ff4b2b",
+      "Inside S1 footprint imaged" = "#00d4ff",
+      "Inside S1 footprint not imaged" = "#ff9d00ff"
+    )
+  ) +
+  theme_void() +
+  facet_wrap(~facet_label, ncol = 1)
+```
 
 ### Registered data validation
 
