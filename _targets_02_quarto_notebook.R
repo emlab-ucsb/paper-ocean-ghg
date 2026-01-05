@@ -128,6 +128,13 @@ list(
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
+    name = total_spatial_co2_emissions_ais_dark_by_footprint,
+    command = here::here(
+      "data/gfw/total_spatial_co2_emissions_ais_dark_by_footprint.csv"
+    ),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
     name = vessel_size_info,
     command = here::here(
       "data/gfw/vessel_size_info.csv"
@@ -174,6 +181,16 @@ list(
       "data/IEA_EDGAR_CO2_1970_2023/IEA_EDGAR_CO2_1970_2023.xlsx"
     ),
     read = readxl::read_excel(!!.x, sheet = "IPCC 2006", skip = 9)
+  ),
+  # Downloaded from here on August 27, 2025: https://data-explorer.oecd.org/vis?fs[0]=Topic%2C1%7CEnvironment%20and%20climate%20change%23ENV%23%7CAir%20and%20climate%23ENV_AC%23&pg=0&fc=Topic&bp=true&snb=17&df[ds]=dsDisseminateFinalDMZ&df[id]=DSD_MARITIME_TRANSPORT%40DF_MARITIME_TRANSPORT&df[ag]=OECD.SDD.NAD.SEEA&df[vs]=1.0&dq=W.A......ALL_VESSELS&pd=2019%2C2024&to[TIME_PERIOD]=false&vw=tb&isAvailabilityDisabled=false
+  tar_file_read(
+    name = oecd_data,
+    command = here::here(
+      "data/oecd/annual_oecd_experimental_data.csv"
+    ),
+    read = readr::read_csv(!!.x) |>
+      dplyr::select(year = TIME_PERIOD, emissions_co2_mt = OBS_VALUE) |>
+      dplyr::mutate(data_source = "OECD")
   ),
   # Render quarto notebook -----
   tar_quarto(

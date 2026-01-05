@@ -45,6 +45,7 @@ targets::tar_load(c(
   "n_ais_messages",
   "n_s1_detections",
   "annual_edgar_emissions",
+  "oecd_data",
   "all_performance_metrics",
   "monthly_aggregated_time_series",
   "annual_emissions_all_pollutants",
@@ -420,13 +421,6 @@ marine_based_transportation_emissions_edgar <- annual_edgar_tranportation_emissi
   dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt, na.rm = TRUE)) |>
   dplyr::ungroup() |>
   dplyr::mutate(data_source = "EDGAR")
-
-# Downloaded from here on August 27, 2025: https://data-explorer.oecd.org/vis?fs[0]=Topic%2C1%7CEnvironment%20and%20climate%20change%23ENV%23%7CAir%20and%20climate%23ENV_AC%23&pg=0&fc=Topic&bp=true&snb=17&df[ds]=dsDisseminateFinalDMZ&df[id]=DSD_MARITIME_TRANSPORT%40DF_MARITIME_TRANSPORT&df[ag]=OECD.SDD.NAD.SEEA&df[vs]=1.0&dq=W.A......ALL_VESSELS&pd=2019%2C2024&to[TIME_PERIOD]=false&vw=tb&isAvailabilityDisabled=false
-oecd_data <- readr::read_csv(here::here(
-  "data/oecd/annual_oecd_experimental_data.csv"
-)) |>
-  dplyr::select(year = TIME_PERIOD, emissions_co2_mt = OBS_VALUE) |>
-  dplyr::mutate(data_source = "OECD")
 
 imo_data <- tibble::tibble(
   year = c(2016, 2017, 2018),
@@ -1801,10 +1795,6 @@ make_pollutant_time_series_figure(
 #| fig-width: 8
 #| fig-height: 4
 
-# annual_spatial_co2_emissions_ais_dark_by_fleet <- read.csv(glue::glue(
-#   "data/gfw/annual_spatial_co2_emissions_ais_dark_by_fleet.csv"
-# ))
-
 target_lons <- unique(as.integer(longs))
 target_lats <- unique(as.integer(lats))
 
@@ -1931,10 +1921,6 @@ spatial_co2_emissions_ais_dark_by_fleet |>
 #| fig-width: 8
 #| fig-height: 4
 
-# annual_spatial_co2_emissions_ais_dark_by_fleet <- read.csv(glue::glue(
-#   "data/gfw/annual_spatial_co2_emissions_ais_dark_by_fleet.csv"
-# ))
-
 target_lons <- unique(as.integer(longs))
 target_lats <- unique(as.integer(lats))
 
@@ -2060,10 +2046,6 @@ spatial_co2_emissions_ais_dark_by_fleet |>
 #| fig-cap: Spatial coverage of the non-broadcasting emissions model. Areas are classified according to whether they fall inside or outside the S1 footprint and whether they have been imaged by S1 at any point in time. A given pixel may be imaged in some months but not in others. Pixels outside the footprint have never been imaged. The percentage of total CO$_{2}$ emissions from non-broadcasting vessels attributed to each category is shown.
 #| fig-width: 4
 #| fig-height: 8
-
-# total_spatial_co2_emissions_ais_dark_by_footprint <- read.csv(glue::glue(
-#   "data/gfw/total_spatial_co2_emissions_ais_dark_by_footprint.csv"
-# ))
 
 total_spatial_co2_emissions_ais_dark_by_footprint |>
   dplyr::mutate(
