@@ -1656,20 +1656,20 @@ cowplot::plot_grid(
 #| fig-height: 8
 
 time_series_data_monthly_emissions_by_fleet <- monthly_aggregated_time_series |>
-  group_by(time) |>
-  summarise(
+  dplyr::group_by(time) |>
+  dplyr::summarise(
     emissions_co2_mt = sum(emissions_co2_mt),
     emissions_co2_dark_mt = sum(emissions_co2_dark_mt)
   ) |>
-  ungroup() |>
-  mutate(time = lubridate::ymd(time)) |>
-  pivot_longer(
+  dplyr::ungroup() |>
+  dplyr::mutate(time = lubridate::ymd(time)) |>
+  tidyr::pivot_longer(
     cols = c(emissions_co2_mt, emissions_co2_dark_mt),
     names_to = "fleet",
     values_to = "emissions_mt"
   ) |>
-  mutate(
-    fleet = case_when(
+  dplyr::mutate(
+    fleet = dplyr::case_when(
       fleet == "emissions_co2_mt" ~ "AIS",
       fleet == "emissions_co2_dark_mt" ~ "S1"
     ),
@@ -1680,41 +1680,41 @@ make_pollutant_by_fleet_time_series_figure <- function(
   pollutant_time_series_data,
   y_axis_label
 ) {
-    ggplot(
-      pollutant_time_series_data,
-      aes(x = time, y = emissions_mt, fill = fleet)
+  ggplot(
+    pollutant_time_series_data,
+    aes(x = time, y = emissions_mt, fill = fleet)
+  ) +
+    geom_area(position = 'stack', alpha = 0.9) +
+    geom_line(
+      data = subset(pollutant_time_series_data, fleet == "S1"),
+      aes(x = time, y = emissions_mt),
+      color = "white"
     ) +
-      geom_area(position = 'stack', alpha = 0.9) +
-      geom_line(
-        data = subset(pollutant_time_series_data, fleet == "S1"),
-        aes(x = time, y = emissions_mt),
-        color = "white"
-      ) +
-      scale_y_continuous(
-        labels = scales::comma,
-        limits = c(0, NA)
-      ) +
-      scale_fill_manual(
-        values = all_data_source_color_palette,
-        breaks = c("AIS", "S1")
-      ) +
-      scale_x_continuous(
-        breaks = seq(
-          lubridate::ymd(glue::glue("{analysis_start_year}-01-01")),
-          lubridate::ymd(glue::glue("{analysis_end_year+1}-01-01")),
-          by = "1 year"
-        ),
-        labels = seq(analysis_start_year, analysis_end_year + 1)
-      ) +
-      theme_plot() +
-      labs(x = "", y = y_axis_label) +
-      theme(
-        panel.grid.minor = element_blank(),
-        legend.position = c(0.15, 0.92),
-        legend.background = element_rect(fill = "white", color = "gray"),
-        legend.title = element_blank()
-      )
-  }
+    scale_y_continuous(
+      labels = scales::comma,
+      limits = c(0, NA)
+    ) +
+    scale_fill_manual(
+      values = all_data_source_color_palette,
+      breaks = c("AIS", "S1")
+    ) +
+    scale_x_continuous(
+      breaks = seq(
+        lubridate::ymd(glue::glue("{analysis_start_year}-01-01")),
+        lubridate::ymd(glue::glue("{analysis_end_year+1}-01-01")),
+        by = "1 year"
+      ),
+      labels = seq(analysis_start_year, analysis_end_year + 1)
+    ) +
+    theme_plot() +
+    labs(x = "", y = y_axis_label) +
+    theme(
+      panel.grid.minor = element_blank(),
+      legend.position = c(0.15, 0.92),
+      legend.background = element_rect(fill = "white", color = "gray"),
+      legend.title = element_blank()
+    )
+}
 
 
 time_series_by_fleet_fig_co2 <- make_pollutant_by_fleet_time_series_figure(
@@ -1797,7 +1797,7 @@ make_pollutant_time_series_figure(
 
 ```{r}
 #| label: fig-spatial-emissions-by-fleet-2024
-#| fig-cap: Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}$ 
+#| fig-cap: Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}$
 #| fig-width: 8
 #| fig-height: 4
 
@@ -1809,14 +1809,14 @@ target_lons <- unique(as.integer(longs))
 target_lats <- unique(as.integer(lats))
 
 spatial_co2_emissions_ais_dark_by_fleet <- annual_spatial_co2_emissions_ais_dark_by_fleet |>
-  group_by(year, lon_bin, lat_bin, fishing) |>
-  summarise(
+  dplyr::group_by(year, lon_bin, lat_bin, fishing) |>
+  dplyr::summarise(
     emissions_co2_mt = sum(emissions_co2_mt, na.rm = TRUE),
     emissions_co2_dark_mt = sum(emissions_co2_dark_mt, na.rm = TRUE)
   ) |>
-  ungroup() |>
-  filter(year == analysis_end_year) |>
-  pivot_longer(
+  dplyr::ungroup() |>
+  dplyr::filter(year == analysis_end_year) |>
+  tidyr::pivot_longer(
     cols = c(emissions_co2_mt, emissions_co2_dark_mt),
     names_to = "fleet",
     values_to = "emissions_co2_mt"
@@ -1834,7 +1834,10 @@ spatial_co2_emissions_ais_dark_by_fleet <- annual_spatial_co2_emissions_ais_dark
 
 scale_limits <- c(
   0.001,
-  max(spatial_co2_emissions_ais_dark_by_fleet$emissions_mt_per_km2, na.rm = TRUE)
+  max(
+    spatial_co2_emissions_ais_dark_by_fleet$emissions_mt_per_km2,
+    na.rm = TRUE
+  )
 )
 
 spatial_co2_emissions_ais_dark_by_fleet |>
@@ -1864,24 +1867,24 @@ spatial_co2_emissions_ais_dark_by_fleet |>
       2024 ~ CO[2] ~ emissions ~ (MT / km^2)
     ),
     palette = "vik",
-    begin = 0.5, 
-    end = 1, 
-    limits = scale_limits, 
-    trans = "log10", 
+    begin = 0.5,
+    end = 1,
+    limits = scale_limits,
+    trans = "log10",
     na.value = "grey90",
     # labels = scales::comma,
     labels = c("0", "0.1", "10", "1000"),
     guide = "none"
   ) +
   scico::scale_fill_scico(
-   name = expression(
+    name = expression(
       2024 ~ CO[2] ~ emissions ~ (MT / km^2)
     ),
     palette = "vik",
-    begin = 0.5, 
-    end = 1, 
-    limits = scale_limits, 
-    trans = "log10", 
+    begin = 0.5,
+    end = 1,
+    limits = scale_limits,
+    trans = "log10",
     na.value = "grey90",
     # labels = scales::comma
     labels = c("0", "0.1", "10", "1000")
@@ -1924,7 +1927,7 @@ spatial_co2_emissions_ais_dark_by_fleet |>
 
 ```{r}
 #| label: fig-spatial-emissions-by-fleet-total
-#| fig-cap: Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}$ 
+#| fig-cap: Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}$
 #| fig-width: 8
 #| fig-height: 4
 
@@ -1936,13 +1939,13 @@ target_lons <- unique(as.integer(longs))
 target_lats <- unique(as.integer(lats))
 
 spatial_co2_emissions_ais_dark_by_fleet <- annual_spatial_co2_emissions_ais_dark_by_fleet |>
-  group_by(lon_bin, lat_bin, fishing) |>
-  summarise(
+  dplyr::group_by(lon_bin, lat_bin, fishing) |>
+  dplyr::summarise(
     emissions_co2_mt = sum(emissions_co2_mt, na.rm = TRUE),
     emissions_co2_dark_mt = sum(emissions_co2_dark_mt, na.rm = TRUE)
   ) |>
-  ungroup() |>
-  pivot_longer(
+  dplyr::ungroup() |>
+  tidyr::pivot_longer(
     cols = c(emissions_co2_mt, emissions_co2_dark_mt),
     names_to = "fleet",
     values_to = "emissions_co2_mt"
@@ -1961,7 +1964,10 @@ spatial_co2_emissions_ais_dark_by_fleet <- annual_spatial_co2_emissions_ais_dark
 
 scale_limits <- c(
   0.001,
-  max(spatial_co2_emissions_ais_dark_by_fleet$emissions_mt_per_km2, na.rm = TRUE)
+  max(
+    spatial_co2_emissions_ais_dark_by_fleet$emissions_mt_per_km2,
+    na.rm = TRUE
+  )
 )
 
 spatial_co2_emissions_ais_dark_by_fleet |>
@@ -1991,24 +1997,24 @@ spatial_co2_emissions_ais_dark_by_fleet |>
       Cumulative ~ CO[2] ~ emissions ~ (MT / km^2) ~ from ~ 2017 ~ to ~ 2024
     ),
     palette = "vik",
-    begin = 0.5, 
-    end = 1, 
-    limits = scale_limits, 
-    trans = "log10", 
+    begin = 0.5,
+    end = 1,
+    limits = scale_limits,
+    trans = "log10",
     na.value = "grey90",
     # labels = scales::comma,
     labels = c("0", "0.1", "10", "1000"),
     guide = "none"
   ) +
   scico::scale_fill_scico(
-   name = expression(
+    name = expression(
       Cumulative ~ CO[2] ~ emissions ~ (MT / km^2) ~ from ~ 2017 ~ to ~ 2024
     ),
     palette = "vik",
-    begin = 0.5, 
-    end = 1, 
-    limits = scale_limits, 
-    trans = "log10", 
+    begin = 0.5,
+    end = 1,
+    limits = scale_limits,
+    trans = "log10",
     na.value = "grey90",
     # labels = scales::comma
     labels = c("0", "0.1", "10", "1000")
@@ -2060,7 +2066,7 @@ spatial_co2_emissions_ais_dark_by_fleet |>
 # ))
 
 total_spatial_co2_emissions_ais_dark_by_footprint |>
-  mutate(
+  dplyr::mutate(
     footprint = case_when(
       inside_footprint == FALSE ~ "Outside S1 footprint",
       inside_footprint == TRUE &
@@ -2071,9 +2077,11 @@ total_spatial_co2_emissions_ais_dark_by_footprint |>
     )
   ) |>
   filter(!is.na(footprint)) |>
-  mutate(total_emissions_global = sum(emissions_co2_dark_mt, na.rm = TRUE)) |>
-  group_by(footprint) |>
-  mutate(
+  dplyr::mutate(
+    total_emissions_global = sum(emissions_co2_dark_mt, na.rm = TRUE)
+  ) |>
+  dplyr::group_by(footprint) |>
+  dplyr::mutate(
     pct_emissions = (sum(emissions_co2_dark_mt, na.rm = TRUE) /
       total_emissions_global) *
       100,
@@ -2084,7 +2092,7 @@ total_spatial_co2_emissions_ais_dark_by_footprint |>
       "% of emissions)"
     )
   ) |>
-  ungroup() |>
+  dplyr::ungroup() |>
   ggplot() +
   geom_sf(data = world_bbox_sf, fill = "grey90", color = NA) +
   ggspatial::geom_spatial_tile(

@@ -121,6 +121,13 @@ list(
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
+    name = annual_spatial_co2_emissions_ais_dark_by_fleet,
+    command = here::here(
+      "data/gfw/annual_spatial_co2_emissions_ais_dark_by_fleet.csv"
+    ),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
     name = vessel_size_info,
     command = here::here(
       "data/gfw/vessel_size_info.csv"
