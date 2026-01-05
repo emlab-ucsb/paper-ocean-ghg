@@ -2044,12 +2044,12 @@ spatial_co2_emissions_ais_dark_by_fleet |>
 ```{r}
 #| label: fig-spatial-coverage-footprint
 #| fig-cap: Spatial coverage of the non-broadcasting emissions model. Areas are classified according to whether they fall inside or outside the S1 footprint and whether they have been imaged by S1 at any point in time. A given pixel may be imaged in some months but not in others. Pixels outside the footprint have never been imaged. The percentage of total CO$_{2}$ emissions from non-broadcasting vessels attributed to each category is shown.
-#| fig-width: 4
+#| fig-width: 6
 #| fig-height: 8
 
 total_spatial_co2_emissions_ais_dark_by_footprint |>
   dplyr::mutate(
-    footprint = case_when(
+    footprint = dplyr::case_when(
       inside_footprint == FALSE ~ "Outside S1 footprint",
       inside_footprint == TRUE &
         s1_imaged == TRUE ~ "Inside S1 footprint imaged",
@@ -2058,7 +2058,7 @@ total_spatial_co2_emissions_ais_dark_by_footprint |>
       TRUE ~ NA_character_
     )
   ) |>
-  filter(!is.na(footprint)) |>
+  dplyr::filter(!is.na(footprint)) |>
   dplyr::mutate(
     total_emissions_global = sum(emissions_co2_dark_mt, na.rm = TRUE)
   ) |>
