@@ -66,7 +66,7 @@ targets::tar_load(c(
   "all_varimp_data",
   "performance_detections_cls_roc_pr_curves",
   "performance_detections_cls_conf_mat",
-  "s1_ais_spatial_co2_emissions"
+  "total_spatial_co2_emissions_ais_dark_by_fleet"
 ))
 ```
 
@@ -1799,22 +1799,22 @@ make_pollutant_time_series_figure(
 #| fig-width: 8
 #| fig-height: 4
 
-# s1_ais_spatial_co2_emissions <- read.csv(glue::glue(
-#   "data/gfw/s1_ais_spatial_co2_emissions.csv"
-# ))
+total_spatial_co2_emissions_ais_dark_by_fleet <- read.csv(glue::glue(
+  "data/gfw/total_spatial_co2_emissions_ais_dark_by_fleet.csv"
+))
 
 target_lons <- unique(as.integer(longs))
 target_lats <- unique(as.integer(lats))
 
-years <- length(analysis_end_year:analysis_start_year)
+# years <- length(analysis_end_year:analysis_start_year)
 
-total_s1_ais_spatial_co2_emissions <- s1_ais_spatial_co2_emissions |>
-  group_by(lon_bin, lat_bin, fishing) |>
-  summarise(
-    emissions_co2_mt = sum(emissions_co2_mt, na.rm = TRUE),
-    emissions_co2_dark_mt = sum(emissions_co2_dark_mt, na.rm = TRUE)
-  ) |>
-  ungroup() |>
+spatial_co2_emissions_ais_dark_by_fleet <- total_spatial_co2_emissions_ais_dark_by_fleet |>
+  # group_by(lon_bin, lat_bin, fishing) |>
+  # summarise(
+  #   emissions_co2_mt = sum(emissions_co2_mt, na.rm = TRUE),
+  #   emissions_co2_dark_mt = sum(emissions_co2_dark_mt, na.rm = TRUE)
+  # ) |>
+  # ungroup() |>
   pivot_longer(
     cols = c(emissions_co2_mt, emissions_co2_dark_mt),
     names_to = "fleet",
@@ -1822,7 +1822,7 @@ total_s1_ais_spatial_co2_emissions <- s1_ais_spatial_co2_emissions |>
   ) |>
   dplyr::mutate(
     emissions_mt_per_km2 = emissions_co2_mt / lat_to_area(lat_bin),
-    emissions_mt_per_km2_year = emissions_mt_per_km2 / years
+    # emissions_mt_per_km2_year = emissions_mt_per_km2 / years # If use, update SQL to pull data by year
   ) |>
   tidyr::complete(
     lon_bin = target_lons,
@@ -1834,10 +1834,10 @@ total_s1_ais_spatial_co2_emissions <- s1_ais_spatial_co2_emissions |>
 
 scale_limits <- c(
   0.001,
-  max(total_s1_ais_spatial_co2_emissions$emissions_mt_per_km2, na.rm = TRUE)
+  max(spatial_co2_emissions_ais_dark_by_fleet$emissions_mt_per_km2, na.rm = TRUE)
 )
 
-total_s1_ais_spatial_co2_emissions |>
+spatial_co2_emissions_ais_dark_by_fleet |>
   dplyr::mutate(
     fleet = factor(
       fleet,

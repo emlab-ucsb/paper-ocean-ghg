@@ -194,9 +194,9 @@ list(
   ),
   # Disaggregated CO2 emissions between AIS-broadcasting and non-broadcasting fleets
   tar_file_read(
-    name = annual_spatial_co2_emissions_ais_dark_by_fleet,
+    name = total_spatial_co2_emissions_ais_dark_by_fleet,
     command = here::here(
-      "sql/annual_spatial_co2_emissions_ais_dark_by_fleet.sql"
+      "sql/total_spatial_co2_emissions_ais_dark_by_fleet.sql"
     ),
     read = download_gfw_data(
       bq_billing_project,
@@ -207,7 +207,7 @@ list(
           analysis_end_year = analysis_end_year
         ),
       file_path = here::here(
-        "data/gfw/annual_spatial_co2_emissions_ais_dark_by_fleet.csv"
+        "data/gfw/total_spatial_co2_emissions_ais_dark_by_fleet.csv"
       ),
     ),
     format = "file"
