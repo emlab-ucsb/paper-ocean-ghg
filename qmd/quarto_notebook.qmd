@@ -586,9 +586,9 @@ social_cost_tibble <- tibble::tibble(
   )
 )
 
-total_scc_billion_usd <- annual_emissions |>
+total_sc_billion_usd <- annual_emissions |>
   dplyr::filter(fleet %in% c("AIS-broadcasting", "Non-broadcasting")) |>
-  dplyr::filter(year == 2024) |>
+  dplyr::filter(year == 2021) |>
   dplyr::group_by(pollutant) |>
   dplyr::summarise(emissions_mt = sum(emissions_mt, na.rm = TRUE)) |>
   dplyr::ungroup() |>
@@ -657,7 +657,7 @@ total_scc_billion_usd <- annual_emissions |>
     of emissions from non-broadcasting vessels has been declining
     steadily since 2020.
 
-    - The total social cost of CO$_{2}$, CH$_{4}$, and N$_{2}$O emissions in 2024 was `r total_scc_billion_usd` billion USD.
+    - The total social cost of CO$_{2}$, CH$_{4}$, and N$_{2}$O emissions in 2024 was `r round(total_sc_billion_usd$sc_total_billion_usd)` billion USD. This represents about `r scales::percent(total_sc_billion_usd$sc_total_billion_usd/1e3/6.63)` of the total value of all goods transported by maritime trade (using 6.63 trillion USD as the 2021 value of maritime-traded goods).
 
     # Figures
 
@@ -2176,8 +2176,6 @@ spatial_emissions_by_fleet_total_plot_qlog10 <- spatial_co2_emissions_ais_dark_b
   coord_sf(crs = map_projection)
 
 
-
-
 spatial_emissions_by_fleet_total_plot_qlog10
 ```
 
@@ -2186,7 +2184,6 @@ spatial_emissions_by_fleet_total_plot_qlog10
 #| fig-cap: Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}. A pseudolog$_10$ scale is applied for visualization to manage the high dynamic range of emissions, suppressing near-zero values while preserving emission hotspots.$
 #| fig-width: 8
 #| fig-height: 4
-
 
 spatial_emissions_by_fleet_total_plot_pseudolog <- spatial_co2_emissions_ais_dark_by_fleet |>
   dplyr::mutate(
@@ -2271,7 +2268,7 @@ spatial_emissions_by_fleet_total_plot_pseudolog
 ```{r}
 #| label: fig-spatial-temporal-richness-by-fleet-total-qlog10
 #| fig-cap: (A) Time series of monthly global CO$_2$ emissions, aggregated across AIS-broadcasting and non-broadcasting fleets, for both fishing and non-fishing boats. (B) Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}. A log$_10$ scale is applied for visualization to manage the high dynamic range of emissions. To ensure visual clarity and suppress background noise, the bottom 1% of the emission distribution has been excluded from the color mapping.$
-#| fig-width: 4
+#| fig-width: 7
 #| fig-height: 7
 
 time_series_data_monthly_emissions_by_fleet <- monthly_aggregated_time_series |>
@@ -2378,9 +2375,8 @@ cowplot::plot_grid(
 ```{r}
 #| label: fig-spatial-temporal-richness-by-fleet-total-pseudolog
 #| fig-cap: (A) Time series of monthly global CO$_2$ emissions, aggregated across AIS-broadcasting and non-broadcasting fleets, for both fishing and non-fishing boats. (B) Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}. A pseudolog$_10$ scale is applied for visualization to manage the high dynamic range of emissions, suppressing near-zero values while preserving emission hotspots.$
-#| fig-width: 4
+#| fig-width: 7
 #| fig-height: 7
-
 
 cowplot::plot_grid(
   plot_constrained,
