@@ -1232,10 +1232,11 @@ summarized_s1_dark_fleet_data |>
 ```
 
 ```{r}
-#| label: fig-pollutant-maps
+#| label: fig-pollutant-maps-pseudolog
 #| fig-cap: Spatial map of 2024 emissions for each pollutant, aggregated across the AIS-broadcasting fleet and non-broadcasting, and shown at a 1x1 degree spatial resolution
 #| fig-width: 8
 #| fig-height: 8
+
 pollutant_map_data_all <- total_spatial_emissions_by_pollutant |>
   dplyr::mutate(
     pollutant = dplyr::case_when(
@@ -1295,6 +1296,101 @@ pollutant_map_list <- purrr::map(
           title.hjust = 0.5,
           frame.colour = "black",
           ticks.colour = "black"
+        )
+      ) +
+      scale_x_continuous(expand = c(0, 1)) +
+      scale_y_continuous(expand = c(0, 1)) +
+      theme(
+        legend.position = "bottom",
+        legend.direction = "horizontal",
+        legend.key.width = unit(1, "cm")
+      ) +
+      facet_wrap(pollutant ~ ., labeller = label_parsed)
+  }
+)
+
+cowplot::plot_grid(plotlist = pollutant_map_list, ncol = 3)
+```
+
+
+```{r}
+#| label: fig-pollutant-maps-qlog10
+#| fig-cap: Spatial map of 2024 emissions for each pollutant, aggregated across the AIS-broadcasting fleet and non-broadcasting, and shown at a 1x1 degree spatial resolution. A log$_10$ scale is applied for visualization to manage the high dynamic range of emissions. To ensure visual clarity and suppress background noise, the bottom 1% of the emission distribution has been excluded from the color mapping.
+#| fig-width: 8
+#| fig-height: 8
+
+pollutant_map_data_all <- total_spatial_emissions_by_pollutant |>
+  dplyr::mutate(
+    pollutant = dplyr::case_when(
+      pollutant == "CO2" ~ "CO[2]",
+      pollutant == "N2O" ~ "N[2]*O",
+      pollutant == "CH4" ~ "CH[4]",
+      pollutant == "PM2.5" ~ "PM[2.5]",
+      pollutant == "PM10" ~ "PM[10]",
+      pollutant == "SOX" ~ "SO[X]",
+      pollutant == "NOX" ~ "NO[X]",
+      TRUE ~ pollutant
+    )
+  ) |>
+  dplyr::mutate(
+    pollutant = forcats::fct_relevel(pollutant, pollutant_factor_levels)
+  )
+
+pollutant_map_list <- purrr::map(
+  unique(pollutant_map_data_all$pollutant),
+  function(pollutant_tmp) {
+    pollutant_tmp <- as.character(pollutant_tmp)
+
+    pollutant_map_data <- pollutant_map_data_all |>
+      dplyr::filter(pollutant == pollutant_tmp)
+
+    scale_limits <- pollutant_map_data |>
+      dplyr::summarize(
+        min = quantile(emissions_mt_per_km2_2024, 0.01, na.rm = TRUE),
+        max = max(emissions_mt_per_km2_2024, na.rm = TRUE)
+      ) |>
+      as.numeric()
+
+    pollutant_map_data |>
+      ggplot() +
+      geom_sf(data = world_bbox_sf, fill = "grey90") +
+      ggspatial::geom_spatial_tile(
+        aes(
+          x = lon_bin + 0.5,
+          y = lat_bin + 0.5,
+          color = emissions_mt_per_km2_2024,
+          fill = emissions_mt_per_km2_2024
+        )
+      ) +
+      geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
+      scico::scale_fill_scico(
+        name = expression(Emissions ~ (MT / km^2)),
+        palette = "vik",
+        begin = 0.5,
+        end = 1,
+        limits = scale_limits,
+        trans = "log10",
+        na.value = "grey90",
+        labels = scales::scientific
+      ) +
+      scico::scale_color_scico(
+        name = expression(Emissions ~ (MT / km^2)),
+        palette = "vik",
+        begin = 0.5,
+        end = 1,
+        limits = scale_limits,
+        trans = "log10",
+        na.value = "grey90",
+        labels = scales::scientific
+      ) +
+      labs(x = "", y = "") +
+      theme_void() +
+      guides(
+        fill = guide_colorbar(
+          title.position = "top",
+          title.hjust = 0.5,
+          frame.colour = "white",
+          ticks.colour = "white"
         )
       ) +
       scale_x_continuous(expand = c(0, 1)) +
@@ -1919,8 +2015,8 @@ spatial_emissions_by_fleet_2024_plot
 #### Spatial emissions by fleet (total)
 
 ```{r}
-#| label: fig-spatial-emissions-by-fleet-total
-#| fig-cap: Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}$
+#| label: fig-spatial-emissions-by-fleet-total-qlog10
+#| fig-cap: Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}. A log$_10$ scale is applied for visualization to manage the high dynamic range of emissions. To ensure visual clarity and suppress background noise, the bottom 1% of the emission distribution has been excluded from the color mapping.$
 #| fig-width: 8
 #| fig-height: 4
 
@@ -1951,15 +2047,16 @@ spatial_co2_emissions_ais_dark_by_fleet <- annual_spatial_co2_emissions_ais_dark
     fill = list(emissions_mt_per_km2 = NA)
   )
 
-scale_limits <- c(
-  0.001,
-  max(
-    spatial_co2_emissions_ais_dark_by_fleet$emissions_mt_per_km2,
-    na.rm = TRUE
-  )
-)
 
-spatial_emissions_by_fleet_total_plot <- spatial_co2_emissions_ais_dark_by_fleet |>
+scale_limits <- spatial_co2_emissions_ais_dark_by_fleet |>
+  dplyr::filter(fleet == "emissions_co2_mt") |>
+  dplyr::summarize(
+    min = quantile(emissions_mt_per_km2, 0.01, na.rm = TRUE),
+    max = max(emissions_mt_per_km2, na.rm = TRUE)
+  ) |>
+  as.numeric()
+
+spatial_emissions_by_fleet_total_plot_qlog10 <- spatial_co2_emissions_ais_dark_by_fleet |>
   dplyr::mutate(
     fleet = factor(
       fleet,
@@ -1991,8 +2088,7 @@ spatial_emissions_by_fleet_total_plot <- spatial_co2_emissions_ais_dark_by_fleet
     limits = scale_limits,
     trans = "log10",
     na.value = "grey90",
-    # labels = scales::comma,
-    labels = c("0", "0.1", "10", "1000"),
+    labels = scales::comma,
     guide = "none"
   ) +
   scico::scale_fill_scico(
@@ -2005,8 +2101,7 @@ spatial_emissions_by_fleet_total_plot <- spatial_co2_emissions_ais_dark_by_fleet
     limits = scale_limits,
     trans = "log10",
     na.value = "grey90",
-    # labels = scales::comma
-    labels = c("0", "0.1", "10", "1000")
+    labels = scales::comma
   ) +
   labs(x = "", y = "") +
   theme(
@@ -2040,13 +2135,101 @@ spatial_emissions_by_fleet_total_plot <- spatial_co2_emissions_ais_dark_by_fleet
   facet_grid(fleet ~ fishing) +
   coord_sf(crs = map_projection)
 
-spatial_emissions_by_fleet_total_plot
+
+
+
+spatial_emissions_by_fleet_total_plot_qlog10
 ```
 
-
 ```{r}
-#| label: fig-spatial-temporal-richness-by-fleet-total
-#| fig-cap: (A) Time series of monthly global CO$_2$ emissions, aggregated across AIS-broadcasting and non-broadcasting fleets, for both fishing and non-fishing boats. (B) Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}$
+#| label: fig-spatial-emissions-by-fleet-total-pseudolog
+#| fig-cap: Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}. A pseudolog$_10$ scale is applied for visualization to manage the high dynamic range of emissions, suppressing near-zero values while preserving emission hotspots.$
+#| fig-width: 8
+#| fig-height: 4
+
+
+spatial_emissions_by_fleet_total_plot_pseudolog <- spatial_co2_emissions_ais_dark_by_fleet |>
+  dplyr::mutate(
+    fleet = factor(
+      fleet,
+      levels = c("emissions_co2_mt", "emissions_co2_dark_mt"),
+      labels = c("AIS", "S1")
+    )
+  ) |>
+  dplyr::mutate(
+    fishing = ifelse(fishing, "Fishing", "Non-fishing") |>
+      forcats::fct_rev()
+  ) |>
+  ggplot() +
+  geom_sf(data = world_bbox_sf, fill = "black") +
+  ggspatial::geom_spatial_tile(aes(
+    x = lon_bin + 0.5,
+    y = lat_bin + 0.5,
+    fill = emissions_mt_per_km2,
+    color = emissions_mt_per_km2
+  )) +
+  theme_void() +
+  geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
+  scico::scale_color_scico(
+    name = expression(
+      Cumulative ~ CO[2] ~ emissions ~ (MT / km^2) ~ from ~ 2017 ~ to ~ 2024
+    ),
+    palette = "vik",
+    begin = 0.5,
+    end = 1,
+    trans = ggallin::pseudolog10_trans,
+    na.value = "grey90",
+    labels = scales::comma,
+    guide = "none"
+  ) +
+  scico::scale_fill_scico(
+    name = expression(
+      Cumulative ~ CO[2] ~ emissions ~ (MT / km^2) ~ from ~ 2017 ~ to ~ 2024
+    ),
+    palette = "vik",
+    begin = 0.5,
+    end = 1,
+    trans = ggallin::pseudolog10_trans,
+    na.value = "grey90",
+    labels = scales::comma
+  ) +
+  labs(x = "", y = "") +
+  theme(
+    legend.position = "bottom",
+    legend.title.align = 0.5,
+    strip.text.x = element_text(
+      margin = margin(t = 10, b = 10),
+      size = 10
+    ),
+    strip.text.y = element_text(
+      angle = 0,
+      hjust = 0,
+      margin = margin(l = 10, r = 10),
+      size = 10
+    ),
+    strip.background = element_rect(fill = "transparent", color = NA),
+    panel.spacing = unit(1, "lines")
+  ) +
+  guides(
+    fill = guide_colorbar(
+      title.position = "top",
+      title.hjust = 0.5,
+      frame.colour = "white",
+      ticks.colour = "white",
+      barwidth = unit(10, "cm"),
+      barheight = unit(0.5, "cm")
+    )
+  ) +
+  scale_x_continuous(expand = c(0, 1)) +
+  scale_y_continuous(expand = c(0, 1)) +
+  facet_grid(fleet ~ fishing) +
+  coord_sf(crs = map_projection)
+
+spatial_emissions_by_fleet_total_plot_pseudolog
+```
+```{r}
+#| label: fig-spatial-temporal-richness-by-fleet-total-qlog10
+#| fig-cap: (A) Time series of monthly global CO$_2$ emissions, aggregated across AIS-broadcasting and non-broadcasting fleets, for both fishing and non-fishing boats. (B) Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}. A log$_10$ scale is applied for visualization to manage the high dynamic range of emissions. To ensure visual clarity and suppress background noise, the bottom 1% of the emission distribution has been excluded from the color mapping.$
 #| fig-width: 4
 #| fig-height: 7
 
@@ -2142,7 +2325,26 @@ plot_constrained <- cowplot::plot_grid(
 
 cowplot::plot_grid(
   plot_constrained,                     
-  spatial_emissions_by_fleet_total_plot,
+  spatial_emissions_by_fleet_total_plot_qlog10,
+  ncol = 1,
+  rel_heights = c(0.35, 0.65),
+  labels = c("A", "B")
+)
+
+```
+
+
+
+```{r}
+#| label: fig-spatial-temporal-richness-by-fleet-total-pseudolog
+#| fig-cap: (A) Time series of monthly global CO$_2$ emissions, aggregated across AIS-broadcasting and non-broadcasting fleets, for both fishing and non-fishing boats. (B) Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}. A pseudolog$_10$ scale is applied for visualization to manage the high dynamic range of emissions, suppressing near-zero values while preserving emission hotspots.$
+#| fig-width: 4
+#| fig-height: 7
+
+
+cowplot::plot_grid(
+  plot_constrained,                     
+  spatial_emissions_by_fleet_total_plot_pseudolog,
   ncol = 1,
   rel_heights = c(0.35, 0.65),
   labels = c("A", "B")
