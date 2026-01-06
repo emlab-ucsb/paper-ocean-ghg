@@ -1475,245 +1475,71 @@ pollutant_time_series_data_co2 <- total_monthly_emissions_by_pollutant |>
 
 ```
 
+
 ```{r}
 #| label: fig-data-richness
-#| fig-cap: (A) Time series of monthly global emissions for each pollutant, aggregated across AIS-broadcasting vessels and non-broadcasting vessels. (B) CO2 emissions during 2024 port stays, aggregated by country. (C) Total trip-level CO2 emissions in 2024 for domestic (within-country) trips for top 25 countries, and total trip-level CO2 emissions in 2024 for international trips for top 25 country-to-country paris. (D)  Total 2024 CO2 emissions by vessel type for AIS-broadcasting vessels.
+#| fig-cap: (A) Time series of monthly global emissions for each GHG and pollutant, aggregated across AIS-broadcasting vessels and non-broadcasting vessels and disaggregated by non-fishing and fishing vessels. (B) 2024 CO$_{2}$ emissions by vessel type for AIS-broadcasting vessels. (C) 2024 CO$_{2}$ emissions by country for AIS-broadcasting vessels during domestic trips, international trips (where emissions of each trip are partitioned equally to its departure and arrival country), and during port stays. Countries with no values are shown in black.
 #| fig-width: 9
 #| fig-height: 8
 
-make_pollutant_time_series_figure <- function(
-  pollutant_time_series_data,
-  y_axis_label
-) {
-  {
-    ggplot(
-      data = pollutant_time_series_data,
-      aes(x = month, y = emissions_mt)
-    ) +
-      geom_line(linewidth = 1.1) +
-      scale_y_continuous(labels = scales::comma) +
-      theme_plot() +
-      labs(x = "", y = y_axis_label) +
-      theme(panel.grid.minor.x = element_blank()) +
-      scale_x_continuous(
-        breaks = seq(
-          lubridate::ymd(glue::glue("{analysis_start_year}-01-01")),
-          lubridate::ymd(glue::glue("{analysis_end_year+1}-01-01")),
-          by = "1 year"
-        ),
-        labels = seq(analysis_start_year, analysis_end_year + 1)
-      ) +
-      scale_y_continuous(limits = c(0, NA))
-  }
-}
+time_series_data_monthly_emissions_by_fishing <- monthly_aggregated_time_series |>
+  dplyr::mutate(
+    time = lubridate::ymd(time)
+  ) |>
+  dplyr::group_by(time, fishing) |>
+  dplyr::summarise(
+    total_emissions_co2_mt = sum(emissions_co2_mt + emissions_co2_dark_mt)
+  ) |>
+  dplyr::ungroup() |>
+  dplyr::mutate(
+    fleet = dplyr::case_when(
+      fishing == TRUE ~ "Fishing",
+      fishing == FALSE ~ "Non-fishing"
+    ),
+    fleet = factor(fleet, levels = c("Non-fishing", "Fishing"))
+  )
 
-time_series_fig_co2 <- make_pollutant_time_series_figure(
-  pollutant_time_series_data_co2,
-  y_axis_label = expression(Monthly ~ CO[2] ~ emissions ~ (MT))
+time_series_by_fishing_fig_co2 <- ggplot(
+  time_series_data_monthly_emissions_by_fishing,
+  aes(x = time, y = total_emissions_co2_mt, fill = fleet)
 ) +
+  geom_area(position = 'stack', alpha = 0.9) +
+  geom_line(
+    data = subset(
+      time_series_data_monthly_emissions_by_fishing,
+      fleet == "Fishing"
+    ),
+    aes(x = time, y = total_emissions_co2_mt),
+    color = "white"
+  ) +
+  scale_y_continuous(
+    labels = scales::comma,
+    limits = c(0, NA)
+  ) +
+  scale_fill_manual(
+    values = all_data_source_color_palette,
+    breaks = c("Non-fishing", "Fishing")
+  ) +
+  scale_x_continuous(
+    breaks = seq(
+      lubridate::ymd(glue::glue("{analysis_start_year}-01-01")),
+      lubridate::ymd(glue::glue("{analysis_end_year+1}-01-01")),
+      by = "1 year"
+    ),
+    labels = seq(analysis_start_year, analysis_end_year + 1)
+  ) +
+  theme_plot() +
+  labs(x = "", y = expression(Monthly ~ CO[2] ~ emissions ~ (MT))) +
+  theme(
+    panel.grid.minor = element_blank(),
+    legend.position = c(0.15, 0.92),
+    legend.background = element_rect(fill = "white", color = "gray"),
+    legend.title = element_blank()
+  ) +
   scale_y_continuous(
     labels = scales::unit_format(unit = "M", scale = 1e-6),
     limits = c(0, NA)
   )
-
-# Divde international trip emissions equally to from and to countries
-international_trip_emissions_by_country <- trip_co2_emissions_by_from_to_countries |>
-  dplyr::filter(from_country_iso3 != to_country_iso3) |>
-  dplyr::mutate(emissions_co2_mt = emissions_co2_mt / 2) |>
-  dplyr::select(country_iso3 = from_country_iso3, emissions_co2_mt) |>
-  dplyr::bind_rows(
-    trip_co2_emissions_by_from_to_countries |>
-      dplyr::mutate(emissions_co2_mt = emissions_co2_mt / 2) |>
-      dplyr::select(country_iso3 = to_country_iso3, emissions_co2_mt)
-  ) |>
-  dplyr::group_by(country_iso3) |>
-  dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt)) |>
-  dplyr::ungroup()
-
-domestic_trip_emissions_by_country <- trip_co2_emissions_by_from_to_countries |>
-  dplyr::filter(from_country_iso3 == to_country_iso3) |>
-  dplyr::select(country_iso3 = from_country_iso3, emissions_co2_mt)
-
-all_port_and_trip_emissions <- international_trip_emissions_by_country |>
-  dplyr::mutate(type = "International trips") |>
-  dplyr::bind_rows(
-    domestic_trip_emissions_by_country |>
-      dplyr::mutate(type = "Domestic trips")
-  ) |>
-  dplyr::bind_rows(
-    port_visit_co2_emissions_by_country |>
-      dplyr::rename(country_iso3 = port_country_iso3) |>
-      dplyr::mutate(type = "Port stays")
-  )
-
-all_countries_for_plot <- land |>
-  sf::st_drop_geometry() |>
-  dplyr::select(country_iso3) |>
-  tidyr::crossing(
-    all_port_and_trip_emissions |>
-      dplyr::distinct(type)
-  )
-
-port_trip_emissions_fig <- ggplot() +
-  geom_sf(data = world_bbox_sf, fill = "grey90") +
-  geom_sf(
-    data = all_countries_for_plot |>
-      dplyr::left_join(land, by = ) |>
-      dplyr::left_join(
-        all_port_and_trip_emissions,
-        by = c("country_iso3", "type")
-      ) |>
-      sf::st_as_sf(),
-    aes(fill = emissions_co2_mt),
-    color = "white",
-    linewidth = 0.01
-  ) +
-  facet_wrap(type ~ ., ncol = 1) +
-  coord_sf(crs = map_projection) +
-  theme_void() +
-  scale_fill_viridis_c(
-    option = "A",
-    begin = 0.2,
-    end = 0.7,
-    na.value = "black",
-    labels = scales::unit_format(unit = "M", scale = 1e-6)
-  ) +
-  labs(
-    x = "",
-    fill = expression(2024 ~ CO[2] ~ emissions ~ (MT))
-  ) +
-  guides(
-    fill = guide_colorbar(
-      title.position = "top",
-      title.hjust = 0.5,
-      frame.colour = "black",
-      ticks.colour = "black"
-    )
-  ) +
-  theme(
-    legend.position = "bottom",
-    legend.direction = "horizontal",
-    legend.key.width = unit(1.75, "cm")
-  )
-
-port_emissions_fig <- ggplot() +
-  geom_sf(data = world_bbox_sf, fill = "grey90") +
-  geom_sf(
-    data = land |>
-      dplyr::rename(port_country_iso3 = country_iso3) |>
-      dplyr::left_join(
-        port_visit_co2_emissions_by_country,
-        by = c("port_country_iso3")
-      ),
-    aes(fill = emissions_co2_mt),
-    color = "white",
-    linewidth = 0.01
-  ) +
-  coord_sf(crs = map_projection) +
-  theme_void() +
-  scale_fill_viridis_c(
-    option = "A",
-    begin = 0.2,
-    end = 0.7,
-    na.value = "black",
-    labels = scales::unit_format(unit = "M", scale = 1e-6)
-  ) +
-  labs(
-    x = "",
-    fill = expression(2024 ~ port ~ stay ~ CO[2] ~ emissions ~ (MT))
-  ) +
-  guides(
-    fill = guide_colorbar(
-      title.position = "top",
-      title.hjust = 0.5,
-      frame.colour = "black",
-      ticks.colour = "black"
-    )
-  ) +
-  theme(
-    legend.position = "bottom",
-    legend.direction = "horizontal",
-    legend.key.width = unit(1, "cm")
-  )
-
-domestic_trip_emissions_fig <- ggplot() +
-  geom_sf(data = world_bbox_sf, fill = "grey90") +
-  geom_sf(
-    data = land |>
-      dplyr::rename(from_country_iso3 = country_iso3) |>
-      dplyr::left_join(
-        trip_co2_emissions_by_from_to_countries |>
-          dplyr::filter(from_country_iso3 == to_country_iso3),
-        by = c("from_country_iso3")
-      ),
-    aes(fill = emissions_co2_mt),
-    color = "white",
-    linewidth = 0.01
-  ) +
-  coord_sf(crs = map_projection) +
-  theme_void() +
-  scale_fill_viridis_c(
-    option = "A",
-    begin = 0.2,
-    end = 0.7,
-    na.value = "black",
-    labels = scales::unit_format(unit = "M", scale = 1e-6)
-  ) +
-  labs(
-    x = "",
-    fill = expression(2024 ~ domestic ~ trip ~ CO[2] ~ emissions ~ (MT))
-  ) +
-  guides(
-    fill = guide_colorbar(
-      title.position = "top",
-      title.hjust = 0.5,
-      frame.colour = "black",
-      ticks.colour = "black"
-    )
-  ) +
-  theme(
-    legend.position = "bottom",
-    legend.direction = "horizontal",
-    legend.key.width = unit(1, "cm")
-  )
-
-trip_emissions_fig <- trip_co2_emissions_by_from_to_countries |>
-  dplyr::mutate(
-    domestic = ifelse(from_country_iso3 == to_country_iso3, TRUE, FALSE)
-  ) |>
-  dplyr::group_by(domestic) |>
-  dplyr::slice_max(n = 25, order_by = emissions_co2_mt) |>
-  dplyr::ungroup() |>
-  dplyr::mutate(
-    from_country = countrycode::countrycode(
-      from_country_iso3,
-      "iso3c",
-      "country.name"
-    )
-  ) |>
-  dplyr::mutate(
-    to_country = countrycode::countrycode(
-      to_country_iso3,
-      "iso3c",
-      "country.name"
-    )
-  ) |>
-  dplyr::mutate(
-    label = ifelse(
-      domestic,
-      from_country,
-      glue::glue("{from_country} to {to_country}")
-    )
-  ) |>
-  dplyr::mutate(
-    domestic = ifelse(domestic, "Domestic trips", "International trips")
-  ) |>
-  ggplot(aes(x = emissions_co2_mt, y = reorder(label, emissions_co2_mt))) +
-  geom_bar(stat = "identity") +
-  facet_wrap(. ~ domestic, scales = "free_y") +
-  theme_plot() +
-  scale_x_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) +
-  labs(x = expression(2024 ~ CO[2] ~ emissions ~ (MT)), y = "")
 
 emissions_by_vessel_class_barplot <- annual_ais_co2_emissions_by_vessel_type |>
   dplyr::filter(year == 2024) |>
@@ -1767,97 +1593,45 @@ emissions_by_vessel_class_barplot <- annual_ais_co2_emissions_by_vessel_type |>
     limits = c(0, NA)
   )
 
-cowplot::plot_grid(
-  cowplot::plot_grid(
-    time_series_fig_co2,
-    emissions_by_vessel_class_barplot,
-    ncol = 1,
-    rel_heights = c(0.4, 0.6),
-    labels = c("A", "B")
-  ),
-  port_trip_emissions_fig,
-  labels = c("", "C"),
-  rel_widths = c(0.52, 0.48)
-)
-```
 
-```{r}
-#| label: fig-data-richness-v2
-#| fig-cap: (A) Time series of monthly global CO$_2$ emissions, aggregated across Non-fishing and fishing vessels. (B) CO2 emissions during 2024 port stays, aggregated by country. (C) Total trip-level CO2 emissions in 2024 for domestic (within-country) trips for top 25 countries, and total trip-level CO2 emissions in 2024 for international trips for top 25 country-to-country paris. (D)  Total 2024 CO2 emissions by vessel type for AIS-broadcasting vessels.
-#| fig-width: 9
-#| fig-height: 8
-#|
-
-monthly_aggregated_time_series <- read.csv(glue::glue(
-  "data/gfw/monthly_aggregated_time_series.csv"
-))
-
-time_series_data_monthly_emissions_by_fishing <- monthly_aggregated_time_series |>
-  dplyr::mutate(
-    time = lubridate::ymd(time)
+# Divde international trip emissions equally to from and to countries
+international_trip_emissions_by_country <- trip_co2_emissions_by_from_to_countries |>
+  dplyr::filter(from_country_iso3 != to_country_iso3) |>
+  dplyr::mutate(emissions_co2_mt = emissions_co2_mt / 2) |>
+  dplyr::select(country_iso3 = from_country_iso3, emissions_co2_mt) |>
+  dplyr::bind_rows(
+    trip_co2_emissions_by_from_to_countries |>
+      dplyr::mutate(emissions_co2_mt = emissions_co2_mt / 2) |>
+      dplyr::select(country_iso3 = to_country_iso3, emissions_co2_mt)
   ) |>
-  dplyr::group_by(time, fishing) |>
-  dplyr::summarise(
-    total_emissions_co2_mt = sum(emissions_co2_mt + emissions_co2_dark_mt)
+  dplyr::group_by(country_iso3) |>
+  dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt)) |>
+  dplyr::ungroup()
+
+domestic_trip_emissions_by_country <- trip_co2_emissions_by_from_to_countries |>
+  dplyr::filter(from_country_iso3 == to_country_iso3) |>
+  dplyr::select(country_iso3 = from_country_iso3, emissions_co2_mt)
+
+all_port_and_trip_emissions <- international_trip_emissions_by_country |>
+  dplyr::mutate(type = "International trips") |>
+  dplyr::bind_rows(
+    domestic_trip_emissions_by_country |>
+      dplyr::mutate(type = "Domestic trips")
   ) |>
-  dplyr::ungroup() |>
-  dplyr::mutate(
-    fleet = dplyr::case_when(
-      fishing == TRUE ~ "Fishing",
-      fishing == FALSE ~ "Non-fishing"
-    ),
-    fleet = factor(fleet, levels = c("Non-fishing", "Fishing"))
+  dplyr::bind_rows(
+    port_visit_co2_emissions_by_country |>
+      dplyr::rename(country_iso3 = port_country_iso3) |>
+      dplyr::mutate(type = "Port stays")
   )
 
-make_pollutant_by_fishing_time_series_figure <- function(
-  pollutant_time_series_data,
-  y_axis_label
-) {
-  ggplot(
-    pollutant_time_series_data,
-    aes(x = time, y = total_emissions_co2_mt, fill = fleet)
-  ) +
-    geom_area(position = 'stack', alpha = 0.9) +
-    geom_line(
-      data = subset(pollutant_time_series_data, fleet == "Fishing"),
-      aes(x = time, y = total_emissions_co2_mt),
-      color = "white"
-    ) +
-    scale_y_continuous(
-      labels = scales::comma,
-      limits = c(0, NA)
-    ) +
-    scale_fill_manual(
-      values = all_data_source_color_palette,
-      breaks = c("Non-fishing", "Fishing")
-    ) +
-    scale_x_continuous(
-      breaks = seq(
-        lubridate::ymd(glue::glue("{analysis_start_year}-01-01")),
-        lubridate::ymd(glue::glue("{analysis_end_year+1}-01-01")),
-        by = "1 year"
-      ),
-      labels = seq(analysis_start_year, analysis_end_year + 1)
-    ) +
-    theme_plot() +
-    labs(x = "", y = y_axis_label) +
-    theme(
-      panel.grid.minor = element_blank(),
-      legend.position = c(0.15, 0.92),
-      legend.background = element_rect(fill = "white", color = "gray"),
-      legend.title = element_blank()
-    )
-}
 
-time_series_by_fishing_fig_co2 <- make_pollutant_by_fishing_time_series_figure(
-  time_series_data_monthly_emissions_by_fishing,
-  y_axis_label = expression(Monthly ~ CO[2] ~ emissions ~ (MT))
-) +
-  scale_y_continuous(
-    labels = scales::unit_format(unit = "M", scale = 1e-6),
-    limits = c(0, NA)
+all_countries_for_plot <- land |>
+  sf::st_drop_geometry() |>
+  dplyr::select(country_iso3) |>
+  tidyr::crossing(
+    all_port_and_trip_emissions |>
+      dplyr::distinct(type)
   )
-
 
 port_trip_emissions_fig <- ggplot() +
   geom_sf(data = world_bbox_sf, fill = "grey90") +
@@ -1876,18 +1650,9 @@ port_trip_emissions_fig <- ggplot() +
   facet_wrap(type ~ ., ncol = 1) +
   coord_sf(crs = map_projection) +
   theme_void() +
-  # scale_fill_viridis_c(
-  #   option = "mako",
-  #   begin = 0.2,
-  #   end = 0.7,
-  #   na.value = "black",
-  #   labels = scales::unit_format(unit = "M", scale = 1e-6)
-  # ) +
-  scale_fill_distiller(
-    palette = "Blues",
-    direction = -1,
-    na.value = "black",
-    labels = scales::unit_format(unit = "M", scale = 1e-6)
+  scale_fill_gradientn(
+    # Get the "Blues" palette with 9 colors, but keep only the darker 5 (indices 4-9)
+    colors = rev(RColorBrewer::brewer.pal(9, "Blues")[5:9]),
   ) +
   labs(
     x = "",
@@ -2199,7 +1964,7 @@ spatial_emissions_by_fleet_total_plot_pseudolog <- spatial_co2_emissions_ais_dar
   ) |>
   dplyr::mutate(
     emissions_mt_per_km2 = dplyr::na_if(emissions_mt_per_km2, 0)
-  ) |> 
+  ) |>
   ggplot() +
   geom_sf(data = world_bbox_sf, fill = "grey92") +
   ggspatial::geom_spatial_tile(aes(
@@ -2432,6 +2197,32 @@ pollutant_time_series_data_all <- total_monthly_emissions_by_pollutant |>
   dplyr::mutate(
     pollutant = forcats::fct_relevel(pollutant, pollutant_factor_levels)
   )
+
+make_pollutant_time_series_figure <- function(
+  pollutant_time_series_data,
+  y_axis_label
+) {
+  {
+    ggplot(
+      data = pollutant_time_series_data,
+      aes(x = month, y = emissions_mt)
+    ) +
+      geom_line(linewidth = 1.1) +
+      scale_y_continuous(labels = scales::comma) +
+      theme_plot() +
+      labs(x = "", y = y_axis_label) +
+      theme(panel.grid.minor.x = element_blank()) +
+      scale_x_continuous(
+        breaks = seq(
+          lubridate::ymd(glue::glue("{analysis_start_year}-01-01")),
+          lubridate::ymd(glue::glue("{analysis_end_year+1}-01-01")),
+          by = "1 year"
+        ),
+        labels = seq(analysis_start_year, analysis_end_year + 1)
+      ) +
+      scale_y_continuous(limits = c(0, NA))
+  }
+}
 
 make_pollutant_time_series_figure(
   pollutant_time_series_data_all,
