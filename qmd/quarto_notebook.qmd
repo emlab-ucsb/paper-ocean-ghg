@@ -105,7 +105,7 @@ all_data_source_color_palette <- c(
   "AIS + S1" = paletteer::paletteer_d("colorblindr::OkabeIto")[[5]],
   "Other transportation (EDGAR)" = paletteer::paletteer_d(
     "colorblindr::OkabeIto"
-  )[[6]],
+  )[[7]],
   "GFW (AIS)" = paletteer::paletteer_d("colorblindr::OkabeIto")[[3]],
   "AIS" = paletteer::paletteer_d("colorblindr::OkabeIto")[[1]],
   "S1" = paletteer::paletteer_d("colorblindr::OkabeIto")[[
