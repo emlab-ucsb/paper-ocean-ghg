@@ -1233,10 +1233,11 @@ summarized_s1_dark_fleet_data |>
 ```
 
 ```{r}
-#| label: fig-pollutant-maps
+#| label: fig-pollutant-maps-pseudolog
 #| fig-cap: Spatial map of 2024 emissions for each pollutant, aggregated across the AIS-broadcasting fleet and non-broadcasting, and shown at a 1x1 degree spatial resolution
 #| fig-width: 8
 #| fig-height: 8
+
 pollutant_map_data_all <- total_spatial_emissions_by_pollutant |>
   dplyr::mutate(
     pollutant = dplyr::case_when(
@@ -1311,6 +1312,102 @@ pollutant_map_list <- purrr::map(
 
 cowplot::plot_grid(plotlist = pollutant_map_list, ncol = 3)
 ```
+
+
+```{r}
+#| label: fig-pollutant-maps-qlog10
+#| fig-cap: Spatial map of 2024 emissions for each pollutant, aggregated across the AIS-broadcasting fleet and non-broadcasting, and shown at a 1x1 degree spatial resolution. A log$_10$ scale is applied for visualization to manage the high dynamic range of emissions. To ensure visual clarity and suppress background noise, the bottom 1% of the emission distribution has been excluded from the color mapping.
+#| fig-width: 8
+#| fig-height: 8
+
+pollutant_map_data_all <- total_spatial_emissions_by_pollutant |>
+  dplyr::mutate(
+    pollutant = dplyr::case_when(
+      pollutant == "CO2" ~ "CO[2]",
+      pollutant == "N2O" ~ "N[2]*O",
+      pollutant == "CH4" ~ "CH[4]",
+      pollutant == "PM2.5" ~ "PM[2.5]",
+      pollutant == "PM10" ~ "PM[10]",
+      pollutant == "SOX" ~ "SO[X]",
+      pollutant == "NOX" ~ "NO[X]",
+      TRUE ~ pollutant
+    )
+  ) |>
+  dplyr::mutate(
+    pollutant = forcats::fct_relevel(pollutant, pollutant_factor_levels)
+  )
+
+pollutant_map_list <- purrr::map(
+  unique(pollutant_map_data_all$pollutant),
+  function(pollutant_tmp) {
+    pollutant_tmp <- as.character(pollutant_tmp)
+
+    pollutant_map_data <- pollutant_map_data_all |>
+      dplyr::filter(pollutant == pollutant_tmp)
+
+    scale_limits <- pollutant_map_data |>
+      dplyr::summarize(
+        min = quantile(emissions_mt_per_km2_2024, 0.01, na.rm = TRUE),
+        max = max(emissions_mt_per_km2_2024, na.rm = TRUE)
+      ) |>
+      as.numeric()
+
+    pollutant_map_data |>
+      ggplot() +
+      geom_sf(data = world_bbox_sf, fill = "grey90") +
+      ggspatial::geom_spatial_tile(
+        aes(
+          x = lon_bin + 0.5,
+          y = lat_bin + 0.5,
+          color = emissions_mt_per_km2_2024,
+          fill = emissions_mt_per_km2_2024
+        )
+      ) +
+      geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
+      scico::scale_fill_scico(
+        name = expression(Emissions ~ (MT / km^2)),
+        palette = "vik",
+        begin = 0.5,
+        end = 1,
+        limits = scale_limits,
+        trans = "log10",
+        na.value = "grey90",
+        labels = scales::scientific
+      ) +
+      scico::scale_color_scico(
+        name = expression(Emissions ~ (MT / km^2)),
+        palette = "vik",
+        begin = 0.5,
+        end = 1,
+        limits = scale_limits,
+        trans = "log10",
+        na.value = "grey90",
+        labels = scales::scientific
+      ) +
+      labs(x = "", y = "") +
+      theme_void() +
+      guides(
+        fill = guide_colorbar(
+          title.position = "top",
+          title.hjust = 0.5,
+          frame.colour = "white",
+          ticks.colour = "white"
+        )
+      ) +
+      scale_x_continuous(expand = c(0, 1)) +
+      scale_y_continuous(expand = c(0, 1)) +
+      theme(
+        legend.position = "bottom",
+        legend.direction = "horizontal",
+        legend.key.width = unit(1, "cm")
+      ) +
+      facet_wrap(pollutant ~ ., labeller = label_parsed)
+  }
+)
+
+cowplot::plot_grid(plotlist = pollutant_map_list, ncol = 3)
+```
+
 
 ```{r}
 #| label: make-fig-co2-emissions-time-series
