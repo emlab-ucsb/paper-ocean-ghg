@@ -561,6 +561,42 @@ monthly_fraction_fig <- monthly_aggregated_time_series |>
   scale_y_continuous(labels = scales::percent, limits = c(0, NA))
 ```
 
+
+```{r}
+#| label: social-cost-calculation
+
+# Social cost of carbon
+# From Moore et al. 2024: https://www.pnas.org/doi/abs/10.1073/pnas.2410733121
+social_cost_carbon_usd_per_mt_co2 <- 283
+
+# Social cost of methane
+# From Wang and Teng 2023: https://www.nature.com/articles/s41558-023-01803-4
+social_cost_methane_usd_per_mt_ch4 <- 2900
+
+# Social cost of n2o
+# From Wang and Teng 2023: https://www.nature.com/articles/s41558-023-01803-4
+social_cost_nitrous_oxide_usd_per_mt_n2o <- 49600
+
+social_cost_tibble <- tibble::tibble(
+  pollutant = c("co2", "ch4", "n2o"),
+  sc_usd_per_mt = c(
+    social_cost_carbon_usd_per_mt_co2,
+    social_cost_methane_usd_per_mt_ch4,
+    social_cost_nitrous_oxide_usd_per_mt_n2o
+  )
+)
+
+total_scc_billion_usd <- annual_emissions |>
+  dplyr::filter(fleet %in% c("AIS-broadcasting", "Non-broadcasting")) |>
+  dplyr::filter(year == 2024) |>
+  dplyr::group_by(pollutant) |>
+  dplyr::summarise(emissions_mt = sum(emissions_mt, na.rm = TRUE)) |>
+  dplyr::ungroup() |>
+  dplyr::inner_join(social_cost_tibble, by = "pollutant") |>
+  dplyr::mutate(sc_billion_usd = emissions_mt * sc_usd_per_mt / 1e9) |>
+  dplyr::summarise(sc_total_billion_usd = sum(sc_billion_usd))
+```
+
 \# In-line manuscript statistics
 
 -   The transportation sector is a major source of global greenhouse gas
@@ -620,6 +656,8 @@ monthly_fraction_fig <- monthly_aggregated_time_series |>
     non-broadcasting vessels. For both types of vessels, this fraction
     of emissions from non-broadcasting vessels has been declining
     steadily since 2020.
+
+    - The total social cost of CO$_{2}$, CH$_{4}$, and N$_{2}$O emissions in 2024 was `r total_scc_billion_usd` billion USD.
 
     # Figures
 
@@ -2995,3 +3033,4 @@ performance_results |>
     here::here("tables/mrv_performance_results.tex")
   )
 ```
+
