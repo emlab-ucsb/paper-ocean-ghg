@@ -103,7 +103,7 @@ all_data_source_color_palette <- c(
   )[[5]],
   "GFW (AIS + S1)" = paletteer::paletteer_d("colorblindr::OkabeIto")[[5]],
   "AIS + S1" = paletteer::paletteer_d("colorblindr::OkabeIto")[[5]],
-  "Terrestrial transportation (EDGAR)" = paletteer::paletteer_d(
+  "Other transportation (EDGAR)" = paletteer::paletteer_d(
     "colorblindr::OkabeIto"
   )[[6]],
   "GFW (AIS)" = paletteer::paletteer_d("colorblindr::OkabeIto")[[3]],
@@ -355,13 +355,13 @@ pollutant_ais_underestimation_overestimation_summary <- ais_scale_underestimatio
 
 ```{r}
 #| label: wrangel-edgar-data
-# Calculate annual terrestrial transportation emissions from EDGAR
+# Calculate annual other transportation emissions from EDGAR
 land_based_transportation_emissions_edgar <- annual_edgar_tranportation_emissions |>
   dplyr::filter(land_based_tranpsportation) |>
   dplyr::group_by(year) |>
   dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt, na.rm = TRUE)) |>
   dplyr::ungroup() |>
-  dplyr::mutate(data_source = "Terrestrial transportation (EDGAR)")
+  dplyr::mutate(data_source = "Other transportation (EDGAR)")
 
 all_tranportation_data <- land_based_transportation_emissions_edgar |>
   dplyr::bind_rows(
@@ -398,7 +398,7 @@ percent_transportation_emmissions_from_marine_2024 <- all_tranportation_data |>
   dplyr::mutate(
     percent = scales::percent(
       `Marine vessels (AIS + S1)` /
-        (`Marine vessels (AIS + S1)` + `Terrestrial transportation (EDGAR)`)
+        (`Marine vessels (AIS + S1)` + `Other transportation (EDGAR)`)
     )
   ) |>
   dplyr::pull(percent)
@@ -596,8 +596,8 @@ monthly_fraction_fig <- monthly_aggregated_time_series |>
     emissions increased by
     `r percent_increase_from_2017_to_2024 |>   dplyr::filter(data_source == "Marine vessels (AIS + S1)") |>   dplyr::pull(emissions_co2_mt_normalized_percent)`
     between `r analysis_start_year` and 2024,
-    `r round(   (percent_increase_from_2017_to_2024 |>     dplyr::filter(data_source == "Marine vessels (AIS + S1)") |>     dplyr::pull(emissions_co2_mt_normalized)) /     (percent_increase_from_2017_to_2024 |>       dplyr::filter(data_source == "Terrestrial transportation (EDGAR)") |>       dplyr::pull(emissions_co2_mt_normalized)) )`
-    times faster than the growth rate of terrestrial transportation
+    `r round(   (percent_increase_from_2017_to_2024 |>     dplyr::filter(data_source == "Marine vessels (AIS + S1)") |>     dplyr::pull(emissions_co2_mt_normalized)) /     (percent_increase_from_2017_to_2024 |>       dplyr::filter(data_source == "Other transportation (EDGAR)") |>       dplyr::pull(emissions_co2_mt_normalized)) )`
+    times faster than the growth rate of other transportation
     emissions
 
 -   Across the entire `r analysis_start_year` to `r analysis_end_year`
@@ -818,8 +818,8 @@ cowplot::plot_grid(
 ### Figure 2
 
 ```{r}
-#| label: fig-emissions-marine-terrestrial
-#| fig-cap: Comparison of emissions data between marine transportation emissions from GFW and terrestrial transportation emissions from EDGAR.
+#| label: fig-emissions-marine-other
+#| fig-cap: Comparison of emissions data between marine transportation emissions from GFW and other transportation emissions from EDGAR.
 #| fig-width: 7
 #| fig-height: 6
 
@@ -853,7 +853,7 @@ emissions_comparison_figure <- all_tranportation_data |>
   scale_color_manual(
     values = all_data_source_color_palette,
     breaks = c(
-      "Terrestrial transportation (EDGAR)",
+      "Other transportation (EDGAR)",
       "Marine vessels (AIS + S1)"
     )
   )
@@ -861,7 +861,7 @@ emissions_comparison_figure <- all_tranportation_data |>
 emissions_comparison_figure_normalized <- all_tranportation_data_normalized |>
   dplyr::filter(
     data_source %in%
-      c("Terrestrial transportation (EDGAR)", "Marine vessels (AIS + S1)")
+      c("Other transportation (EDGAR)", "Marine vessels (AIS + S1)")
   ) |>
   ggplot(aes(x = year, y = emissions_co2_mt_normalized, color = data_source)) +
   geom_hline(yintercept = 0, linetype = 2) +
@@ -892,7 +892,7 @@ emissions_comparison_figure_normalized <- all_tranportation_data_normalized |>
     values = all_data_source_color_palette,
     breaks = c(
       "Marine vessels (AIS + S1)",
-      "Terrestrial transportation (EDGAR)"
+      "Other transportation (EDGAR)"
     )
   )
 
