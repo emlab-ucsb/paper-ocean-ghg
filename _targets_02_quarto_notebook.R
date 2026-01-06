@@ -172,13 +172,13 @@ list(
   # Load other data ----
   # EDGAR - Emissions Database for Global Atmospheric Research
   # From the European Commission
-  # Annual totals by sector and country (1970-2023)
-  # Downloaded from here: https://edgar.jrc.ec.europa.eu/dataset_ghg2024#p1
-  # For each substance emission time series (1970-2023) by sector and country are provided in an overview table (.xlsx). Emission country totals are expressed in kton substance / year. The IPCC 1996 and 2006 codes are used for specification of the sectors.
+  # Annual totals by sector and country (1970-2024)
+  # Downloaded from here:https://edgar.jrc.ec.europa.eu/dataset_ghg2025
+  # For each substance emission time series (1970-2024) by sector and country are provided in an overview table (.xlsx). Emission country totals are expressed in kton substance / year. The IPCC 1996 and 2006 codes are used for specification of the sectors.
   tar_file_read(
     name = annual_edgar_emissions,
     command = here::here(
-      "data/IEA_EDGAR_CO2_1970_2023/IEA_EDGAR_CO2_1970_2023.xlsx"
+      "data/IEA_EDGAR_CO2_1970_2024/IEA_EDGAR_CO2_1970_2024.xlsx"
     ),
     read = readxl::read_excel(!!.x, sheet = "IPCC 2006", skip = 9)
   ),

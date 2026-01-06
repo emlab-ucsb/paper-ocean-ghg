@@ -220,7 +220,7 @@ annual_edgar_tranportation_emissions <- annual_edgar_emissions |>
   # Only need years that correspond to our dataset
   dplyr::filter(year >= analysis_start_year, year <= analysis_end_year)
 
-# Fraction of global 2023 CO2 emissions that came from transportation sectors
+# Fraction of global 2024 CO2 emissions that came from transportation sectors
 fraction_co2_from_transportation <- annual_edgar_tranportation_emissions |>
   dplyr::mutate(
     transportation = ifelse(
@@ -229,7 +229,7 @@ fraction_co2_from_transportation <- annual_edgar_tranportation_emissions |>
       FALSE
     )
   ) |>
-  dplyr::filter(year == 2023) |>
+  dplyr::filter(year == 2024) |>
   dplyr::group_by(transportation) |>
   dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt, na.rm = TRUE)) |>
   dplyr::ungroup() |>
@@ -388,8 +388,8 @@ all_tranportation_data_normalized <- all_tranportation_data |>
   )
 
 
-percent_transportation_emmissions_from_marine_2023 <- all_tranportation_data |>
-  dplyr::filter(year == 2023) |>
+percent_transportation_emmissions_from_marine_2024 <- all_tranportation_data |>
+  dplyr::filter(year == 2024) |>
   dplyr::select(-year) |>
   tidyr::pivot_wider(
     names_from = "data_source",
@@ -403,8 +403,8 @@ percent_transportation_emmissions_from_marine_2023 <- all_tranportation_data |>
   ) |>
   dplyr::pull(percent)
 
-percent_increase_from_2017_to_2023 <- all_tranportation_data_normalized |>
-  dplyr::filter(year == 2023) |>
+percent_increase_from_2017_to_2024 <- all_tranportation_data_normalized |>
+  dplyr::filter(year == 2024) |>
   dplyr::mutate(
     emissions_co2_mt_normalized_percent = scales::percent(
       emissions_co2_mt_normalized
@@ -565,7 +565,7 @@ monthly_fraction_fig <- monthly_aggregated_time_series |>
 -   The transportation sector is a major source of global greenhouse gas
     (GHG) and local air pollution emissions, responsible for
     `r fraction_co2_from_transportation` of all CO$_{2}$ emissions
-    globally in 2023
+    globally in 2024
 
 -   For over
     `r scales::comma(signif(n_unique_vessels$n_unique_vessels, 2))`
@@ -588,14 +588,14 @@ monthly_fraction_fig <- monthly_aggregated_time_series |>
     (from `r analysis_start_year` to `r analysis_end_year`).
 
 -   Using the latest data available from the EU's Emissions Database for
-    Global Atmospheric Research (EDGAR), we estimate that in 2023 marine
+    Global Atmospheric Research (EDGAR), we estimate that in 2024 marine
     vessels accounted for
-    `r percent_transportation_emmissions_from_marine_2023` of all
+    `r percent_transportation_emmissions_from_marine_2024` of all
     transportation-related CO$_{2}$ emissions. Marine vessel CO$_{2}$
     emissions increased by
-    `r percent_increase_from_2017_to_2023 |>   dplyr::filter(data_source == "Marine vessels (AIS + S1)") |>   dplyr::pull(emissions_co2_mt_normalized_percent)`
-    between `r analysis_start_year` and 2023,
-    `r round(   (percent_increase_from_2017_to_2023 |>     dplyr::filter(data_source == "Marine vessels (AIS + S1)") |>     dplyr::pull(emissions_co2_mt_normalized)) /     (percent_increase_from_2017_to_2023 |>       dplyr::filter(data_source == "Terrestrial transportation (EDGAR)") |>       dplyr::pull(emissions_co2_mt_normalized)) )`
+    `r percent_increase_from_2017_to_2024 |>   dplyr::filter(data_source == "Marine vessels (AIS + S1)") |>   dplyr::pull(emissions_co2_mt_normalized_percent)`
+    between `r analysis_start_year` and 2024,
+    `r round(   (percent_increase_from_2017_to_2024 |>     dplyr::filter(data_source == "Marine vessels (AIS + S1)") |>     dplyr::pull(emissions_co2_mt_normalized)) /     (percent_increase_from_2017_to_2024 |>       dplyr::filter(data_source == "Terrestrial transportation (EDGAR)") |>       dplyr::pull(emissions_co2_mt_normalized)) )`
     times faster than the growth rate of terrestrial transportation
     emissions
 
@@ -828,7 +828,7 @@ emissions_comparison_figure <- all_tranportation_data |>
   geom_line(linewidth = 1.05) +
   scale_x_continuous(
     breaks = unique(all_tranportation_data_normalized$year),
-    limits = c(analysis_start_year, 2023)
+    limits = c(analysis_start_year, 2024)
   ) +
   scale_y_continuous(
     labels = scales::unit_format(unit = "B", scale = 1e-9),
@@ -867,7 +867,7 @@ emissions_comparison_figure_normalized <- all_tranportation_data_normalized |>
   geom_line(linewidth = 1.1) +
   scale_x_continuous(
     breaks = unique(all_tranportation_data_normalized$year),
-    limits = c(analysis_start_year, 2023)
+    limits = c(analysis_start_year, 2024)
   ) +
   scale_y_continuous(
     labels = scales::percent
@@ -1650,21 +1650,21 @@ cowplot::plot_grid(
 #| fig-cap: (A) Time series of monthly global CO$_2$ emissions, aggregated across Non-fishing and fishing vessels. (B) CO2 emissions during 2024 port stays, aggregated by country. (C) Total trip-level CO2 emissions in 2024 for domestic (within-country) trips for top 25 countries, and total trip-level CO2 emissions in 2024 for international trips for top 25 country-to-country paris. (D)  Total 2024 CO2 emissions by vessel type for AIS-broadcasting vessels.
 #| fig-width: 9
 #| fig-height: 8
-#| 
+#|
 
 monthly_aggregated_time_series <- read.csv(glue::glue(
   "data/gfw/monthly_aggregated_time_series.csv"
 ))
 
 time_series_data_monthly_emissions_by_fishing <- monthly_aggregated_time_series |>
-  mutate(
+  dplyr::mutate(
     time = lubridate::ymd(time)
   ) |>
-  group_by(time, fishing) |>
-  summarise(
+  dplyr::group_by(time, fishing) |>
+  dplyr::summarise(
     total_emissions_co2_mt = sum(emissions_co2_mt + emissions_co2_dark_mt)
   ) |>
-  ungroup() |>
+  dplyr::ungroup() |>
   dplyr::mutate(
     fleet = dplyr::case_when(
       fishing == TRUE ~ "Fishing",
@@ -2132,16 +2132,16 @@ time_series_by_fleet_fig_co2 <- make_pollutant_by_fleet_time_series_figure(
   )
 
 plot_constrained <- cowplot::plot_grid(
-  NULL, 
-  time_series_by_fleet_fig_co2 + 
+  NULL,
+  time_series_by_fleet_fig_co2 +
     theme(plot.margin = margin(b = -15, l = 0)),
-    NULL, 
-  ncol = 3, 
-  rel_widths = c(0.07, 0.75, 0.18) 
+  NULL,
+  ncol = 3,
+  rel_widths = c(0.07, 0.75, 0.18)
 )
 
 cowplot::plot_grid(
-  plot_constrained,                     
+  plot_constrained,
   spatial_emissions_by_fleet_total_plot,
   ncol = 1,
   rel_heights = c(0.35, 0.65),
