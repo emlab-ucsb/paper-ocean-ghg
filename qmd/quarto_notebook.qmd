@@ -2497,9 +2497,9 @@ total_spatial_co2_emissions_ais_dark_by_footprint |>
   scale_fill_manual(
     name = "",
     values = c(
-      "Outside S1 footprint" = "#ff4b2b",
-      "Inside S1 footprint imaged" = "#00d4ff",
-      "Inside S1 footprint not imaged" = "#ff9d00ff"
+      "Outside S1 footprint" = paletteer::paletteer_d("colorblindr::OkabeIto")[[1]],
+      "Inside S1 footprint imaged" = paletteer::paletteer_d("colorblindr::OkabeIto")[[2]],
+      "Inside S1 footprint not imaged" = paletteer::paletteer_d("colorblindr::OkabeIto")[[3]]
     )
   ) +
   theme_void() +
