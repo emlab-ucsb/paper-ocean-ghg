@@ -1,0 +1,30 @@
+\contentsline {section}{\numberline {1}Figures}{4}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Figure 1}{4}{subsection.1.1}%
+\contentsline {subsubsection}{\numberline {1.1.1}Figure 1, panel A}{4}{subsubsection.1.1.1}%
+\contentsline {subsubsection}{\numberline {1.1.2}Figure 2, panel B}{4}{subsubsection.1.1.2}%
+\contentsline {subsubsection}{\numberline {1.1.3}Figure 1, panel A}{4}{subsubsection.1.1.3}%
+\contentsline {subsubsection}{\numberline {1.1.4}Figure 1, combined}{4}{subsubsection.1.1.4}%
+\contentsline {subsubsection}{\numberline {1.1.5}Figure 2}{5}{subsubsection.1.1.5}%
+\contentsline {subsection}{\numberline {1.2}Figure 3}{6}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Figure 3}{6}{subsection.1.3}%
+\contentsline {section}{\numberline {2}Supplementary figures}{6}{section.2}%
+\contentsline {subsubsection}{\numberline {2.0.1}Relationship between length and engine power}{6}{subsubsection.2.0.1}%
+\contentsline {subsubsection}{\numberline {2.0.2}Size distribution of vessel class for S1 and AIS data}{7}{subsubsection.2.0.2}%
+\contentsline {subsubsection}{\numberline {2.0.3}Dark fleet emissions, by vessel size and type}{8}{subsubsection.2.0.3}%
+\contentsline {section}{\numberline {3}Figure 3.1 -----}{11}{section.3}%
+\contentsline {paragraph}{\numberline {3.0.0.1}Spatial emissions by fleet (annual)}{11}{paragraph.3.0.0.1}%
+\contentsline {paragraph}{\numberline {3.0.0.2}Spatial emissions by fleet (total)}{12}{paragraph.3.0.0.2}%
+\contentsline {subsubsection}{\numberline {3.0.1}Other plots}{15}{subsubsection.3.0.1}%
+\contentsline {subsubsection}{\numberline {3.0.2}Spatial emissions by footprint group}{19}{subsubsection.3.0.2}%
+\contentsline {subsubsection}{\numberline {3.0.3}Registered data validation}{20}{subsubsection.3.0.3}%
+\contentsline {subsubsection}{\numberline {3.0.4}MRV validation}{21}{subsubsection.3.0.4}%
+\contentsline {section}{\numberline {4}Supplementary tables}{23}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Dark fleet model performance metrics}{23}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Summary of 2017 and 2024 emissions, by pollutant and data source}{23}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Underestimation of 2024 emissions using only AIS data, and overestimation of 2017 to 2024 emissions trend using only AIS data, by pollutant.}{23}{subsection.4.3}%
+\contentsline {subsubsection}{\numberline {4.3.1}Feature importance}{23}{subsubsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {4.3.2}Classification model performance}{24}{subsubsection.4.3.2}%
+\contentsline {subsubsection}{\numberline {4.3.3}Dynamic AIS - annual emissions and vessels by AIS receiver type}{28}{subsubsection.4.3.3}%
+\contentsline {subsubsection}{\numberline {4.3.4}Dynamic AIS - annual emissions by AIS receiver type for top flags}{29}{subsubsection.4.3.4}%
+\contentsline {subsubsection}{\numberline {4.3.5}Dynamic AIS - map showing spatial change in emissions by AIS receiver type}{30}{subsubsection.4.3.5}%
+\providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 
