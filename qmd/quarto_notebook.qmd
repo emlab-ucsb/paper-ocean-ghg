@@ -2268,7 +2268,11 @@ spatial_emissions_by_fleet_total_plot_pseudolog
 ```{r}
 #| label: fig-spatial-temporal-richness-by-fleet-total-qlog10
 #| fig-cap: (A) Time series of monthly global CO$_2$ emissions, aggregated across AIS-broadcasting and non-broadcasting fleets, for both fishing and non-fishing boats. (B) Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}. A log$_10$ scale is applied for visualization to manage the high dynamic range of emissions. To ensure visual clarity and suppress background noise, the bottom 1% of the emission distribution has been excluded from the color mapping.$
+<<<<<<< HEAD
 #| fig-width: 7
+=======
+#| fig-width: 8
+>>>>>>> 47108d05be5b9fcc8e2881275b863bc2220f792c
 #| fig-height: 7
 
 time_series_data_monthly_emissions_by_fleet <- monthly_aggregated_time_series |>
@@ -2358,16 +2362,17 @@ plot_constrained <- cowplot::plot_grid(
     theme(plot.margin = margin(b = -15, l = 0)),
   NULL,
   ncol = 3,
-  rel_widths = c(0.07, 0.75, 0.18)
+  rel_widths = c(0.02, 0.88, 0.10)
 )
 
-cowplot::plot_grid(
+test <- cowplot::plot_grid(
   plot_constrained,
   spatial_emissions_by_fleet_total_plot_qlog10,
   ncol = 1,
-  rel_heights = c(0.35, 0.65),
+  rel_heights = c(0.3, 0.7),
   labels = c("A", "B")
 )
+
 
 ```
 
@@ -2375,7 +2380,11 @@ cowplot::plot_grid(
 ```{r}
 #| label: fig-spatial-temporal-richness-by-fleet-total-pseudolog
 #| fig-cap: (A) Time series of monthly global CO$_2$ emissions, aggregated across AIS-broadcasting and non-broadcasting fleets, for both fishing and non-fishing boats. (B) Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}. A pseudolog$_10$ scale is applied for visualization to manage the high dynamic range of emissions, suppressing near-zero values while preserving emission hotspots.$
+<<<<<<< HEAD
 #| fig-width: 7
+=======
+#| fig-width: 8
+>>>>>>> 47108d05be5b9fcc8e2881275b863bc2220f792c
 #| fig-height: 7
 
 cowplot::plot_grid(
@@ -2492,9 +2501,9 @@ total_spatial_co2_emissions_ais_dark_by_footprint |>
   scale_fill_manual(
     name = "",
     values = c(
-      "Outside S1 footprint" = "#ff4b2b",
-      "Inside S1 footprint imaged" = "#00d4ff",
-      "Inside S1 footprint not imaged" = "#ff9d00ff"
+      "Outside S1 footprint" = paletteer::paletteer_d("colorblindr::OkabeIto")[[1]],
+      "Inside S1 footprint imaged" = paletteer::paletteer_d("colorblindr::OkabeIto")[[2]],
+      "Inside S1 footprint not imaged" = paletteer::paletteer_d("colorblindr::OkabeIto")[[3]]
     )
   ) +
   theme_void() +
