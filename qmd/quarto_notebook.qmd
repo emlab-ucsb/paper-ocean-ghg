@@ -1354,7 +1354,7 @@ cowplot::plot_grid(plotlist = pollutant_map_list, ncol = 3)
 
 ```{r}
 #| label: fig-pollutant-maps-qlog10
-#| fig-cap: Spatial map of 2024 emissions for each pollutant, aggregated across the AIS-broadcasting fleet and non-broadcasting, and shown at a 1x1 degree spatial resolution. A log$_10$ scale is applied for visualization to manage the high dynamic range of emissions. To ensure visual clarity and suppress background noise, the bottom 1% of the emission distribution has been excluded from the color mapping.
+#| fig-cap: Spatial map of 2024 emissions for each pollutant, aggregated across the AIS-broadcasting fleet and non-broadcasting, and shown at a 1x1 degree spatial resolution. A log-10 scale is applied for visualization to manage the high dynamic range of emissions. To ensure visual clarity and suppress background noise, the bottom 1% of the emission distribution has been excluded from the color mapping.
 #| fig-width: 8
 #| fig-height: 8
 
@@ -2056,7 +2056,7 @@ spatial_emissions_by_fleet_2024_plot
 
 ```{r}
 #| label: fig-spatial-emissions-by-fleet-total-qlog10
-#| fig-cap: Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}. A log$_10$ scale is applied for visualization to manage the high dynamic range of emissions. To ensure visual clarity and suppress background noise, the bottom 1% of the emission distribution has been excluded from the color mapping.$
+#| fig-cap: Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}. A log-10 scale is applied for visualization to manage the high dynamic range of emissions. To ensure visual clarity and suppress background noise, the bottom 1% of the emission distribution has been excluded from the color mapping.$
 #| fig-width: 8
 #| fig-height: 4
 
@@ -2181,7 +2181,7 @@ spatial_emissions_by_fleet_total_plot_qlog10
 
 ```{r}
 #| label: fig-spatial-emissions-by-fleet-total-pseudolog
-#| fig-cap: Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}. A pseudolog$_10$ scale is applied for visualization to manage the high dynamic range of emissions, suppressing near-zero values while preserving emission hotspots.$
+#| fig-cap: Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}. A pseudolog-10 scale is applied for visualization to manage the high dynamic range of emissions, suppressing near-zero values while preserving emission hotspots.$
 #| fig-width: 8
 #| fig-height: 4
 
@@ -2267,12 +2267,8 @@ spatial_emissions_by_fleet_total_plot_pseudolog
 
 ```{r}
 #| label: fig-spatial-temporal-richness-by-fleet-total-qlog10
-#| fig-cap: (A) Time series of monthly global CO$_2$ emissions, aggregated across AIS-broadcasting and non-broadcasting fleets, for both fishing and non-fishing boats. (B) Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}. A log$_10$ scale is applied for visualization to manage the high dynamic range of emissions. To ensure visual clarity and suppress background noise, the bottom 1% of the emission distribution has been excluded from the color mapping.$
-<<<<<<< HEAD
-#| fig-width: 7
-=======
+#| fig-cap: (A) Time series of monthly global CO$_2$ emissions, aggregated across AIS-broadcasting and non-broadcasting fleets, for both fishing and non-fishing boats. (B) Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}. A log-10 scale is applied for visualization to manage the high dynamic range of emissions. To ensure visual clarity and suppress background noise, the bottom 1% of the emission distribution has been excluded from the color mapping.$
 #| fig-width: 8
->>>>>>> 47108d05be5b9fcc8e2881275b863bc2220f792c
 #| fig-height: 7
 
 time_series_data_monthly_emissions_by_fleet <- monthly_aggregated_time_series |>
@@ -2379,12 +2375,8 @@ test <- cowplot::plot_grid(
 
 ```{r}
 #| label: fig-spatial-temporal-richness-by-fleet-total-pseudolog
-#| fig-cap: (A) Time series of monthly global CO$_2$ emissions, aggregated across AIS-broadcasting and non-broadcasting fleets, for both fishing and non-fishing boats. (B) Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}. A pseudolog$_10$ scale is applied for visualization to manage the high dynamic range of emissions, suppressing near-zero values while preserving emission hotspots.$
-<<<<<<< HEAD
-#| fig-width: 7
-=======
+#| fig-cap: (A) Time series of monthly global CO$_2$ emissions, aggregated across AIS-broadcasting and non-broadcasting fleets, for both fishing and non-fishing boats. (B) Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}. A pseudolog-10 scale is applied for visualization to manage the high dynamic range of emissions, suppressing near-zero values while preserving emission hotspots.$
 #| fig-width: 8
->>>>>>> 47108d05be5b9fcc8e2881275b863bc2220f792c
 #| fig-height: 7
 
 cowplot::plot_grid(
@@ -2501,9 +2493,15 @@ total_spatial_co2_emissions_ais_dark_by_footprint |>
   scale_fill_manual(
     name = "",
     values = c(
-      "Outside S1 footprint" = paletteer::paletteer_d("colorblindr::OkabeIto")[[1]],
-      "Inside S1 footprint imaged" = paletteer::paletteer_d("colorblindr::OkabeIto")[[2]],
-      "Inside S1 footprint not imaged" = paletteer::paletteer_d("colorblindr::OkabeIto")[[3]]
+      "Outside S1 footprint" = paletteer::paletteer_d("colorblindr::OkabeIto")[[
+        1
+      ]],
+      "Inside S1 footprint imaged" = paletteer::paletteer_d(
+        "colorblindr::OkabeIto"
+      )[[2]],
+      "Inside S1 footprint not imaged" = paletteer::paletteer_d(
+        "colorblindr::OkabeIto"
+      )[[3]]
     )
   ) +
   theme_void() +
