@@ -107,13 +107,15 @@ all_data_source_color_palette <- c(
     "colorblindr::OkabeIto"
   )[[6]],
   "GFW (AIS)" = paletteer::paletteer_d("colorblindr::OkabeIto")[[3]],
-  "AIS" = paletteer::paletteer_d("colorblindr::OkabeIto")[[3]],
+  "AIS" = paletteer::paletteer_d("colorblindr::OkabeIto")[[1]],
   "S1" = paletteer::paletteer_d("colorblindr::OkabeIto")[[
-    7
+    6
   ]],
   "EDGAR" = paletteer::paletteer_d("colorblindr::OkabeIto")[[8]],
   "OECD" = paletteer::paletteer_d("colorblindr::OkabeIto")[[6]],
-  "IMO" = paletteer::paletteer_d("colorblindr::OkabeIto")[[1]]
+  "IMO" = paletteer::paletteer_d("colorblindr::OkabeIto")[[1]],
+  "Fishing" = paletteer::paletteer_d("colorblindr::OkabeIto")[[5]],
+  "Non-fishing" = paletteer::paletteer_d("colorblindr::OkabeIto")[[2]]
 )
 
 # Set consistent theme for all plots
@@ -1621,7 +1623,7 @@ emissions_by_vessel_class_barplot <- annual_ais_co2_emissions_by_vessel_type |>
   ggforce::facet_col(~fishing, space = "free", scales = "free") +
   theme_plot() +
   labs(
-    x = "2024 CO2 emissions (MT)",
+    x = expression(2024 ~ CO[2] ~ emissions ~ (MT)),
     y = ""
   ) +
   scale_x_continuous(
@@ -1645,12 +1647,411 @@ cowplot::plot_grid(
 
 ```{r}
 #| label: fig-data-richness-v2
-#| fig-cap: (A) Time series of monthly global emissions for each pollutant, aggregated across AIS-broadcasting vessels and non-broadcasting vessels. (B) CO2 emissions during 2024 port stays, aggregated by country. (C) Total trip-level CO2 emissions in 2024 for domestic (within-country) trips for top 25 countries, and total trip-level CO2 emissions in 2024 for international trips for top 25 country-to-country paris. (D)  Total 2024 CO2 emissions by vessel type for AIS-broadcasting vessels.
+#| fig-cap: (A) Time series of monthly global CO$_2$ emissions, aggregated across Non-fishing and fishing vessels. (B) CO2 emissions during 2024 port stays, aggregated by country. (C) Total trip-level CO2 emissions in 2024 for domestic (within-country) trips for top 25 countries, and total trip-level CO2 emissions in 2024 for international trips for top 25 country-to-country paris. (D)  Total 2024 CO2 emissions by vessel type for AIS-broadcasting vessels.
 #| fig-width: 9
 #| fig-height: 8
+#| 
+
+monthly_aggregated_time_series <- read.csv(glue::glue(
+  "data/gfw/monthly_aggregated_time_series.csv"
+))
+
+time_series_data_monthly_emissions_by_fishing <- monthly_aggregated_time_series |>
+  mutate(
+    time = lubridate::ymd(time)
+  ) |>
+  group_by(time, fishing) |>
+  summarise(
+    total_emissions_co2_mt = sum(emissions_co2_mt + emissions_co2_dark_mt)
+  ) |>
+  ungroup() |>
+  dplyr::mutate(
+    fleet = dplyr::case_when(
+      fishing == TRUE ~ "Fishing",
+      fishing == FALSE ~ "Non-fishing"
+    ),
+    fleet = factor(fleet, levels = c("Non-fishing", "Fishing"))
+  )
+
+make_pollutant_by_fishing_time_series_figure <- function(
+  pollutant_time_series_data,
+  y_axis_label
+) {
+  ggplot(
+    pollutant_time_series_data,
+    aes(x = time, y = total_emissions_co2_mt, fill = fleet)
+  ) +
+    geom_area(position = 'stack', alpha = 0.9) +
+    geom_line(
+      data = subset(pollutant_time_series_data, fleet == "Fishing"),
+      aes(x = time, y = total_emissions_co2_mt),
+      color = "white"
+    ) +
+    scale_y_continuous(
+      labels = scales::comma,
+      limits = c(0, NA)
+    ) +
+    scale_fill_manual(
+      values = all_data_source_color_palette,
+      breaks = c("Non-fishing", "Fishing")
+    ) +
+    scale_x_continuous(
+      breaks = seq(
+        lubridate::ymd(glue::glue("{analysis_start_year}-01-01")),
+        lubridate::ymd(glue::glue("{analysis_end_year+1}-01-01")),
+        by = "1 year"
+      ),
+      labels = seq(analysis_start_year, analysis_end_year + 1)
+    ) +
+    theme_plot() +
+    labs(x = "", y = y_axis_label) +
+    theme(
+      panel.grid.minor = element_blank(),
+      legend.position = c(0.15, 0.92),
+      legend.background = element_rect(fill = "white", color = "gray"),
+      legend.title = element_blank()
+    )
+}
+
+time_series_by_fishing_fig_co2 <- make_pollutant_by_fishing_time_series_figure(
+  time_series_data_monthly_emissions_by_fishing,
+  y_axis_label = expression(Monthly ~ CO[2] ~ emissions ~ (MT))
+) +
+  scale_y_continuous(
+    labels = scales::unit_format(unit = "M", scale = 1e-6),
+    limits = c(0, NA)
+  )
+
+
+port_trip_emissions_fig <- ggplot() +
+  geom_sf(data = world_bbox_sf, fill = "grey90") +
+  geom_sf(
+    data = all_countries_for_plot |>
+      dplyr::left_join(land, by = ) |>
+      dplyr::left_join(
+        all_port_and_trip_emissions,
+        by = c("country_iso3", "type")
+      ) |>
+      sf::st_as_sf(),
+    aes(fill = emissions_co2_mt),
+    color = "white",
+    linewidth = 0.01
+  ) +
+  facet_wrap(type ~ ., ncol = 1) +
+  coord_sf(crs = map_projection) +
+  theme_void() +
+  # scale_fill_viridis_c(
+  #   option = "mako",
+  #   begin = 0.2,
+  #   end = 0.7,
+  #   na.value = "black",
+  #   labels = scales::unit_format(unit = "M", scale = 1e-6)
+  # ) +
+  scale_fill_distiller(
+    palette = "Blues",
+    direction = -1,
+    na.value = "black",
+    labels = scales::unit_format(unit = "M", scale = 1e-6)
+  ) +
+  labs(
+    x = "",
+    fill = expression(2024 ~ CO[2] ~ emissions ~ (MT))
+  ) +
+  guides(
+    fill = guide_colorbar(
+      title.position = "top",
+      title.hjust = 0.5,
+      frame.colour = "white",
+      ticks.colour = "white"
+    )
+  ) +
+  theme(
+    legend.position = "bottom",
+    legend.direction = "horizontal",
+    legend.key.width = unit(1.75, "cm")
+  )
+
+cowplot::plot_grid(
+  cowplot::plot_grid(
+    time_series_by_fishing_fig_co2,
+    emissions_by_vessel_class_barplot,
+    ncol = 1,
+    rel_heights = c(0.4, 0.6),
+    labels = c("A", "B")
+  ),
+  port_trip_emissions_fig,
+  labels = c("", "C"),
+  rel_widths = c(0.52, 0.48)
+)
+```
+
+# Figure 3.1 -----
+
+
+
+#### Spatial emissions by fleet (annual)
+
+```{r}
+#| label: fig-spatial-emissions-by-fleet-2024
+#| fig-cap: Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}$
+#| fig-width: 8
+#| fig-height: 4
+
+target_lons <- unique(as.integer(longs))
+target_lats <- unique(as.integer(lats))
+
+spatial_co2_emissions_ais_dark_by_fleet <- annual_spatial_co2_emissions_ais_dark_by_fleet |>
+  dplyr::group_by(year, lon_bin, lat_bin, fishing) |>
+  dplyr::summarise(
+    emissions_co2_mt = sum(emissions_co2_mt, na.rm = TRUE),
+    emissions_co2_dark_mt = sum(emissions_co2_dark_mt, na.rm = TRUE)
+  ) |>
+  dplyr::ungroup() |>
+  dplyr::filter(year == analysis_end_year) |>
+  tidyr::pivot_longer(
+    cols = c(emissions_co2_mt, emissions_co2_dark_mt),
+    names_to = "fleet",
+    values_to = "emissions_co2_mt"
+  ) |>
+  dplyr::mutate(
+    emissions_mt_per_km2 = emissions_co2_mt / lat_to_area(lat_bin)
+  ) |>
+  tidyr::complete(
+    lon_bin = target_lons,
+    lat_bin = target_lats,
+    fishing,
+    fleet,
+    fill = list(emissions_mt_per_km2 = NA)
+  )
+
+scale_limits <- c(
+  0.001,
+  max(
+    spatial_co2_emissions_ais_dark_by_fleet$emissions_mt_per_km2,
+    na.rm = TRUE
+  )
+)
+
+spatial_emissions_by_fleet_2024_plot <- spatial_co2_emissions_ais_dark_by_fleet |>
+  dplyr::mutate(
+    fleet = factor(
+      fleet,
+      levels = c("emissions_co2_mt", "emissions_co2_dark_mt"),
+      labels = c("AIS", "S1")
+    )
+  ) |>
+  dplyr::mutate(
+    fishing = ifelse(fishing, "Fishing", "Non-fishing") |>
+      forcats::fct_rev()
+  ) |>
+  ggplot() +
+  geom_sf(data = world_bbox_sf, fill = "black") +
+  ggspatial::geom_spatial_tile(aes(
+    x = lon_bin + 0.5,
+    y = lat_bin + 0.5,
+    fill = emissions_mt_per_km2,
+    color = emissions_mt_per_km2
+  )) +
+  theme_void() +
+  geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
+  scico::scale_color_scico(
+    name = expression(
+      2024 ~ CO[2] ~ emissions ~ (MT / km^2)
+    ),
+    palette = "vik",
+    begin = 0.5,
+    end = 1,
+    limits = scale_limits,
+    trans = "log10",
+    na.value = "grey90",
+    # labels = scales::comma,
+    labels = c("0", "0.1", "10", "1000"),
+    guide = "none"
+  ) +
+  scico::scale_fill_scico(
+    name = expression(
+      2024 ~ CO[2] ~ emissions ~ (MT / km^2)
+    ),
+    palette = "vik",
+    begin = 0.5,
+    end = 1,
+    limits = scale_limits,
+    trans = "log10",
+    na.value = "grey90",
+    # labels = scales::comma
+    labels = c("0", "0.1", "10", "1000")
+  ) +
+  labs(x = "", y = "") +
+  theme(
+    legend.position = "bottom",
+    legend.title.align = 0.5,
+    strip.text.x = element_text(
+      margin = margin(t = 10, b = 10),
+      size = 10
+    ),
+    strip.text.y = element_text(
+      angle = 0,
+      hjust = 0,
+      margin = margin(l = 10, r = 10),
+      size = 10
+    ),
+    strip.background = element_rect(fill = "transparent", color = NA),
+    panel.spacing = unit(1, "lines")
+  ) +
+  guides(
+    fill = guide_colorbar(
+      title.position = "top",
+      title.hjust = 0.5,
+      frame.colour = "white",
+      ticks.colour = "white",
+      barwidth = unit(10, "cm"),
+      barheight = unit(0.5, "cm")
+    )
+  ) +
+  scale_x_continuous(expand = c(0, 1)) +
+  scale_y_continuous(expand = c(0, 1)) +
+  facet_grid(fleet ~ fishing) +
+  coord_sf(crs = map_projection)
+
+spatial_emissions_by_fleet_2024_plot
+```
+
+#### Spatial emissions by fleet (total)
+
+```{r}
+#| label: fig-spatial-emissions-by-fleet-total
+#| fig-cap: Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}$
+#| fig-width: 8
+#| fig-height: 4
+
+target_lons <- unique(as.integer(longs))
+target_lats <- unique(as.integer(lats))
+
+spatial_co2_emissions_ais_dark_by_fleet <- annual_spatial_co2_emissions_ais_dark_by_fleet |>
+  dplyr::group_by(lon_bin, lat_bin, fishing) |>
+  dplyr::summarise(
+    emissions_co2_mt = sum(emissions_co2_mt, na.rm = TRUE),
+    emissions_co2_dark_mt = sum(emissions_co2_dark_mt, na.rm = TRUE)
+  ) |>
+  dplyr::ungroup() |>
+  tidyr::pivot_longer(
+    cols = c(emissions_co2_mt, emissions_co2_dark_mt),
+    names_to = "fleet",
+    values_to = "emissions_co2_mt"
+  ) |>
+  dplyr::mutate(
+    emissions_mt_per_km2 = emissions_co2_mt / lat_to_area(lat_bin),
+    # emissions_mt_per_km2_year = emissions_mt_per_km2 / length(analysis_end_year:analysis_start_year) # If use, update SQL to pull data by year
+  ) |>
+  tidyr::complete(
+    lon_bin = target_lons,
+    lat_bin = target_lats,
+    fishing,
+    fleet,
+    fill = list(emissions_mt_per_km2 = NA)
+  )
+
+scale_limits <- c(
+  0.001,
+  max(
+    spatial_co2_emissions_ais_dark_by_fleet$emissions_mt_per_km2,
+    na.rm = TRUE
+  )
+)
+
+spatial_emissions_by_fleet_total_plot <- spatial_co2_emissions_ais_dark_by_fleet |>
+  dplyr::mutate(
+    fleet = factor(
+      fleet,
+      levels = c("emissions_co2_mt", "emissions_co2_dark_mt"),
+      labels = c("AIS", "S1")
+    )
+  ) |>
+  dplyr::mutate(
+    fishing = ifelse(fishing, "Fishing", "Non-fishing") |>
+      forcats::fct_rev()
+  ) |>
+  ggplot() +
+  geom_sf(data = world_bbox_sf, fill = "black") +
+  ggspatial::geom_spatial_tile(aes(
+    x = lon_bin + 0.5,
+    y = lat_bin + 0.5,
+    fill = emissions_mt_per_km2,
+    color = emissions_mt_per_km2
+  )) +
+  theme_void() +
+  geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
+  scico::scale_color_scico(
+    name = expression(
+      Cumulative ~ CO[2] ~ emissions ~ (MT / km^2) ~ from ~ 2017 ~ to ~ 2024
+    ),
+    palette = "vik",
+    begin = 0.5,
+    end = 1,
+    limits = scale_limits,
+    trans = "log10",
+    na.value = "grey90",
+    # labels = scales::comma,
+    labels = c("0", "0.1", "10", "1000"),
+    guide = "none"
+  ) +
+  scico::scale_fill_scico(
+    name = expression(
+      Cumulative ~ CO[2] ~ emissions ~ (MT / km^2) ~ from ~ 2017 ~ to ~ 2024
+    ),
+    palette = "vik",
+    begin = 0.5,
+    end = 1,
+    limits = scale_limits,
+    trans = "log10",
+    na.value = "grey90",
+    # labels = scales::comma
+    labels = c("0", "0.1", "10", "1000")
+  ) +
+  labs(x = "", y = "") +
+  theme(
+    legend.position = "bottom",
+    legend.title.align = 0.5,
+    strip.text.x = element_text(
+      margin = margin(t = 10, b = 10),
+      size = 10
+    ),
+    strip.text.y = element_text(
+      angle = 0,
+      hjust = 0,
+      margin = margin(l = 10, r = 10),
+      size = 10
+    ),
+    strip.background = element_rect(fill = "transparent", color = NA),
+    panel.spacing = unit(1, "lines")
+  ) +
+  guides(
+    fill = guide_colorbar(
+      title.position = "top",
+      title.hjust = 0.5,
+      frame.colour = "white",
+      ticks.colour = "white",
+      barwidth = unit(10, "cm"),
+      barheight = unit(0.5, "cm")
+    )
+  ) +
+  scale_x_continuous(expand = c(0, 1)) +
+  scale_y_continuous(expand = c(0, 1)) +
+  facet_grid(fleet ~ fishing) +
+  coord_sf(crs = map_projection)
+
+spatial_emissions_by_fleet_total_plot
+```
+
+
+```{r}
+#| label: fig-spatial-temporal-richness-by-fleet-total
+#| fig-cap: (A) Time series of monthly global CO$_2$ emissions, aggregated across AIS-broadcasting and non-broadcasting fleets, for both fishing and non-fishing boats. (B) Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}$
+#| fig-width: 4
+#| fig-height: 7
 
 time_series_data_monthly_emissions_by_fleet <- monthly_aggregated_time_series |>
-  dplyr::group_by(time) |>
+  dplyr::group_by(time, fishing) |>
   dplyr::summarise(
     emissions_co2_mt = sum(emissions_co2_mt),
     emissions_co2_dark_mt = sum(emissions_co2_dark_mt)
@@ -1667,7 +2068,12 @@ time_series_data_monthly_emissions_by_fleet <- monthly_aggregated_time_series |>
       fleet == "emissions_co2_mt" ~ "AIS",
       fleet == "emissions_co2_dark_mt" ~ "S1"
     ),
-    fleet = factor(fleet, levels = c("AIS", "S1"))
+    fleet = factor(fleet, levels = c("AIS", "S1")),
+    fishing = dplyr::case_when(
+      fishing == TRUE ~ "Fishing",
+      fishing == FALSE ~ "Non-fishing"
+    ),
+    fishing = factor(fishing, levels = c("Non-fishing", "Fishing"))
   )
 
 make_pollutant_by_fleet_time_series_figure <- function(
@@ -1700,16 +2106,21 @@ make_pollutant_by_fleet_time_series_figure <- function(
       ),
       labels = seq(analysis_start_year, analysis_end_year + 1)
     ) +
+    facet_wrap(~fishing, nrow = 1, scales = "free_y") +
     theme_plot() +
     labs(x = "", y = y_axis_label) +
     theme(
       panel.grid.minor = element_blank(),
-      legend.position = c(0.15, 0.92),
+      legend.position = c(0.60, 0.90),
       legend.background = element_rect(fill = "white", color = "gray"),
-      legend.title = element_blank()
+      legend.title = element_blank(),
+      axis.title.y = element_text(size = 9),
+      axis.text.x = element_text(angle = 25, hjust = 0.7),
+      legend.text = element_text(size = 8),
+      legend.key.size = unit(0.5, "cm"),
+      strip.text.x = element_text(size = 12)
     )
 }
-
 
 time_series_by_fleet_fig_co2 <- make_pollutant_by_fleet_time_series_figure(
   time_series_data_monthly_emissions_by_fleet,
@@ -1720,20 +2131,26 @@ time_series_by_fleet_fig_co2 <- make_pollutant_by_fleet_time_series_figure(
     limits = c(0, NA)
   )
 
-cowplot::plot_grid(
-  cowplot::plot_grid(
-    time_series_by_fleet_fig_co2,
-    emissions_by_vessel_class_barplot,
-    ncol = 1,
-    rel_heights = c(0.4, 0.6),
-    labels = c("A", "B")
-  ),
-  port_trip_emissions_fig,
-  labels = c("", "C"),
-  rel_widths = c(0.52, 0.48)
+plot_constrained <- cowplot::plot_grid(
+  NULL, 
+  time_series_by_fleet_fig_co2 + 
+    theme(plot.margin = margin(b = -15, l = 0)),
+    NULL, 
+  ncol = 3, 
+  rel_widths = c(0.07, 0.75, 0.18) 
 )
+
+cowplot::plot_grid(
+  plot_constrained,                     
+  spatial_emissions_by_fleet_total_plot,
+  ncol = 1,
+  rel_heights = c(0.35, 0.65),
+  labels = c("A", "B")
+)
+
 ```
 
+### Other plots
 
 ```{r}
 #| label: tbl-top-port-stay-emissions-by-country
@@ -1786,258 +2203,6 @@ make_pollutant_time_series_figure(
   )
 ```
 
-
-### Spatial emissions by fleet (annual)
-
-```{r}
-#| label: fig-spatial-emissions-by-fleet-2024
-#| fig-cap: Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}$
-#| fig-width: 8
-#| fig-height: 4
-
-target_lons <- unique(as.integer(longs))
-target_lats <- unique(as.integer(lats))
-
-spatial_co2_emissions_ais_dark_by_fleet <- annual_spatial_co2_emissions_ais_dark_by_fleet |>
-  dplyr::group_by(year, lon_bin, lat_bin, fishing) |>
-  dplyr::summarise(
-    emissions_co2_mt = sum(emissions_co2_mt, na.rm = TRUE),
-    emissions_co2_dark_mt = sum(emissions_co2_dark_mt, na.rm = TRUE)
-  ) |>
-  dplyr::ungroup() |>
-  dplyr::filter(year == analysis_end_year) |>
-  tidyr::pivot_longer(
-    cols = c(emissions_co2_mt, emissions_co2_dark_mt),
-    names_to = "fleet",
-    values_to = "emissions_co2_mt"
-  ) |>
-  dplyr::mutate(
-    emissions_mt_per_km2 = emissions_co2_mt / lat_to_area(lat_bin)
-  ) |>
-  tidyr::complete(
-    lon_bin = target_lons,
-    lat_bin = target_lats,
-    fishing,
-    fleet,
-    fill = list(emissions_mt_per_km2 = NA)
-  )
-
-scale_limits <- c(
-  0.001,
-  max(
-    spatial_co2_emissions_ais_dark_by_fleet$emissions_mt_per_km2,
-    na.rm = TRUE
-  )
-)
-
-spatial_co2_emissions_ais_dark_by_fleet |>
-  dplyr::mutate(
-    fleet = factor(
-      fleet,
-      levels = c("emissions_co2_mt", "emissions_co2_dark_mt"),
-      labels = c("AIS", "S1")
-    )
-  ) |>
-  dplyr::mutate(
-    fishing = ifelse(fishing, "Fishing", "Non-fishing") |>
-      forcats::fct_rev()
-  ) |>
-  ggplot() +
-  geom_sf(data = world_bbox_sf, fill = "black") +
-  ggspatial::geom_spatial_tile(aes(
-    x = lon_bin + 0.5,
-    y = lat_bin + 0.5,
-    fill = emissions_mt_per_km2,
-    color = emissions_mt_per_km2
-  )) +
-  theme_void() +
-  geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
-  scico::scale_color_scico(
-    name = expression(
-      2024 ~ CO[2] ~ emissions ~ (MT / km^2)
-    ),
-    palette = "vik",
-    begin = 0.5,
-    end = 1,
-    limits = scale_limits,
-    trans = "log10",
-    na.value = "grey90",
-    # labels = scales::comma,
-    labels = c("0", "0.1", "10", "1000"),
-    guide = "none"
-  ) +
-  scico::scale_fill_scico(
-    name = expression(
-      2024 ~ CO[2] ~ emissions ~ (MT / km^2)
-    ),
-    palette = "vik",
-    begin = 0.5,
-    end = 1,
-    limits = scale_limits,
-    trans = "log10",
-    na.value = "grey90",
-    # labels = scales::comma
-    labels = c("0", "0.1", "10", "1000")
-  ) +
-  labs(x = "", y = "") +
-  theme(
-    legend.position = "bottom",
-    legend.title.align = 0.5,
-    strip.text.x = element_text(
-      margin = margin(t = 10, b = 10),
-      size = 10
-    ),
-    strip.text.y = element_text(
-      angle = 0,
-      hjust = 0,
-      margin = margin(l = 10, r = 10),
-      size = 10
-    ),
-    strip.background = element_rect(fill = "transparent", color = NA),
-    panel.spacing = unit(1, "lines")
-  ) +
-  guides(
-    fill = guide_colorbar(
-      title.position = "top",
-      title.hjust = 0.5,
-      frame.colour = "white",
-      ticks.colour = "white",
-      barwidth = unit(10, "cm"),
-      barheight = unit(0.5, "cm")
-    )
-  ) +
-  scale_x_continuous(expand = c(0, 1)) +
-  scale_y_continuous(expand = c(0, 1)) +
-  facet_grid(fleet ~ fishing) +
-  coord_sf(crs = map_projection)
-
-```
-
-### Spatial emissions by fleet (total)
-
-```{r}
-#| label: fig-spatial-emissions-by-fleet-total
-#| fig-cap: Spatial distribution of cumulative CO$_{2}$ emissions (Mt/km2) for AIS/S1, and fishing/non-fishing fleets, from 2017 to 2024, in MT/Km$^{2}$
-#| fig-width: 8
-#| fig-height: 4
-
-target_lons <- unique(as.integer(longs))
-target_lats <- unique(as.integer(lats))
-
-spatial_co2_emissions_ais_dark_by_fleet <- annual_spatial_co2_emissions_ais_dark_by_fleet |>
-  dplyr::group_by(lon_bin, lat_bin, fishing) |>
-  dplyr::summarise(
-    emissions_co2_mt = sum(emissions_co2_mt, na.rm = TRUE),
-    emissions_co2_dark_mt = sum(emissions_co2_dark_mt, na.rm = TRUE)
-  ) |>
-  dplyr::ungroup() |>
-  tidyr::pivot_longer(
-    cols = c(emissions_co2_mt, emissions_co2_dark_mt),
-    names_to = "fleet",
-    values_to = "emissions_co2_mt"
-  ) |>
-  dplyr::mutate(
-    emissions_mt_per_km2 = emissions_co2_mt / lat_to_area(lat_bin),
-    # emissions_mt_per_km2_year = emissions_mt_per_km2 / length(analysis_end_year:analysis_start_year) # If use, update SQL to pull data by year
-  ) |>
-  tidyr::complete(
-    lon_bin = target_lons,
-    lat_bin = target_lats,
-    fishing,
-    fleet,
-    fill = list(emissions_mt_per_km2 = NA)
-  )
-
-scale_limits <- c(
-  0.001,
-  max(
-    spatial_co2_emissions_ais_dark_by_fleet$emissions_mt_per_km2,
-    na.rm = TRUE
-  )
-)
-
-spatial_co2_emissions_ais_dark_by_fleet |>
-  dplyr::mutate(
-    fleet = factor(
-      fleet,
-      levels = c("emissions_co2_mt", "emissions_co2_dark_mt"),
-      labels = c("AIS", "S1")
-    )
-  ) |>
-  dplyr::mutate(
-    fishing = ifelse(fishing, "Fishing", "Non-fishing") |>
-      forcats::fct_rev()
-  ) |>
-  ggplot() +
-  geom_sf(data = world_bbox_sf, fill = "black") +
-  ggspatial::geom_spatial_tile(aes(
-    x = lon_bin + 0.5,
-    y = lat_bin + 0.5,
-    fill = emissions_mt_per_km2,
-    color = emissions_mt_per_km2
-  )) +
-  theme_void() +
-  geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
-  scico::scale_color_scico(
-    name = expression(
-      Cumulative ~ CO[2] ~ emissions ~ (MT / km^2) ~ from ~ 2017 ~ to ~ 2024
-    ),
-    palette = "vik",
-    begin = 0.5,
-    end = 1,
-    limits = scale_limits,
-    trans = "log10",
-    na.value = "grey90",
-    # labels = scales::comma,
-    labels = c("0", "0.1", "10", "1000"),
-    guide = "none"
-  ) +
-  scico::scale_fill_scico(
-    name = expression(
-      Cumulative ~ CO[2] ~ emissions ~ (MT / km^2) ~ from ~ 2017 ~ to ~ 2024
-    ),
-    palette = "vik",
-    begin = 0.5,
-    end = 1,
-    limits = scale_limits,
-    trans = "log10",
-    na.value = "grey90",
-    # labels = scales::comma
-    labels = c("0", "0.1", "10", "1000")
-  ) +
-  labs(x = "", y = "") +
-  theme(
-    legend.position = "bottom",
-    legend.title.align = 0.5,
-    strip.text.x = element_text(
-      margin = margin(t = 10, b = 10),
-      size = 10
-    ),
-    strip.text.y = element_text(
-      angle = 0,
-      hjust = 0,
-      margin = margin(l = 10, r = 10),
-      size = 10
-    ),
-    strip.background = element_rect(fill = "transparent", color = NA),
-    panel.spacing = unit(1, "lines")
-  ) +
-  guides(
-    fill = guide_colorbar(
-      title.position = "top",
-      title.hjust = 0.5,
-      frame.colour = "white",
-      ticks.colour = "white",
-      barwidth = unit(10, "cm"),
-      barheight = unit(0.5, "cm")
-    )
-  ) +
-  scale_x_continuous(expand = c(0, 1)) +
-  scale_y_continuous(expand = c(0, 1)) +
-  facet_grid(fleet ~ fishing) +
-  coord_sf(crs = map_projection)
-
-```
 
 ### Spatial emissions by footprint group
 
