@@ -2197,8 +2197,11 @@ spatial_emissions_by_fleet_total_plot_pseudolog <- spatial_co2_emissions_ais_dar
     fishing = ifelse(fishing, "Fishing", "Non-fishing") |>
       forcats::fct_rev()
   ) |>
+  dplyr::mutate(
+    emissions_mt_per_km2 = dplyr::na_if(emissions_mt_per_km2, 0)
+  ) |> 
   ggplot() +
-  geom_sf(data = world_bbox_sf, fill = "black") +
+  geom_sf(data = world_bbox_sf, fill = "grey92") +
   ggspatial::geom_spatial_tile(aes(
     x = lon_bin + 0.5,
     y = lat_bin + 0.5,
@@ -2215,7 +2218,7 @@ spatial_emissions_by_fleet_total_plot_pseudolog <- spatial_co2_emissions_ais_dar
     begin = 0.5,
     end = 1,
     trans = ggallin::pseudolog10_trans,
-    na.value = "grey90",
+    na.value = "grey95",
     labels = scales::comma,
     guide = "none"
   ) +
@@ -2227,7 +2230,7 @@ spatial_emissions_by_fleet_total_plot_pseudolog <- spatial_co2_emissions_ais_dar
     begin = 0.5,
     end = 1,
     trans = ggallin::pseudolog10_trans,
-    na.value = "grey90",
+    na.value = "grey95",
     labels = scales::comma
   ) +
   labs(x = "", y = "") +
