@@ -612,10 +612,7 @@ total_sc_billion_usd <- annual_emissions |>
     `r scales::comma(signif(n_ais_messages$n_billion_ais_messages, 3))`
     billion individual AIS messages
 
--   For non-broadcasting vessels, we leverage over
-    `r floor(n_s1_detections$n_million_s1_detections)` million vessel
-    detections from across more than
-    `r floor(n_s1_detections$n_thousand_s1_scenes)` thousand S1 scenes.
+    - We obtained a dataset containing  `r signif(n_s1_detections$n_million_s1_detections,3)` million vessel detections from 2017 to 2024, of which signif(n_s1_detections$n_million_s1_detections_unmatched,3) million detections were not matched to a broadcasting vessel. These detections come from across more than  `r floor(n_s1_detections$n_thousand_s1_scenes)` individual S1 scenes.
 
 -   Because many vessels do not broadcast AIS, current approaches solely
     based on AIS \textit{underestimate} current global emissions by

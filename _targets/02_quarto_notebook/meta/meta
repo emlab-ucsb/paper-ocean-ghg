@@ -1,6 +1,5 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
 mrv_data_validation|stem|264a14bbb164936d|02a63dec589ad856|d8bdc2636ec944ad|-1156835875||t20327.813198723s|s2726715b|2726715|rds|local|vector|||0.046||
-n_s1_detections|stem|5d477b6805fd16ec|c682d60f0f8756cd|5b926ee6737c1afa|-1220995872||t20439.7579920227s|s319b|319|rds|local|vector|||0.106||
 n_unique_vessels|stem|e9c2c1c44651df09|0264d260d58dd8bd|e00f0c9199044e16|1556531303||t20439.7579961775s|s275b|275|rds|local|vector|||0.014||
 n_ais_messages|stem|9b7fffd7e6fd0d33|26ccfb476517bb8f|776629b1b35c646c|662157959||t20439.7579968771s|s285b|285|rds|local|vector|||0.012||
 performance_detections_cls_roc_pr_curves_file|stem|3b1f23152a74f46d|fa19326bfff8ff57|2c530c1562a7fbd1|-1765684357|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/performance_detections_cls_roc_pr_curves.csv|t20444.155640825s|s50880b|50880|file|local|vector|||0.005||
@@ -24,7 +23,6 @@ total_spatial_emissions_by_pollutant_file|stem|ed6d6f43c9352344|0dc7fb7fdc1fb741
 annual_global_emissions_by_receiver_type_and_flag_file|stem|841a28a80af593d8|5e852e5d92f4c244|2c530c1562a7fbd1|-2060547326|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/annual_global_emissions_by_receiver_type_and_flag.csv|t20444.1557352878s|s265916b|265916|file|local|vector|||0.001||
 vessel_size_info_file|stem|9563dfdf6c4dddaf|8ec4a43c523c20c8|2c530c1562a7fbd1|1202604510|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/vessel_size_info.csv|t20444.1564079485s|s40567062b|40567062|file|local|vector|||0.001||
 total_monthly_emissions_by_pollutant_file|stem|86cb1fe3464adeab|db2cec9c1439b37f|2c530c1562a7fbd1|-1354282208|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/total_monthly_emissions_by_pollutant.csv|t20444.1568877679s|s17141b|17141|file|local|vector|||0||
-n_s1_detections_file|stem|17674351b592bf36|a3d67d75671249d2|2c530c1562a7fbd1|-34664370|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/n_s1_detections.csv|t20444.1564527879s|s63b|63|file|local|vector|||0.005||
 performance_detections_cls_roc_pr_curves|stem|0057969f0236ef59|160e59c220c24f54|bff28e5d1c7e819c|-1964521282||t20444.1578494221s|s6407b|6407|rds|local|vector|||0.124||
 annual_global_emissions_by_receiver_type|stem|bcdee3ed614e95a2|a15ed3cd0b15df56|dd014c112daa158d|-454120393||t20444.1578501633s|s856b|856|rds|local|vector|||0.058||
 s1_ais_vessel_size_class_comparison|stem|cb2a98f257ef0385|917bc103da633e73|6b5d0015231a3081|1582837928||t20444.1578503905s|s2555b|2555|rds|local|vector|||0.014||
@@ -51,12 +49,14 @@ oecd_data_file|stem|e6e73d3ba66c0d28|2c6dadda86046fb4|2c530c1562a7fbd1|165477130
 oecd_data|stem|7ba90a0b5b717794|e61fa5b472f3aa78|f1e96eff7e0f1de8|-1839373977||t20458.8852069101s|s253b|253|rds|local|vector|||0.238||
 annual_edgar_emissions_file|stem|f371a87ee2cc7fb7|18bad1b35fdeef9b|2c530c1562a7fbd1|-480052263|/Users/gmcdonald/github/paper-ocean-ghg/data/IEA_EDGAR_CO2_1970_2024/IEA_EDGAR_CO2_1970_2024.xlsx|t20346.3630787037s|s4466323b|4466323|file|local|vector|||0.007||
 annual_edgar_emissions|stem|2ba56e5c736fa349|1e45fe0bfe8aff1d|acc0d4cd247b8920|463478860||t20459.6371742034s|s1206639b|1206639|rds|local|vector|||0.118||
+n_s1_detections_file|stem|0a163a8ae2bccbeb|a3d67d75671249d2|2c530c1562a7fbd1|-34664370|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/n_s1_detections.csv|t20459.8727405907s|s107b|107|file|local|vector|||0.004||
+n_s1_detections|stem|9ca6480cb68be16c|c682d60f0f8756cd|59bd6924dc874738|-1220995872||t20459.8729177544s|s343b|343|rds|local|vector|||0.129||
 pull_gfw_data_locally|function|f81141110805c5bf
 run_custom_bq_query|function|f51b83db0de796b8
 download_gfw_data|function|8071964635c69c3f
 combine_EU_data|function|b5d57b0ec1728741
-.Random.seed|object|e622c74499f2035f
+.Random.seed|object|a827283ec61e5f73
 run_gfw_query_and_save_table|function|076f052fc2a40190
 summarize_dark_fleet_model_results_emissions|function|9b954b9580149f8d
 summarize_dark_fleet_ratios_spatial|function|3ff490bad87fc0e5
-quarto_notebook|stem|57fd66716844311b|75f334536a8b752a|d2da22f51c8df6b6|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20459.8387223864s|s13402539b|13402539|file|local|vector|||39.426||
+quarto_notebook|stem|6c97d870156f8ba0|75f334536a8b752a|c5b0614cdaeef37d|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20459.8756012771s|s13403044b|13403044|file|local|vector|||39.319||
