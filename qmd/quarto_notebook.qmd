@@ -441,7 +441,8 @@ all_inventory_data <- all_tranportation_data |>
       dplyr::filter(pollutant == "co2", fleet == "AIS-broadcasting") |>
       dplyr::select(year, emissions_co2_mt = emissions_mt) |>
       dplyr::mutate(data_source = "GFW (AIS)")
-  )
+  ) |>
+  dplyr::filter(year >= analysis_start_year, year <= analysis_end_year)
 
 all_inventory_data |>
   ggplot(aes(x = year, y = emissions_co2_mt, color = data_source)) +
