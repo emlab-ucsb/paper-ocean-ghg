@@ -232,26 +232,6 @@ list(
     ),
     format = "file"
   ),
-  # # Annual extrapolation of AIS activity to dark activity
-  # # Use method we use for extrapolating emissions (by pixel, month, fishing, and vessel size class)
-  # # To also extrapolate hours, kw-hours
-  # # Also get average speed, assuming they are same for dark and AIS (by pixel, month, fishing, and vessel size class)
-  # tar_file_read(
-  #   name = annual_ais_to_dark_activity_extrapolation,
-  #   "sql/annual_ais_to_dark_activity_extrapolation.sql",
-  #   download_gfw_data(
-  #     bq_billing_project,
-  #     sql = readr::read_file(!!.x) |>
-  #       stringr::str_glue(
-  #         run_version_ais = run_version_ais,
-  #         run_version_dark = run_version_dark
-  #       ),
-  #     file_path = here::here(
-  #       "data/gfw/annual_ais_to_dark_activity_extrapolation.csv"
-  #     )
-  #   ),
-  #   format = "file"
-  # ),
   # Download total monthly non-spatial emissions by pollutant
   tar_file_read(
     name = total_monthly_emissions_by_pollutant,

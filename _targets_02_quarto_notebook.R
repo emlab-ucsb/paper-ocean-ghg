@@ -65,13 +65,6 @@ list(
     ),
     read = readr::read_csv(!!.x)
   ),
-  # tar_file_read(
-  #   name = annual_ais_to_dark_activity_extrapolation,
-  #   command = here::here(
-  #     "data/gfw/annual_ais_to_dark_activity_extrapolation.csv"
-  #   ),
-  #   read = readr::read_csv(!!.x)
-  # ),
   tar_file_read(
     name = total_monthly_emissions_by_pollutant,
     command = here::here(
