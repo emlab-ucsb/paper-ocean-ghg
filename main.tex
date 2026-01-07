@@ -367,6 +367,13 @@ We define a global spatial resolution of 1x1-degree which is used for all spatia
 
 S1 imagery enables identification and quantification of detections of both broadcasting vessels (i.e., those detections that can be matched to a vessel broadcasting AIS) and non-broadcasting vessels (i.e., those detections that are unmatched to a vessel broadcasting AIS) at specific locations and times. The vessel length of each detection is inferred, and each detection is also classified as likely being a fishing vessel or non-fishing vessel\cite{paolo2024satellite}. We divide vessels into 10 size classes according to length deciles derived from all unmatched S1 detections that occurred from 2017 to 2024. These length-based decile thresholds are consistently applied to both AIS-derived vessel characteristics and Sentinel-1 detected vessel lengths in order to bin all AIS-broadcasting vessels and all unmatched S1 detections into length bins. Detections smaller than the minimum vessel size represented in the AIS-broadcasting dataset are excluded to avoid assigning emissions to vessel sizes not characterized by the AIS emissions model. We use length bins because inferred length is available for all S1 detections, and length is representative of main engine power (Fig. \ref{fig:fig-ais-length-power-relationship}), which is directly related to emissions in our bottom-up engineering model. We additionally stratify by vessel type (fishing or non-fishing) because some fishing vessel types have fundamentally different emissions profiles than non-fishing vessels (i.e., trawlers and dredgers emit more at low speeds due to the nature of their energy-intensive gear deployment, which is reflected in their gear-specific main engine load factor adjustment.). Additionally, to ensure emissions are correctly assigned from our AIS-based model, any matched detection that cannot be associated with a vessel in the AIS model is treated as a non-broadcasting vessel and classified as an unmatched detection. This prevents assigning emissions to vessels for which no emission estimates are available. We also normalize detections by the total km² imaged across all S1 scenes within each pixel and month to control for variation in Sentinel-1 sampling effort.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/fig-ais-length-power-relationship-1.png}
+    \caption{Relationship between main engine power (killowatts) and length (meters) for all AIS-broadcasting vessels, disaggregated by non-fishing and fishing vessels.}
+    \label{fig:fig-ais-length-power-relationship}
+\end{figure}
+
 \paragraph{Geographical features}
 
 For each pixel and month, we extract spatial information, such as depth, distance to shore, and distance to the nearest port, from a higher-resolution GFW subproduct (0.01x0.01-degree) and aggregate it to our 1x1-degree grid resolution, computing the minimum, maximum, and average values. Based on performance testing, we retained only the minimum values, which proved most representative. In addition to distance from the nearest port, we found that some pixels exhibited unusually large deviations between expected emissions and S1 detections, primarily driven by patterns specific to high traffic areas near the world’s top ports. This is expected, as traffic density, loitering practices, and navigation behavior in major ports differ from those in regular ports. To account for this, we define a separate top-port distance feature, measuring the distance from each pixel centroid to the nearest of the top 20 container ports according to the Lloyd's list of 2024 \cite{LloydsList_TopPorts_2024}. Additional geographic features include the water area within each pixel (excluding land and the 1 km S1 buffer from shore) and a categorical variable indicating which of the five major ocean basins each pixel falls within.
@@ -522,8 +529,8 @@ After hyperparameter tuning on the full dataset, we performed a final fit using 
 \begin{figure}[!p]
     \centering
     \includegraphics[width=\columnwidth]{figures/fig-feature-importance-1.png}
-    \caption{Feature importance plots for the: 1) emissions regression model;
-2) detections classification mode; and 3) detections regression model.}
+    \caption{Feature importance plots for the: 1) detections classification model;
+2) detections regression model; and 3) emissions regression model.}
     \label{fig:fig-feature-importance}
 \end{figure}
 
@@ -534,6 +541,14 @@ To generate the final global estimates of non-broadcasting vessel emissions, we 
 \paragraph{Direct estimation}
 
 For 86.4\% of the total estimated non-broadcasting emissions (Fig. \ref{fig:fig-spatial-coverage-footprint}), we applied the primary emissions model. For this, we replaced the matched detections used in training with the unmatched vessels detected in both the 10-length-bin S1 detections and the non-stratified-by-length unmatched S2 detections PCA feature to calculate emissions directly.
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/fig-spatial-coverage-footprint-1.png}
+    \caption{Spatial coverage of the non-broadcasting emissions model. Areas are classified according to whether they fall inside or outside the S1 footprint and whether they have been imaged by S1 at any point in time. A given pixel may be imaged in some months but not in others. Pixels outside the footprint have never been imaged. The percentage of total CO$_{2}$ emissions from non-broadcasting vessels attributed to each category is shown.}
+    \label{fig:fig-spatial-coverage-footprint}
+\end{figure}
 
 \paragraph{Indirect estimation}
 
@@ -610,13 +625,6 @@ Finally, in Fig. \ref{fig:fig-co2-emissions-change-map-by-receiver-type}, we see
     \includegraphics[width=\columnwidth]{figures/fig-co2-emissions-change-map-by-receiver-type-1.png}
     \caption{Spatial change in CO$_{2}$ emissions by AIS-broadcasting vessels between 2017 and 2024 (metric tonnes) by receiver type (satellite, terrestrial, and dynamic) and total across receiver types, at a 1x1 degree spatial resolution.}
     \label{fig:fig-co2-emissions-change-map-by-receiver-type}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\columnwidth]{figures/fig-spatial-coverage-footprint-1.png}
-    \caption{Spatial coverage of the non-broadcasting emissions model. Areas are classified according to whether they fall inside or outside the S1 footprint and whether they have been imaged by S1 at any point in time. A given pixel may be imaged in some months but not in others. Pixels outside the footprint have never been imaged. The percentage of total CO$_{2}$ emissions from non-broadcasting vessels attributed to each category is shown.}
-    \label{fig:fig-spatial-coverage-footprint}
 \end{figure}
 
 %%%%%%%%%%%%%%%% SUPPLEMENTARY REFERENCES %%%%%%%%%%%%%%%
