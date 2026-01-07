@@ -2496,21 +2496,56 @@ writeLines(
 ```{r}
 #| label: fig-feature-importance
 #| fig-cap: Feature importance plots for the three final model fit random forests
-#| fig-height: 6
+#| fig-height: 9
+#| fig-width: 7
 
 all_varimp_data |>
+  dplyr::left_join(
+    data_sources,
+    by = c("model_feature" = "Model feature shorthand")
+  ) |>
+  dplyr::rename(model_feature_long = `Model feature`) |>
   dplyr::mutate(
-    model = stringr::str_replace_all(model, "_", "; ") |>
+    model_feature_long = dplyr::case_when(
+      stringr::str_detect(
+        model_feature,
+        "ais_quality_PCA"
+      ) ~ glue::glue(
+        "AIS features (PCA {stringr::str_remove(model_feature, 'ais_quality_PCA_')})"
+      ),
+      stringr::str_detect(
+        model_feature,
+        "s1_s2_coverage_PCA"
+      ) ~ glue::glue(
+        "sentinel features (PCA {stringr::str_remove(model_feature, 's1_s2_coverage_PCA_')})"
+      ),
+      stringr::str_detect(
+        model_feature,
+        "days_since_start_ns"
+      ) ~ glue::glue(
+        "Days since start of study (natural spline{stringr::str_remove(model_feature,'days_since_start_ns_')})"
+      ),
+      stringr::str_detect(
+        model_feature,
+        "length_size_class_percentile_"
+      ) ~ glue::glue(
+        "Matched s1 detections per km2 (length bin {stringr::str_remove(model_feature, 'length_size_class_percentile_')})"
+      ),
+      TRUE ~ model_feature_long
+    )
+  ) |>
+  dplyr::mutate(
+    model = stringr::str_replace_all(model, "_", " ") |>
       stringr::str_to_sentence() |>
       forcats::fct_relevel(
-        "Emissions; regression",
-        "Detections; classification",
-        "Detections; regression"
+        "Detections classification",
+        "Detections regression",
+        "Emissions regression"
       ),
   ) |>
   ggplot(aes(
     x = importance,
-    y = tidytext::reorder_within(model_feature, importance, model)
+    y = tidytext::reorder_within(model_feature_long, importance, model)
   )) +
   geom_bar(stat = "identity") +
   labs(
@@ -2818,8 +2853,6 @@ data_sources_table <- data_sources |>
     font_size = 7
   ) |>
   kableExtra::landscape()
-
-data_sources_table
 
 writeLines(data_sources_table, here::here("tables/data_sources.tex"))
 ```

@@ -1,4 +1,4 @@
-﻿Model feature,Model feature shorthand,Category,Classification detections model,Regression detections model,Emissions model,Units,Type,Spatial,Temporal,Source,Ref.
+﻿Model feature,Model feature shorthand,Category,Detections classification,Detections regression,Emissions egression,Units,Type,Spatial,Temporal,Source,Ref.
 Presence/absence of unmatched detections,unmatched_s1_detections_present,dependant variable,Yes,No,No,-,Boolean,Yes,Yes,GFW,\cite{paolo2024satellite}
 Unmatched detections per km2 imaged,unmatched_s1_detections_per_km2_area_imaged,dependant variable,No,Yes,No,detections/km2,Numeric,Yes,Yes,GFW,\cite{paolo2024satellite}
 Log(ais emissions),emissions_co2_mt_log,dependant variable,No,No,Yes,log(MT),Numeric,Yes,Yes,emLab/GFW,AIS-based emissions model
