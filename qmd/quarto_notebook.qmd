@@ -106,14 +106,14 @@ all_data_source_color_palette <- c(
   "Other transportation (EDGAR)" = paletteer::paletteer_d(
     "colorblindr::OkabeIto"
   )[[7]],
-  "GFW (AIS)" = paletteer::paletteer_d("colorblindr::OkabeIto")[[3]],
+  "GFW (AIS)" = paletteer::paletteer_d("colorblindr::OkabeIto")[[1]],
   "AIS" = paletteer::paletteer_d("colorblindr::OkabeIto")[[1]],
   "S1" = paletteer::paletteer_d("colorblindr::OkabeIto")[[
     6
   ]],
   "EDGAR" = paletteer::paletteer_d("colorblindr::OkabeIto")[[8]],
   "OECD" = paletteer::paletteer_d("colorblindr::OkabeIto")[[6]],
-  "IMO" = paletteer::paletteer_d("colorblindr::OkabeIto")[[1]],
+  "IMO" = paletteer::paletteer_d("colorblindr::OkabeIto")[[3]],
   "Fishing" = paletteer::paletteer_d("colorblindr::OkabeIto")[[5]],
   "Non-fishing" = paletteer::paletteer_d("colorblindr::OkabeIto")[[2]]
 )
@@ -1290,7 +1290,7 @@ time_series_by_fishing_fig_co2 <- ggplot(
   labs(x = "", y = expression(Monthly ~ CO[2] ~ emissions ~ (MT))) +
   theme(
     panel.grid.minor = element_blank(),
-    legend.position = c(0.15, 0.92),
+    legend.position = c(0.15, 0.9),
     legend.background = element_rect(fill = "white", color = "gray"),
     legend.title = element_blank()
   ) +
