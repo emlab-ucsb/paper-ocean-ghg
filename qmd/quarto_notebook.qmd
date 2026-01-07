@@ -1412,10 +1412,11 @@ port_trip_emissions_fig <- ggplot() +
   scale_fill_gradientn(
     # Get the "Blues" palette with 9 colors, but keep only the darker 5 (indices 4-9)
     colors = rev(RColorBrewer::brewer.pal(9, "Blues")[5:9]),
+    labels = scales::unit_format(unit = "M", scale = 1e-6)
   ) +
   labs(
     x = "",
-    fill = expression(2024 ~ CO[2] ~ emissions ~ (MT))
+    fill = expression(2024 ~ CO[2] ~ emissions ~ (MT)),
   ) +
   guides(
     fill = guide_colorbar(
