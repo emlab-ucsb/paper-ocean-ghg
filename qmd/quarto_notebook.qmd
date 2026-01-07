@@ -1742,6 +1742,7 @@ spatial_emissions_by_fleet_total_plot_pseudolog <- spatial_co2_emissions_ais_dar
     begin = 0.5,
     end = 1,
     trans = ggallin::pseudolog10_trans,
+    breaks = c(10, 100, 1000, 10000),
     na.value = "grey95",
     labels = scales::comma,
     guide = "none"
@@ -1754,6 +1755,7 @@ spatial_emissions_by_fleet_total_plot_pseudolog <- spatial_co2_emissions_ais_dar
     begin = 0.5,
     end = 1,
     trans = ggallin::pseudolog10_trans,
+    breaks = c(10, 100, 1000, 10000),
     na.value = "grey95",
     labels = scales::comma
   ) +
