@@ -2848,7 +2848,7 @@ data_sources_table <- data_sources |>
     escape = FALSE,
     booktabs = TRUE,
     longtable = FALSE,
-    caption = "Data sources for all included model features, including the units, feature type, whether it varies spatially, whether it varies temporally, and the source name and reference citation.",
+    caption = "Data sources for all included model features, including which random forest model uses the features (detections classification; detections regression; and/or emissions regression), the units, feature type, whether it varies spatially, whether it varies temporally, and the source name and reference citation.",
     label = "data_sources"
   ) |>
   kableExtra::kable_styling(
