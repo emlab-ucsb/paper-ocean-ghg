@@ -2000,8 +2000,8 @@ make_pollutant_time_series_figure(
 ```{r}
 #| label: fig-spatial-coverage-footprint
 #| fig-cap: Spatial coverage of the non-broadcasting emissions model. Areas are classified according to whether they fall inside or outside the S1 footprint and whether they have been imaged by S1 at any point in time. A given pixel may be imaged in some months but not in others. Pixels outside the footprint have never been imaged. The percentage of total CO$_{2}$ emissions from non-broadcasting vessels attributed to each category is shown.
-#| fig-width: 6
-#| fig-height: 8
+#| fig-width: 5
+#| fig-height: 7
 
 total_spatial_co2_emissions_ais_dark_by_footprint |>
   dplyr::mutate(
@@ -2495,7 +2495,7 @@ writeLines(
 ```{r}
 #| label: fig-feature-importance
 #| fig-cap: Feature importance plots for the three final model fit random forests
-#| fig-height: 8
+#| fig-height: 6
 
 all_varimp_data |>
   dplyr::mutate(
@@ -2526,6 +2526,7 @@ all_varimp_data |>
 ```{r}
 #| label: fig-pr-curves
 #| fig-cap: Precision recall curves for the detection classification model, shown for the inside S1 footprint and outside S1 footprint performance tests
+#| fig-height: 3
 
 performance_detections_cls_roc_pr_curves |>
   tidyr::pivot_wider(names_from = "metric", values_from = "estimate") |>
@@ -2546,6 +2547,7 @@ performance_detections_cls_roc_pr_curves |>
 ```{r}
 #| label: fig-roc-curves
 #| fig-cap: ROC curves for the detection classification model, shown for the inside S1 footprint and outside S1 footprint performance tests
+#| fig-height: 3
 
 performance_detections_cls_roc_pr_curves |>
   tidyr::pivot_wider(names_from = "metric", values_from = "estimate") |>
@@ -2567,6 +2569,7 @@ performance_detections_cls_roc_pr_curves |>
 ```{r}
 #| label: fig-conf-mat
 #| fig-cap: Confusion matricies for the detection classification model, shown for the inside S1 footprint and outside S1 footprint performance tests
+#| fig-height: 3
 
 performance_detections_cls_conf_mat |>
   dplyr::mutate(
@@ -2589,8 +2592,8 @@ performance_detections_cls_conf_mat |>
 ```{r}
 #| label: fig-annual-emissions-by-ais-receiver-type
 #| fig-cap: Annual total CO2 emissions (metric tonnes) by the AIS-broadcasting fleet, disaggregated by AIS receiver type (satellite, terrestrial, and dynamic) and total aggregated across receiver types. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.
-#| #| fig-width: 7.5
-#| fig-height: 6
+# | #| fig-width: 4
+#| fig-height: 5
 annual_global_emissions_by_receiver_type <- annual_global_emissions_by_receiver_type |>
   # Don't include unknown receiver type
   dplyr::filter(receiver_type != "unknown") |>
