@@ -68,7 +68,8 @@ targets::tar_load(c(
   "performance_detections_cls_roc_pr_curves",
   "performance_detections_cls_conf_mat",
   "annual_spatial_co2_emissions_ais_dark_by_fleet",
-  "total_spatial_co2_emissions_ais_dark_by_footprint"
+  "total_spatial_co2_emissions_ais_dark_by_footprint",
+  "data_sources"
 ))
 ```
 
@@ -2795,30 +2796,34 @@ performance_results |>
 
 
 ```{r}
-data_sources <- read_csv(here::here("data/data_sources.csv")) %>%
-  knitr::kable("latex",escape=FALSE,caption = "Data sources for all included model features, including the units, feature type, whether it varies spatially, whether it varies temporally, and the source name and reference citation.", label = "data_sources") %>%
-  kableExtra::kable_styling(latex_options = c("hold_position", "repeat_header"),
-                            font_size = 5)
-```
-
-
-```{r}
-data_sources <- read_csv(here::here("data/data_sources.csv")) |>   
-  dplyr::select(-`Model feature shorthand`) |> 
-  mutate(across(everything(), ~ str_replace_all(., "_", "\\\\_")),
-         across(everything(), ~ str_replace_all(., "²", "$^2$"))) |> 
+data_sources_table <- data_sources |>
+  dplyr::select(-`Model feature shorthand`) |>
+  dplyr::mutate(
+    dplyr::across(
+      dplyr::everything(),
+      ~ stringr::str_replace_all(., "_", "\\\\_")
+    ),
+    dplyr::across(
+      dplyr::everything(),
+      ~ stringr::str_replace_all(., "²", "$^2$")
+    )
+  ) |>
   knitr::kable(
     format = "latex",
-    escape = FALSE, 
-    booktabs = TRUE, 
-    longtable = FALSE, 
+    escape = FALSE,
+    booktabs = TRUE,
+    longtable = FALSE,
     caption = "Data sources for all included model features, including the units, feature type, whether it varies spatially, whether it varies temporally, and the source name and reference citation.",
     label = "tab:data_sources"
-  ) %>%
+  ) |>
   kableExtra::kable_styling(
-    latex_options = c("scale_down", "hold_position"), 
-    font_size = 7 
-  ) %>%
+    latex_options = c("scale_down", "hold_position"),
+    font_size = 7
+  ) |>
   kableExtra::landscape()
+
+data_sources_table
+
+writeLines(data_sources_table, here::here("tables/data_sources.tex"))
 ```
 

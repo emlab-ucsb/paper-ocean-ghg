@@ -186,6 +186,14 @@ list(
       dplyr::select(year = TIME_PERIOD, emissions_co2_mt = OBS_VALUE) |>
       dplyr::mutate(data_source = "OECD")
   ),
+  # Data sources table, for model feature table in supplement
+  tar_file_read(
+    name = data_sources,
+    command = here::here(
+      "data/data_sources.csv"
+    ),
+    read = readr::read_csv(!!.x)
+  ),
   # Render quarto notebook -----
   tar_quarto(
     name = quarto_notebook,
