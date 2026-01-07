@@ -45,6 +45,8 @@ total_spatial_co2_emissions_ais_dark_by_footprint_file|stem|388fa1557d848a3f|f92
 annual_spatial_co2_emissions_ais_dark_by_fleet_file|stem|a8185f936e58d983|465cd7d92ff87433|2c530c1562a7fbd1|1830654499|/Users/gmcdonald/github/paper-ocean-ghg/sql/annual_spatial_co2_emissions_ais_dark_by_fleet.sql|t20458.8740248161s|s410b|410|file|local|vector|||0.001||
 total_spatial_co2_emissions_ais_dark_by_footprint|stem|544fdeb151b462af|125769d71aa821cc|0d9ef31d00271a6f|-1352680752|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/total_spatial_co2_emissions_ais_dark_by_footprint.csv|t20458.8745903723s|s442272b|442272|file|local|vector|||4.03||
 annual_spatial_co2_emissions_ais_dark_by_fleet|stem|04a33b54ef733a5a|e224f2450dcadaae|d1a9150aa9060a1a|1492170606|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/annual_spatial_co2_emissions_ais_dark_by_fleet.csv|t20458.8747948166s|s23353982b|23353982|file|local|vector|||17.64||
+n_s1_detections_file|stem|4416c90b7a2d6e7f|5aa125580ab610f1|2c530c1562a7fbd1|-34664370|/Users/gmcdonald/github/paper-ocean-ghg/sql/n_s1_detections.sql|t20459.8724581716s|s416b|416|file|local|vector|||0.004||
+n_s1_detections|stem|0a163a8ae2bccbeb|62865e14cbc64475|8c5feb2b41333273|-1220995872|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/n_s1_detections.csv|t20459.8727405907s|s107b|107|file|local|vector|||6.427||
 pull_gfw_data_locally|function|f81141110805c5bf
 run_custom_bq_query|function|f51b83db0de796b8
 download_gfw_data|function|8071964635c69c3f
@@ -52,5 +54,3 @@ combine_EU_data|function|b5d57b0ec1728741
 run_gfw_query_and_save_table|function|076f052fc2a40190
 summarize_dark_fleet_model_results_emissions|function|9b954b9580149f8d
 summarize_dark_fleet_ratios_spatial|function|3ff490bad87fc0e5
-n_s1_detections_file|stem|4416c90b7a2d6e7f|5aa125580ab610f1|2c530c1562a7fbd1|-34664370|/Users/gmcdonald/github/paper-ocean-ghg/sql/n_s1_detections.sql|t20459.8724581716s|s416b|416|file|local|vector|||0.004||
-n_s1_detections|stem|0a163a8ae2bccbeb|62865e14cbc64475|8c5feb2b41333273|-1220995872|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/n_s1_detections.csv|t20459.8727405907s|s107b|107|file|local|vector|||6.427||

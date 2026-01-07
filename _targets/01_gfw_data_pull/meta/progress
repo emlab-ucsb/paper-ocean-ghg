@@ -1,9 +1,1 @@
 name|type|parent|branches|progress
-analysis_end_year|stem|analysis_end_year|0|skipped
-analysis_start_year|stem|analysis_start_year|0|skipped
-bq_billing_project|stem|bq_billing_project|0|skipped
-n_s1_detections_file|stem|n_s1_detections_file|0|dispatched
-n_s1_detections_file|stem|n_s1_detections_file|0|completed
-run_version_dark|stem|run_version_dark|0|skipped
-n_s1_detections|stem|n_s1_detections|0|dispatched
-n_s1_detections|stem|n_s1_detections|0|completed

@@ -55,8 +55,10 @@ pull_gfw_data_locally|function|f81141110805c5bf
 run_custom_bq_query|function|f51b83db0de796b8
 download_gfw_data|function|8071964635c69c3f
 combine_EU_data|function|b5d57b0ec1728741
-.Random.seed|object|a827283ec61e5f73
+.Random.seed|object|0c1933e055da4bcd
 run_gfw_query_and_save_table|function|076f052fc2a40190
 summarize_dark_fleet_model_results_emissions|function|9b954b9580149f8d
 summarize_dark_fleet_ratios_spatial|function|3ff490bad87fc0e5
-quarto_notebook|stem|6c97d870156f8ba0|75f334536a8b752a|c5b0614cdaeef37d|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20459.8756012771s|s13403044b|13403044|file|local|vector|||39.319||
+data_sources_file|stem|4c83c403c8df7584|46a239b3b68851eb|2c530c1562a7fbd1|1170827296|/Users/gmcdonald/github/paper-ocean-ghg/data/data_sources.csv|t20460.6278047747s|s5214b|5214|file|local|vector|||0.004||
+data_sources|stem|9c5864d112447349|73c44d5b74410d9a|2af5aa4d057044d0|1456474924||t20460.6278552312s|s1622b|1622|rds|local|vector|||0.125||
+quarto_notebook|stem|cdb33a7692636513|54d511b937ca6863|fe8e2f13a3f9234a|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20460.6282978342s|s13215379b|13215379|file|local|vector|||37.878||

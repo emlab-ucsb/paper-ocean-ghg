@@ -1,7 +1,7 @@
 
 \begin{landscape}\begin{table}[!h]
 \centering
-\caption{\label{tab:tab:data_sources}Data sources for all included model features, including the units, feature type, whether it varies spatially, whether it varies temporally, and the source name and reference citation.}
+\caption{\label{tab:data_sources}Data sources for all included model features, including the units, feature type, whether it varies spatially, whether it varies temporally, and the source name and reference citation.}
 \centering
 \resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
 \fontsize{7}{9}\selectfont
@@ -28,7 +28,7 @@ Minimum depth & geographic features  & Yes & Yes & Yes & m & Numeric & Yes & No
 Minimum distance from shore & geographic features  & Yes & Yes & Yes & m & Numeric & Yes & No & GFW & \cite{kroodsma2018tracking}\\
 \addlinespace
 Minimum distance from nearest port & geographic features  & Yes & Yes & Yes & m & Numeric & Yes & No & GFW & \cite{kroodsma2018tracking}\\
-Distance to top 20 ports & geographic features  & Yes & Yes & Yes & m & Numeric & Yes & No & Lloyd’s List & \cite{LloydsList\_TopPorts\_2024}\\
+Distance to top 20 ports & geographic features  & Yes & Yes & Yes & m & Numeric & Yes & No & Lloyd’s List & \cite{LloydsListTopPorts2024}\\
 Total number of s1 scenes & sentinel features PCA  & Yes & Yes & No & - & Numeric & Yes & No & GFW & \cite{paolo2024satellite}\\
 Total s1 pixel area imaged & sentinel features PCA  & Yes & Yes & No & km2 & Numeric & Yes & No & GFW & \cite{paolo2024satellite}\\
 Average s1 scene area & sentinel features PCA  & Yes & Yes & No & km2 & Numeric & Yes & No & GFW & \cite{paolo2024satellite}\\
@@ -48,10 +48,10 @@ Proportion of dynamic ais receivers & AIS features PCA & Yes & Yes & Yes & - & N
 Proportion of unknown ais receivers & AIS features PCA & Yes & Yes & Yes & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
 Proportion of terrestrial ais receivers & AIS features PCA & Yes & Yes & Yes & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
 Proportion of satellite ais receivers & AIS features PCA & Yes & Yes & Yes & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
-Maximum wind speed & weather features & Yes & Yes & Yes & m/s & Numeric & Yes & Yes & ERA5 & \cite{era5\_cds\_2023}\\
-Mean primary wave height & weather features & Yes & Yes & Yes & m & Numeric & Yes & Yes & ERA5 & \cite{era5\_cds\_2023}\\
+Maximum wind speed & weather features & Yes & Yes & Yes & m/s & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
+Mean primary wave height & weather features & Yes & Yes & Yes & m & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
 \addlinespace
-Minimum primary wave period & weather features & Yes & Yes & Yes & s & Numeric & Yes & Yes & ERA5 & \cite{era5\_cds\_2023}\\
+Minimum primary wave period & weather features & Yes & Yes & Yes & s & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
 \bottomrule
 \end{tabular}}
 \end{table}

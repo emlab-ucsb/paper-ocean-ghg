@@ -15,7 +15,7 @@ Pixel water area,pixel_water_area_km2,geographic features ,Yes,Yes,Yes,km2,Nume
 Minimum depth,max_elevation_m,geographic features ,Yes,Yes,Yes,m,Numeric,Yes,No,GFW,\cite{kroodsma2018tracking}
 Minimum distance from shore,min_distance_from_shore_m,geographic features ,Yes,Yes,Yes,m,Numeric,Yes,No,GFW,\cite{kroodsma2018tracking}
 Minimum distance from nearest port,min_distance_from_port_m,geographic features ,Yes,Yes,Yes,m,Numeric,Yes,No,GFW,\cite{kroodsma2018tracking}
-Distance to top 20 ports,distance_to_top_port_m,geographic features ,Yes,Yes,Yes,m,Numeric,Yes,No,Lloyd’s List,\cite{LloydsList_TopPorts_2024}
+Distance to top 20 ports,distance_to_top_port_m,geographic features ,Yes,Yes,Yes,m,Numeric,Yes,No,Lloyd’s List,\cite{LloydsListTopPorts2024}
 Total number of s1 scenes,total_number_s1_scenes_all_time,sentinel features PCA ,Yes,Yes,No,-,Numeric,Yes,No,GFW,\cite{paolo2024satellite}
 Total s1 pixel area imaged,total_s1_pixel_area_imaged_km2_all_time,sentinel features PCA ,Yes,Yes,No,km2,Numeric,Yes,No,GFW,\cite{paolo2024satellite}
 Average s1 scene area,s1_avg_scene_area_all_time,sentinel features PCA ,Yes,Yes,No,km2,Numeric,Yes,No,GFW,\cite{paolo2024satellite}
@@ -32,6 +32,6 @@ Proportion of dynamic ais receivers,dynamic_receiver_prop,AIS features PCA,Yes,Y
 Proportion of unknown ais receivers,unknown_receiver_prop,AIS features PCA,Yes,Yes,Yes,-,Numeric,Yes,Yes,GFW,\cite{kroodsma2018tracking}
 Proportion of terrestrial ais receivers,terrestrial_receiver_prop,AIS features PCA,Yes,Yes,Yes,-,Numeric,Yes,Yes,GFW,\cite{kroodsma2018tracking}
 Proportion of satellite ais receivers,satellite_receiver_prop,AIS features PCA,Yes,Yes,Yes,-,Numeric,Yes,Yes,GFW,\cite{kroodsma2018tracking}
-Maximum wind speed,wind_speed_max,weather features,Yes,Yes,Yes,m/s,Numeric,Yes,Yes,ERA5,\cite{era5_cds_2023}
-Mean primary wave height,wave_height_mean,weather features,Yes,Yes,Yes,m,Numeric,Yes,Yes,ERA5,\cite{era5_cds_2023}
-Minimum primary wave period,wave_period_min,weather features,Yes,Yes,Yes,s,Numeric,Yes,Yes,ERA5,\cite{era5_cds_2023}
+Maximum wind speed,wind_speed_max,weather features,Yes,Yes,Yes,m/s,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
+Mean primary wave height,wave_height_mean,weather features,Yes,Yes,Yes,m,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
+Minimum primary wave period,wave_period_min,weather features,Yes,Yes,Yes,s,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}

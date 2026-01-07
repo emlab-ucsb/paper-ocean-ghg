@@ -2796,13 +2796,10 @@ performance_results |>
 
 
 ```{r}
+#| results = 'asis'
 data_sources_table <- data_sources |>
   dplyr::select(-`Model feature shorthand`) |>
   dplyr::mutate(
-    dplyr::across(
-      dplyr::everything(),
-      ~ stringr::str_replace_all(., "_", "\\\\_")
-    ),
     dplyr::across(
       dplyr::everything(),
       ~ stringr::str_replace_all(., "²", "$^2$")
@@ -2814,7 +2811,7 @@ data_sources_table <- data_sources |>
     booktabs = TRUE,
     longtable = FALSE,
     caption = "Data sources for all included model features, including the units, feature type, whether it varies spatially, whether it varies temporally, and the source name and reference citation.",
-    label = "tab:data_sources"
+    label = "data_sources"
   ) |>
   kableExtra::kable_styling(
     latex_options = c("scale_down", "hold_position"),
