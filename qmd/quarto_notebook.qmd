@@ -523,9 +523,14 @@ dark_emissions_by_area <- monthly_aggregated_time_series |>
   dplyr::summarise(emissions_co2_dark_mt = sum(emissions_co2_dark_mt)) |>
   dplyr::ungroup() |>
   dplyr::mutate(
-    percent_total = scales::percent(
-      emissions_co2_dark_mt / sum(emissions_co2_dark_mt),
-      accuracy = 0.1
+    fraction = emissions_co2_dark_mt / sum(emissions_co2_dark_mt),
+    percent_total = ifelse(
+      fraction < 0.01,
+      scales::percent(
+        fraction,
+        accuracy = 0.001
+      ),
+      scales::percent(fraction, accuracy = 0.1)
     )
   )
 
@@ -613,7 +618,7 @@ total_sc_billion_usd <- annual_emissions |>
     `r scales::comma(signif(n_ais_messages$n_billion_ais_messages, 3))`
     billion individual AIS messages
 
-    - We obtained a dataset containing  `r signif(n_s1_detections$n_million_s1_detections,3)` million vessel detections from 2017 to 2024, of which signif(n_s1_detections$n_million_s1_detections_unmatched,3) million detections were not matched to a broadcasting vessel. These detections come from across more than  `r floor(n_s1_detections$n_thousand_s1_scenes)` individual S1 scenes.
+    - We obtained a dataset containing  `r signif(n_s1_detections$n_million_s1_detections,3)` million vessel detections from 2017 to 2024, of which `r signif(n_s1_detections$n_million_s1_detections_unmatched,3)` million detections were not matched to a broadcasting vessel. These detections come from across more than  `r floor(n_s1_detections$n_thousand_s1_scenes)` individual S1 scenes.
 
 -   Because many vessels do not broadcast AIS, current approaches solely
     based on AIS \textit{underestimate} current global emissions by
@@ -2008,6 +2013,11 @@ make_pollutant_time_series_figure(
 #| fig-height: 7
 
 total_spatial_co2_emissions_ais_dark_by_footprint |>
+  dplyr::left_join(
+    dark_emissions_by_area |>
+      dplyr::select(inside_footprint, s1_imaged, percent_total),
+    by = c("inside_footprint", "s1_imaged")
+  ) |>
   dplyr::mutate(
     footprint = dplyr::case_when(
       inside_footprint == FALSE ~ "Outside S1 footprint",
@@ -2018,20 +2028,10 @@ total_spatial_co2_emissions_ais_dark_by_footprint |>
       TRUE ~ NA_character_
     )
   ) |>
-  dplyr::filter(!is.na(footprint)) |>
-  dplyr::mutate(
-    total_emissions_global = sum(emissions_co2_dark_mt, na.rm = TRUE)
-  ) |>
   dplyr::group_by(footprint) |>
   dplyr::mutate(
-    pct_emissions = (sum(emissions_co2_dark_mt, na.rm = TRUE) /
-      total_emissions_global) *
-      100,
-    facet_label = paste0(
-      footprint,
-      " (",
-      round(pct_emissions, 1),
-      "% of emissions)"
+    facet_label = glue::glue(
+      "{footprint} ({percent_total} of non-broadcasting emissions)"
     )
   ) |>
   dplyr::ungroup() |>
