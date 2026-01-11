@@ -57,8 +57,8 @@ pull_gfw_data_locally|function|f81141110805c5bf
 run_custom_bq_query|function|f51b83db0de796b8
 download_gfw_data|function|8071964635c69c3f
 combine_EU_data|function|b5d57b0ec1728741
-.Random.seed|object|f18ec7cdf55b1933
+.Random.seed|object|b71b6d8a1a7ae0c0
 run_gfw_query_and_save_table|function|076f052fc2a40190
 summarize_dark_fleet_model_results_emissions|function|9b954b9580149f8d
 summarize_dark_fleet_ratios_spatial|function|3ff490bad87fc0e5
-quarto_notebook|stem|02a70832e4dd7b39|54d511b937ca6863|b8cbe90643033a24|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20464.8330321923s|s13500075b|13500075|file|local|vector|||56.144||
+quarto_notebook|stem|b7e9a2c620439e3c|54d511b937ca6863|b8cbe90643033a24|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20464.8388325019s|s13499839b|13499839|file|local|vector|||40.893||

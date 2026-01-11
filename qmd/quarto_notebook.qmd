@@ -1321,7 +1321,11 @@ emissions_by_vessel_class_barplot <- annual_ais_co2_emissions_by_vessel_type |>
           "dredge_fishing",
           "other_seines",
           "other_purse_seines",
-          "trollers"
+          "trollers",
+          "drifting_longlines",
+          "driftnets",
+          "fish_factory",
+          "other_fishing"
         ),
       "Fishing",
       "Non-fishing"
