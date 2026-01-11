@@ -33,13 +33,6 @@ annual_global_emissions_by_receiver_type|stem|9a12533d38baf80d|af334a4f255e9f52|
 total_spatial_co2_emissions_ais_dark_by_footprint_file|stem|388fa1557d848a3f|f921765c2da616de|2c530c1562a7fbd1|1530076680|/Users/gmcdonald/github/paper-ocean-ghg/sql/total_spatial_co2_emissions_ais_dark_by_footprint.sql|t20458.8740248186s|s408b|408|file|local|vector|||0.01||
 annual_spatial_co2_emissions_ais_dark_by_fleet_file|stem|a8185f936e58d983|465cd7d92ff87433|2c530c1562a7fbd1|1830654499|/Users/gmcdonald/github/paper-ocean-ghg/sql/annual_spatial_co2_emissions_ais_dark_by_fleet.sql|t20458.8740248161s|s410b|410|file|local|vector|||0.001||
 n_s1_detections_file|stem|4416c90b7a2d6e7f|5aa125580ab610f1|2c530c1562a7fbd1|-34664370|/Users/gmcdonald/github/paper-ocean-ghg/sql/n_s1_detections.sql|t20459.8724581716s|s416b|416|file|local|vector|||0.004||
-pull_gfw_data_locally|function|f81141110805c5bf
-run_custom_bq_query|function|f51b83db0de796b8
-download_gfw_data|function|8071964635c69c3f
-combine_EU_data|function|b5d57b0ec1728741
-run_gfw_query_and_save_table|function|076f052fc2a40190
-summarize_dark_fleet_model_results_emissions|function|9b954b9580149f8d
-summarize_dark_fleet_ratios_spatial|function|3ff490bad87fc0e5
 run_version_dark|stem|ea7a42985fe65d46|28266b2aebab460e|2c530c1562a7fbd1|1946111252||t20463.609224852s|s62b|62|rds|local|vector|||0||
 performance_detections_cls_conf_mat|stem|338fda57d56ff0e7|8b71893022aeab5f|2782afc3b1b9769c|2091198568|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/performance_detections_cls_conf_mat.csv|t20463.6092504881s|s640b|640|file|local|vector|||2.196||
 all_varimp_data|stem|17ad4f27aae46627|9299725ed7afc82d|2782afc3b1b9769c|-1351249550|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/all_varimp_data.csv|t20463.6092685428s|s18972b|18972|file|local|vector|||1.531||
@@ -54,3 +47,10 @@ annual_emissions_all_pollutants|stem|63ee00afc8b2e96e|a0101939275f9c1a|601c86e4d
 registered_validation_data|stem|989c4e965be34804|8b410f50c4ce5760|597cbce42f69b738|-855102128|/Users/gmcdonald/github/paper-ocean-ghg/data/registered_validation_data/registered_validation_data.csv|t20463.6096557029s|s1022023b|1022023|file|local|vector|||3.042||
 s1_ais_vessel_size_class_comparison|stem|bb82da29762d9f1a|b6710e2f7a0304ed|8927cf06c919d1f4|1582837928|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/s1_ais_vessel_size_class_comparison.csv|t20463.6096808813s|s5161b|5161|file|local|vector|||2.161||
 annual_spatial_co2_emissions_ais_dark_by_fleet|stem|03c13e62bf72a9f3|e224f2450dcadaae|2f9334c469671ed1|1492170606|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/annual_spatial_co2_emissions_ais_dark_by_fleet.csv|t20463.6098543372s|s23333284b|23333284|file|local|vector|||14.966||
+pull_gfw_data_locally|function|f81141110805c5bf
+run_custom_bq_query|function|f51b83db0de796b8
+download_gfw_data|function|8071964635c69c3f
+combine_EU_data|function|b5d57b0ec1728741
+run_gfw_query_and_save_table|function|076f052fc2a40190
+summarize_dark_fleet_model_results_emissions|function|9b954b9580149f8d
+summarize_dark_fleet_ratios_spatial|function|3ff490bad87fc0e5

@@ -953,8 +953,8 @@ cowplot::plot_grid(
 ```{r}
 #| label: fig-ais-length-power-relationship
 #| fig-cap: The relationship between main engine power (kilowatts) and length (meters), where each point is a specific AIS-broadcasting vessel. The relationship is disaggregated for non-fishing vessels and fishing vessels.
-#| #| fig-height: 10
-#| #| fig-width: 6
+#| fig-height: 7
+#| fig-width: 6
 vessel_size_info |>
   dplyr::mutate(
     fishing = ifelse(
@@ -1241,8 +1241,8 @@ pollutant_time_series_data_co2 <- total_monthly_emissions_by_pollutant |>
 
 
 ```{r}
-#| label: fig-data-richness
-#| fig-cap: (A) Time series of monthly global emissions for each GHG and pollutant, aggregated across AIS-broadcasting vessels and non-broadcasting vessels and disaggregated by non-fishing and fishing vessels. (B) 2024 CO$_{2}$ emissions by vessel type for AIS-broadcasting vessels. (C) 2024 CO$_{2}$ emissions by country for AIS-broadcasting vessels during domestic trips, international trips (where emissions of each trip are partitioned equally to its departure and arrival country), and during port stays. Countries with no values are shown in black.
+#| label: fig-ais-data-richness
+#| fig-cap: (A) 2024 CO$_{2}$ emissions by vessel type for AIS-broadcasting vessels. (B) 2024 CO$_{2}$ emissions by country for AIS-broadcasting vessels during domestic trips, international trips (where emissions of each trip are partitioned equally to its departure and arrival country), and during port stays. Countries with no values are shown in black.
 #| fig-width: 9
 #| fig-height: 8
 
@@ -1437,16 +1437,24 @@ port_trip_emissions_fig <- ggplot() +
     legend.key.width = unit(1.75, "cm")
   )
 
+# cowplot::plot_grid(
+#   cowplot::plot_grid(
+#     time_series_by_fishing_fig_co2,
+#     emissions_by_vessel_class_barplot,
+#     ncol = 1,
+#     rel_heights = c(0.4, 0.6),
+#     labels = c("A", "B")
+#   ),
+#   port_trip_emissions_fig,
+#   labels = c("", "C"),
+#   rel_widths = c(0.52, 0.48)
+# )
+
 cowplot::plot_grid(
-  cowplot::plot_grid(
-    time_series_by_fishing_fig_co2,
-    emissions_by_vessel_class_barplot,
-    ncol = 1,
-    rel_heights = c(0.4, 0.6),
-    labels = c("A", "B")
-  ),
+  emissions_by_vessel_class_barplot,
   port_trip_emissions_fig,
-  labels = c("", "C"),
+  ncol = 2,
+  labels = c("A", "B"),
   rel_widths = c(0.52, 0.48)
 )
 ```
