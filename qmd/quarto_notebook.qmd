@@ -104,7 +104,7 @@ all_data_source_color_palette <- c(
   )[[5]],
   "GFW (AIS + S1)" = paletteer::paletteer_d("colorblindr::OkabeIto")[[5]],
   "AIS + S1" = paletteer::paletteer_d("colorblindr::OkabeIto")[[5]],
-  "Other transportation (EDGAR)" = paletteer::paletteer_d(
+  "Other transportation sectors (EDGAR)" = paletteer::paletteer_d(
     "colorblindr::OkabeIto"
   )[[7]],
   "GFW (AIS)" = paletteer::paletteer_d("colorblindr::OkabeIto")[[1]],
@@ -112,7 +112,7 @@ all_data_source_color_palette <- c(
   "S1" = paletteer::paletteer_d("colorblindr::OkabeIto")[[
     6
   ]],
-  "EDGAR" = paletteer::paletteer_d("colorblindr::OkabeIto")[[8]],
+  "All sectors (EDGAR)" = paletteer::paletteer_d("colorblindr::OkabeIto")[[8]],
   "OECD" = paletteer::paletteer_d("colorblindr::OkabeIto")[[6]],
   "IMO" = paletteer::paletteer_d("colorblindr::OkabeIto")[[3]],
   "Fishing" = paletteer::paletteer_d("colorblindr::OkabeIto")[[5]],
@@ -362,9 +362,17 @@ land_based_transportation_emissions_edgar <- annual_edgar_tranportation_emission
   dplyr::group_by(year) |>
   dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt, na.rm = TRUE)) |>
   dplyr::ungroup() |>
-  dplyr::mutate(data_source = "Other transportation (EDGAR)")
+  dplyr::mutate(data_source = "Other transportation sectors (EDGAR)")
+
+
+global_emissions_edgar <- annual_edgar_tranportation_emissions |>
+  dplyr::group_by(year) |>
+  dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt, na.rm = TRUE)) |>
+  dplyr::ungroup() |>
+  dplyr::mutate(data_source = "All sectors (EDGAR)")
 
 all_tranportation_data <- land_based_transportation_emissions_edgar |>
+  dplyr::bind_rows(global_emissions_edgar) |>
   dplyr::bind_rows(
     annual_emissions |>
       dplyr::filter(pollutant == "co2", fleet == "Total") |>
@@ -372,7 +380,6 @@ all_tranportation_data <- land_based_transportation_emissions_edgar |>
       dplyr::mutate(data_source = "Marine vessels (AIS + S1)") |>
       dplyr::select(-c(fleet, pollutant))
   )
-
 
 # Get analysis_start_year values for time-series normalization
 all_tranportation_data_starting <- all_tranportation_data |>
@@ -399,7 +406,7 @@ percent_transportation_emmissions_from_marine_2024 <- all_tranportation_data |>
   dplyr::mutate(
     percent = scales::percent(
       `Marine vessels (AIS + S1)` /
-        (`Marine vessels (AIS + S1)` + `Other transportation (EDGAR)`)
+        (`Marine vessels (AIS + S1)` + `Other transportation sectors (EDGAR)`)
     )
   ) |>
   dplyr::pull(percent)
@@ -635,7 +642,7 @@ total_sc_billion_usd <- annual_emissions |>
     emissions increased by
     `r percent_increase_from_2017_to_2024 |>   dplyr::filter(data_source == "Marine vessels (AIS + S1)") |>   dplyr::pull(emissions_co2_mt_normalized_percent)`
     between `r analysis_start_year` and 2024,
-    `r round(   (percent_increase_from_2017_to_2024 |>     dplyr::filter(data_source == "Marine vessels (AIS + S1)") |>     dplyr::pull(emissions_co2_mt_normalized)) /     (percent_increase_from_2017_to_2024 |>       dplyr::filter(data_source == "Other transportation (EDGAR)") |>       dplyr::pull(emissions_co2_mt_normalized)) )`
+    `r round(   (percent_increase_from_2017_to_2024 |>     dplyr::filter(data_source == "Marine vessels (AIS + S1)") |>     dplyr::pull(emissions_co2_mt_normalized)) /     (percent_increase_from_2017_to_2024 |>       dplyr::filter(data_source == "Other transportation sectors (EDGAR)") |>       dplyr::pull(emissions_co2_mt_normalized)) )`
     times faster than the growth rate of other transportation
     emissions
 
@@ -860,49 +867,20 @@ cowplot::plot_grid(
 
 ```{r}
 #| label: fig-emissions-marine-other
-#| fig-cap: Comparison of emissions data between marine transportation emissions from GFW and other transportation emissions from EDGAR.
+#| fig-cap: Comparison of emissions data between marine transportation emissions from GFW, other transportation emissions from EDGAR, and all sector emissions from EDGAR.
 #| fig-width: 7
-#| fig-height: 6
+#| fig-height: 5
 
 # Summarize total emissions by data source for 2023, for putting on figure
-emissions_comparison_figure <- all_tranportation_data |>
-  ggplot(aes(x = year, y = emissions_co2_mt, color = data_source)) +
-  geom_line(linewidth = 1.05) +
-  scale_x_continuous(
-    breaks = unique(all_tranportation_data_normalized$year),
-    limits = c(analysis_start_year, 2024)
-  ) +
-  scale_y_continuous(
-    labels = scales::unit_format(unit = "B", scale = 1e-9),
-    limits = c(0, NA)
-  ) +
-  theme_plot() +
-  labs(
-    x = "",
-    y = expression(
-      atop(Annual ~ transportation, ~ CO[2] ~ emissions ~ (MT))
-    ),
-    color = "Data source"
-  ) +
-  theme(
-    panel.grid.minor = element_blank(),
-    legend.position = c(0.65, 0.5),
-    legend.direction = "vertical",
-    legend.title = element_blank(),
-    legend.background = element_rect(fill = "white", color = "gray")
-  ) +
-  scale_color_manual(
-    values = all_data_source_color_palette,
-    breaks = c(
-      "Other transportation (EDGAR)",
-      "Marine vessels (AIS + S1)"
-    )
-  )
 
 emissions_comparison_figure_normalized <- all_tranportation_data_normalized |>
   dplyr::filter(
     data_source %in%
-      c("Other transportation (EDGAR)", "Marine vessels (AIS + S1)")
+      c(
+        "Other transportation sectors (EDGAR)",
+        "Marine vessels (AIS + S1)",
+        "All sectors (EDGAR)"
+      )
   ) |>
   ggplot(aes(x = year, y = emissions_co2_mt_normalized, color = data_source)) +
   geom_hline(yintercept = 0, linetype = 2) +
@@ -915,6 +893,7 @@ emissions_comparison_figure_normalized <- all_tranportation_data_normalized |>
     labels = scales::percent
   ) +
   theme_plot() +
+
   labs(
     x = "",
     y = expression(atop(
@@ -933,16 +912,11 @@ emissions_comparison_figure_normalized <- all_tranportation_data_normalized |>
     values = all_data_source_color_palette,
     breaks = c(
       "Marine vessels (AIS + S1)",
-      "Other transportation (EDGAR)"
+      "All sectors (EDGAR)",
+      "Other transportation sectors (EDGAR)"
     )
   )
-
-cowplot::plot_grid(
-  emissions_comparison_figure,
-  emissions_comparison_figure_normalized,
-  ncol = 1,
-  labels = c("A", "B")
-)
+emissions_comparison_figure_normalized
 ```
 
 
