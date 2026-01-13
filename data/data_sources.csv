@@ -2,7 +2,7 @@
 Presence/absence of unmatched detections,unmatched_s1_detections_present,dependant variable,Yes,No,No,-,Boolean,Yes,Yes,GFW,\cite{paolo2024satellite}
 Unmatched detections per km2 imaged,unmatched_s1_detections_per_km2_area_imaged,dependant variable,No,Yes,No,detections/km2,Numeric,Yes,Yes,GFW,\cite{paolo2024satellite}
 Log(ais emissions),emissions_co2_mt_log,dependant variable,No,No,Yes,log(MT),Numeric,Yes,Yes,emLab/GFW,AIS-based emissions model
-Fishing vessel type,fishing,S1 detection features,Yes,Yes,Yes,-,Boolean,Yes,Yes,GFW,\cite{paolo2024satellite}
+Vessel type (fishing or non-fishing),fishing,S1 detection features,Yes,Yes,Yes,-,Boolean,Yes,Yes,GFW,\cite{paolo2024satellite}
 Minimum vessel length,length_bin_min,S1 detection features,Yes,Yes,No,m,Numeric,No,No,GFW,\cite{paolo2024satellite}
 Maximum vessel length,length_bin_max,S1 detection features,Yes,Yes,No,m,Numeric,No,No,GFW,\cite{paolo2024satellite}
 Vessel length percentile (10 classes),length_size_class_percentile,S1 detection features,Yes,Yes,No,-,Categorical,Yes,Yes,GFW,\cite{paolo2024satellite}
@@ -28,10 +28,10 @@ Unmatched s2 detections per km² of area imaged,unmatched_s2_detections_per_km2_
 Matched s2 detections per km² of area imaged,matched_s2_detections_per_km2_area_imaged,sentinel features PCA ,No,No,Yes,detections/km2,Numeric,Yes,Yes,GFW,\cite{paolo2024satellite}
 Positions reported by ais type a,ais_reception_positions_per_day_class_A,AIS features PCA,Yes,Yes,Yes,-,Numeric,Yes,No,GFW,\cite{kroodsma2018tracking}
 Positions reported by ais type b,ais_reception_positions_per_day_class_B,AIS features PCA,Yes,Yes,Yes,-,Numeric,Yes,No,GFW,\cite{kroodsma2018tracking}
-Proportion of dynamic ais receivers,dynamic_receiver_prop,AIS features PCA,Yes,Yes,Yes,-,Numeric,Yes,Yes,GFW,\cite{kroodsma2018tracking}
-Proportion of unknown ais receivers,unknown_receiver_prop,AIS features PCA,Yes,Yes,Yes,-,Numeric,Yes,Yes,GFW,\cite{kroodsma2018tracking}
-Proportion of terrestrial ais receivers,terrestrial_receiver_prop,AIS features PCA,Yes,Yes,Yes,-,Numeric,Yes,Yes,GFW,\cite{kroodsma2018tracking}
-Proportion of satellite ais receivers,satellite_receiver_prop,AIS features PCA,Yes,Yes,Yes,-,Numeric,Yes,Yes,GFW,\cite{kroodsma2018tracking}
+Proportion of messages from dynamic ais receivers,dynamic_receiver_prop,AIS features PCA,Yes,Yes,Yes,-,Numeric,Yes,Yes,GFW,\cite{kroodsma2018tracking}
+Proportion of messages from unknown ais receivers,unknown_receiver_prop,AIS features PCA,Yes,Yes,Yes,-,Numeric,Yes,Yes,GFW,\cite{kroodsma2018tracking}
+Proportion of messages from terrestrial ais receivers,terrestrial_receiver_prop,AIS features PCA,Yes,Yes,Yes,-,Numeric,Yes,Yes,GFW,\cite{kroodsma2018tracking}
+Proportion of messages from satellite ais receivers,satellite_receiver_prop,AIS features PCA,Yes,Yes,Yes,-,Numeric,Yes,Yes,GFW,\cite{kroodsma2018tracking}
 Maximum wind speed,wind_speed_max,weather features,Yes,Yes,Yes,m/s,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
 Mean primary wave height,wave_height_mean,weather features,Yes,Yes,Yes,m,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
 Minimum primary wave period,wave_period_min,weather features,Yes,Yes,Yes,s,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}

@@ -644,7 +644,7 @@ total_sc_billion_usd <- annual_emissions |>
     between `r analysis_start_year` and 2024,
     `r round(   (percent_increase_from_2017_to_2024 |>     dplyr::filter(data_source == "Marine vessels (AIS + S1)") |>     dplyr::pull(emissions_co2_mt_normalized)) /     (percent_increase_from_2017_to_2024 |>       dplyr::filter(data_source == "Other transportation sectors (EDGAR)") |>       dplyr::pull(emissions_co2_mt_normalized)) )`
     times faster than the growth rate of other transportation
-    emissions
+    emissions, and `r round(   (percent_increase_from_2017_to_2024 |>     dplyr::filter(data_source == "Marine vessels (AIS + S1)") |>     dplyr::pull(emissions_co2_mt_normalized)) /     (percent_increase_from_2017_to_2024 |>       dplyr::filter(data_source == "All sectors (EDGAR)") |>       dplyr::pull(emissions_co2_mt_normalized)) )` faster than the growth rate of total global emissions across all sectors.
 
 -   Across the entire `r analysis_start_year` to `r analysis_end_year`
     time series,
@@ -2518,7 +2518,7 @@ all_varimp_data |>
         model_feature,
         "length_size_class_percentile_"
       ) ~ glue::glue(
-        "Matched s1 detections per km2 (length bin {stringr::str_remove(model_feature, 'length_size_class_percentile_')})"
+        "S1 detections per km2 (length bin {stringr::str_remove(model_feature, 'length_size_class_percentile_')})"
       ),
       TRUE ~ model_feature_long
     )
