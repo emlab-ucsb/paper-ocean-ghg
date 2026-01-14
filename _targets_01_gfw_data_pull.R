@@ -431,5 +431,31 @@ list(
       )
     ),
     format = "file"
+  ),
+  # Pixels used for the training/testing split for assessing
+  # performance outside the S1 footprint
+  tar_file_read(
+    name = pixels_for_offshore_training_testing_split,
+    command = download_gfw_data(
+      bq_billing_project,
+      sql = "SELECT * FROM `world-fishing-827.proj_ocean_ghg.rf_pixels_for_offshore_training_testing_split_{run_version_dark}`" |>
+        stringr::str_glue(
+          run_version_dark = run_version_dark
+        ),
+      file_path = here::here("data/gfw/pixels_for_offshore_training_testing_split.csv"),
+    )
+
+    command = here::here("sql/trip_emissions_for_mrv_validation.sql"),
+    read = download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_ais = run_version_ais
+        ),
+      file_path = here::here(
+        "data/MRV/trip_emissions_for_mrv_validation.csv"
+      )
+    ),
+    format = "file"
   )
 )

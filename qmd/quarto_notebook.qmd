@@ -69,7 +69,8 @@ targets::tar_load(c(
   "performance_detections_cls_conf_mat",
   "annual_spatial_co2_emissions_ais_dark_by_fleet",
   "total_spatial_co2_emissions_ais_dark_by_footprint",
-  "data_sources"
+  "data_sources",
+  "pixels_for_offshore_training_testing_split"
 ))
 ```
 
@@ -2846,3 +2847,28 @@ data_sources_table <- data_sources |>
 writeLines(data_sources_table, here::here("tables/data_sources.tex"))
 ```
 
+
+```{r}
+#| label: fig-offshore-outside-footprint-training-testing-map
+#| fig-cap: Make of pixels that were used in the training and testing datasets for the outside S1 performance tests. Pixels <=100km from the shore were used for training; pixels >100km from shore were used for testing.
+#| fig-width: 7.5
+#| fig-height: 4
+pixels_for_offshore_training_testing_split |>
+  dplyr::mutate(type = ifelse(offshore_pixel, "Testing", "Training")) |>
+  ggplot() +
+  geom_sf(data = world_bbox_sf, fill = "grey90") +
+  ggspatial::geom_spatial_tile(
+    aes(
+      x = lon_bin + 0.5,
+      y = lat_bin + 0.5,
+      color = type,
+      fill = type
+    )
+  ) +
+  geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
+  scale_color_brewer("Dataset", type = "qual", palette = "Dark2") +
+  scale_fill_brewer("Dataset", type = "qual", palette = "Dark2") +
+  labs(x = "", y = "") +
+  theme_void() +
+  theme(legend.position = "bottom", legend.direction = "horizontal")
+```

@@ -194,6 +194,14 @@ list(
     ),
     read = readr::read_csv(!!.x)
   ),
+  # Data sources table, for model feature table in supplement
+  tar_file_read(
+    name = pixels_for_offshore_training_testing_split,
+    command = here::here(
+      "data/gfw/pixels_for_offshore_training_testing_split.csv"
+    ),
+    read = readr::read_csv(!!.x)
+  ),
   # Render quarto notebook -----
   tar_quarto(
     name = quarto_notebook,
