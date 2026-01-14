@@ -68,7 +68,7 @@ targets::tar_load(c(
   "performance_detections_cls_roc_pr_curves",
   "performance_detections_cls_conf_mat",
   "annual_spatial_co2_emissions_ais_dark_by_fleet",
-  "total_spatial_co2_emissions_ais_dark_by_footprint",
+  "total_spatial_co2_emissions_dark_by_footprint",
   "data_sources",
   "pixels_for_offshore_training_testing_split",
   "total_spatial_co2_emissions_by_ocean"
@@ -981,6 +981,8 @@ cowplot::plot_grid(
 
 ```{r}
 #| results = 'asis'
+
+# Make and output a table summarizing 2024 CO2 emissions by ocean, and change in emissions from 2017 to 2024 by ocean
 annual_emissions_by_ocean_normalized_tbl <- annual_emissions_by_ocean_normalized |>
   dplyr::filter(year == 2024) |>
   dplyr::mutate(
@@ -989,9 +991,17 @@ annual_emissions_by_ocean_normalized_tbl <- annual_emissions_by_ocean_normalized
     ),
     emissions_co2_mmt = signif(emissions_co2_mt / 1e3, 3)
   ) |>
+  dplyr::group_by(year) |>
+  dplyr::mutate(
+    percent_annual_total = scales::percent(
+      emissions_co2_mt / sum(emissions_co2_mt)
+    )
+  ) |>
+  dplyr::ungroup() |>
   dplyr::select(
     Ocean = ocean,
     `CO2 emissions in 2024 (MMT)` = emissions_co2_mmt,
+    `Percent of total 2024 CO2 emissions` = percent_annual_total,
     `Change in CO2 emissions from 2017 to 2024` = emissions_co2_mt_normalized
   ) |>
   knitr::kable()
@@ -2083,7 +2093,7 @@ make_pollutant_time_series_figure(
 #| fig-width: 5
 #| fig-height: 7
 
-total_spatial_co2_emissions_ais_dark_by_footprint |>
+total_spatial_co2_emissions_dark_by_footprint |>
   dplyr::left_join(
     dark_emissions_by_area |>
       dplyr::select(inside_footprint, s1_imaged, percent_total),
