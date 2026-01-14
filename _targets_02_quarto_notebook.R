@@ -129,9 +129,9 @@ list(
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
-    name = total_spatial_co2_emissions_ais_dark_by_footprint,
+    name = total_spatial_co2_emissions_dark_by_footprint,
     command = here::here(
-      "data/gfw/total_spatial_co2_emissions_ais_dark_by_footprint.csv"
+      "data/gfw/total_spatial_co2_emissions_dark_by_footprint.csv"
     ),
     read = readr::read_csv(!!.x)
   ),

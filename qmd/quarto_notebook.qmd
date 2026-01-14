@@ -892,14 +892,31 @@ annual_emissions_by_ocean_normalized <- annual_emissions_by_ocean |>
       emissions_co2_mt_starting -
       1
   )
+ocean_data_ending <- annual_emissions_by_ocean_normalized |>
+  dplyr::filter(year == 2024) |>
+  dplyr::mutate(
+    emissions_co2_mt_ending = paste0(
+      prettyNum(signif(emissions_co2_mt / 1e6, 3), big.mark = ","),
+      " MMT"
+    )
+  ) |>
+  dplyr::select(
+    ocean,
+    emissions_co2_mt_ending,
+    emissions_co2_mt_normalized
+  )
 
 annual_ocean_emissions_normalized_fig <- annual_emissions_by_ocean_normalized |>
   dplyr::mutate(ocean = stringr::str_to_sentence(ocean)) |>
-  ggplot(aes(x = year, y = emissions_co2_mt_normalized, color = ocean)) +
+  ggplot() +
   geom_hline(yintercept = 0, linetype = 2) +
-  geom_line(linewidth = 1.1) +
+  geom_line(
+    aes(x = year, y = emissions_co2_mt_normalized, color = ocean),
+    linewidth = 1.1
+  ) +
   scale_x_continuous(
-    breaks = unique(annual_emissions_by_ocean_normalized$year)
+    breaks = seq(2017, 2024),
+    limits = c(2017, 2025.5)
   ) +
   scale_y_continuous(
     labels = scales::percent
@@ -922,11 +939,33 @@ annual_ocean_emissions_normalized_fig <- annual_emissions_by_ocean_normalized |>
   ) +
   scale_color_brewer(
     palette = "Dark2",
-    breaks = c("Indian", "Atlantic", "Pacific", "Arctic")
+    breaks = c("Southern", "Arctic", "Pacific", "Indian", "Atlantic")
+  ) +
+  geom_label(
+    data = ocean_data_ending,
+    aes(
+      x = 2024.9,
+      y = emissions_co2_mt_normalized,
+      label = emissions_co2_mt_ending
+    )
   )
 
 
 # Summarize total emissions by data source for 2023, for putting on figure
+
+all_tranportation_data_ending <- all_tranportation_data_normalized |>
+  dplyr::filter(year == 2024) |>
+  dplyr::mutate(
+    emissions_co2_mt_ending = paste0(
+      prettyNum(signif(emissions_co2_mt / 1e9, 3), big.mark = ","),
+      " BMT"
+    )
+  ) |>
+  dplyr::select(
+    data_source,
+    emissions_co2_mt_ending,
+    emissions_co2_mt_normalized
+  )
 
 emissions_comparison_figure_normalized <- all_tranportation_data_normalized |>
   dplyr::filter(
@@ -937,12 +976,15 @@ emissions_comparison_figure_normalized <- all_tranportation_data_normalized |>
         "All sectors (EDGAR)"
       )
   ) |>
-  ggplot(aes(x = year, y = emissions_co2_mt_normalized, color = data_source)) +
+  ggplot() +
   geom_hline(yintercept = 0, linetype = 2) +
-  geom_line(linewidth = 1.1) +
+  geom_line(
+    aes(x = year, y = emissions_co2_mt_normalized, color = data_source),
+    linewidth = 1.1
+  ) +
   scale_x_continuous(
-    breaks = unique(all_tranportation_data_normalized$year),
-    limits = c(analysis_start_year, 2024)
+    breaks = seq(2017, 2024),
+    limits = c(2017, 2025.5)
   ) +
   scale_y_continuous(
     labels = scales::percent
@@ -969,6 +1011,14 @@ emissions_comparison_figure_normalized <- all_tranportation_data_normalized |>
       "Marine vessels (AIS + S1)",
       "All sectors (EDGAR)",
       "Other transportation sectors (EDGAR)"
+    )
+  ) +
+  geom_label(
+    data = all_tranportation_data_ending,
+    aes(
+      x = 2024.9,
+      y = emissions_co2_mt_normalized,
+      label = emissions_co2_mt_ending
     )
   )
 cowplot::plot_grid(

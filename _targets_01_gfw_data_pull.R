@@ -232,11 +232,11 @@ list(
     ),
     format = "file"
   ),
-  # Disaggregated CO2 emissions falling within and outside the S1 footprint
+  # Disaggregated dark CO2 emissions falling within and outside the S1 footprint
   tar_file_read(
-    name = total_spatial_co2_emissions_ais_dark_by_footprint,
+    name = total_spatial_co2_emissions_dark_by_footprint,
     command = here::here(
-      "sql/total_spatial_co2_emissions_ais_dark_by_footprint.sql"
+      "sql/total_spatial_co2_emissions_dark_by_footprint.sql"
     ),
     read = download_gfw_data(
       bq_billing_project,
@@ -247,7 +247,7 @@ list(
           analysis_end_year = analysis_end_year
         ),
       file_path = here::here(
-        "data/gfw/total_spatial_co2_emissions_ais_dark_by_footprint.csv"
+        "data/gfw/total_spatial_co2_emissions_dark_by_footprint.csv"
       ),
     ),
     format = "file"
