@@ -874,18 +874,14 @@ cowplot::plot_grid(
 #| #| fig-width: 7.5
 #| fig-height: 7
 # Calculate normalized annual changes in CO2 emissions by major ocean basin
-annual_emissions_by_ocean <- total_spatial_co2_emissions_by_ocean |>
-  dplyr::group_by(year = lubridate::year(time), ocean) |>
-  dplyr::summarise(emissions_co2_mt = sum(emissions_co2_dark_mt)) |>
-  dplyr::ungroup()
 
 # Get analysis_start_year values for time-series normalization
-annual_emissions_by_ocean_starting <- annual_emissions_by_ocean |>
+annual_emissions_by_ocean_starting <- total_spatial_co2_emissions_by_ocean |>
   dplyr::filter(year == analysis_start_year) |>
   dplyr::mutate(emissions_co2_mt_starting = emissions_co2_mt) |>
   dplyr::select(-c(year, emissions_co2_mt))
 
-annual_emissions_by_ocean_normalized <- annual_emissions_by_ocean |>
+annual_emissions_by_ocean_normalized <- total_spatial_co2_emissions_by_ocean |>
   dplyr::inner_join(annual_emissions_by_ocean_starting, by = "ocean") |>
   dplyr::mutate(
     emissions_co2_mt_normalized = emissions_co2_mt /
@@ -932,7 +928,7 @@ annual_ocean_emissions_normalized_fig <- annual_emissions_by_ocean_normalized |>
   ) +
   theme(
     panel.grid.minor = element_blank(),
-    legend.position = c(0.175, 0.25),
+    legend.position = c(0.175, 0.6),
     legend.direction = "vertical",
     legend.title = element_blank(),
     legend.background = element_rect(fill = "white", color = "gray")
@@ -1000,7 +996,7 @@ emissions_comparison_figure_normalized <- all_tranportation_data_normalized |>
   ) +
   theme(
     panel.grid.minor = element_blank(),
-    legend.position = c(0.35, 0.875),
+    legend.position = c(0.35, 0.9),
     legend.direction = "vertical",
     legend.title = element_blank(),
     legend.background = element_rect(fill = "white", color = "gray")
