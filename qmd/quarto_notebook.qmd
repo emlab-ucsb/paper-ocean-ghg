@@ -903,7 +903,7 @@ ocean_data_ending <- annual_emissions_by_ocean_normalized |>
   )
 
 annual_ocean_emissions_normalized_fig <- annual_emissions_by_ocean_normalized |>
-  dplyr::mutate(ocean = stringr::str_to_sentence(ocean)) |>
+  dplyr::mutate(ocean = paste0(stringr::str_to_sentence(ocean), " Ocean")) |>
   ggplot() +
   geom_hline(yintercept = 0, linetype = 2) +
   geom_line(
@@ -935,7 +935,13 @@ annual_ocean_emissions_normalized_fig <- annual_emissions_by_ocean_normalized |>
   ) +
   scale_color_brewer(
     palette = "Dark2",
-    breaks = c("Southern", "Arctic", "Pacific", "Indian", "Atlantic")
+    breaks = c(
+      "Southern Ocean",
+      "Arctic Ocean",
+      "Pacific Ocean",
+      "Indian Ocean",
+      "Atlantic Ocean"
+    )
   ) +
   geom_label(
     data = ocean_data_ending,
@@ -2649,7 +2655,7 @@ all_varimp_data |>
         model_feature,
         "s1_coverage_PCA"
       ) ~ glue::glue(
-        "S1 coverage features (PCA {stringr::str_remove(model_feature, 's1_coverage_PCA_')})"
+        "S1 coverage features (PCA {stringr::str_remove(model_feature, 's1_s2_coverage_PCA_')})"
       ),
       stringr::str_detect(
         model_feature,
@@ -2666,6 +2672,7 @@ all_varimp_data |>
       TRUE ~ model_feature_long
     )
   ) |>
+  dplyr::filter(!is.na(model_feature_long)) |>
   dplyr::mutate(
     model = stringr::str_replace_all(model, "_", " ") |>
       stringr::str_to_sentence() |>
