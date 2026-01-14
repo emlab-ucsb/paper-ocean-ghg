@@ -2504,9 +2504,9 @@ all_varimp_data |>
       ),
       stringr::str_detect(
         model_feature,
-        "s1_s2_coverage_PCA"
+        "s1_coverage_PCA"
       ) ~ glue::glue(
-        "sentinel features (PCA {stringr::str_remove(model_feature, 's1_s2_coverage_PCA_')})"
+        "S1 coverage features (PCA {stringr::str_remove(model_feature, 's1_coverage_PCA_')})"
       ),
       stringr::str_detect(
         model_feature,
