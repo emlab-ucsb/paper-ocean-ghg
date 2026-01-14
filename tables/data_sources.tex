@@ -9,49 +9,45 @@
 \toprule
 Model feature & Category & Detections classification & Detections regression & Emissions Regression & Units & Type & Spatial & Temporal & Source & Ref.\\
 \midrule
-Presence/absence of unmatched detections & dependant variable & Yes & No & No & - & Boolean & Yes & Yes & GFW & \cite{paolo2024satellite}\\
-Unmatched detections per km2 imaged & dependant variable & No & Yes & No & detections/km2 & Numeric & Yes & Yes & GFW & \cite{paolo2024satellite}\\
-Log(ais emissions) & dependant variable & No & No & Yes & log(MT) & Numeric & Yes & Yes & emLab/GFW & AIS-based emissions model\\
-Fishing vessel type & S1 detection features & Yes & Yes & Yes & - & Boolean & Yes & Yes & GFW & \cite{paolo2024satellite}\\
+Presence/absence of unmatched S1 detections & Dependant variable & Yes & No & No & - & Boolean & Yes & Yes & GFW & \cite{paolo2024satellite}\\
+Unmatched S1 detections per km2 imaged & Dependant variable & No & Yes & No & detections/km2 & Numeric & Yes & Yes & GFW & \cite{paolo2024satellite}\\
+Log(AIS emissions) & Dependant variable & No & No & Yes & log(MT) & Numeric & Yes & Yes & emLab/GFW & AIS-based emissions model\\
+Vessel type (fishing or non-fishing) & S1 detection features & Yes & Yes & Yes & - & Boolean & Yes & Yes & GFW & \cite{paolo2024satellite}\\
 Minimum vessel length & S1 detection features & Yes & Yes & No & m & Numeric & No & No & GFW & \cite{paolo2024satellite}\\
 \addlinespace
 Maximum vessel length & S1 detection features & Yes & Yes & No & m & Numeric & No & No & GFW & \cite{paolo2024satellite}\\
 Vessel length percentile (10 classes) & S1 detection features & Yes & Yes & No & - & Categorical & Yes & Yes & GFW & \cite{paolo2024satellite}\\
-Matched s1 detections per km$^2$ of area imaged for each length bin (10 classes) & S1 detection features & No & No & Yes & detections/km2 & Numeric & Yes & Yes & GFW & \cite{paolo2024satellite}\\
-Year & temporal features & Yes & Yes & Yes & Years & Numeric & No & Yes & GFW & \cite{kroodsma2018tracking}\\
-Month & temporal features & Yes & Yes & Yes & Months & Numeric & No & Yes & GFW & \cite{kroodsma2018tracking}\\
+Matched S1 detections per km$^2$ of area imaged for each length bin (10 classes) & S1 detection features & No & No & Yes & detections/km2 & Numeric & Yes & Yes & GFW & \cite{paolo2024satellite}\\
+Year & Temporal features & Yes & Yes & Yes & Years & Numeric & No & Yes & GFW & \cite{kroodsma2018tracking}\\
+Month & Temporal features & Yes & Yes & Yes & Months & Numeric & No & Yes & GFW & \cite{kroodsma2018tracking}\\
 \addlinespace
-Days since start of study & temporal features & Yes & Yes & Yes & Days & Numeric & No & Yes & GFW & \cite{kroodsma2018tracking}\\
-Ocean & geographic features  & Yes & Yes & Yes & - & Categorical & Yes & No & GFW & \cite{kroodsma2018tracking}\\
-Pixel water area & geographic features  & Yes & Yes & Yes & km2 & Numeric & Yes & No & GFW & \cite{paolo2024satellite}\\
-Minimum depth & geographic features  & Yes & Yes & Yes & m & Numeric & Yes & No & GFW & \cite{kroodsma2018tracking}\\
-Minimum distance from shore & geographic features  & Yes & Yes & Yes & m & Numeric & Yes & No & GFW & \cite{kroodsma2018tracking}\\
+Days since start of study & Temporal features & Yes & Yes & Yes & Days & Numeric & No & Yes & GFW & \cite{kroodsma2018tracking}\\
+Post-2020 IMO Sulphur policy & Temporal features & Yes & Yes & Yes & - & Boolean & No & Yes & IMO & \cite{imo_sulphur_2020}\\
+Ocean basin & Geographic features  & Yes & Yes & Yes & - & Categorical & Yes & No & GFW & \cite{kroodsma2018tracking}\\
+Pixel water area & Geographic features  & Yes & Yes & Yes & km2 & Numeric & Yes & No & GFW & \cite{paolo2024satellite}\\
+Minimum depth & Geographic features  & Yes & Yes & Yes & m & Numeric & Yes & No & GFW & \cite{kroodsma2018tracking}\\
 \addlinespace
-Minimum distance from nearest port & geographic features  & Yes & Yes & Yes & m & Numeric & Yes & No & GFW & \cite{kroodsma2018tracking}\\
-Distance to top 20 ports & geographic features  & Yes & Yes & Yes & m & Numeric & Yes & No & Lloyd’s List & \cite{LloydsListTopPorts2024}\\
-Total number of s1 scenes & sentinel features PCA  & Yes & Yes & No & - & Numeric & Yes & No & GFW & \cite{paolo2024satellite}\\
-Total s1 pixel area imaged & sentinel features PCA  & Yes & Yes & No & km2 & Numeric & Yes & No & GFW & \cite{paolo2024satellite}\\
-Average s1 scene area & sentinel features PCA  & Yes & Yes & No & km2 & Numeric & Yes & No & GFW & \cite{paolo2024satellite}\\
+Minimum distance from shore & Geographic features  & Yes & Yes & Yes & m & Numeric & Yes & No & GFW & \cite{kroodsma2018tracking}\\
+Minimum distance from nearest port & Geographic features  & Yes & Yes & Yes & m & Numeric & Yes & No & GFW & \cite{kroodsma2018tracking}\\
+Distance to top 20 ports & Geographic features  & Yes & Yes & Yes & m & Numeric & Yes & No & Lloyd’s List & \cite{LloydsListTopPorts2024}\\
+Total number of S1 scenes & S1 coverage features PCA & Yes & Yes & No & - & Numeric & Yes & No & GFW & \cite{paolo2024satellite}\\
+Total S1 pixel area imaged & S1 coverage features PCA & Yes & Yes & No & km2 & Numeric & Yes & No & GFW & \cite{paolo2024satellite}\\
 \addlinespace
-Ratio of average s1 scene area to pixel water area & sentinel features PCA  & Yes & Yes & No & - & Numeric & Yes & No & GFW & \cite{paolo2024satellite}\\
-Monthly average s1 scene area & sentinel features PCA  & No & No & Yes & km2 & Numeric & Yes & Yes & GFW & \cite{paolo2024satellite}\\
-Monthly ratio of average s1 scene area to pixel water area & sentinel features PCA  & No & No & Yes & km2 & Numeric & Yes & Yes & GFW & \cite{paolo2024satellite}\\
-Monthly average s2 scene area & sentinel features PCA  & No & No & Yes & km2 & Numeric & Yes & Yes & GFW & \cite{paolo2024satellite}\\
-Monthly ratio of average s2 scene area to pixel water area & sentinel features PCA  & No & No & Yes & - & Numeric & Yes & Yes & GFW & \cite{paolo2024satellite}\\
+Average S1 scene area & S1 coverage features PCA & Yes & Yes & No & km2 & Numeric & Yes & No & GFW & \cite{paolo2024satellite}\\
+Ratio of average S1 scene area to pixel water area & S1 coverage features PCA & Yes & Yes & No & - & Numeric & Yes & No & GFW & \cite{paolo2024satellite}\\
+Monthly average S1 scene area & S1 coverage features PCA & No & No & Yes & km2 & Numeric & Yes & Yes & GFW & \cite{paolo2024satellite}\\
+Monthly ratio of average S1 scene area to pixel water area & S1 coverage features PCA & No & No & Yes & km2 & Numeric & Yes & Yes & GFW & \cite{paolo2024satellite}\\
+Positions reported by AIS type a & AIS reception quality features PCA & Yes & Yes & Yes & - & Numeric & Yes & No & GFW & \cite{kroodsma2018tracking}\\
 \addlinespace
-Unmatched s2 detections per km$^2$ of area imaged & sentinel features PCA  & Yes & Yes & No & detections/km2 & Numeric & Yes & Yes & GFW & \cite{paolo2024satellite}\\
-Matched s2 detections per km$^2$ of area imaged & sentinel features PCA  & No & No & Yes & detections/km2 & Numeric & Yes & Yes & GFW & \cite{paolo2024satellite}\\
-Positions reported by ais type a & AIS features PCA & Yes & Yes & Yes & - & Numeric & Yes & No & GFW & \cite{kroodsma2018tracking}\\
-Positions reported by ais type b & AIS features PCA & Yes & Yes & Yes & - & Numeric & Yes & No & GFW & \cite{kroodsma2018tracking}\\
-Proportion of dynamic ais receivers & AIS features PCA & Yes & Yes & Yes & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
+Positions reported by AIS type b & AIS reception quality features PCA & Yes & Yes & Yes & - & Numeric & Yes & No & GFW & \cite{kroodsma2018tracking}\\
+Proportion of messages from dynamic AIS receivers & AIS reception quality features PCA & Yes & Yes & Yes & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
+Proportion of messages from unknown AIS receivers & AIS reception quality features PCA & Yes & Yes & Yes & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
+Proportion of messages from terrestrial AIS receivers & AIS reception quality features PCA & Yes & Yes & Yes & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
+Proportion of messages from satellite AIS receivers & AIS reception quality features PCA & Yes & Yes & Yes & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
 \addlinespace
-Proportion of unknown ais receivers & AIS features PCA & Yes & Yes & Yes & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
-Proportion of terrestrial ais receivers & AIS features PCA & Yes & Yes & Yes & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
-Proportion of satellite ais receivers & AIS features PCA & Yes & Yes & Yes & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
-Maximum wind speed & weather features & Yes & Yes & Yes & m/s & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
-Mean primary wave height & weather features & Yes & Yes & Yes & m & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
-\addlinespace
-Minimum primary wave period & weather features & Yes & Yes & Yes & s & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
+Maximum wind speed & Weather features & Yes & Yes & Yes & m/s & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
+Mean primary wave height & Weather features & Yes & Yes & Yes & m & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
+Minimum primary wave period & Weather features & Yes & Yes & Yes & s & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
 \bottomrule
 \end{tabular}}
 \end{table}
