@@ -2387,6 +2387,7 @@ all_performance_metrics_table <- all_performance_metrics |>
         "rsq_trad_backtransformed_residuals" ~ "Traditional R² (backtransformed)",
       Metric == "rsq_trad" ~ "Traditional R²",
       Metric == "mae" ~ "MAE",
+      Metric == "aggregate_prediction_percent_error" ~ "Percent error of total summed predictions"
       TRUE ~ Metric
     )
   ) |>
@@ -2396,7 +2397,7 @@ all_performance_metrics_table <- all_performance_metrics |>
   knitr::kable(
     format = "latex",
     label = "all_performance_metrics_table",
-    caption = "Summary of dark fleet model performance metrics for the: 1) emissions regression model; 2) detections classification mode; and 3) detections regression model. Performance estimates for each metric are shown for both the inside S1 footprint and outside S1 footprint tests.",
+    caption = "Summary of dark fleet model performance metrics for the: 1) emissions regression model; 2) detections classification mode; and 3) detections regression model. Performance estimates for each metric are shown for both the inside S1 footprint and outside S1 footprint tests. All metrics are calculated at the unit of observation except for 'Percent error of total summed predictions', which is the percentage error in the total sum of all predictions relative to the total sum of all truth values.",
     digits = 3
   ) |>
   kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
