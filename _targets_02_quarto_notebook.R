@@ -66,6 +66,13 @@ list(
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
+    name = total_spatial_co2_emissions_by_ocean,
+    command = here::here(
+      "data/gfw/total_spatial_co2_emissions_by_ocean.csv"
+    ),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
     name = total_monthly_emissions_by_pollutant,
     command = here::here(
       "data/gfw/total_monthly_emissions_by_pollutant.csv"
@@ -195,13 +202,13 @@ list(
     read = readr::read_csv(!!.x)
   ),
   # Data sources table, for model feature table in supplement
-  tar_file_read(
-    name = pixels_for_offshore_training_testing_split,
-    command = here::here(
-      "data/gfw/pixels_for_offshore_training_testing_split.csv"
-    ),
-    read = readr::read_csv(!!.x)
-  ),
+  # tar_file_read(
+  #   name = pixels_for_offshore_training_testing_split,
+  #   command = here::here(
+  #     "data/gfw/pixels_for_offshore_training_testing_split.csv"
+  #   ),
+  #   read = readr::read_csv(!!.x)
+  # ),
   # Render quarto notebook -----
   tar_quarto(
     name = quarto_notebook,

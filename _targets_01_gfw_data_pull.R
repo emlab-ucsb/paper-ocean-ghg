@@ -194,6 +194,26 @@ list(
   ),
   # Disaggregated CO2 emissions between AIS-broadcasting and non-broadcasting fleets
   tar_file_read(
+    name = total_spatial_co2_emissions_by_ocean,
+    command = here::here(
+      "sql/total_spatial_co2_emissions_by_ocean.sql"
+    ),
+    read = download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_dark = run_version_dark,
+          analysis_start_year = analysis_start_year,
+          analysis_end_year = analysis_end_year
+        ),
+      file_path = here::here(
+        "data/gfw/total_spatial_co2_emissions_by_ocean.csv"
+      ),
+    ),
+    format = "file"
+  ),
+  # Disaggregated CO2 emissions between AIS-broadcasting and non-broadcasting fleets
+  tar_file_read(
     name = annual_spatial_co2_emissions_ais_dark_by_fleet,
     command = here::here(
       "sql/annual_spatial_co2_emissions_ais_dark_by_fleet.sql"
@@ -431,31 +451,20 @@ list(
       )
     ),
     format = "file"
-  ),
+  )
   # Pixels used for the training/testing split for assessing
   # performance outside the S1 footprint
-  tar_file_read(
-    name = pixels_for_offshore_training_testing_split,
-    command = download_gfw_data(
-      bq_billing_project,
-      sql = "SELECT * FROM `world-fishing-827.proj_ocean_ghg.rf_pixels_for_offshore_training_testing_split_{run_version_dark}`" |>
-        stringr::str_glue(
-          run_version_dark = run_version_dark
-        ),
-      file_path = here::here("data/gfw/pixels_for_offshore_training_testing_split.csv"),
-    )
-
-    command = here::here("sql/trip_emissions_for_mrv_validation.sql"),
-    read = download_gfw_data(
-      bq_billing_project,
-      sql = readr::read_file(!!.x) |>
-        stringr::str_glue(
-          run_version_ais = run_version_ais
-        ),
-      file_path = here::here(
-        "data/MRV/trip_emissions_for_mrv_validation.csv"
-      )
-    ),
-    format = "file"
-  )
+  # tar_file_read(
+  #   name = pixels_for_offshore_training_testing_split,
+  #   command = download_gfw_data(
+  #     bq_billing_project,
+  #     sql = "SELECT * FROM `world-fishing-827.proj_ocean_ghg.pixels_for_offshore_training_testing_split{run_version_dark}`" |>
+  #       stringr::str_glue(
+  #         run_version_dark = run_version_dark
+  #       ),
+  #     file_path = here::here(
+  #       "data/gfw/pixels_for_offshore_training_testing_split.csv"
+  #     ),
+  #   )
+  # )
 )

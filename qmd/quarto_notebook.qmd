@@ -70,7 +70,8 @@ targets::tar_load(c(
   "annual_spatial_co2_emissions_ais_dark_by_fleet",
   "total_spatial_co2_emissions_ais_dark_by_footprint",
   "data_sources",
-  "pixels_for_offshore_training_testing_split"
+  "pixels_for_offshore_training_testing_split",
+  "total_spatial_co2_emissions_by_ocean"
 ))
 ```
 
@@ -420,6 +421,7 @@ percent_increase_from_2017_to_2024 <- all_tranportation_data_normalized |>
     )
   )
 ```
+
 
 ```{r}
 #| label: fig-inventory-comparison
@@ -867,10 +869,62 @@ cowplot::plot_grid(
 ### Figure 2
 
 ```{r}
-#| label: fig-emissions-marine-other
-#| fig-cap: Comparison of emissions data between marine transportation emissions from GFW, other transportation emissions from EDGAR, and all sector emissions from EDGAR.
-#| fig-width: 7
-#| fig-height: 5
+#| label: fig-emissions-marine-ocean-other
+#| fig-cap: (A) Trend in CO2 emissions by ocean (normalized to 2017 baesline) . (B) Comparison in trend of CO2 emissions data (normalized to 2017 baesline) between marine transportation emissions from GFW, other transportation emissions from EDGAR, and all sector emissions from EDGAR.
+#| #| fig-width: 7.5
+#| fig-height: 7
+# Calculate normalized annual changes in CO2 emissions by major ocean basin
+annual_emissions_by_ocean <- total_spatial_co2_emissions_by_ocean |>
+  dplyr::group_by(year = lubridate::year(time), ocean) |>
+  dplyr::summarise(emissions_co2_mt = sum(emissions_co2_dark_mt)) |>
+  dplyr::ungroup()
+
+# Get analysis_start_year values for time-series normalization
+annual_emissions_by_ocean_starting <- annual_emissions_by_ocean |>
+  dplyr::filter(year == analysis_start_year) |>
+  dplyr::mutate(emissions_co2_mt_starting = emissions_co2_mt) |>
+  dplyr::select(-c(year, emissions_co2_mt))
+
+annual_emissions_by_ocean_normalized <- annual_emissions_by_ocean |>
+  dplyr::inner_join(annual_emissions_by_ocean_starting, by = "ocean") |>
+  dplyr::mutate(
+    emissions_co2_mt_normalized = emissions_co2_mt /
+      emissions_co2_mt_starting -
+      1
+  )
+
+annual_ocean_emissions_normalized_fig <- annual_emissions_by_ocean_normalized |>
+  dplyr::mutate(ocean = stringr::str_to_sentence(ocean)) |>
+  ggplot(aes(x = year, y = emissions_co2_mt_normalized, color = ocean)) +
+  geom_hline(yintercept = 0, linetype = 2) +
+  geom_line(linewidth = 1.1) +
+  scale_x_continuous(
+    breaks = unique(annual_emissions_by_ocean_normalized$year)
+  ) +
+  scale_y_continuous(
+    labels = scales::percent
+  ) +
+  theme_plot() +
+
+  labs(
+    x = "",
+    y = expression(atop(
+      Relative ~ change ~ of,
+      CO[2] ~ emissions ~ from ~ 2017 ~ baseline
+    ))
+  ) +
+  theme(
+    panel.grid.minor = element_blank(),
+    legend.position = c(0.175, 0.25),
+    legend.direction = "vertical",
+    legend.title = element_blank(),
+    legend.background = element_rect(fill = "white", color = "gray")
+  ) +
+  scale_color_brewer(
+    palette = "Dark2",
+    breaks = c("Indian", "Atlantic", "Pacific", "Arctic")
+  )
+
 
 # Summarize total emissions by data source for 2023, for putting on figure
 
@@ -904,7 +958,7 @@ emissions_comparison_figure_normalized <- all_tranportation_data_normalized |>
   ) +
   theme(
     panel.grid.minor = element_blank(),
-    legend.position = c(0.25, 0.875),
+    legend.position = c(0.35, 0.875),
     legend.direction = "vertical",
     legend.title = element_blank(),
     legend.background = element_rect(fill = "white", color = "gray")
@@ -917,7 +971,12 @@ emissions_comparison_figure_normalized <- all_tranportation_data_normalized |>
       "Other transportation sectors (EDGAR)"
     )
   )
-emissions_comparison_figure_normalized
+cowplot::plot_grid(
+  annual_ocean_emissions_normalized_fig,
+  emissions_comparison_figure_normalized,
+  ncol = 1,
+  labels = c("A", "B")
+)
 ```
 
 
@@ -2387,7 +2446,8 @@ all_performance_metrics_table <- all_performance_metrics |>
         "rsq_trad_backtransformed_residuals" ~ "Traditional R² (backtransformed)",
       Metric == "rsq_trad" ~ "Traditional R²",
       Metric == "mae" ~ "MAE",
-      Metric == "aggregate_prediction_percent_error" ~ "Percent error of total summed predictions"
+      Metric ==
+        "aggregate_prediction_percent_error" ~ "Percent error of total summed predictions",
       TRUE ~ Metric
     )
   ) |>
@@ -2822,7 +2882,6 @@ performance_results |>
 
 
 ```{r}
-#| results = 'asis'
 data_sources_table <- data_sources |>
   dplyr::select(-`Model feature shorthand`) |>
   dplyr::mutate(
@@ -2851,25 +2910,30 @@ writeLines(data_sources_table, here::here("tables/data_sources.tex"))
 
 ```{r}
 #| label: fig-offshore-outside-footprint-training-testing-map
-#| fig-cap: Make of pixels that were used in the training and testing datasets for the outside S1 performance tests. Pixels <=100km from the shore were used for training; pixels >100km from shore were used for testing.
+#| fig-cap: Make of pixels that were used in the training and testing datasets for the outside S1 performance tests. Pixels <=100km from the shore were used for training; pixels >100km from shore were used for testing. The exact training/testing split for each of the 3 models is shown.
 #| fig-width: 7.5
-#| fig-height: 4
-pixels_for_offshore_training_testing_split |>
-  dplyr::mutate(type = ifelse(offshore_pixel, "Testing", "Training")) |>
-  ggplot() +
-  geom_sf(data = world_bbox_sf, fill = "grey90") +
-  ggspatial::geom_spatial_tile(
-    aes(
-      x = lon_bin + 0.5,
-      y = lat_bin + 0.5,
-      color = type,
-      fill = type
-    )
-  ) +
-  geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
-  scale_color_brewer("Dataset", type = "qual", palette = "Dark2") +
-  scale_fill_brewer("Dataset", type = "qual", palette = "Dark2") +
-  labs(x = "", y = "") +
-  theme_void() +
-  theme(legend.position = "bottom", legend.direction = "horizontal")
+#| fig-height: 7.5
+# pixels_for_offshore_training_testing_split |>
+#   dplyr::mutate(type = ifelse(offshore_pixel, "Testing", "Training")) |>
+#   dplyr::mutate(
+#     model = stringr::str_replace_all(model, "_", "; ") |>
+#       stringr::str_to_sentence()
+#   ) |>
+#   ggplot() +
+#   geom_sf(data = world_bbox_sf, fill = "grey90") +
+#   ggspatial::geom_spatial_tile(
+#     aes(
+#       x = lon_bin + 0.5,
+#       y = lat_bin + 0.5,
+#       color = type,
+#       fill = type
+#     )
+#   ) +
+#   geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
+#   scale_color_brewer("Dataset", type = "qual", palette = "Dark2") +
+#   scale_fill_brewer("Dataset", type = "qual", palette = "Dark2") +
+#   labs(x = "", y = "") +
+#   theme_void() +
+#   theme(legend.position = "bottom", legend.direction = "horizontal") +
+#   facet_wrap(model ~ ., ncol = 1)
 ```
