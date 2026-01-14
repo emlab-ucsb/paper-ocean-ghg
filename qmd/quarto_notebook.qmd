@@ -900,6 +900,14 @@ ocean_data_ending <- annual_emissions_by_ocean_normalized |>
     ocean,
     emissions_co2_mt_ending,
     emissions_co2_mt_normalized
+  ) |>
+  # Manually move these down, so labels don't interact with each other
+  dplyr::mutate(
+    emissions_co2_mt_normalized = dplyr::case_when(
+      ocean == "indian" ~ emissions_co2_mt_normalized - 0.25,
+      ocean == "atlantic" ~ emissions_co2_mt_normalized - .1,
+      TRUE ~ emissions_co2_mt_normalized
+    )
   )
 
 annual_ocean_emissions_normalized_fig <- annual_emissions_by_ocean_normalized |>
