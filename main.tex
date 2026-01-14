@@ -383,7 +383,7 @@ We define a global spatial resolution of 1x1-degree which is used for all spatia
 
 \input{tables/data_sources}
 
-\paragraph{S1 and S2 vessel detection features}
+\paragraph{S1 vessel detection features}
 
 For the emissions regression model, we include 10 model features that capture the vessel length frequency distribution of S1 detections that occurred in any given pixel-month for each vessel type (fishing or non-fishing). Each of the 10 model features corresponds to the number of detections within a length bin decile range that is based on the length deciles derived from all unmatched S1 detections that occurred from 2017 to 2024 (Fig. \ref{fig:fig-s1-ais-size-class-comparison}). We use length bins because length is representative of main engine power (Fig. \ref{fig:fig-ais-length-power-relationship}), which is directly related to emissions in our bottom-up engineering model. Fig. We additionally stratify by vessel type (fishing or non-fishing) because some fishing vessel types have fundamentally different emissions profiles than non-fishing vessels (i.e., trawlers and dredgers emit more at low speeds due to the nature of their energy-intensive gear deployment, which is reflected in their gear-specific main engine load factor adjustment.) Any matched detection that cannot be associated with a vessel in the AIS model is treated as a non-broadcasting vessel and classified as an unmatched detection. This prevents assigning emissions to vessels for which no emission estimates are available.  S1 detections smaller than the minimum vessel size represented in the AIS-broadcasting dataset are excluded to avoid assigning emissions to vessel sizes not characterized by the AIS emissions model. We normalize the detections by the total km² imaged across all S1 scenes within each pixel-month to account for spatiotemporal variation in Sentinel-1 sampling effort and therefore create a measure of detection density. The emissions regression model is trained with these 10 features corresponding to matched detection density in order to predict AIS-broadcasting emissions; when it comes time for using the model to predict non-broadcasting emissions, the unmatched detection density is used for these 10 features instead.
 
@@ -403,18 +403,9 @@ For the detection classification and detection regression models, each unit of o
     \label{fig:fig-ais-length-power-relationship}
 \end{figure}
 
-\paragraph{S2 detection features}
+\paragraph{S1satellite coverage features}
 
-While S2 imagery was processed similarly to S1 (i.e., every detection has an inferred length, is classified as fishing or non-fishing, and is classified as matched or unmatched), we treat it somewhat different than S1 . We did not include S2 in the same way as S1 due to: (1) less consistent temporal and spatial coverage of S2, which is strongly affected by cloud conditions, whereas S1 coverage is more constant throughout the year (i.e., S1 can see through clouds); and (2) greater confidence in the currently-available S1 detection products from GFW \cite{paolo2024satellite}. 
-
-For the emissions regression model, we include a single feature that captures the total density of S2 vessel detections, aggregated across all length bins, and disaggregated by fishing or non-fishing. Whereas we build a fully separate two-stage hurdle modeling framework to infer missing values of unmatched S1 detections, we simply impute missing S2 detections in the same way as any other missing numeric model feature (using a simple linear regression - see Step 4 in the data pre-processing steps below). The emissions regression model is trained with this feature corresponding to matched S2 detection density in order to predict AIS-broadcasting emissions; when it comes time for using the model to predict non-broadcasting emissions, the unmatched S2 detection density is used for this feautre instead.
-
-
-For the detection classification and detection regression models, for which the unit of observation is by vessel length decile and vessel type, we treat S2 like S1 and include a feature describing unmatched S2 detection density for each pixel-month.
-
-\paragraph{S1 and S2 satellite coverage features}
-
-The variability of S1 and S2 coverage over space and time influence the number and density of vessel detections that are observed in any given pixel-month, and therefore also impacts the relationship between detections and emissions. To account for this, we include a suite of model features to capture the heterogeneity of S1 and S2 coverage. First, for each pixel-month we calculate the intersection area of the pixel that was imaged by each S1 scene, and then calculate the average imaged S1 scene area for that pixel-month. We do the same for S2 scenes. For each of the two measures, we then normalize them by the water area of each pixel in order to generate two additional model measures that quantify the area-normalized average imaged scene area for S1 and S2, respectively. We also include several features that describe the overall time-invariant S1 coverage for each pixel from across the entire 2017-2024 time period, to provide contextual information about historic satellite coverage. For each pixel we calculate the total number of S1 scenes that ever imaged the pixel, the total intersecting area of the pixel that was ever imaged by S1, the average intersecting area of each S1 scene that ever imaged the pixel, and the  average intersecting area of each S1 scene that ever imaged the pixel divided by the pixel's water area.
+The variability of S1coverage over space and time influence the number and density of vessel detections that are observed in any given pixel-month, and therefore also impacts the relationship between detections and emissions. To account for this, we include a suite of model features to capture the heterogeneity of S1 coverage. First, for each pixel-month we calculate the intersection area of the pixel that was imaged by each S1 scene, and then calculate the average imaged S1 scene area for that pixel-month. We then normalize this by the water area of each pixel in order to generate two additional model feature that quantify the area-normalized average imaged scene area for S1 . We also include several features that describe the overall time-invariant S1 coverage for each pixel from across the entire 2017-2024 time period, to provide contextual information about historic satellite coverage. For each pixel we calculate the total number of S1 scenes that ever imaged the pixel, the total intersecting area of the pixel that was ever imaged by S1, the average intersecting area of each S1 scene that ever imaged the pixel, and the  average intersecting area of each S1 scene that ever imaged the pixel divided by the pixel's water area.
 
 \paragraph{Spatial features}
 
@@ -446,7 +437,7 @@ We perform the following data pre-processing steps, in this order, each time a m
 
 5. For all features related to AIS reception quality, we reduce the features to a set of two principal components using PCA with centering and scaling \cite{jolliffe2011principal}.
 
-6. For all features related to S1 and S2 satellite coverage, as well as all S2-related features, we reduce the features to a set of two principal components using PCA with centering and scaling \cite{jolliffe2011principal}.
+6. For all features related to S1 satellite coverage, as well as all S2-related features, we reduce the features to a set of two principal components using PCA with centering and scaling \cite{jolliffe2011principal}.
 
 7. For the detection classification and regression models that are disaggregated by vessel length decile, we treat the length decile as a categorical model feature.
 
@@ -522,7 +513,7 @@ The final output provides a continuous global dataset of monthly non-broadcastin
 
 \paragraph{Direct estimation}
 
-For this prediction, we replaced the 10 matched S1 detection density features used during model training with the observed unmatched S1 detection density for each of the 10 length bin features and separately for non-fishing/fishing vessel types. Additionally, we also replaced the total S2 matched detections model feature with total S2 unmatched detections, which is subsequently used for the sentinel-related PCA features.  We were able to use this direct estimation approach for 96.1\% of the total estimated non-broadcasting emissions (Fig. \ref{fig:fig-spatial-coverage-footprint}). This approach predicts non-broadcasting emissions fully within the S1 footprint, and thus also represents the models with the highest predictive performance (Table \ref{tab:all_performance_metrics_table}).
+For this prediction, we replaced the 10 matched S1 detection density features used during model training with the observed unmatched S1 detection density for each of the 10 length bin features and separately for non-fishing/fishing vessel types. We were able to use this direct estimation approach for 96.1\% of the total estimated non-broadcasting emissions (Fig. \ref{fig:fig-spatial-coverage-footprint}). This approach predicts non-broadcasting emissions fully within the S1 footprint, and thus also represents the models with the highest predictive performance (Table \ref{tab:all_performance_metrics_table}).
 
 \begin{figure}[H]
     \centering
