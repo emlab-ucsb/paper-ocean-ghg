@@ -3007,8 +3007,8 @@ writeLines(data_sources_table, here::here("tables/data_sources.tex"))
 ```{r}
 #| label: fig-offshore-outside-footprint-training-testing-map
 #| fig-cap: Maps of pixels that were used in the training and testing datasets for the outside S1 performance tests for each model. Pixels <=100km from the shore were used for training; pixels >100km from shore were used for testing. The exact training/testing split for each of the 3 models is shown.
-#| fig-width: 6
-#| fig-height: 8
+#| fig-width: 4
+#| fig-height: 7
 pixels_for_offshore_training_testing_split |>
   dplyr::mutate(type = ifelse(offshore_pixel, "Testing", "Training")) |>
   dplyr::mutate(
