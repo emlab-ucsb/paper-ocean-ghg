@@ -1094,7 +1094,7 @@ vessel_size_info |>
       forcats::fct_rev()
   ) |>
   ggplot(aes(x = length_m, y = main_engine_power_kw)) +
-  geom_point(size = 0.1, alpha = 0.5) +
+  geom_point(size = 0.1, alpha = 0.1) +
   theme_plot() +
   facet_wrap(fishing ~ ., ncol = 1, scales = "free") +
   labs(x = "Length (m)", y = "Main engine power (kW)") +
