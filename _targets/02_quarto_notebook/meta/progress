@@ -58,4 +58,4 @@ annual_spatial_co2_emissions_ais_dark_by_fleet|stem|annual_spatial_co2_emissions
 registered_validation_data|stem|registered_validation_data|0|skipped
 annual_global_emissions_by_receiver_type_and_flag|stem|annual_global_emissions_by_receiver_type_and_flag|0|skipped
 quarto_notebook|stem|quarto_notebook|0|dispatched
-quarto_notebook|stem|quarto_notebook|0|completed
+quarto_notebook|stem|quarto_notebook|0|errored
