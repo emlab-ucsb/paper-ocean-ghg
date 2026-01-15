@@ -462,8 +462,7 @@ Because both emissions and detection predictions inside the S1 footprint are mad
 Then, to assess spatial transferability when predicting emissions in areas outside the footprint or near its edges that are poorly represented in the training data, we additionally implemented a spatially structured split, training on nearshore pixels ($<=$ 100km from shore) and testing on offshore pixels ($>$ 100km from shore) (Fig. \ref{fig:fig-offshore-outside-footprint-training-testing-map}). To simulate our ability to predict detections outside the S1 footprint, we manually set all S1-related model features in the testing split to missing values, since these values will not be available at the time of prediction for pixels outside the S1 footprint. This strategy tests the ability of the modeling framework to predict emissions in regions outside the S1 footprint, although such areas contribute only 1.1\% to the total non-broadcasting emissions (Fig. \ref{fig:fig-spatial-coverage-footprint}).
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=\columnwidth]{figures/fig-offshore-outside-footprint-training-testing-map-1.png}
+    \centering    \includegraphics[width=\columnwidth]{figures/fig-offshore-outside-footprint-training-testing-map-1.png}
     \caption{Maps of pixels that were used in the training and testing datasets for the outside-footprint performance tests for each model. Pixels <=100km from the shore were used for training; pixels >100km from shore were used for testing.}
     \label{fig:fig-offshore-outside-footprint-training-testing-map}
 \end{figure}
