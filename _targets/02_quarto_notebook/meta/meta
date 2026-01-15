@@ -55,12 +55,14 @@ total_spatial_co2_emissions_dark_by_footprint_file|stem|ad2574305615ca1a|109484d
 total_spatial_co2_emissions_by_ocean|stem|b60d7e28ee7967ac|504f1646ddc230d1|aa1354ad8902b3f7|-1577136785||t20467.9599166769s|s812b|812|rds|local|vector|||0.129||
 total_spatial_co2_emissions_dark_by_footprint|stem|f8f672f0d9f0ca28|e433e8a5b8b23163|3ecfcc64632872bf|-1663666381||t20467.9599177235s|s123395b|123395|rds|local|vector|||0.064||
 data_sources_file|stem|9857ce6658270b51|46a239b3b68851eb|2c530c1562a7fbd1|1170827296|/Users/gmcdonald/github/paper-ocean-ghg/data/data_sources.csv|t20467.9700096529s|s4833b|4833|file|local|vector|||0.004||
+pixels_for_offshore_training_testing_split_file|stem|b0c076aec141e6aa|835e901dc998807c|2c530c1562a7fbd1|1660932157|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/pixels_for_offshore_training_testing_split.csv|t20468.8502411856s|s1110132b|1110132|file|local|vector|||0.013||
+pixels_for_offshore_training_testing_split|stem|d2dc93a53526742f|1e3d0e59adb9306c|b32e3983283e71a2|-6951856||t20468.8504493949s|s44724b|44724|rds|local|vector|||0.206||
 pull_gfw_data_locally|function|f81141110805c5bf
 run_custom_bq_query|function|f51b83db0de796b8
 download_gfw_data|function|8071964635c69c3f
 combine_EU_data|function|b5d57b0ec1728741
-.Random.seed|object|a3eb378626fe283a
+.Random.seed|object|c714f0d4a1761620
 run_gfw_query_and_save_table|function|076f052fc2a40190
 summarize_dark_fleet_model_results_emissions|function|9b954b9580149f8d
 summarize_dark_fleet_ratios_spatial|function|3ff490bad87fc0e5
-quarto_notebook|stem|1a38480b954062ba|d5c9c0a17eeb87f4|87cc7f0ddc5216ed|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20467.9793311779s|s13548909b|13548909|file|local|vector|||51.241||
+quarto_notebook|stem|da283e88b52e14dc|d5c9c0a17eeb87f4|56186fbd15ffeac6|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20468.8544430365s|s14228670b|14228670|file|local|vector|||65.873||
