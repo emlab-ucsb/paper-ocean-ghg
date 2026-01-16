@@ -297,8 +297,6 @@ total_percent_change_by_fleet <- annual_emissions |>
   split(.[, c("pollutant")]) %>%
   purrr::map_df(janitor::adorn_totals, fill = NA) |>
   tidyr::fill(pollutant, .direction = "down") |>
-  # janitor::adorn_totals("row") |>
-  dplyr::mutate(percent_total_2024 = scales::percent(percent_total_2024)) |>
   dplyr::mutate(
     percent_change = 100 *
       (`2024` - `2017`) /
@@ -1043,29 +1041,25 @@ cowplot::plot_grid(
 # Make and output a table summarizing 2024 CO2 emissions by ocean, and change in emissions from 2017 to 2024 by ocean
 emissions_by_ocean_summary_tbl <- annual_emissions_by_ocean_normalized |>
   dplyr::filter(year == 2024) |>
-  dplyr::mutate(
-    emissions_co2_mt_normalized = scales::percent(
-      emissions_co2_mt_normalized
-    ),
-    emissions_co2_mmt = signif(emissions_co2_mt / 1e6, 3)
-  ) |>
   dplyr::group_by(year) |>
   dplyr::mutate(
-    percent_annual_total = scales::percent(
-      emissions_co2_mt / sum(emissions_co2_mt)
-    )
+    percent_annual_total = emissions_co2_mt * 100 / sum(emissions_co2_mt),
+    percent_emissions_co2_mt_normalized = emissions_co2_mt_normalized * 100
   ) |>
   dplyr::ungroup() |>
+  dplyr::mutate(
+    emissions_co2_mt = prettyNum(signif(emissions_co2_mt, 3), big.mark = ",")
+  ) |>
   dplyr::select(
     Ocean = ocean,
-    `CO2 emissions in 2024 (MMT)` = emissions_co2_mmt,
+    `CO2 emissions in 2024 (MT)` = emissions_co2_mt,
     `Percent of total 2024 CO2 emissions` = percent_annual_total,
-    `Change in CO2 emissions from 2017 to 2024` = emissions_co2_mt_normalized
+    `Percent change in CO2 emissions from 2017 to 2024` = percent_emissions_co2_mt_normalized
   ) |>
   knitr::kable(
     format = "latex",
     label = "emissions_by_ocean_summary_tbl",
-    caption = "For each ocean, summary of: total 2024 CO2 emissions (millions metric tonnes); percentage of total 2024 CO2 emissions from across all oceans; and percent change in CO2 emissions from 2017 to 2024.",
+    caption = "For each ocean, summary of: total 2024 CO2 emissions (metric tonnes); percentage of total 2024 CO2 emissions from across all oceans; and percent change in CO2 emissions from 2017 to 2024.",
     digits = 3
   ) |>
   kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
@@ -1093,21 +1087,19 @@ emissions_by_data_source_summary_tbl <- all_edgar_gfw_data_normalized |>
   ) |>
   dplyr::filter(year == 2024) |>
   dplyr::mutate(
-    emissions_co2_mt_normalized = scales::percent(
-      emissions_co2_mt_normalized
-    ),
-    emissions_co2_bmt = signif(emissions_co2_mt / 1e9, 3)
+    emissions_co2_mt = prettyNum(signif(emissions_co2_mt, 3), big.mark = ","),
+    percent_emissions_co2_mt_normalized = emissions_co2_mt_normalized * 100,
   ) |>
   dplyr::ungroup() |>
   dplyr::select(
     `Data source` = data_source,
-    `CO2 emissions in 2024 (BMT)` = emissions_co2_bmt,
-    `Change in CO2 emissions from 2017 to 2024` = emissions_co2_mt_normalized
+    `CO2 emissions in 2024 (MT)` = emissions_co2_mt,
+    `Percent change in CO2 emissions from 2017 to 2024` = percent_emissions_co2_mt_normalized
   ) |>
   knitr::kable(
     format = "latex",
     label = "emissions_by_data_source_summary_tbl",
-    caption = "For each data source, summary of: total 2024 CO2 emissions (millions metric tonnes); and percent change in CO2 emissions from 2017 to 2024.",
+    caption = "For each data source, summary of: total 2024 CO2 emissions (metric tonnes); and percent change in CO2 emissions from 2017 to 2024.",
     digits = 3
   ) |>
   kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
@@ -2599,7 +2591,7 @@ all_performance_metrics_table <- all_performance_metrics |>
     format = "latex",
     label = "all_performance_metrics_table",
     caption = "Summary of dark fleet model performance metrics for the: 1) emissions regression model; 2) detections classification mode; and 3) detections regression model. Performance estimates for each metric are shown for both the inside S1 footprint and outside S1 footprint tests. All metrics are calculated at the unit of observation except for 'Percent error of total summed predictions', which is the percentage error in the total sum of all predictions relative to the total sum of all truth values.",
-    digits = 3
+    digits = 2
   ) |>
   kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
 
