@@ -111,7 +111,7 @@
 % Then summarise the results of your observations, experiments, simulations etc.
 % End with a statement of your main conclusions
 
- Increased concentrations of greenhouse gases in the atmosphere due to human activities trap heat and cause the planet to warm, leading to changes in the global climate. The transportation sector contributes significantly towards these emissions through ocean-based vessel emissions as well as aviation, railways, and roadways. Yet despite advances in marine vessel tracking technology and emission inventories, a substantial and unquantified fraction of vessel activity remains invisible in current global datasets.  As a result, global inventories chronically underestimate marine vessel emissions and misrepresent trends, undermining efforts to monitor, regulate, and mitigate their climate impacts. We developed a method for quantifying marine vessel emissions at global scale by fusing two independent types of satellite data: vessel tracking using the Automatic Identification System (AIS) to estimate vessel-level emissions, and vessel detection using synthetic aperture radar (SAR) imagery to estimate emissions for vessels that do not use AIS. We found that vessels emitted approximately 1.3 billion metric tonnes of CO$_{2}$ in 2024, accounting for 15\% of global fossil fuel emissions from the transportation sector. We also found that marine vessel CO$_{2}$ emissions increased by 32\% between 2017 and 2024, five times the increase seen across global emissions as a whole, and ten times the increase seen in the rest of the transportation sector. Because many vessels do not broadcast AIS, current approaches solely based on AIS \textit{underestimate} the magnitude of 2024 emissions by 8\%. Meanwhile, because AIS coverage has generally been increasing over time, current global estimates \textit{overestimate} the increasing emissions trend by 18\% (from 2017 to 2024). The areas with the highest growth rates of marine vessel CO$_{2}$ emissions are in the Southern and Arctic Oceans (291\% and 62\% growth between 2017 and 2024, respectively). Our approach provides a robust estimate of the magnitude, trends, and spatial patterns of marine vessel GHG emissions and non-GHG air pollutant emissions. This information can serve as a key input to designing and evaluating interventions aimed at mitigating climate change.
+ Increased concentrations of greenhouse gases in the atmosphere due to human activities trap heat and cause the planet to warm, leading to changes in the global climate. The transportation sector contributes significantly towards these emissions through ocean-based vessel emissions as well as aviation, railways, and roadways. Yet despite advances in marine vessel tracking technology and emission inventories, a substantial and unquantified fraction of vessel activity remains invisible in current global datasets. As a result, global inventories chronically underestimate marine vessel emissions and misrepresent trends, undermining efforts to monitor, regulate, and mitigate their climate impacts. We developed a method for quantifying marine vessel emissions at global scale by fusing two independent types of satellite data: vessel tracking using the Automatic Identification System (AIS) to estimate vessel-level emissions, and vessel detection using synthetic aperture radar (SAR) imagery to estimate emissions for vessels that do not use AIS. We found that vessels emitted approximately 1.27 billion metric tonnes of CO$_{2}$ in 2024, accounting for 15\% of global fossil fuel emissions from the transportation sector. We also found that marine vessel CO$_{2}$ emissions increased by 32\% between 2017 and 2024, five times the increase seen across global emissions as a whole, and ten times the increase seen in the rest of the transportation sector. Because many vessels do not broadcast AIS, current approaches solely based on AIS \textit{underestimate} the magnitude of 2024 emissions by 8\%. Meanwhile, because AIS coverage has generally been increasing over time, current global estimates \textit{overestimate} the increasing emissions trend by 18\% (from 2017 to 2024). The areas with the highest growth rates of marine vessel CO$_{2}$ emissions are in the Southern and Arctic Oceans (291\% and 62\% growth between 2017 and 2024, respectively). Our approach provides a robust estimate of the magnitude, trends, and spatial patterns of marine vessel GHG emissions and non-GHG air pollutant emissions. This information can serve as a key input to designing and evaluating interventions aimed at mitigating climate change.
 
 \end{abstract}
 
@@ -421,7 +421,7 @@ We included several model features related to AIS reception quality and signal t
 
 \paragraph{Temporal features}
 
-We included year, month and days since the start of study in all three models to account for temporal variability.
+To account for temporal variability in each of the three models, we include a numeric feature representing days since the start, and categorical features for year and month. 
 
 \subsubsection{Data pre-processing}
 
@@ -453,13 +453,13 @@ We defined three independent Random Forest models using the tidymodels framework
 
 We assessed model performance for each of the three models using two different evaluation approaches designed to test: 1) predictive power for areas within the S1 footprint but that don't have overpasses in a given month (subsequently referred to as 'inside footprint'); and 2) and generalization to locations completely outside the S1 footprint subsequently referred to as 'outside footprint').
 
-\paragraph{Inside footprint testing}
+\paragraph{Inside S1 footprint testing}
 
 Because both emissions and detection predictions inside the S1 footprint are made for locations where emissions and detections data is available for training, (i.e., inside the footprint we are not generalizing to regions with unknown emissions and detections), we first evaluated performance inside the footprint using a stratified random 75/25 train/test split. For each of the three models, we stratify the random split by the dependent variable (presence/absence of unmatched detections for the detections classification model; density of unmatched detections for the detections regression model; and log-transformed emissions for the emissions regression model).
 
-\paragraph{Outside footprint testing}
+\paragraph{Simulated outside S1 footprint testing}
 
-Then, to assess spatial transferability when predicting emissions in areas outside the footprint or near its edges that are poorly represented in the training data, we additionally implemented a spatially structured split, training on nearshore pixels ($<=$ 100km from shore) and testing on offshore pixels ($>$ 100km from shore) (Fig. \ref{fig:fig-offshore-outside-footprint-training-testing-map}). To simulate our ability to predict detections outside the S1 footprint, we manually set all S1-related model features in the testing split to missing values, since these values will not be available at the time of prediction for pixels outside the S1 footprint.
+Then, to assess spatial transferability when predicting emissions in areas completely outside the S1 footprint (i.e., areas far from shore), we additionally implemented a spatially structured split, training on nearshore pixels ($<=$ 100km from shore) and testing on offshore pixels ($>$ 100km from shore) (Fig. \ref{fig:fig-offshore-outside-footprint-training-testing-map}). To simulate our ability to predict detections outside the S1 footprint, we manually set all S1-related model features in the testing split to missing values, since these values will not be available at the time of prediction for pixels outside the S1 footprint.
 
 \begin{figure}[H]
     \centering    \includegraphics[width=\columnwidth]{figures/fig-offshore-outside-footprint-training-testing-map-1.png}
@@ -472,21 +472,21 @@ Classifier performance is reported using precision-recall curves (Fig. \ref{fig:
 \begin{figure}[H]
     \centering
     \includegraphics[width=\columnwidth]{figures/fig-pr-curves-1.png}
-    \caption{Precision-recall curves of the detection classification model, shown for both the inside S1 footprint test and outside S1 footprint test.}
+    \caption{Precision-recall curves of the detection presence/absence classification model, shown for both the inside S1 footprint test and simulated outside S1 footprint test.}
     \label{fig:fig-pr-curves}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\columnwidth]{figures/fig-roc-curves-1.png}
-    \caption{Receiver Operating Characteristic (ROC) curves of the detection classification model, shown for both the inside S1 footprint test and outside S1 footprint test.}
+    \caption{Receiver Operating Characteristic (ROC) curves of the detection classification model, shown for both the inside S1 footprint test and simulated outside S1 footprint test.}
     \label{fig:fig-roc-curves}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\columnwidth]{figures/fig-conf-mat-1.png}
-    \caption{Confusion matricies of the detection classification model, shown for both the inside S1 footprint test and outside S1 footprint test.}
+    \caption{Confusion matricies of the detection classification model, shown for both the inside S1 footprint test and simulated outside S1 footprint test.}
     \label{fig:fig-conf-mat}
 \end{figure}
 
@@ -530,7 +530,7 @@ For this prediction, we replaced the 10 matched S1 detection density features us
 
 \paragraph{Indirect estimation}
 
-For pixel-months where S1 detections were unavailable, either because they were not imaged due to spatiotemporal satellite heterogeneity or because they fall fully outside the S1 footprint, we first used the detections classification model to predict whether detections were present or absent for each of the 10 length bins and fishing/non-fishing vessel types. If detections were predicted, the subsequent detection regression model was used to predict the number of unmatched S1 detections per km² for each length bin and fishing/non-fishing vessel type. These predicted unmatched detection densities were then fed into the emissions regression model as the 10 separate length-bin-related model features (for each fishing/non-fishing vessel type) to predict the resulting emissions. We do this for all nine emissions regression models corresponding to the three GHGs and six  pollutants. Of the total predicted non-broadcasting emissions, 3.9\% corresponded to indirect estimations within the S1 footprint, while only 0.001\% occurred entirely outside the footprint (Fig. \ref{fig:fig-spatial-coverage-footprint}).
+For pixel-months where S1 detections were unavailable, either because they were not imaged due to spatiotemporal satellite heterogeneity or because they fall fully outside the S1 footprint, we first used the detections classification model to predict whether detections were present or absent for each of the 10 length bins and fishing/non-fishing vessel types. If detections were predicted, the subsequent detection regression model was used to predict the number of unmatched S1 detections per km² for each length bin and fishing/non-fishing vessel type. These predicted unmatched detection densities were then fed into the emissions regression model as the 10 separate length-bin-related model features (for each fishing/non-fishing vessel type) to predict the resulting emissions. We do this for all nine emissions regression models corresponding to the three GHGs and six pollutants. Of the total predicted non-broadcasting emissions, 3.9\% corresponded to indirect estimations within the S1 footprint, while only 0.001\% occurred entirely outside the footprint (Fig. \ref{fig:fig-spatial-coverage-footprint}).
 
 \subsection{Comparing our emission estimates to other inventories}
 
