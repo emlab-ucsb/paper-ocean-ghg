@@ -3082,15 +3082,15 @@ pixels_for_offshore_training_testing_split |>
     )
   ) +
   geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
-  scale_color_brewer(
-    "Dataset",
-    type = "qual",
-    palette = "Dark2"
+  paletteer::scale_color_paletteer_d(
+    name = "Dataset",
+    palette = "nbapalettes::pacers_classic",
+    direction = -1
   ) +
-  scale_fill_brewer(
-    "Dataset",
-    type = "qual",
-    palette = "Dark2"
+  paletteer::scale_fill_paletteer_d(
+    name = "Dataset",
+    palette = "nbapalettes::pacers_classic",
+    direction = -1
   ) +
   labs(x = "", y = "") +
   theme_void() +
