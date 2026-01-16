@@ -2280,8 +2280,8 @@ ggplot(
   coord_fixed(ratio = 1, clip = "on") +
   facet_wrap(Model ~ ., nrow = 1, scales = "fixed") +
   labs(
-    x = "Simulated CO₂ Emissions (mt)",
-    y = "Registered CO₂ Emissions (mt)"
+    x = "Simulated CO2 emissions (MT)",
+    y = "Registered CO2 emissions (MT)"
   ) +
   scale_x_continuous(limits = c(0, 600)) +
   scale_y_continuous(limits = c(0, 600)) +
@@ -2470,8 +2470,8 @@ ggplot(
   scale_x_continuous(limits = c(0, max(filtered_df))) +
   scale_y_continuous(limits = c(0, max(filtered_df))) +
   labs(
-    x = "GFW CO2 emissions (mt)",
-    y = "MRV CO2 emissions (mt)"
+    x = "Simulated CO2 emissions (MT)",
+    y = "EU MRV CO2 emissions (MT)"
   ) +
   theme_minimal() +
   theme(
