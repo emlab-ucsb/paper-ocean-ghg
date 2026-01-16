@@ -1066,14 +1066,14 @@ emissions_by_ocean_summary_tbl <- annual_emissions_by_ocean_normalized |>
   ) |>
   dplyr::select(
     Ocean = ocean,
-    `CO$_2$ emissions in 2024 (million MT)` = emissions_co2_mmt,
-    `Percent of total 2024 CO$_2$ emissions` = percent_annual_total,
-    `Percent change in CO$_2$ emissions from 2017 to 2024` = percent_emissions_co2_mt_normalized
+    `CO2 emissions in 2024 (million MT)` = emissions_co2_mmt,
+    `Percent of total 2024 CO2 emissions` = percent_annual_total,
+    `Percent change in CO2 emissions from 2017 to 2024` = percent_emissions_co2_mt_normalized
   ) |>
   knitr::kable(
     format = "latex",
     label = "emissions_by_ocean_summary_tbl",
-    caption = "For each ocean, summary of: total 2024 CO2 emissions (metric tonnes); percentage of total 2024 CO2 emissions from across all oceans; and percent change in CO2 emissions from 2017 to 2024.",
+    caption = "For each ocean, summary of: total 2024 CO$_2$ emissions (metric tonnes); percentage of total 2024 CO$_2$ emissions from across all oceans; and percent change in CO$_2$ emissions from 2017 to 2024.",
     digits = 3
   ) |>
   kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
@@ -1111,13 +1111,13 @@ emissions_by_data_source_summary_tbl <- all_edgar_gfw_data_normalized |>
   dplyr::ungroup() |>
   dplyr::select(
     `Data source` = data_source,
-    `CO$_2$ emissions in 2024 (billion MT)` = emissions_co2_bmt,
-    `Percent change in CO$_2$ emissions from 2017 to 2024` = percent_emissions_co2_mt_normalized
+    `CO2 emissions in 2024 (billion MT)` = emissions_co2_bmt,
+    `Percent change in CO2 emissions from 2017 to 2024` = percent_emissions_co2_mt_normalized
   ) |>
   knitr::kable(
     format = "latex",
     label = "emissions_by_data_source_summary_tbl",
-    caption = "For each data source, summary of: total 2024 CO2 emissions (metric tonnes); and percent change in CO2 emissions from 2017 to 2024.",
+    caption = "For each data source, summary of: total 2024 CO$_2$ emissions (metric tonnes); and percent change in CO$_2$ emissions from 2017 to 2024.",
     digits = 3
   ) |>
   kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
