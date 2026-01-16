@@ -292,15 +292,18 @@ total_percent_change_by_fleet <- annual_emissions |>
   tidyr::pivot_wider(names_from = year, values_from = emissions_mt) |>
   dplyr::arrange(pollutant) |>
   dplyr::group_by(pollutant) |>
-  dplyr::mutate(percent_total_2024 = `2024` / sum(`2024`)) |>
+  dplyr::mutate(
+    percent_total_2024 = (`2024` / sum(`2024`)) |>
+      scales::percent(accuracy = 0.01)
+  ) |>
   dplyr::ungroup() %>%
   split(.[, c("pollutant")]) %>%
   purrr::map_df(janitor::adorn_totals, fill = NA) |>
   tidyr::fill(pollutant, .direction = "down") |>
   dplyr::mutate(
-    percent_change = 100 *
-      (`2024` - `2017`) /
-      `2017`
+    percent_change = ((`2024` - `2017`) /
+      `2017`) |>
+      scales::percent(accuracy = 0.01)
   ) |>
   dplyr::mutate(
     fleet = dplyr::case_when(
@@ -1043,16 +1046,22 @@ emissions_by_ocean_summary_tbl <- annual_emissions_by_ocean_normalized |>
   dplyr::filter(year == 2024) |>
   dplyr::group_by(year) |>
   dplyr::mutate(
-    percent_annual_total = emissions_co2_mt * 100 / sum(emissions_co2_mt),
-    percent_emissions_co2_mt_normalized = emissions_co2_mt_normalized * 100
+    percent_annual_total = (emissions_co2_mt /
+      sum(emissions_co2_mt)) |>
+      scales::percent(accuracy = 0.01),
+    percent_emissions_co2_mt_normalized = emissions_co2_mt_normalized |>
+      scales::percent(accuracy = 0.01)
   ) |>
   dplyr::ungroup() |>
   dplyr::mutate(
-    emissions_co2_mt = prettyNum(signif(emissions_co2_mt, 3), big.mark = ",")
+    emissions_co2_mmt = prettyNum(
+      signif(emissions_co2_mt / 1e6, 3),
+      big.mark = ","
+    )
   ) |>
   dplyr::select(
     Ocean = ocean,
-    `CO2 emissions in 2024 (MT)` = emissions_co2_mt,
+    `CO2 emissions in 2024 (million MT)` = emissions_co2_mmt,
     `Percent of total 2024 CO2 emissions` = percent_annual_total,
     `Percent change in CO2 emissions from 2017 to 2024` = percent_emissions_co2_mt_normalized
   ) |>
@@ -1087,13 +1096,17 @@ emissions_by_data_source_summary_tbl <- all_edgar_gfw_data_normalized |>
   ) |>
   dplyr::filter(year == 2024) |>
   dplyr::mutate(
-    emissions_co2_mt = prettyNum(signif(emissions_co2_mt, 3), big.mark = ","),
-    percent_emissions_co2_mt_normalized = emissions_co2_mt_normalized * 100,
+    emissions_co2_bmt = prettyNum(
+      signif(emissions_co2_mt / 1e9, 3),
+      big.mark = ","
+    ),
+    percent_emissions_co2_mt_normalized = emissions_co2_mt_normalized |>
+      scales::percent(accuracy = 0.01),
   ) |>
   dplyr::ungroup() |>
   dplyr::select(
     `Data source` = data_source,
-    `CO2 emissions in 2024 (MT)` = emissions_co2_mt,
+    `CO2 emissions in 2024 (billion MT)` = emissions_co2_bmt,
     `Percent change in CO2 emissions from 2017 to 2024` = percent_emissions_co2_mt_normalized
   ) |>
   knitr::kable(
@@ -2608,7 +2621,7 @@ writeLines(
 ```{r}
 total_percent_change_by_fleet_tbl <- total_percent_change_by_fleet |>
   dplyr::mutate(across(
-    c(`2017`, `2024`, percent_change),
+    c(`2017`, `2024`),
     ~ signif(., 3) |>
       prettyNum(big.mark = ",")
   )) |>
