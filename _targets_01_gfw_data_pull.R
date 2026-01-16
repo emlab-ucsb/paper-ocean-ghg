@@ -26,7 +26,7 @@ list(
   # Define the version of the dark fleet dataset to pull
   tar_target(
     name = run_version_dark,
-    "v20260105"
+    "v20260114"
   ),
   # Set analysis start year
   tar_target(
@@ -458,10 +458,9 @@ list(
     name = pixels_for_offshore_training_testing_split,
     command = download_gfw_data(
       bq_billing_project,
-      sql = "SELECT * FROM `world-fishing-827.proj_ocean_ghg.pixels_for_offshore_training_testing_split{run_version_dark}`" |>
+      sql = "SELECT * FROM `world-fishing-827.proj_ocean_ghg.pixels_for_offshore_training_testing_split_{run_version_dark}`" |>
         stringr::str_glue(
-          # Set this back to run_version_dark
-          run_version_dark = "_v20260114" #run_version_dark
+          run_version_dark = run_version_dark
         ),
       file_path = here::here(
         "data/gfw/pixels_for_offshore_training_testing_split.csv"
