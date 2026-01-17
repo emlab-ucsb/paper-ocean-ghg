@@ -2527,8 +2527,8 @@ ggplot(
     fontface = "bold"
   ) +
   coord_fixed(ratio = 1, clip = "on") +
-  scale_x_continuous(limits = c(0, max(filtered_df))) +
-  scale_y_continuous(limits = c(0, max(filtered_df))) +
+  scale_x_continuous(limits = c(0, max(filtered_df)), labels = scales::comma) +
+  scale_y_continuous(limits = c(0, max(filtered_df)), labels = scales::comma) +
   labs(
     x = "Published emissions in the EU MRV database (MT)",
     y = "Estimated CO2 emissions using our model (MT)"
