@@ -2299,8 +2299,8 @@ r2_labels <- vessel_long |>
 ggplot(
   vessel_long,
   aes(
-    x = Estimate,
-    y = co2_emissions_tonnes_registered
+    x = co2_emissions_tonnes_registered,
+    y = Estimate
   )
 ) +
   geom_bin2d(
@@ -2340,8 +2340,8 @@ ggplot(
   coord_fixed(ratio = 1, clip = "on") +
   facet_wrap(Model ~ ., nrow = 1, scales = "fixed") +
   labs(
-    x = "Simulated CO2 emissions (MT)",
-    y = "Registered CO2 emissions (MT)"
+    x = "Registered CO2 emissions (MT)",
+    y = "Estimated CO2 emissions using our model (MT)"
   ) +
   scale_x_continuous(limits = c(0, 600)) +
   scale_y_continuous(limits = c(0, 600)) +
@@ -2498,8 +2498,8 @@ filtered_df <- filtered_hours_df |>
 ggplot(
   filtered_df,
   aes(
-    x = co2_trip_emissions_gfw,
-    y = co2_trip_emissions_eu
+    x = co2_trip_emissions_eu,
+    y = co2_trip_emissions_gfw
   )
 ) +
   geom_point(
@@ -2530,8 +2530,8 @@ ggplot(
   scale_x_continuous(limits = c(0, max(filtered_df))) +
   scale_y_continuous(limits = c(0, max(filtered_df))) +
   labs(
-    x = "Simulated CO2 emissions (MT)",
-    y = "EU MRV CO2 emissions (MT)"
+    x = "Published emissions in the EU MRV database (MT)",
+    y = "Estimated CO2 emissions using our model (MT)"
   ) +
   theme_minimal() +
   theme(
