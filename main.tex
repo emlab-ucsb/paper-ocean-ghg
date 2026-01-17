@@ -335,7 +335,7 @@ This comparison shows that the updated vessel metadata using random forest model
 \begin{figure}[H]
     \centering
     \includegraphics[width=\columnwidth]{figures/fig-registered-data-performance-1.png}
-    \caption{Comparison of vessel-level CO$_{2}$ emissions estimated using our model with registered emissions from a proprietary vessel database (based on main engine fuel consumption over 24 hours). Estimates are shown using main engine power and design speed from IMO (left), our machine learning random forest models (center), and the same registered dataset (right). The solid red line shows a linear regression fit, while the dashed line represents the 1:1 line. Performance values for traditional R$^{2}$ are shown for each set of vessel characteristics. Over 15,000 vessels are represented in the figure, and blue shading indicates point density. All data are rule-of-three compliant, meaning each cell (20×20 mt) displayed contains at least three vessels.}
+    \caption{Comparison of daily vessel-level CO$_{2}$ emissions estimated using our model with registered emissions from a proprietary vessel database (based on main engine fuel consumption over 24 hours). Estimates are shown using main engine power and design speed from IMO (left), our machine learning random forest models (center), and the same registered dataset (right). The solid red line shows a linear regression fit, while the dashed line represents the 1:1 line. Performance values for traditional R$^{2}$ are shown for each set of vessel characteristics. Over 15,000 vessels are represented in the figure, and blue shading indicates point density. All data are rule-of-three compliant, meaning each cell (20×20 mt) displayed contains at least three vessels.}
     \label{fig:fig-registered-data-performance}
 \end{figure}
 
@@ -353,7 +353,7 @@ In Table \ref{tab:tab-performance-tolerance-table}, performance peaks at a tradi
 \begin{figure}[H]
     \centering
     \includegraphics[width=\columnwidth]{figures/fig-mrv-performance-1.png}
-    \caption{Comparison of vessel-level CO$_{2}$ emissions estimated using our model with published emissions from the EU MRV database. The sample includes 2,276 observations from yearly aggregated vessel trips where hours at sea differ by no more than 15\% between our data and the MRV dataset. The solid red line shows the linear regression fit, and the dashed line represents the 1:1 line.}
+    \caption{Comparison of annual vessel-level CO$_{2}$ emissions estimated using our model with published emissions from the EU MRV database. The sample includes 2,276 observations from yearly aggregated vessel trips where hours at sea differ by no more than 15\% between our data and the MRV dataset. The solid red line shows the linear regression fit, and the dashed line represents the 1:1 line.}
     \label{fig:fig-mrv-performance}
 \end{figure}
 
