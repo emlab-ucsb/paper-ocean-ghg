@@ -115,6 +115,7 @@ all_data_source_color_palette <- c(
     6
   ]],
   "All sectors (EDGAR)" = paletteer::paletteer_d("colorblindr::OkabeIto")[[8]],
+  "EDGAR" = paletteer::paletteer_d("colorblindr::OkabeIto")[[8]],
   "OECD" = paletteer::paletteer_d("colorblindr::OkabeIto")[[6]],
   "IMO" = paletteer::paletteer_d("colorblindr::OkabeIto")[[3]],
   "Fishing" = paletteer::paletteer_d("colorblindr::OkabeIto")[[5]],
@@ -2175,7 +2176,10 @@ make_pollutant_time_series_figure <- function(
       scale_y_continuous(labels = scales::comma) +
       theme_plot() +
       labs(x = "", y = y_axis_label) +
-      theme(panel.grid.minor.x = element_blank()) +
+      theme(
+        panel.grid.minor.x = element_blank(),
+        axis.text.x = element_text(angle = 45, vjust = 0)
+      ) +
       scale_x_continuous(
         breaks = seq(
           lubridate::ymd(glue::glue("{analysis_start_year}-01-01")),
@@ -2184,7 +2188,7 @@ make_pollutant_time_series_figure <- function(
         ),
         labels = seq(analysis_start_year, analysis_end_year + 1)
       ) +
-      scale_y_continuous(limits = c(0, NA))
+      scale_y_continuous(limits = c(0, NA), labels = scales::comma)
   }
 }
 
