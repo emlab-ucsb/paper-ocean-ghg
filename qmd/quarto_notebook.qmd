@@ -2854,7 +2854,7 @@ annual_global_emissions_by_receiver_type |>
   dplyr::rename(
     `CO[2]~emissions~(MT)` = emissions_co2_mt,
     `Number~unique~vessels` = n_distinct_ssvid,
-    `Number~ais~messages` = number_pings,
+    `Number~AIS~messages` = number_pings,
   ) |>
   tidyr::pivot_longer(cols = -c(year, receiver_type)) |>
   ggplot(aes(x = year, y = value, color = receiver_type)) +
