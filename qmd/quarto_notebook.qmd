@@ -2844,7 +2844,7 @@ annual_global_emissions_by_receiver_type <- annual_global_emissions_by_receiver_
   tidyr::complete(
     receiver_type,
     tidyr::nesting(year),
-    fill = list(emissions_co2_mt = 0, n_distinct_ssvid = 0)
+    fill = list(emissions_co2_mt = 0, n_distinct_ssvid = 0, number_pings = 0)
   ) |>
   dplyr::mutate(receiver_type = stringr::str_to_sentence(receiver_type)) |>
   # Don't use 2025 data, since the year is incomplete
@@ -2853,13 +2853,17 @@ annual_global_emissions_by_receiver_type <- annual_global_emissions_by_receiver_
 annual_global_emissions_by_receiver_type |>
   dplyr::rename(
     `CO[2]~emissions~(MT)` = emissions_co2_mt,
-    `Number~unique~vessels` = n_distinct_ssvid
+    `Number~unique~vessels` = n_distinct_ssvid,
+    `Number~ais~messages` = number_pings,
   ) |>
   tidyr::pivot_longer(cols = -c(year, receiver_type)) |>
   ggplot(aes(x = year, y = value, color = receiver_type)) +
   facet_wrap(name ~ ., scales = "free_y", ncol = 1, labeller = label_parsed) +
   geom_line(linewidth = 1.1) +
-  scale_y_continuous(labels = scales::unit_format(unit = "M", scale = 1e-6)) +
+  scale_y_continuous(
+    labels = scales::unit_format(unit = "M", scale = 1e-6),
+    limits = c(0, NA)
+  ) +
   scale_x_continuous(
     breaks = unique(annual_global_emissions_by_receiver_type$year)
   ) +
