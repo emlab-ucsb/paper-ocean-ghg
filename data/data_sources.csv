@@ -3,32 +3,22 @@ Presence/absence of unmatched S1 detections,unmatched_s1_detections_present,Depe
 Unmatched S1 detections per km2 imaged,unmatched_s1_detections_per_km2_area_imaged,Dependant variable,No,Yes,No,detections/km2,Numeric,Yes,Yes,GFW,\cite{paolo2024satellite}
 Log(AIS emissions),emissions_co2_mt_log,Dependant variable,No,No,Yes,log(MT),Numeric,Yes,Yes,emLab/GFW,AIS-based emissions model
 Vessel type (fishing or non-fishing),fishing,S1 detection features,Yes,Yes,Yes,-,Boolean,Yes,Yes,GFW,\cite{paolo2024satellite}
-Minimum vessel length,length_bin_min,S1 detection features,Yes,Yes,No,m,Numeric,No,No,GFW,\cite{paolo2024satellite}
-Maximum vessel length,length_bin_max,S1 detection features,Yes,Yes,No,m,Numeric,No,No,GFW,\cite{paolo2024satellite}
-Vessel length percentile (10 classes),length_size_class_percentile,S1 detection features,Yes,Yes,No,-,Categorical,Yes,Yes,GFW,\cite{paolo2024satellite}
-Matched S1 detections per km² of area imaged for each length bin (10 classes),length_size_class_percentile{bin number},S1 detection features,No,No,Yes,detections/km2,Numeric,Yes,Yes,GFW,\cite{paolo2024satellite}
-Year,year,Temporal features,Yes,Yes,Yes,Years,Numeric,No,Yes,GFW,\cite{kroodsma2018tracking}
-Month,month,Temporal features,Yes,Yes,Yes,Months,Numeric,No,Yes,GFW,\cite{kroodsma2018tracking}
+Lower threshold of vessel length bin,length_bin_min,S1 detection features,Yes,Yes,No,m,Numeric,No,No,GFW,\cite{paolo2024satellite}
+Vessel length bin (4 categories),length_size_bin,S1 detection features,Yes,Yes,No,-,Categorical,Yes,Yes,GFW,\cite{paolo2024satellite}
+Matched S1 detections per km² of area imaged for each length bin,length_size_bin_{bin number},S1 detection features,No,No,Yes,detections/km2,Numeric,Yes,Yes,GFW,\cite{paolo2024satellite}
 Days since start of study,days_since_start,Temporal features,Yes,Yes,Yes,Days,Numeric,No,Yes,GFW,\cite{kroodsma2018tracking}
 Post-2020 IMO Sulphur policy,post_2020,Temporal features,Yes,Yes,Yes,-,Boolean,No,Yes,IMO,\cite{imo_sulphur_2020}
 Ocean basin,ocean,Geographic features ,Yes,Yes,Yes,-,Categorical,Yes,No,GFW,\cite{kroodsma2018tracking}
 Pixel water area,pixel_water_area_km2,Geographic features ,Yes,Yes,Yes,km2,Numeric,Yes,No,GFW,\cite{paolo2024satellite}
-Minimum depth,max_elevation_m,Geographic features ,Yes,Yes,Yes,m,Numeric,Yes,No,GFW,\cite{kroodsma2018tracking}
-Minimum distance from shore,min_distance_from_shore_m,Geographic features ,Yes,Yes,Yes,m,Numeric,Yes,No,GFW,\cite{kroodsma2018tracking}
-Minimum distance from nearest port,min_distance_from_port_m,Geographic features ,Yes,Yes,Yes,m,Numeric,Yes,No,GFW,\cite{kroodsma2018tracking}
+Mean ocean depth,mean_elevation_m,Geographic features ,Yes,Yes,Yes,m,Numeric,Yes,No,GFW,\cite{kroodsma2018tracking}
+Mean distance from shore,mean_distance_from_shore_m,Geographic features ,Yes,Yes,Yes,m,Numeric,Yes,No,GFW,\cite{kroodsma2018tracking}
+Mean distance from nearest port,mean_distance_from_port_m,Geographic features ,Yes,Yes,Yes,m,Numeric,Yes,No,GFW,\cite{kroodsma2018tracking}
 Distance to top 20 ports,distance_to_top_port_m,Geographic features ,Yes,Yes,Yes,m,Numeric,Yes,No,Lloyd’s List,\cite{LloydsListTopPorts2024}
-Total number of S1 scenes,total_number_s1_scenes_all_time,S1 coverage features PCA,Yes,Yes,No,-,Numeric,Yes,No,GFW,\cite{paolo2024satellite}
-Total S1 pixel area imaged,total_s1_pixel_area_imaged_km2_all_time,S1 coverage features PCA,Yes,Yes,No,km2,Numeric,Yes,No,GFW,\cite{paolo2024satellite}
-Average S1 scene area,s1_avg_scene_area_all_time,S1 coverage features PCA,Yes,Yes,No,km2,Numeric,Yes,No,GFW,\cite{paolo2024satellite}
-Ratio of average S1 scene area to pixel water area,s1_avg_scene_area_ratio_all_time,S1 coverage features PCA,Yes,Yes,No,-,Numeric,Yes,No,GFW,\cite{paolo2024satellite}
-Monthly average S1 scene area,s1_avg_scene_area_monthly,S1 coverage features PCA,No,No,Yes,km2,Numeric,Yes,Yes,GFW,\cite{paolo2024satellite}
-Monthly ratio of average S1 scene area to pixel water area,s1_avg_scene_area_ratio_monthly,S1 coverage features PCA,No,No,Yes,km2,Numeric,Yes,Yes,GFW,\cite{paolo2024satellite}
 Positions reported by AIS type a,ais_reception_positions_per_day_class_A,AIS reception quality features PCA,Yes,Yes,Yes,-,Numeric,Yes,No,GFW,\cite{kroodsma2018tracking}
 Positions reported by AIS type b,ais_reception_positions_per_day_class_B,AIS reception quality features PCA,Yes,Yes,Yes,-,Numeric,Yes,No,GFW,\cite{kroodsma2018tracking}
 Proportion of messages from dynamic AIS receivers,dynamic_receiver_prop,AIS reception quality features PCA,Yes,Yes,Yes,-,Numeric,Yes,Yes,GFW,\cite{kroodsma2018tracking}
-Proportion of messages from unknown AIS receivers,unknown_receiver_prop,AIS reception quality features PCA,Yes,Yes,Yes,-,Numeric,Yes,Yes,GFW,\cite{kroodsma2018tracking}
 Proportion of messages from terrestrial AIS receivers,terrestrial_receiver_prop,AIS reception quality features PCA,Yes,Yes,Yes,-,Numeric,Yes,Yes,GFW,\cite{kroodsma2018tracking}
 Proportion of messages from satellite AIS receivers,satellite_receiver_prop,AIS reception quality features PCA,Yes,Yes,Yes,-,Numeric,Yes,Yes,GFW,\cite{kroodsma2018tracking}
-Maximum wind speed,wind_speed_max,Weather features,Yes,Yes,Yes,m/s,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
+Mean wind speed,wind_speed_mean,Weather features,Yes,Yes,Yes,m/s,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
 Mean primary wave height,wave_height_mean,Weather features,Yes,Yes,Yes,m,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
-Minimum primary wave period,wave_period_min,Weather features,Yes,Yes,Yes,s,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
+Mean primary wave period,wave_period_mean,Weather features,Yes,Yes,Yes,s,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}

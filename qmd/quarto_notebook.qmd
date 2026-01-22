@@ -59,7 +59,6 @@ targets::tar_load(c(
   "annual_global_emissions_by_receiver_type_and_flag",
   "annual_spatial_emissions_by_receiver_type",
   "vessel_size_info",
-  "s1_ais_vessel_size_class_comparison",
   "registered_validation_data",
   "mrv_data_validation",
   "trip_emissions_for_mrv_validation",
@@ -297,8 +296,7 @@ total_percent_change_by_fleet <- annual_emissions |>
     percent_total_2024 = ifelse(
       fleet == "AIS + S1",
       "-",
-      (`2024` / sum(`2024`)) |>
-        scales::percent(accuracy = 0.01)
+      (`2024` / sum(`2024`))
     )
   ) |>
   dplyr::ungroup() %>%
@@ -307,8 +305,7 @@ total_percent_change_by_fleet <- annual_emissions |>
   tidyr::fill(pollutant, .direction = "down") |>
   dplyr::mutate(
     percent_change = ((`2024` - `2017`) /
-      `2017`) |>
-      scales::percent(accuracy = 0.01)
+      `2017`)
   ) |>
   dplyr::mutate(
     fleet = dplyr::case_when(
@@ -1158,43 +1155,6 @@ vessel_size_info |>
   scale_y_continuous(labels = scales::comma)
 ```
 
-### Size distribution of vessel class for S1 and AIS data
-
-```{r}
-#| label: fig-s1-ais-size-class-comparison
-#| #| fig-cap: Figure summarizing the length distributions for each vessel type (fishing and non-fishing) and size class, separately for AIS-broadcasting vessels and S1 detections. The point represents the median value, the vertical bars represent the interquartile range (i.e., 25th percentile and 75th percentile), and the lightly colored horizonal lines represents the full range of values.
-#| fig-height: 6
-#| fig-width: 8
-#|
-s1_ais_vessel_size_class_comparison |>
-  dplyr::mutate(
-    fishing = ifelse(fishing, "Fishing", "Non-fishing") |>
-      forcats::fct_rev()
-  ) |>
-  dplyr::mutate(
-    SOURCE = dplyr::case_when(
-      source == "s1" ~ "S1 unmatched detections",
-      source == "ais" ~ "AIS-broadcasting"
-    ),
-    length_size_class_percentile = glue::glue(
-      "Length bin: {length_size_class_percentile}"
-    ) %>%
-      forcats::fct_relevel("Length bin: 10", after = Inf)
-  ) |>
-  ggplot(aes(x = median_length_m, y = SOURCE)) +
-  geom_point(size = 1) +
-  geom_errorbar(
-    aes(xmin = min_length_m, xmax = max_length_m),
-    width = 0,
-    alpha = 0.25
-  ) +
-  geom_errorbar(aes(xmin = iqr_lower_length_m, xmax = iqr_upper_length_m)) +
-  facet_grid(length_size_class_percentile ~ fishing, scales = "free_x") +
-  theme_plot() +
-  labs(x = "Vessel length (m)", y = "") +
-  scale_x_continuous(limits = c(0, NA))
-```
-
 ### Dark fleet emissions, by vessel size and type
 
 ```{r}
@@ -1902,9 +1862,6 @@ spatial_emissions_by_fleet_total_plot_qlog10 <- spatial_co2_emissions_ais_dark_b
   scale_y_continuous(expand = c(0, 1)) +
   facet_grid(fleet ~ fishing) +
   coord_sf(crs = map_projection)
-
-
-spatial_emissions_by_fleet_total_plot_qlog10
 ```
 
 ```{r}
@@ -1994,8 +1951,6 @@ spatial_emissions_by_fleet_total_plot_pseudolog <- spatial_co2_emissions_ais_dar
   scale_y_continuous(expand = c(0, 1)) +
   facet_grid(fleet ~ fishing) +
   coord_sf(crs = map_projection)
-
-spatial_emissions_by_fleet_total_plot_pseudolog
 ```
 
 ```{r}
@@ -2715,27 +2670,9 @@ all_varimp_data |>
     model_feature_long = dplyr::case_when(
       stringr::str_detect(
         model_feature,
-        "ais_quality_PCA"
+        "length_size_bin_"
       ) ~ glue::glue(
-        "AIS features (PCA {stringr::str_remove(model_feature, 'ais_quality_PCA_')})"
-      ),
-      stringr::str_detect(
-        model_feature,
-        "s1_coverage_PCA"
-      ) ~ glue::glue(
-        "S1 coverage features (PCA {stringr::str_remove(model_feature, 's1_s2_coverage_PCA_')})"
-      ),
-      stringr::str_detect(
-        model_feature,
-        "days_since_start_ns"
-      ) ~ glue::glue(
-        "Days since start of study (natural spline{stringr::str_remove(model_feature,'days_since_start_ns_')})"
-      ),
-      stringr::str_detect(
-        model_feature,
-        "length_size_class_percentile_"
-      ) ~ glue::glue(
-        "S1 detections per km2 (length bin {stringr::str_remove(model_feature, 'length_size_class_percentile_')})"
+        "S1 detections per km2 (length bin {stringr::str_remove(model_feature, 'length_size_bin_')})"
       ),
       TRUE ~ model_feature_long
     )

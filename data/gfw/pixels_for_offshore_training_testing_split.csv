@@ -6,13 +6,17 @@ lon_bin,lat_bin,offshore_pixel,model
 -180,52,TRUE,emissions_regression
 -180,64,TRUE,emissions_regression
 -180,65,FALSE,emissions_regression
+-179,-20,FALSE,emissions_regression
+-179,-19,FALSE,emissions_regression
 -179,-18,FALSE,emissions_regression
 -179,-17,FALSE,emissions_regression
 -179,-16,FALSE,emissions_regression
+-179,-14,TRUE,emissions_regression
 -179,51,FALSE,emissions_regression
 -179,52,FALSE,emissions_regression
 -179,64,TRUE,emissions_regression
 -179,65,FALSE,emissions_regression
+-178,-19,FALSE,emissions_regression
 -178,-18,TRUE,emissions_regression
 -178,-15,TRUE,emissions_regression
 -178,51,FALSE,emissions_regression
@@ -29,6 +33,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -177,53,TRUE,emissions_regression
 -177,64,TRUE,emissions_regression
 -177,65,TRUE,emissions_regression
+-176,-23,FALSE,emissions_regression
 -176,-22,FALSE,emissions_regression
 -176,-21,FALSE,emissions_regression
 -176,-20,FALSE,emissions_regression
@@ -39,6 +44,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -176,51,FALSE,emissions_regression
 -176,52,FALSE,emissions_regression
 -176,64,FALSE,emissions_regression
+-176,65,TRUE,emissions_regression
 -175,-23,FALSE,emissions_regression
 -175,-22,FALSE,emissions_regression
 -175,-21,FALSE,emissions_regression
@@ -48,6 +54,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -175,-17,FALSE,emissions_regression
 -175,-16,FALSE,emissions_regression
 -175,-15,TRUE,emissions_regression
+-175,-14,TRUE,emissions_regression
 -175,51,FALSE,emissions_regression
 -175,52,FALSE,emissions_regression
 -175,53,FALSE,emissions_regression
@@ -72,6 +79,8 @@ lon_bin,lat_bin,offshore_pixel,model
 -174,63,FALSE,emissions_regression
 -174,64,FALSE,emissions_regression
 -173,-21,TRUE,emissions_regression
+-173,-20,TRUE,emissions_regression
+-173,-19,FALSE,emissions_regression
 -173,-18,TRUE,emissions_regression
 -173,-17,FALSE,emissions_regression
 -173,-16,FALSE,emissions_regression
@@ -132,8 +141,10 @@ lon_bin,lat_bin,offshore_pixel,model
 -171,65,TRUE,emissions_regression
 -171,66,TRUE,emissions_regression
 -171,67,TRUE,emissions_regression
+-171,68,TRUE,emissions_regression
 -171,69,TRUE,emissions_regression
 -171,70,TRUE,emissions_regression
+-170,-15,FALSE,emissions_regression
 -170,-14,FALSE,emissions_regression
 -170,51,TRUE,emissions_regression
 -170,52,TRUE,emissions_regression
@@ -184,6 +195,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -168,67,TRUE,emissions_regression
 -168,68,TRUE,emissions_regression
 -168,69,TRUE,emissions_regression
+-167,52,FALSE,emissions_regression
 -167,53,FALSE,emissions_regression
 -167,54,FALSE,emissions_regression
 -167,55,FALSE,emissions_regression
@@ -236,6 +248,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -164,55,FALSE,emissions_regression
 -164,56,FALSE,emissions_regression
 -164,57,TRUE,emissions_regression
+-164,58,FALSE,emissions_regression
 -164,59,FALSE,emissions_regression
 -164,63,FALSE,emissions_regression
 -164,64,FALSE,emissions_regression
@@ -248,6 +261,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -163,19,TRUE,emissions_regression
 -163,20,TRUE,emissions_regression
 -163,21,TRUE,emissions_regression
+-163,22,TRUE,emissions_regression
 -163,23,TRUE,emissions_regression
 -163,24,TRUE,emissions_regression
 -163,25,TRUE,emissions_regression
@@ -270,6 +284,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -162,20,TRUE,emissions_regression
 -162,21,TRUE,emissions_regression
 -162,22,TRUE,emissions_regression
+-162,23,TRUE,emissions_regression
 -162,24,TRUE,emissions_regression
 -162,25,TRUE,emissions_regression
 -162,53,FALSE,emissions_regression
@@ -302,6 +317,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -161,59,FALSE,emissions_regression
 -161,63,TRUE,emissions_regression
 -161,64,TRUE,emissions_regression
+-161,66,TRUE,emissions_regression
 -161,70,TRUE,emissions_regression
 -160,17,TRUE,emissions_regression
 -160,18,TRUE,emissions_regression
@@ -331,6 +347,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -159,23,TRUE,emissions_regression
 -159,24,TRUE,emissions_regression
 -159,26,TRUE,emissions_regression
+-159,48,TRUE,emissions_regression
 -159,52,TRUE,emissions_regression
 -159,53,TRUE,emissions_regression
 -159,54,TRUE,emissions_regression
@@ -350,6 +367,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -158,22,FALSE,emissions_regression
 -158,23,TRUE,emissions_regression
 -158,24,TRUE,emissions_regression
+-158,26,TRUE,emissions_regression
 -158,48,TRUE,emissions_regression
 -158,53,TRUE,emissions_regression
 -158,54,TRUE,emissions_regression
@@ -372,6 +390,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -157,56,FALSE,emissions_regression
 -157,57,FALSE,emissions_regression
 -157,71,TRUE,emissions_regression
+-156,12,TRUE,emissions_regression
 -156,16,TRUE,emissions_regression
 -156,17,TRUE,emissions_regression
 -156,18,FALSE,emissions_regression
@@ -416,6 +435,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -154,58,FALSE,emissions_regression
 -154,59,FALSE,emissions_regression
 -154,71,TRUE,emissions_regression
+-153,-17,FALSE,emissions_regression
 -153,16,TRUE,emissions_regression
 -153,17,TRUE,emissions_regression
 -153,18,TRUE,emissions_regression
@@ -431,6 +451,8 @@ lon_bin,lat_bin,offshore_pixel,model
 -153,57,FALSE,emissions_regression
 -153,58,FALSE,emissions_regression
 -153,59,FALSE,emissions_regression
+-153,60,FALSE,emissions_regression
+-153,71,TRUE,emissions_regression
 -152,-18,FALSE,emissions_regression
 -152,-17,FALSE,emissions_regression
 -152,16,TRUE,emissions_regression
@@ -445,10 +467,13 @@ lon_bin,lat_bin,offshore_pixel,model
 -152,59,FALSE,emissions_regression
 -152,60,FALSE,emissions_regression
 -152,61,FALSE,emissions_regression
+-151,-19,FALSE,emissions_regression
 -151,-18,FALSE,emissions_regression
 -151,-17,FALSE,emissions_regression
 -151,18,TRUE,emissions_regression
 -151,53,TRUE,emissions_regression
+-151,54,TRUE,emissions_regression
+-151,56,TRUE,emissions_regression
 -151,57,FALSE,emissions_regression
 -151,58,FALSE,emissions_regression
 -151,59,FALSE,emissions_regression
@@ -458,6 +483,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -150,-18,FALSE,emissions_regression
 -150,-17,FALSE,emissions_regression
 -150,49,TRUE,emissions_regression
+-150,53,TRUE,emissions_regression
 -150,58,TRUE,emissions_regression
 -150,59,FALSE,emissions_regression
 -150,60,FALSE,emissions_regression
@@ -485,6 +511,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -144,60,TRUE,emissions_regression
 -143,53,TRUE,emissions_regression
 -143,54,TRUE,emissions_regression
+-143,58,TRUE,emissions_regression
 -143,59,TRUE,emissions_regression
 -143,60,TRUE,emissions_regression
 -142,53,TRUE,emissions_regression
@@ -499,6 +526,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -141,57,TRUE,emissions_regression
 -141,58,FALSE,emissions_regression
 -141,59,FALSE,emissions_regression
+-141,69,TRUE,emissions_regression
 -140,53,TRUE,emissions_regression
 -140,54,TRUE,emissions_regression
 -140,55,TRUE,emissions_regression
@@ -535,6 +563,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -137,56,FALSE,emissions_regression
 -137,57,FALSE,emissions_regression
 -137,58,FALSE,emissions_regression
+-137,69,TRUE,emissions_regression
 -136,50,TRUE,emissions_regression
 -136,51,TRUE,emissions_regression
 -136,52,TRUE,emissions_regression
@@ -556,6 +585,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -135,56,FALSE,emissions_regression
 -135,57,FALSE,emissions_regression
 -135,58,FALSE,emissions_regression
+-135,69,TRUE,emissions_regression
 -135,70,TRUE,emissions_regression
 -134,48,TRUE,emissions_regression
 -134,49,TRUE,emissions_regression
@@ -617,6 +647,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -130,51,FALSE,emissions_regression
 -130,52,FALSE,emissions_regression
 -130,53,FALSE,emissions_regression
+-130,55,FALSE,emissions_regression
 -130,69,TRUE,emissions_regression
 -129,38,TRUE,emissions_regression
 -129,39,TRUE,emissions_regression
@@ -750,6 +781,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -122,35,FALSE,emissions_regression
 -122,36,FALSE,emissions_regression
 -122,69,TRUE,emissions_regression
+-122,70,TRUE,emissions_regression
 -121,23,TRUE,emissions_regression
 -121,26,TRUE,emissions_regression
 -121,27,TRUE,emissions_regression
@@ -835,6 +867,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -115,29,TRUE,emissions_regression
 -115,30,FALSE,emissions_regression
 -115,31,FALSE,emissions_regression
+-115,67,TRUE,emissions_regression
 -115,68,TRUE,emissions_regression
 -114,17,TRUE,emissions_regression
 -114,20,TRUE,emissions_regression
@@ -892,6 +925,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -110,24,FALSE,emissions_regression
 -110,25,FALSE,emissions_regression
 -110,26,FALSE,emissions_regression
+-109,17,TRUE,emissions_regression
 -109,18,TRUE,emissions_regression
 -109,19,TRUE,emissions_regression
 -109,20,TRUE,emissions_regression
@@ -924,6 +958,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -107,22,FALSE,emissions_regression
 -107,23,FALSE,emissions_regression
 -107,68,FALSE,emissions_regression
+-106,13,TRUE,emissions_regression
 -106,14,TRUE,emissions_regression
 -106,15,TRUE,emissions_regression
 -106,16,TRUE,emissions_regression
@@ -958,24 +993,32 @@ lon_bin,lat_bin,offshore_pixel,model
 -102,15,FALSE,emissions_regression
 -102,16,FALSE,emissions_regression
 -102,17,FALSE,emissions_regression
+-101,8,TRUE,emissions_regression
 -101,13,TRUE,emissions_regression
 -101,14,TRUE,emissions_regression
 -101,15,FALSE,emissions_regression
 -101,16,FALSE,emissions_regression
 -101,17,FALSE,emissions_regression
+-100,4,TRUE,emissions_regression
 -100,5,TRUE,emissions_regression
+-100,6,TRUE,emissions_regression
 -100,11,TRUE,emissions_regression
 -100,12,TRUE,emissions_regression
 -100,13,TRUE,emissions_regression
 -100,14,TRUE,emissions_regression
 -100,15,FALSE,emissions_regression
 -100,16,FALSE,emissions_regression
+-100,68,TRUE,emissions_regression
+-99,-18,TRUE,emissions_regression
+-99,1,TRUE,emissions_regression
 -99,11,TRUE,emissions_regression
 -99,12,TRUE,emissions_regression
 -99,13,TRUE,emissions_regression
 -99,14,TRUE,emissions_regression
 -99,15,TRUE,emissions_regression
 -99,16,FALSE,emissions_regression
+-99,68,TRUE,emissions_regression
+-98,5,TRUE,emissions_regression
 -98,12,TRUE,emissions_regression
 -98,13,TRUE,emissions_regression
 -98,14,TRUE,emissions_regression
@@ -1003,6 +1046,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -97,27,FALSE,emissions_regression
 -97,28,FALSE,emissions_regression
 -97,68,TRUE,emissions_regression
+-96,5,TRUE,emissions_regression
 -96,11,TRUE,emissions_regression
 -96,12,TRUE,emissions_regression
 -96,13,TRUE,emissions_regression
@@ -1068,6 +1112,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -94,29,FALSE,emissions_regression
 -94,59,FALSE,emissions_regression
 -94,61,TRUE,emissions_regression
+-94,63,TRUE,emissions_regression
 -93,-3,TRUE,emissions_regression
 -93,-2,FALSE,emissions_regression
 -93,-1,FALSE,emissions_regression
@@ -1144,6 +1189,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -91,27,FALSE,emissions_regression
 -91,28,FALSE,emissions_regression
 -91,62,TRUE,emissions_regression
+-91,63,TRUE,emissions_regression
 -90,-3,FALSE,emissions_regression
 -90,-2,FALSE,emissions_regression
 -90,-1,FALSE,emissions_regression
@@ -1213,6 +1259,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -88,28,FALSE,emissions_regression
 -88,29,FALSE,emissions_regression
 -88,30,FALSE,emissions_regression
+-87,-7,TRUE,emissions_regression
 -87,7,TRUE,emissions_regression
 -87,8,TRUE,emissions_regression
 -87,9,FALSE,emissions_regression
@@ -1269,6 +1316,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -85,16,TRUE,emissions_regression
 -85,17,TRUE,emissions_regression
 -85,18,TRUE,emissions_regression
+-85,19,TRUE,emissions_regression
 -85,20,TRUE,emissions_regression
 -85,21,TRUE,emissions_regression
 -85,22,TRUE,emissions_regression
@@ -1334,6 +1382,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -83,26,FALSE,emissions_regression
 -83,27,FALSE,emissions_regression
 -83,28,FALSE,emissions_regression
+-83,62,TRUE,emissions_regression
 -82,-35,TRUE,emissions_regression
 -82,-34,TRUE,emissions_regression
 -82,-9,TRUE,emissions_regression
@@ -1345,6 +1394,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -82,-3,FALSE,emissions_regression
 -82,-2,FALSE,emissions_regression
 -82,-1,FALSE,emissions_regression
+-82,0,TRUE,emissions_regression
 -82,1,TRUE,emissions_regression
 -82,5,TRUE,emissions_regression
 -82,6,TRUE,emissions_regression
@@ -1371,6 +1421,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -82,29,FALSE,emissions_regression
 -82,30,FALSE,emissions_regression
 -82,31,FALSE,emissions_regression
+-82,52,TRUE,emissions_regression
 -82,62,TRUE,emissions_regression
 -81,-35,TRUE,emissions_regression
 -81,-34,TRUE,emissions_regression
@@ -1417,7 +1468,9 @@ lon_bin,lat_bin,offshore_pixel,model
 -81,30,FALSE,emissions_regression
 -81,31,FALSE,emissions_regression
 -81,32,FALSE,emissions_regression
+-81,54,TRUE,emissions_regression
 -81,62,TRUE,emissions_regression
+-80,-35,FALSE,emissions_regression
 -80,-33,FALSE,emissions_regression
 -80,-13,TRUE,emissions_regression
 -80,-12,TRUE,emissions_regression
@@ -1461,8 +1514,10 @@ lon_bin,lat_bin,offshore_pixel,model
 -80,31,FALSE,emissions_regression
 -80,32,FALSE,emissions_regression
 -80,33,FALSE,emissions_regression
+-80,51,TRUE,emissions_regression
 -80,52,TRUE,emissions_regression
 -80,53,TRUE,emissions_regression
+-80,54,TRUE,emissions_regression
 -80,56,TRUE,emissions_regression
 -80,59,TRUE,emissions_regression
 -80,60,TRUE,emissions_regression
@@ -1470,6 +1525,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -79,-52,TRUE,emissions_regression
 -79,-49,TRUE,emissions_regression
 -79,-48,TRUE,emissions_regression
+-79,-46,TRUE,emissions_regression
 -79,-33,FALSE,emissions_regression
 -79,-13,FALSE,emissions_regression
 -79,-12,FALSE,emissions_regression
@@ -1511,6 +1567,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -79,33,FALSE,emissions_regression
 -79,55,TRUE,emissions_regression
 -79,58,TRUE,emissions_regression
+-79,59,TRUE,emissions_regression
 -79,60,TRUE,emissions_regression
 -79,62,TRUE,emissions_regression
 -79,63,TRUE,emissions_regression
@@ -1563,9 +1620,12 @@ lon_bin,lat_bin,offshore_pixel,model
 -78,34,FALSE,emissions_regression
 -78,38,FALSE,emissions_regression
 -78,55,TRUE,emissions_regression
+-78,56,TRUE,emissions_regression
 -78,57,TRUE,emissions_regression
 -78,58,TRUE,emissions_regression
+-78,59,TRUE,emissions_regression
 -78,62,TRUE,emissions_regression
+-78,63,TRUE,emissions_regression
 -77,-53,TRUE,emissions_regression
 -77,-52,TRUE,emissions_regression
 -77,-51,TRUE,emissions_regression
@@ -1579,6 +1639,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -77,-43,TRUE,emissions_regression
 -77,-42,TRUE,emissions_regression
 -77,-41,TRUE,emissions_regression
+-77,-32,TRUE,emissions_regression
 -77,-31,TRUE,emissions_regression
 -77,-20,TRUE,emissions_regression
 -77,-19,TRUE,emissions_regression
@@ -1621,6 +1682,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -77,38,FALSE,emissions_regression
 -77,39,FALSE,emissions_regression
 -77,56,TRUE,emissions_regression
+-77,57,TRUE,emissions_regression
 -77,62,FALSE,emissions_regression
 -77,63,TRUE,emissions_regression
 -77,64,TRUE,emissions_regression
@@ -2112,6 +2174,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -68,48,FALSE,emissions_regression
 -68,49,FALSE,emissions_regression
 -68,58,TRUE,emissions_regression
+-68,59,TRUE,emissions_regression
 -68,60,TRUE,emissions_regression
 -67,-57,TRUE,emissions_regression
 -67,-56,FALSE,emissions_regression
@@ -2143,6 +2206,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -67,25,TRUE,emissions_regression
 -67,26,TRUE,emissions_regression
 -67,27,TRUE,emissions_regression
+-67,28,TRUE,emissions_regression
 -67,33,TRUE,emissions_regression
 -67,34,TRUE,emissions_regression
 -67,35,TRUE,emissions_regression
@@ -2333,6 +2397,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -63,-43,TRUE,emissions_regression
 -63,-42,TRUE,emissions_regression
 -63,-41,FALSE,emissions_regression
+-63,-40,FALSE,emissions_regression
 -63,-39,FALSE,emissions_regression
 -63,10,FALSE,emissions_regression
 -63,11,FALSE,emissions_regression
@@ -2369,6 +2434,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -63,58,TRUE,emissions_regression
 -63,59,TRUE,emissions_regression
 -63,60,TRUE,emissions_regression
+-62,-53,TRUE,emissions_regression
 -62,-52,TRUE,emissions_regression
 -62,-51,TRUE,emissions_regression
 -62,-49,TRUE,emissions_regression
@@ -2430,6 +2496,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -61,-42,TRUE,emissions_regression
 -61,-41,FALSE,emissions_regression
 -61,-40,FALSE,emissions_regression
+-61,-39,FALSE,emissions_regression
 -61,8,FALSE,emissions_regression
 -61,9,FALSE,emissions_regression
 -61,10,FALSE,emissions_regression
@@ -2464,6 +2531,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -61,48,FALSE,emissions_regression
 -61,49,FALSE,emissions_regression
 -61,50,TRUE,emissions_regression
+-61,53,FALSE,emissions_regression
 -61,55,FALSE,emissions_regression
 -61,56,FALSE,emissions_regression
 -61,57,FALSE,emissions_regression
@@ -2550,6 +2618,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -59,23,TRUE,emissions_regression
 -59,24,TRUE,emissions_regression
 -59,34,TRUE,emissions_regression
+-59,35,TRUE,emissions_regression
 -59,36,TRUE,emissions_regression
 -59,40,TRUE,emissions_regression
 -59,41,TRUE,emissions_regression
@@ -2606,6 +2675,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -58,49,FALSE,emissions_regression
 -58,50,FALSE,emissions_regression
 -58,51,FALSE,emissions_regression
+-58,53,TRUE,emissions_regression
 -58,54,FALSE,emissions_regression
 -58,55,FALSE,emissions_regression
 -58,56,TRUE,emissions_regression
@@ -2701,6 +2771,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -55,15,TRUE,emissions_regression
 -55,36,TRUE,emissions_regression
 -55,37,TRUE,emissions_regression
+-55,39,TRUE,emissions_regression
 -55,40,TRUE,emissions_regression
 -55,41,TRUE,emissions_regression
 -55,42,TRUE,emissions_regression
@@ -2803,6 +2874,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -51,-32,FALSE,emissions_regression
 -51,-31,FALSE,emissions_regression
 -51,-30,FALSE,emissions_regression
+-51,2,TRUE,emissions_regression
 -51,3,TRUE,emissions_regression
 -51,4,TRUE,emissions_regression
 -51,5,TRUE,emissions_regression
@@ -2946,6 +3018,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -43,4,TRUE,emissions_regression
 -43,5,TRUE,emissions_regression
 -43,41,TRUE,emissions_regression
+-42,-29,TRUE,emissions_regression
 -42,-28,TRUE,emissions_regression
 -42,-27,FALSE,emissions_regression
 -42,-26,FALSE,emissions_regression
@@ -3032,6 +3105,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -38,-14,FALSE,emissions_regression
 -38,-13,FALSE,emissions_regression
 -38,-12,FALSE,emissions_regression
+-38,-11,FALSE,emissions_regression
 -38,-5,FALSE,emissions_regression
 -38,-4,FALSE,emissions_regression
 -38,-3,FALSE,emissions_regression
@@ -3070,6 +3144,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -36,-4,TRUE,emissions_regression
 -36,-3,TRUE,emissions_regression
 -36,-2,TRUE,emissions_regression
+-36,-1,TRUE,emissions_regression
 -35,-18,TRUE,emissions_regression
 -35,-17,TRUE,emissions_regression
 -35,-16,TRUE,emissions_regression
@@ -3151,6 +3226,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -32,41,TRUE,emissions_regression
 -32,42,TRUE,emissions_regression
 -32,43,TRUE,emissions_regression
+-31,-13,TRUE,emissions_regression
 -31,-10,TRUE,emissions_regression
 -31,-9,TRUE,emissions_regression
 -31,-8,TRUE,emissions_regression
@@ -3175,7 +3251,9 @@ lon_bin,lat_bin,offshore_pixel,model
 -31,43,TRUE,emissions_regression
 -31,44,TRUE,emissions_regression
 -31,45,TRUE,emissions_regression
+-30,-18,TRUE,emissions_regression
 -30,-17,TRUE,emissions_regression
+-30,-16,TRUE,emissions_regression
 -30,-13,TRUE,emissions_regression
 -30,-12,TRUE,emissions_regression
 -30,-11,TRUE,emissions_regression
@@ -3234,8 +3312,10 @@ lon_bin,lat_bin,offshore_pixel,model
 -28,-11,TRUE,emissions_regression
 -28,-10,TRUE,emissions_regression
 -28,-9,TRUE,emissions_regression
+-28,-8,TRUE,emissions_regression
 -28,-7,TRUE,emissions_regression
 -28,-6,TRUE,emissions_regression
+-28,-4,TRUE,emissions_regression
 -28,32,TRUE,emissions_regression
 -28,33,TRUE,emissions_regression
 -28,34,TRUE,emissions_regression
@@ -3255,7 +3335,9 @@ lon_bin,lat_bin,offshore_pixel,model
 -27,-12,TRUE,emissions_regression
 -27,-11,TRUE,emissions_regression
 -27,-10,TRUE,emissions_regression
+-27,-8,TRUE,emissions_regression
 -27,-6,TRUE,emissions_regression
+-27,14,TRUE,emissions_regression
 -27,31,TRUE,emissions_regression
 -27,32,TRUE,emissions_regression
 -27,33,TRUE,emissions_regression
@@ -3271,6 +3353,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -27,43,TRUE,emissions_regression
 -27,44,TRUE,emissions_regression
 -27,48,TRUE,emissions_regression
+-27,49,TRUE,emissions_regression
 -27,50,TRUE,emissions_regression
 -27,59,TRUE,emissions_regression
 -26,-19,TRUE,emissions_regression
@@ -3302,18 +3385,23 @@ lon_bin,lat_bin,offshore_pixel,model
 -26,43,TRUE,emissions_regression
 -26,44,TRUE,emissions_regression
 -26,46,TRUE,emissions_regression
+-26,59,TRUE,emissions_regression
+-26,60,TRUE,emissions_regression
 -26,62,TRUE,emissions_regression
 -26,63,TRUE,emissions_regression
 -26,64,FALSE,emissions_regression
 -26,66,FALSE,emissions_regression
 -25,-22,TRUE,emissions_regression
+-25,-21,TRUE,emissions_regression
 -25,-15,TRUE,emissions_regression
 -25,-14,TRUE,emissions_regression
 -25,-13,TRUE,emissions_regression
 -25,-12,TRUE,emissions_regression
 -25,-11,TRUE,emissions_regression
 -25,-8,TRUE,emissions_regression
+-25,-7,TRUE,emissions_regression
 -25,-6,TRUE,emissions_regression
+-25,-5,TRUE,emissions_regression
 -25,14,FALSE,emissions_regression
 -25,15,FALSE,emissions_regression
 -25,16,FALSE,emissions_regression
@@ -3344,6 +3432,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -25,67,FALSE,emissions_regression
 -24,-21,TRUE,emissions_regression
 -24,-17,TRUE,emissions_regression
+-24,-15,TRUE,emissions_regression
 -24,-14,TRUE,emissions_regression
 -24,-12,TRUE,emissions_regression
 -24,-10,TRUE,emissions_regression
@@ -3384,6 +3473,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -23,-12,TRUE,emissions_regression
 -23,-10,TRUE,emissions_regression
 -23,-8,TRUE,emissions_regression
+-23,-7,TRUE,emissions_regression
 -23,11,TRUE,emissions_regression
 -23,29,TRUE,emissions_regression
 -23,30,TRUE,emissions_regression
@@ -3410,6 +3500,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -22,-34,TRUE,emissions_regression
 -22,-31,TRUE,emissions_regression
 -22,-12,TRUE,emissions_regression
+-22,10,TRUE,emissions_regression
 -22,11,TRUE,emissions_regression
 -22,12,TRUE,emissions_regression
 -22,14,TRUE,emissions_regression
@@ -3423,6 +3514,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -22,23,TRUE,emissions_regression
 -22,42,TRUE,emissions_regression
 -22,43,TRUE,emissions_regression
+-22,49,TRUE,emissions_regression
 -22,56,TRUE,emissions_regression
 -22,58,TRUE,emissions_regression
 -22,59,TRUE,emissions_regression
@@ -3438,8 +3530,10 @@ lon_bin,lat_bin,offshore_pixel,model
 -21,-34,TRUE,emissions_regression
 -21,-33,TRUE,emissions_regression
 -21,-32,TRUE,emissions_regression
+-21,-31,TRUE,emissions_regression
 -21,-7,TRUE,emissions_regression
 -21,-6,TRUE,emissions_regression
+-21,-4,TRUE,emissions_regression
 -21,10,TRUE,emissions_regression
 -21,14,TRUE,emissions_regression
 -21,15,TRUE,emissions_regression
@@ -3596,6 +3690,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -18,63,FALSE,emissions_regression
 -18,66,FALSE,emissions_regression
 -18,67,FALSE,emissions_regression
+-18,68,TRUE,emissions_regression
 -17,-34,TRUE,emissions_regression
 -17,5,TRUE,emissions_regression
 -17,6,TRUE,emissions_regression
@@ -3637,6 +3732,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -17,43,TRUE,emissions_regression
 -17,44,TRUE,emissions_regression
 -17,45,TRUE,emissions_regression
+-17,47,TRUE,emissions_regression
 -17,48,TRUE,emissions_regression
 -17,49,TRUE,emissions_regression
 -17,50,TRUE,emissions_regression
@@ -3857,6 +3953,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -13,65,FALSE,emissions_regression
 -13,66,FALSE,emissions_regression
 -13,67,TRUE,emissions_regression
+-12,-3,TRUE,emissions_regression
 -12,0,TRUE,emissions_regression
 -12,1,TRUE,emissions_regression
 -12,2,TRUE,emissions_regression
@@ -3864,6 +3961,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -12,4,TRUE,emissions_regression
 -12,5,FALSE,emissions_regression
 -12,6,FALSE,emissions_regression
+-12,7,FALSE,emissions_regression
 -12,28,FALSE,emissions_regression
 -12,29,FALSE,emissions_regression
 -12,30,TRUE,emissions_regression
@@ -4036,6 +4134,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -9,64,TRUE,emissions_regression
 -9,65,TRUE,emissions_regression
 -9,66,TRUE,emissions_regression
+-8,-5,TRUE,emissions_regression
 -8,-4,TRUE,emissions_regression
 -8,-3,TRUE,emissions_regression
 -8,0,TRUE,emissions_regression
@@ -4071,6 +4170,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -8,65,TRUE,emissions_regression
 -7,-6,TRUE,emissions_regression
 -7,-4,TRUE,emissions_regression
+-7,-3,TRUE,emissions_regression
 -7,-1,TRUE,emissions_regression
 -7,0,TRUE,emissions_regression
 -7,1,TRUE,emissions_regression
@@ -4141,6 +4241,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -6,65,TRUE,emissions_regression
 -6,66,TRUE,emissions_regression
 -5,-4,TRUE,emissions_regression
+-5,-3,TRUE,emissions_regression
 -5,-1,TRUE,emissions_regression
 -5,0,TRUE,emissions_regression
 -5,1,TRUE,emissions_regression
@@ -4271,6 +4372,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -2,66,TRUE,emissions_regression
 -2,67,TRUE,emissions_regression
 -2,68,TRUE,emissions_regression
+-1,-19,TRUE,emissions_regression
 -1,-18,TRUE,emissions_regression
 -1,-17,TRUE,emissions_regression
 -1,-16,TRUE,emissions_regression
@@ -4342,6 +4444,7 @@ lon_bin,lat_bin,offshore_pixel,model
 0,68,TRUE,emissions_regression
 0,69,TRUE,emissions_regression
 0,70,TRUE,emissions_regression
+0,71,TRUE,emissions_regression
 1,-18,TRUE,emissions_regression
 1,-17,TRUE,emissions_regression
 1,-2,TRUE,emissions_regression
@@ -4552,6 +4655,7 @@ lon_bin,lat_bin,offshore_pixel,model
 5,70,TRUE,emissions_regression
 5,71,TRUE,emissions_regression
 5,72,TRUE,emissions_regression
+5,73,TRUE,emissions_regression
 6,-6,TRUE,emissions_regression
 6,-5,TRUE,emissions_regression
 6,-4,TRUE,emissions_regression
@@ -4671,6 +4775,7 @@ lon_bin,lat_bin,offshore_pixel,model
 8,71,TRUE,emissions_regression
 8,72,TRUE,emissions_regression
 8,73,TRUE,emissions_regression
+8,76,TRUE,emissions_regression
 8,77,TRUE,emissions_regression
 8,78,FALSE,emissions_regression
 9,-16,TRUE,emissions_regression
@@ -5326,6 +5431,7 @@ lon_bin,lat_bin,offshore_pixel,model
 26,73,TRUE,emissions_regression
 26,74,TRUE,emissions_regression
 26,75,TRUE,emissions_regression
+27,-39,TRUE,emissions_regression
 27,-38,TRUE,emissions_regression
 27,-37,TRUE,emissions_regression
 27,-36,TRUE,emissions_regression
@@ -5514,6 +5620,7 @@ lon_bin,lat_bin,offshore_pixel,model
 33,43,FALSE,emissions_regression
 33,44,FALSE,emissions_regression
 33,45,FALSE,emissions_regression
+33,46,FALSE,emissions_regression
 33,66,FALSE,emissions_regression
 33,69,FALSE,emissions_regression
 33,70,FALSE,emissions_regression
@@ -5569,6 +5676,7 @@ lon_bin,lat_bin,offshore_pixel,model
 35,-22,TRUE,emissions_regression
 35,-21,FALSE,emissions_regression
 35,-20,FALSE,emissions_regression
+35,22,TRUE,emissions_regression
 35,23,FALSE,emissions_regression
 35,24,FALSE,emissions_regression
 35,25,FALSE,emissions_regression
@@ -5667,6 +5775,7 @@ lon_bin,lat_bin,offshore_pixel,model
 37,73,TRUE,emissions_regression
 37,74,TRUE,emissions_regression
 38,-28,TRUE,emissions_regression
+38,-27,TRUE,emissions_regression
 38,-26,TRUE,emissions_regression
 38,-25,TRUE,emissions_regression
 38,-24,TRUE,emissions_regression
@@ -5826,6 +5935,7 @@ lon_bin,lat_bin,offshore_pixel,model
 41,74,TRUE,emissions_regression
 42,-28,TRUE,emissions_regression
 42,-27,TRUE,emissions_regression
+42,-26,TRUE,emissions_regression
 42,-25,FALSE,emissions_regression
 42,-24,FALSE,emissions_regression
 42,-23,FALSE,emissions_regression
@@ -5848,6 +5958,7 @@ lon_bin,lat_bin,offshore_pixel,model
 42,-1,FALSE,emissions_regression
 42,0,FALSE,emissions_regression
 42,11,FALSE,emissions_regression
+42,12,FALSE,emissions_regression
 42,13,FALSE,emissions_regression
 42,14,FALSE,emissions_regression
 42,15,FALSE,emissions_regression
@@ -5906,16 +6017,19 @@ lon_bin,lat_bin,offshore_pixel,model
 44,10,FALSE,emissions_regression
 44,11,FALSE,emissions_regression
 44,12,FALSE,emissions_regression
+44,66,TRUE,emissions_regression
 44,68,TRUE,emissions_regression
 45,-28,TRUE,emissions_regression
 45,-27,TRUE,emissions_regression
 45,-26,TRUE,emissions_regression
+45,-17,FALSE,emissions_regression
 45,-16,FALSE,emissions_regression
 45,-15,FALSE,emissions_regression
 45,-14,FALSE,emissions_regression
 45,-13,FALSE,emissions_regression
 45,-12,FALSE,emissions_regression
 45,-11,TRUE,emissions_regression
+45,-10,TRUE,emissions_regression
 45,-9,TRUE,emissions_regression
 45,-2,TRUE,emissions_regression
 45,-1,TRUE,emissions_regression
@@ -5954,6 +6068,7 @@ lon_bin,lat_bin,offshore_pixel,model
 47,-25,FALSE,emissions_regression
 47,-24,TRUE,emissions_regression
 47,-23,TRUE,emissions_regression
+47,-16,FALSE,emissions_regression
 47,-15,FALSE,emissions_regression
 47,-14,FALSE,emissions_regression
 47,-13,FALSE,emissions_regression
@@ -5965,6 +6080,7 @@ lon_bin,lat_bin,offshore_pixel,model
 47,2,TRUE,emissions_regression
 47,3,TRUE,emissions_regression
 47,4,TRUE,emissions_regression
+47,10,TRUE,emissions_regression
 47,11,TRUE,emissions_regression
 47,12,TRUE,emissions_regression
 47,13,FALSE,emissions_regression
@@ -6002,6 +6118,7 @@ lon_bin,lat_bin,offshore_pixel,model
 48,29,FALSE,emissions_regression
 48,67,TRUE,emissions_regression
 48,68,TRUE,emissions_regression
+48,69,TRUE,emissions_regression
 49,-27,TRUE,emissions_regression
 49,-26,TRUE,emissions_regression
 49,-25,TRUE,emissions_regression
@@ -6014,6 +6131,7 @@ lon_bin,lat_bin,offshore_pixel,model
 49,-18,FALSE,emissions_regression
 49,-17,TRUE,emissions_regression
 49,-16,TRUE,emissions_regression
+49,-14,FALSE,emissions_regression
 49,-13,FALSE,emissions_regression
 49,-12,FALSE,emissions_regression
 49,-1,TRUE,emissions_regression
@@ -6037,6 +6155,7 @@ lon_bin,lat_bin,offshore_pixel,model
 49,67,TRUE,emissions_regression
 49,68,TRUE,emissions_regression
 49,69,TRUE,emissions_regression
+50,-24,TRUE,emissions_regression
 50,-23,TRUE,emissions_regression
 50,-22,TRUE,emissions_regression
 50,-21,TRUE,emissions_regression
@@ -6063,6 +6182,7 @@ lon_bin,lat_bin,offshore_pixel,model
 50,12,TRUE,emissions_regression
 50,13,TRUE,emissions_regression
 50,14,FALSE,emissions_regression
+50,15,TRUE,emissions_regression
 50,25,FALSE,emissions_regression
 50,26,FALSE,emissions_regression
 50,27,FALSE,emissions_regression
@@ -6071,12 +6191,14 @@ lon_bin,lat_bin,offshore_pixel,model
 50,30,FALSE,emissions_regression
 50,68,TRUE,emissions_regression
 50,69,TRUE,emissions_regression
+51,-20,TRUE,emissions_regression
 51,-19,TRUE,emissions_regression
 51,-18,TRUE,emissions_regression
 51,-17,TRUE,emissions_regression
 51,-16,TRUE,emissions_regression
 51,-15,TRUE,emissions_regression
 51,-14,TRUE,emissions_regression
+51,-1,TRUE,emissions_regression
 51,0,TRUE,emissions_regression
 51,1,TRUE,emissions_regression
 51,2,TRUE,emissions_regression
@@ -6124,6 +6246,7 @@ lon_bin,lat_bin,offshore_pixel,model
 52,14,FALSE,emissions_regression
 52,15,FALSE,emissions_regression
 52,16,FALSE,emissions_regression
+52,23,FALSE,emissions_regression
 52,24,FALSE,emissions_regression
 52,25,FALSE,emissions_regression
 52,26,FALSE,emissions_regression
@@ -6142,6 +6265,7 @@ lon_bin,lat_bin,offshore_pixel,model
 53,-16,TRUE,emissions_regression
 53,-15,TRUE,emissions_regression
 53,-14,TRUE,emissions_regression
+53,-2,TRUE,emissions_regression
 53,8,TRUE,emissions_regression
 53,9,TRUE,emissions_regression
 53,10,TRUE,emissions_regression
@@ -6169,6 +6293,7 @@ lon_bin,lat_bin,offshore_pixel,model
 54,-16,TRUE,emissions_regression
 54,-15,TRUE,emissions_regression
 54,-14,TRUE,emissions_regression
+54,3,TRUE,emissions_regression
 54,5,TRUE,emissions_regression
 54,10,TRUE,emissions_regression
 54,11,TRUE,emissions_regression
@@ -6245,10 +6370,12 @@ lon_bin,lat_bin,offshore_pixel,model
 57,-17,TRUE,emissions_regression
 57,-16,TRUE,emissions_regression
 57,-15,TRUE,emissions_regression
+57,-4,TRUE,emissions_regression
 57,16,TRUE,emissions_regression
 57,17,TRUE,emissions_regression
 57,18,FALSE,emissions_regression
 57,19,FALSE,emissions_regression
+57,20,FALSE,emissions_regression
 57,23,FALSE,emissions_regression
 57,24,FALSE,emissions_regression
 57,25,FALSE,emissions_regression
@@ -6349,6 +6476,7 @@ lon_bin,lat_bin,offshore_pixel,model
 65,71,TRUE,emissions_regression
 65,72,TRUE,emissions_regression
 65,73,TRUE,emissions_regression
+66,-47,TRUE,emissions_regression
 66,21,TRUE,emissions_regression
 66,22,TRUE,emissions_regression
 66,23,FALSE,emissions_regression
@@ -6399,6 +6527,8 @@ lon_bin,lat_bin,offshore_pixel,model
 69,73,TRUE,emissions_regression
 69,74,TRUE,emissions_regression
 70,-50,TRUE,emissions_regression
+70,-49,TRUE,emissions_regression
+70,16,TRUE,emissions_regression
 70,17,FALSE,emissions_regression
 70,18,FALSE,emissions_regression
 70,19,FALSE,emissions_regression
@@ -6408,6 +6538,7 @@ lon_bin,lat_bin,offshore_pixel,model
 70,66,FALSE,emissions_regression
 70,72,TRUE,emissions_regression
 70,73,TRUE,emissions_regression
+71,-49,TRUE,emissions_regression
 71,-5,TRUE,emissions_regression
 71,-4,TRUE,emissions_regression
 71,-3,TRUE,emissions_regression
@@ -6424,6 +6555,7 @@ lon_bin,lat_bin,offshore_pixel,model
 71,20,FALSE,emissions_regression
 71,21,FALSE,emissions_regression
 71,66,FALSE,emissions_regression
+71,71,FALSE,emissions_regression
 71,72,TRUE,emissions_regression
 71,73,TRUE,emissions_regression
 72,-8,FALSE,emissions_regression
@@ -6536,6 +6668,7 @@ lon_bin,lat_bin,offshore_pixel,model
 77,8,FALSE,emissions_regression
 77,67,TRUE,emissions_regression
 77,68,TRUE,emissions_regression
+77,71,TRUE,emissions_regression
 77,73,FALSE,emissions_regression
 78,2,TRUE,emissions_regression
 78,3,TRUE,emissions_regression
@@ -6546,6 +6679,7 @@ lon_bin,lat_bin,offshore_pixel,model
 78,8,FALSE,emissions_regression
 78,9,FALSE,emissions_regression
 78,67,TRUE,emissions_regression
+78,70,TRUE,emissions_regression
 78,72,FALSE,emissions_regression
 78,73,FALSE,emissions_regression
 78,74,FALSE,emissions_regression
@@ -6590,6 +6724,7 @@ lon_bin,lat_bin,offshore_pixel,model
 81,15,FALSE,emissions_regression
 81,16,FALSE,emissions_regression
 81,72,TRUE,emissions_regression
+81,74,FALSE,emissions_regression
 82,4,TRUE,emissions_regression
 82,5,TRUE,emissions_regression
 82,6,FALSE,emissions_regression
@@ -6605,8 +6740,11 @@ lon_bin,lat_bin,offshore_pixel,model
 82,16,FALSE,emissions_regression
 82,17,FALSE,emissions_regression
 82,71,TRUE,emissions_regression
+82,72,TRUE,emissions_regression
 82,74,FALSE,emissions_regression
 82,75,TRUE,emissions_regression
+82,77,TRUE,emissions_regression
+82,78,TRUE,emissions_regression
 83,5,TRUE,emissions_regression
 83,6,TRUE,emissions_regression
 83,7,TRUE,emissions_regression
@@ -6648,11 +6786,13 @@ lon_bin,lat_bin,offshore_pixel,model
 86,18,TRUE,emissions_regression
 86,19,FALSE,emissions_regression
 86,20,FALSE,emissions_regression
+86,21,FALSE,emissions_regression
 86,75,TRUE,emissions_regression
 86,77,TRUE,emissions_regression
 87,-22,TRUE,emissions_regression
 87,-17,TRUE,emissions_regression
 87,16,TRUE,emissions_regression
+87,17,TRUE,emissions_regression
 87,18,TRUE,emissions_regression
 87,19,FALSE,emissions_regression
 87,20,FALSE,emissions_regression
@@ -6673,6 +6813,7 @@ lon_bin,lat_bin,offshore_pixel,model
 89,20,FALSE,emissions_regression
 89,21,FALSE,emissions_regression
 89,75,TRUE,emissions_regression
+89,78,TRUE,emissions_regression
 90,5,TRUE,emissions_regression
 90,6,TRUE,emissions_regression
 90,7,TRUE,emissions_regression
@@ -6687,6 +6828,7 @@ lon_bin,lat_bin,offshore_pixel,model
 90,22,FALSE,emissions_regression
 90,75,TRUE,emissions_regression
 90,76,TRUE,emissions_regression
+90,78,TRUE,emissions_regression
 91,5,TRUE,emissions_regression
 91,6,TRUE,emissions_regression
 91,7,TRUE,emissions_regression
@@ -6701,6 +6843,7 @@ lon_bin,lat_bin,offshore_pixel,model
 91,20,FALSE,emissions_regression
 91,21,FALSE,emissions_regression
 91,22,FALSE,emissions_regression
+91,76,TRUE,emissions_regression
 92,6,TRUE,emissions_regression
 92,7,FALSE,emissions_regression
 92,8,FALSE,emissions_regression
@@ -7054,6 +7197,7 @@ lon_bin,lat_bin,offshore_pixel,model
 110,19,FALSE,emissions_regression
 110,20,FALSE,emissions_regression
 110,21,FALSE,emissions_regression
+110,73,TRUE,emissions_regression
 110,74,TRUE,emissions_regression
 111,-10,FALSE,emissions_regression
 111,-9,FALSE,emissions_regression
@@ -7062,6 +7206,7 @@ lon_bin,lat_bin,offshore_pixel,model
 111,-5,TRUE,emissions_regression
 111,-4,FALSE,emissions_regression
 111,-3,FALSE,emissions_regression
+111,1,FALSE,emissions_regression
 111,2,FALSE,emissions_regression
 111,3,FALSE,emissions_regression
 111,4,FALSE,emissions_regression
@@ -7373,6 +7518,7 @@ lon_bin,lat_bin,offshore_pixel,model
 120,-20,TRUE,emissions_regression
 120,-19,TRUE,emissions_regression
 120,-18,TRUE,emissions_regression
+120,-13,TRUE,emissions_regression
 120,-12,TRUE,emissions_regression
 120,-11,FALSE,emissions_regression
 120,-10,FALSE,emissions_regression
@@ -7604,6 +7750,7 @@ lon_bin,lat_bin,offshore_pixel,model
 123,37,FALSE,emissions_regression
 123,38,FALSE,emissions_regression
 123,39,FALSE,emissions_regression
+123,75,TRUE,emissions_regression
 124,-35,TRUE,emissions_regression
 124,-34,TRUE,emissions_regression
 124,-17,FALSE,emissions_regression
@@ -7717,6 +7864,7 @@ lon_bin,lat_bin,offshore_pixel,model
 125,37,FALSE,emissions_regression
 125,38,FALSE,emissions_regression
 125,74,TRUE,emissions_regression
+126,-33,TRUE,emissions_regression
 126,-15,TRUE,emissions_regression
 126,-14,TRUE,emissions_regression
 126,-13,TRUE,emissions_regression
@@ -7871,6 +8019,7 @@ lon_bin,lat_bin,offshore_pixel,model
 129,7,TRUE,emissions_regression
 129,10,TRUE,emissions_regression
 129,22,TRUE,emissions_regression
+129,23,TRUE,emissions_regression
 129,25,TRUE,emissions_regression
 129,26,FALSE,emissions_regression
 129,27,FALSE,emissions_regression
@@ -7891,6 +8040,7 @@ lon_bin,lat_bin,offshore_pixel,model
 129,71,FALSE,emissions_regression
 129,72,FALSE,emissions_regression
 129,73,TRUE,emissions_regression
+130,-33,TRUE,emissions_regression
 130,-14,FALSE,emissions_regression
 130,-13,FALSE,emissions_regression
 130,-12,FALSE,emissions_regression
@@ -7968,8 +8118,10 @@ lon_bin,lat_bin,offshore_pixel,model
 131,43,FALSE,emissions_regression
 131,71,FALSE,emissions_regression
 131,72,FALSE,emissions_regression
+132,-35,TRUE,emissions_regression
 132,-34,TRUE,emissions_regression
 132,-33,FALSE,emissions_regression
+132,-13,TRUE,emissions_regression
 132,-12,TRUE,emissions_regression
 132,-11,TRUE,emissions_regression
 132,-10,TRUE,emissions_regression
@@ -8073,6 +8225,7 @@ lon_bin,lat_bin,offshore_pixel,model
 135,-36,FALSE,emissions_regression
 135,-35,FALSE,emissions_regression
 135,-15,FALSE,emissions_regression
+135,-14,FALSE,emissions_regression
 135,-13,FALSE,emissions_regression
 135,-12,FALSE,emissions_regression
 135,-11,TRUE,emissions_regression
@@ -8086,6 +8239,7 @@ lon_bin,lat_bin,offshore_pixel,model
 135,-3,FALSE,emissions_regression
 135,-2,FALSE,emissions_regression
 135,-1,FALSE,emissions_regression
+135,7,FALSE,emissions_regression
 135,8,FALSE,emissions_regression
 135,29,TRUE,emissions_regression
 135,31,TRUE,emissions_regression
@@ -8137,14 +8291,18 @@ lon_bin,lat_bin,offshore_pixel,model
 136,43,FALSE,emissions_regression
 136,44,FALSE,emissions_regression
 136,45,FALSE,emissions_regression
+136,53,TRUE,emissions_regression
 136,54,TRUE,emissions_regression
 136,55,TRUE,emissions_regression
 136,71,FALSE,emissions_regression
+136,73,TRUE,emissions_regression
 136,75,TRUE,emissions_regression
 137,-37,FALSE,emissions_regression
 137,-36,FALSE,emissions_regression
 137,-35,FALSE,emissions_regression
 137,-34,FALSE,emissions_regression
+137,-33,FALSE,emissions_regression
+137,-17,FALSE,emissions_regression
 137,-16,FALSE,emissions_regression
 137,-15,FALSE,emissions_regression
 137,-14,FALSE,emissions_regression
@@ -8181,6 +8339,7 @@ lon_bin,lat_bin,offshore_pixel,model
 137,55,TRUE,emissions_regression
 137,56,TRUE,emissions_regression
 137,71,FALSE,emissions_regression
+137,72,FALSE,emissions_regression
 137,74,TRUE,emissions_regression
 137,75,TRUE,emissions_regression
 138,-37,FALSE,emissions_regression
@@ -8228,6 +8387,7 @@ lon_bin,lat_bin,offshore_pixel,model
 138,74,TRUE,emissions_regression
 139,-39,FALSE,emissions_regression
 139,-38,FALSE,emissions_regression
+139,-37,FALSE,emissions_regression
 139,-18,FALSE,emissions_regression
 139,-17,FALSE,emissions_regression
 139,-16,TRUE,emissions_regression
@@ -8264,6 +8424,7 @@ lon_bin,lat_bin,offshore_pixel,model
 139,54,TRUE,emissions_regression
 139,55,TRUE,emissions_regression
 139,72,TRUE,emissions_regression
+139,73,TRUE,emissions_regression
 139,74,TRUE,emissions_regression
 140,-40,FALSE,emissions_regression
 140,-39,FALSE,emissions_regression
@@ -8282,6 +8443,7 @@ lon_bin,lat_bin,offshore_pixel,model
 140,-2,FALSE,emissions_regression
 140,24,TRUE,emissions_regression
 140,25,TRUE,emissions_regression
+140,28,TRUE,emissions_regression
 140,30,TRUE,emissions_regression
 140,32,TRUE,emissions_regression
 140,33,TRUE,emissions_regression
@@ -8289,6 +8451,7 @@ lon_bin,lat_bin,offshore_pixel,model
 140,35,FALSE,emissions_regression
 140,36,FALSE,emissions_regression
 140,37,FALSE,emissions_regression
+140,38,FALSE,emissions_regression
 140,39,FALSE,emissions_regression
 140,40,FALSE,emissions_regression
 140,41,FALSE,emissions_regression
@@ -8310,6 +8473,7 @@ lon_bin,lat_bin,offshore_pixel,model
 140,74,TRUE,emissions_regression
 141,-40,FALSE,emissions_regression
 141,-39,FALSE,emissions_regression
+141,-17,FALSE,emissions_regression
 141,-16,TRUE,emissions_regression
 141,-15,TRUE,emissions_regression
 141,-14,FALSE,emissions_regression
@@ -8411,6 +8575,7 @@ lon_bin,lat_bin,offshore_pixel,model
 143,52,FALSE,emissions_regression
 143,53,FALSE,emissions_regression
 143,54,FALSE,emissions_regression
+143,55,TRUE,emissions_regression
 143,58,FALSE,emissions_regression
 143,59,FALSE,emissions_regression
 143,72,TRUE,emissions_regression
@@ -8424,6 +8589,7 @@ lon_bin,lat_bin,offshore_pixel,model
 144,-38,FALSE,emissions_regression
 144,-15,FALSE,emissions_regression
 144,-14,FALSE,emissions_regression
+144,-13,FALSE,emissions_regression
 144,-12,FALSE,emissions_regression
 144,-11,TRUE,emissions_regression
 144,-10,FALSE,emissions_regression
@@ -8432,6 +8598,7 @@ lon_bin,lat_bin,offshore_pixel,model
 144,-5,FALSE,emissions_regression
 144,-4,FALSE,emissions_regression
 144,-3,FALSE,emissions_regression
+144,3,TRUE,emissions_regression
 144,4,TRUE,emissions_regression
 144,12,FALSE,emissions_regression
 144,13,FALSE,emissions_regression
@@ -8505,6 +8672,7 @@ lon_bin,lat_bin,offshore_pixel,model
 145,59,TRUE,emissions_regression
 145,72,TRUE,emissions_regression
 145,74,TRUE,emissions_regression
+145,75,TRUE,emissions_regression
 145,76,TRUE,emissions_regression
 146,-44,FALSE,emissions_regression
 146,-42,FALSE,emissions_regression
@@ -8549,6 +8717,7 @@ lon_bin,lat_bin,offshore_pixel,model
 146,58,TRUE,emissions_regression
 146,59,TRUE,emissions_regression
 146,74,TRUE,emissions_regression
+146,75,TRUE,emissions_regression
 146,76,TRUE,emissions_regression
 147,-44,FALSE,emissions_regression
 147,-43,FALSE,emissions_regression
@@ -8574,6 +8743,7 @@ lon_bin,lat_bin,offshore_pixel,model
 147,-2,FALSE,emissions_regression
 147,1,TRUE,emissions_regression
 147,2,TRUE,emissions_regression
+147,13,TRUE,emissions_regression
 147,15,TRUE,emissions_regression
 147,42,FALSE,emissions_regression
 147,43,FALSE,emissions_regression
@@ -8581,6 +8751,7 @@ lon_bin,lat_bin,offshore_pixel,model
 147,45,FALSE,emissions_regression
 147,46,FALSE,emissions_regression
 147,58,TRUE,emissions_regression
+147,59,TRUE,emissions_regression
 147,72,TRUE,emissions_regression
 147,73,TRUE,emissions_regression
 147,74,TRUE,emissions_regression
@@ -8596,6 +8767,7 @@ lon_bin,lat_bin,offshore_pixel,model
 148,-21,FALSE,emissions_regression
 148,-20,FALSE,emissions_regression
 148,-19,FALSE,emissions_regression
+148,-18,TRUE,emissions_regression
 148,-17,TRUE,emissions_regression
 148,-16,TRUE,emissions_regression
 148,-12,TRUE,emissions_regression
@@ -8622,6 +8794,7 @@ lon_bin,lat_bin,offshore_pixel,model
 149,-40,FALSE,emissions_regression
 149,-39,FALSE,emissions_regression
 149,-38,FALSE,emissions_regression
+149,-37,FALSE,emissions_regression
 149,-22,FALSE,emissions_regression
 149,-21,FALSE,emissions_regression
 149,-20,FALSE,emissions_regression
@@ -8690,6 +8863,7 @@ lon_bin,lat_bin,offshore_pixel,model
 151,-24,FALSE,emissions_regression
 151,-23,FALSE,emissions_regression
 151,-22,FALSE,emissions_regression
+151,-21,TRUE,emissions_regression
 151,-20,TRUE,emissions_regression
 151,-19,TRUE,emissions_regression
 151,-12,FALSE,emissions_regression
@@ -8750,6 +8924,9 @@ lon_bin,lat_bin,offshore_pixel,model
 152,49,TRUE,emissions_regression
 152,50,TRUE,emissions_regression
 152,58,TRUE,emissions_regression
+152,59,FALSE,emissions_regression
+152,71,TRUE,emissions_regression
+152,75,TRUE,emissions_regression
 153,-36,TRUE,emissions_regression
 153,-35,TRUE,emissions_regression
 153,-34,FALSE,emissions_regression
@@ -8841,7 +9018,10 @@ lon_bin,lat_bin,offshore_pixel,model
 155,-26,TRUE,emissions_regression
 155,-25,TRUE,emissions_regression
 155,-24,TRUE,emissions_regression
+155,-23,TRUE,emissions_regression
+155,-22,TRUE,emissions_regression
 155,-21,TRUE,emissions_regression
+155,-13,TRUE,emissions_regression
 155,-10,TRUE,emissions_regression
 155,-9,FALSE,emissions_regression
 155,-8,FALSE,emissions_regression
@@ -8876,6 +9056,7 @@ lon_bin,lat_bin,offshore_pixel,model
 156,-6,FALSE,emissions_regression
 156,-5,TRUE,emissions_regression
 156,5,TRUE,emissions_regression
+156,6,TRUE,emissions_regression
 156,47,TRUE,emissions_regression
 156,48,TRUE,emissions_regression
 156,49,FALSE,emissions_regression
@@ -8887,6 +9068,7 @@ lon_bin,lat_bin,offshore_pixel,model
 156,57,FALSE,emissions_regression
 156,58,FALSE,emissions_regression
 156,59,FALSE,emissions_regression
+156,60,TRUE,emissions_regression
 156,61,TRUE,emissions_regression
 156,74,TRUE,emissions_regression
 157,-20,TRUE,emissions_regression
@@ -8907,11 +9089,14 @@ lon_bin,lat_bin,offshore_pixel,model
 157,59,FALSE,emissions_regression
 157,60,TRUE,emissions_regression
 157,61,TRUE,emissions_regression
+158,-23,TRUE,emissions_regression
+158,-21,TRUE,emissions_regression
 158,-11,TRUE,emissions_regression
 158,-10,FALSE,emissions_regression
 158,-9,FALSE,emissions_regression
 158,-8,FALSE,emissions_regression
 158,-7,FALSE,emissions_regression
+158,-6,TRUE,emissions_regression
 158,5,TRUE,emissions_regression
 158,6,FALSE,emissions_regression
 158,7,FALSE,emissions_regression
@@ -8934,6 +9119,7 @@ lon_bin,lat_bin,offshore_pixel,model
 159,51,FALSE,emissions_regression
 159,52,FALSE,emissions_regression
 159,53,FALSE,emissions_regression
+159,54,FALSE,emissions_regression
 159,58,TRUE,emissions_regression
 159,59,TRUE,emissions_regression
 159,60,TRUE,emissions_regression
@@ -8963,6 +9149,7 @@ lon_bin,lat_bin,offshore_pixel,model
 161,60,TRUE,emissions_regression
 161,61,TRUE,emissions_regression
 161,69,FALSE,emissions_regression
+162,-12,TRUE,emissions_regression
 162,-11,TRUE,emissions_regression
 162,-10,FALSE,emissions_regression
 162,-9,FALSE,emissions_regression
@@ -8976,6 +9163,7 @@ lon_bin,lat_bin,offshore_pixel,model
 162,69,FALSE,emissions_regression
 163,-22,FALSE,emissions_regression
 163,-21,FALSE,emissions_regression
+163,-20,FALSE,emissions_regression
 163,54,TRUE,emissions_regression
 163,55,FALSE,emissions_regression
 163,56,FALSE,emissions_regression
@@ -8987,10 +9175,14 @@ lon_bin,lat_bin,offshore_pixel,model
 163,69,TRUE,emissions_regression
 164,-47,TRUE,emissions_regression
 164,-46,TRUE,emissions_regression
+164,-45,TRUE,emissions_regression
 164,-23,FALSE,emissions_regression
 164,-22,FALSE,emissions_regression
 164,-21,FALSE,emissions_regression
+164,-20,FALSE,emissions_regression
+164,-16,TRUE,emissions_regression
 164,-14,TRUE,emissions_regression
+164,-12,TRUE,emissions_regression
 164,-11,TRUE,emissions_regression
 164,-10,TRUE,emissions_regression
 164,54,TRUE,emissions_regression
@@ -9013,6 +9205,8 @@ lon_bin,lat_bin,offshore_pixel,model
 165,-17,TRUE,emissions_regression
 165,-16,TRUE,emissions_regression
 165,-15,TRUE,emissions_regression
+165,-14,TRUE,emissions_regression
+165,-11,TRUE,emissions_regression
 165,54,TRUE,emissions_regression
 165,55,TRUE,emissions_regression
 165,56,TRUE,emissions_regression
@@ -9030,13 +9224,16 @@ lon_bin,lat_bin,offshore_pixel,model
 166,-22,FALSE,emissions_regression
 166,-21,FALSE,emissions_regression
 166,-20,FALSE,emissions_regression
+166,-19,TRUE,emissions_regression
 166,-18,FALSE,emissions_regression
 166,-17,FALSE,emissions_regression
 166,-16,FALSE,emissions_regression
 166,-15,FALSE,emissions_regression
+166,-14,FALSE,emissions_regression
 166,-13,FALSE,emissions_regression
 166,-12,TRUE,emissions_regression
 166,54,TRUE,emissions_regression
+166,55,TRUE,emissions_regression
 166,56,TRUE,emissions_regression
 166,57,TRUE,emissions_regression
 166,58,TRUE,emissions_regression
@@ -9063,6 +9260,7 @@ lon_bin,lat_bin,offshore_pixel,model
 167,-12,TRUE,emissions_regression
 167,-11,TRUE,emissions_regression
 167,54,TRUE,emissions_regression
+167,55,TRUE,emissions_regression
 167,59,FALSE,emissions_regression
 167,60,FALSE,emissions_regression
 167,69,FALSE,emissions_regression
@@ -9089,6 +9287,7 @@ lon_bin,lat_bin,offshore_pixel,model
 169,-44,TRUE,emissions_regression
 169,-43,FALSE,emissions_regression
 169,-23,TRUE,emissions_regression
+169,-22,FALSE,emissions_regression
 169,-21,FALSE,emissions_regression
 169,-20,FALSE,emissions_regression
 169,-19,FALSE,emissions_regression
@@ -9098,6 +9297,7 @@ lon_bin,lat_bin,offshore_pixel,model
 169,-15,TRUE,emissions_regression
 169,-14,TRUE,emissions_regression
 169,-13,TRUE,emissions_regression
+169,-11,TRUE,emissions_regression
 169,59,TRUE,emissions_regression
 169,60,TRUE,emissions_regression
 170,-48,TRUE,emissions_regression
@@ -9108,11 +9308,17 @@ lon_bin,lat_bin,offshore_pixel,model
 170,-42,FALSE,emissions_regression
 170,-41,FALSE,emissions_regression
 170,-36,TRUE,emissions_regression
+170,-35,TRUE,emissions_regression
 170,-21,FALSE,emissions_regression
 170,-20,FALSE,emissions_regression
 170,-19,FALSE,emissions_regression
 170,-18,TRUE,emissions_regression
 170,-17,TRUE,emissions_regression
+170,-16,TRUE,emissions_regression
+170,-14,TRUE,emissions_regression
+170,-13,TRUE,emissions_regression
+170,-12,TRUE,emissions_regression
+170,52,TRUE,emissions_regression
 170,59,TRUE,emissions_regression
 170,60,TRUE,emissions_regression
 170,69,FALSE,emissions_regression
@@ -9132,6 +9338,7 @@ lon_bin,lat_bin,offshore_pixel,model
 171,-34,TRUE,emissions_regression
 171,-21,TRUE,emissions_regression
 171,-20,TRUE,emissions_regression
+171,-19,TRUE,emissions_regression
 171,52,TRUE,emissions_regression
 171,53,TRUE,emissions_regression
 171,59,TRUE,emissions_regression

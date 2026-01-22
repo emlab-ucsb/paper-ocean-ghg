@@ -26,7 +26,7 @@ list(
   # Define the version of the dark fleet dataset to pull
   tar_target(
     name = run_version_dark,
-    "v20260114"
+    "v20260120"
   ),
   # Set analysis start year
   tar_target(
@@ -393,24 +393,6 @@ list(
         ),
       file_path = here::here(
         "data/gfw/vessel_size_info.csv"
-      )
-    ),
-    format = "file"
-  ),
-  # Compare vessel size class distributions of S1 data and AIS data
-  # For each of unmatched S1 detections and AIS vessels, each vessel type (fishing and non-fishing), and each size class
-  # Calculate the minimum, maximum, standard devation, and average length
-  tar_file_read(
-    name = s1_ais_vessel_size_class_comparison,
-    command = here::here("sql/s1_ais_vessel_size_class_comparison.sql"),
-    read = download_gfw_data(
-      bq_billing_project,
-      sql = readr::read_file(!!.x) |>
-        stringr::str_glue(
-          run_version_dark = run_version_dark
-        ),
-      file_path = here::here(
-        "data/gfw/s1_ais_vessel_size_class_comparison.csv"
       )
     ),
     format = "file"
