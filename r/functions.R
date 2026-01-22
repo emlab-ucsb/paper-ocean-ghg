@@ -166,7 +166,7 @@ download_gfw_data <- function(sql, bq_billing_project, file_path, ...) {
     bq_billing_project,
     query = sql
   ) |>
-    bigrquery::bq_table_download(n_max = Inf) |>
+    bigrquery::bq_table_download(n_max = Inf, bigint = "integer64") |>
     readr::write_csv(file_path)
   return(file_path)
 }
