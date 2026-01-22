@@ -2765,7 +2765,7 @@ performance_detections_cls_conf_mat |>
 #| label: fig-annual-emissions-by-ais-receiver-type
 #| fig-cap: Annual total CO2 emissions (metric tonnes) by the AIS-broadcasting fleet, disaggregated by AIS receiver type (satellite, terrestrial, and dynamic) and total aggregated across receiver types. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.
 # | #| fig-width: 4
-#| fig-height: 5
+#| fig-height: 7
 annual_global_emissions_by_receiver_type <- annual_global_emissions_by_receiver_type |>
   # Don't include unknown receiver type
   dplyr::filter(receiver_type != "unknown") |>
