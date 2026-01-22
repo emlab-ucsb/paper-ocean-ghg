@@ -1258,7 +1258,7 @@ pollutant_map_list <- purrr::map(
   }
 )
 
-cowplot::plot_grid(plotlist = pollutant_map_list, ncol = 3)
+#cowplot::plot_grid(plotlist = pollutant_map_list, ncol = 3)
 ```
 
 

@@ -55,14 +55,6 @@ total_spatial_co2_emissions_dark_by_footprint|stem|04a200523075a900|e433e8a5b8b2
 annual_global_emissions_by_receiver_type|stem|62b14406b52e72ff|a15ed3cd0b15df56|a29f64301d430822|-454120393||t20475.7312555998s|s884b|884|rds|local|vector|||0.013||
 all_performance_metrics|stem|7b42d9f802ffc457|94c46e0a343b2937|8a57845349887b04|-2088621195||t20475.7312558227s|s2189b|2189|rds|local|vector|||0.013||
 pixels_for_offshore_training_testing_split|stem|4eac8bde3c035983|1e3d0e59adb9306c|ca1e42628563bdfe|-6951856||t20475.7312563462s|s44871b|44871|rds|local|vector|||0.023||
-pull_gfw_data_locally|function|f81141110805c5bf
-run_custom_bq_query|function|f51b83db0de796b8
-download_gfw_data|function|8071964635c69c3f
-combine_EU_data|function|b5d57b0ec1728741
-.Random.seed|object|b143eb85396745b8
-run_gfw_query_and_save_table|function|076f052fc2a40190
-summarize_dark_fleet_model_results_emissions|function|9b954b9580149f8d
-summarize_dark_fleet_ratios_spatial|function|3ff490bad87fc0e5
 data_sources_file|stem|256cb3723841f253|46a239b3b68851eb|2c530c1562a7fbd1|1170827296|/Users/gmcdonald/github/paper-ocean-ghg/data/data_sources.csv|t20475.7389024379s|s3406b|3406|file|local|vector|||0.004||
 data_sources|stem|ceb108f58fac5ead|73c44d5b74410d9a|b0cdade6171deb05|1456474924||t20475.7402221914s|s1404b|1404|rds|local|vector|||0.127||
 quarto_notebook|stem|9d6bffebeebccd25|4e092b8ee380c350|f97bdd39dc302f83|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20473.9371698598s||14287212|file|local|vector|||2.505||✖ Error running quarto cli. Caused by error: ! System command 'quarto' failed
@@ -71,6 +63,14 @@ run_custom_bq_query|function|f51b83db0de796b8
 download_gfw_data|function|8071964635c69c3f
 combine_EU_data|function|b5d57b0ec1728741
 .Random.seed|object|ed3e6f1d5f100bb1
+run_gfw_query_and_save_table|function|076f052fc2a40190
+summarize_dark_fleet_model_results_emissions|function|9b954b9580149f8d
+summarize_dark_fleet_ratios_spatial|function|3ff490bad87fc0e5
+pull_gfw_data_locally|function|f81141110805c5bf
+run_custom_bq_query|function|f51b83db0de796b8
+download_gfw_data|function|8071964635c69c3f
+combine_EU_data|function|b5d57b0ec1728741
+.Random.seed|object|989e6f678aba5089
 run_gfw_query_and_save_table|function|076f052fc2a40190
 summarize_dark_fleet_model_results_emissions|function|9b954b9580149f8d
 summarize_dark_fleet_ratios_spatial|function|3ff490bad87fc0e5
