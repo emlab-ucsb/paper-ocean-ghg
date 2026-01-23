@@ -403,10 +403,7 @@ list(
     command = here::here("sql/registered_data_validation.sql"),
     read = download_gfw_data(
       bq_billing_project,
-      sql = readr::read_file(!!.x) |>
-        stringr::str_glue(
-          run_version_dark = run_version_dark
-        ),
+      sql = readr::read_file(!!.x),
       file_path = here::here(
         "data/registered_validation_data/registered_validation_data.csv"
       )
