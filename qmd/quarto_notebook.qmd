@@ -2538,6 +2538,9 @@ ggplot(
 #| results = 'asis'
 all_performance_metrics_table <- all_performance_metrics |>
   dplyr::mutate(
+    model = ifelse(is.na(pollutant), model, "emissions_regression")
+  ) |>
+  dplyr::mutate(
     model = stringr::str_replace_all(model, "_", "; ") |>
       stringr::str_to_sentence(),
     test = stringr::str_replace_all(test, "_", " ") |>
@@ -2559,15 +2562,6 @@ all_performance_metrics_table <- all_performance_metrics |>
     Pollutant = pollutant,
     Metric = metric,
     Estimate = estimate
-  ) |>
-  dplyr::filter(
-    !(Metric %in%
-      c(
-        "rsq_trad_backtransformed_naive",
-        "rsq_trad_backtransformed_regression",
-        "rsq_trad_backtransformed_rmse",
-        "rsq_trad_untransformed_log_scale"
-      ))
   ) |>
   dplyr::mutate(
     Metric = dplyr::case_when(
@@ -2622,6 +2616,12 @@ total_percent_change_by_fleet_tbl <- total_percent_change_by_fleet |>
   ) |>
   dplyr::mutate(
     pollutant = forcats::fct_relevel(pollutant, pollutant_factor_levels_tables)
+  ) |>
+  dplyr::mutate(
+    dplyr::across(
+      c(percent_total_2024, percent_change),
+      ~ scales::percent(., accuracy = 1)
+    )
   ) |>
   dplyr::arrange(pollutant) |>
   dplyr::rename(
