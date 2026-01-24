@@ -2576,10 +2576,11 @@ all_performance_metrics_table <- all_performance_metrics |>
       Metric ==
         "aggregate_prediction_percent_error" ~ "Percent error of total summed predictions",
       TRUE ~ Metric
-    )
+    ) |>
+      forcats::fct_relevel("Traditional R²")
   ) |>
   dplyr::mutate(Model = forcats::fct_relevel(Model, "Emissions; regression")) |>
-  dplyr::arrange(Model) |>
+  dplyr::arrange(Model, Metric) |>
   tidyr::pivot_wider(values_from = Estimate, names_from = Test) |>
   knitr::kable(
     format = "latex",
