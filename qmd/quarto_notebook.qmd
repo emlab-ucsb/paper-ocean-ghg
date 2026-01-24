@@ -2538,9 +2538,6 @@ ggplot(
 #| results = 'asis'
 all_performance_metrics_table <- all_performance_metrics |>
   dplyr::mutate(
-    model = ifelse(is.na(pollutant), model, "emissions_regression")
-  ) |>
-  dplyr::mutate(
     model = stringr::str_replace_all(model, "_", "; ") |>
       stringr::str_to_sentence(),
     test = stringr::str_replace_all(test, "_", " ") |>
