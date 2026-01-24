@@ -270,6 +270,21 @@ list(
     ),
     format = "file"
   ),
+  # Pixels used for the training/testing split for assessing
+  # performance outside the S1 footprint
+  tar_file(
+    name = pixels_for_offshore_training_testing_split,
+    command = download_gfw_data(
+      bq_billing_project,
+      sql = "SELECT * FROM `world-fishing-827.proj_ocean_ghg.pixels_for_offshore_training_testing_split_{run_version_dark}`" |>
+        stringr::str_glue(
+          run_version_dark = run_version_dark
+        ),
+      file_path = here::here(
+        "data/gfw/pixels_for_offshore_training_testing_split.csv"
+      )
+    )
+  ),
   # Annual AIS-broadcasting CO2 emissions by vessel type
   tar_file_read(
     name = annual_ais_co2_emissions_by_vessel_type,
@@ -430,20 +445,5 @@ list(
       )
     ),
     format = "file"
-  ),
-  # Pixels used for the training/testing split for assessing
-  # performance outside the S1 footprint
-  tar_file(
-    name = pixels_for_offshore_training_testing_split,
-    command = download_gfw_data(
-      bq_billing_project,
-      sql = "SELECT * FROM `world-fishing-827.proj_ocean_ghg.pixels_for_offshore_training_testing_split_{run_version_dark}`" |>
-        stringr::str_glue(
-          run_version_dark = run_version_dark
-        ),
-      file_path = here::here(
-        "data/gfw/pixels_for_offshore_training_testing_split.csv"
-      )
-    )
   )
 )
