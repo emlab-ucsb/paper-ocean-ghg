@@ -26,7 +26,7 @@ list(
   # Define the version of the dark fleet dataset to pull
   tar_target(
     name = run_version_dark,
-    "v20260120"
+    "v20260126"
   ),
   # Set analysis start year
   tar_target(
@@ -284,6 +284,22 @@ list(
         "data/gfw/pixels_for_offshore_training_testing_split.csv"
       )
     )
+  ),
+  # For each pixel, count up number of months that are imaged by S1 and not imaged
+  tar_file_read(
+    name = number_s1_imaged_months_by_pixel,
+    command = here::here("sql/number_s1_imaged_months_by_pixel.sql"),
+    read = download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_dark = run_version_dark
+        ),
+      file_path = here::here(
+        "data/gfw/number_s1_imaged_months_by_pixel.csv"
+      )
+    ),
+    format = "file"
   ),
   # Annual AIS-broadcasting CO2 emissions by vessel type
   tar_file_read(
