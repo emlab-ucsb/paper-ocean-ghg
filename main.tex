@@ -507,7 +507,7 @@ For the CO$_2$ emissions regression random forest, we simply train the model on 
 
 \subsubsection{Feature importance}
 
-After assessing model performance, we perform a final fit using the entire dataset to assess feature importance for the three non-broadcasting emissions models (Fig \ref{fig:fig-feature-importance}). Feature importance was quantified using the bias-corrected Gini index \cite{nembrini2018revival}, as implemented for random forests in the ranger R package \cite{ranger}. This metric quantifies how much each model feature reduces node impurity when it is used to make splits in the random forest's decision trees.
+After assessing model performance, we perform a final fit using the entire dataset to assess feature importance for the three non-broadcasting emissions random forest models (Fig \ref{fig:fig-feature-importance}). Feature importance was quantified using the bias-corrected Gini index \cite{nembrini2018revival}, as implemented for random forests in the ranger R package \cite{ranger}. This metric quantifies how much each model feature reduces node impurity when it is used to make splits in the random forest's decision trees.
 
 \begin{figure}[!p]
     \centering
@@ -517,12 +517,21 @@ After assessing model performance, we perform a final fit using the entire datas
     \label{fig:fig-feature-importance}
 \end{figure}
 
+\subsubsection{Linear regression fit statistics for non-gas models}
+
+Here we look at the linear regression fit statistics for the final models to convert CO$_2$ emissions to emissions of non-CO$_2$ gases (other GHGs and non-GHG pollutants), trained using the full dataset (Table \ref{tab:lm_other_gases_tidy_fit_stats}).
+
+\begin{table}[H]
+    \centering
+    \input{tables/lm_other_gases_tidy_fit_stats}
+\end{table}
+
 \subsubsection{Predicting non-broadcasting emissions}
 
-To generate the final global estimates of non-broadcasting vessel emissions, we: 1) train all models (the three random forests and eight linear regressions) using the entire dataset of observations that have both S1 detections and AIS emissions; and then 2) applied the trained models across all ocean pixels on a monthly basis for the entire 2017-2024 study period. The prediction workflow followed a hierarchical logic based on the availability of S1 detections:
+To generate the final global estimates of non-broadcasting vessel emissions, we: 1) train all models (the three random forests and eight linear regressions) using the entire dataset of observations that have both S1 detections and AIS emissions (Fig \ref{fig:fig-feature-importance}, Table \ref{tab:lm_other_gases_tidy_fit_stats}); and then 2) applied the trained models across all ocean pixels on a monthly basis for the entire 2017-2024 study period. The prediction workflow followed a hierarchical logic based on the availability of S1 detections:
 
 1. Direct estimation: If unmatched S1 detections are available for a given pixel-month, we use the unmatched detection density to directly predict non-broadcasting CO$_2$ emissions using the emissions regression model. We then use the other eight gas-specific linear regression models to convert CO$_2$ emissions to emissions of each of the other eight gases.
-2. Indirect estimation: If unmatched S1 detections are not available for a given pixel-month, we: a) predict whether or not unmatched detections are present using the classification first stage of the hurdle model; then b) if unmatched detections are predicted to be present, we predict the density of unmatched detections using the regression second stage of the hurdle model; then c) we use the predicted density of unmatched detections in the emissions regression model to predict CO$_2$ emissions; and finally d) we then use the other eight gas-specific linear regression models to convert CO$_2$ emissions to emissions of each of the other eight gases.. 
+2. Indirect estimation: If unmatched S1 detections are not available for a given pixel-month, we: a) predict whether or not unmatched detections are present using the classification first stage of the hurdle model; then b) if unmatched detections are predicted to be present, we predict the density of unmatched detections using the regression second stage of the hurdle model; then c) we use the predicted density of unmatched detections in the emissions regression model to predict CO$_2$ emissions; and finally d) we then use the other eight gas-specific linear regression models to convert CO$_2$ emissions to emissions of each of the other eight gases. 
 
 The final output provides a continuous global dataset of monthly non-broadcasting emissions, for all three GHGs and six pollutants, from 2017 to 2024 at 1×1-degree resolution, disaggregated by fishing and non-fishing vessel types.
 
