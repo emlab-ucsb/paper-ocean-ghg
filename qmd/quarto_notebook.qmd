@@ -912,7 +912,7 @@ cowplot::plot_grid(
 ```{r}
 #| label: fig-emissions-marine-ocean-other
 #| fig-cap: (A) Trend in CO2 emissions by ocean (normalized to 2017 baesline) . (B) Comparison in trend of CO2 emissions data (normalized to 2017 baesline) between marine transportation emissions from GFW, other transportation emissions from EDGAR, and all sector emissions from EDGAR.
-#| #| fig-width: 7.5
+#| fig-width: 7.5
 #| fig-height: 7
 # Calculate normalized annual changes in CO2 emissions by major ocean basin
 
@@ -1082,6 +1082,54 @@ cowplot::plot_grid(
   ncol = 1,
   labels = c("A", "B")
 )
+```
+
+```{r}
+#| label: fig-annual-emissions-by-ocean-and-data-source
+#| fig-cap: Annual total CO2 emissions by ocean, disaggregated by data source (AIS-broadcasting vessels, and non-broadcasting vessels detected by S1).
+#| fig-width: 7.5
+#| fig-height: 7.5
+ocean_time_series_fig_data <- total_spatial_co2_emissions_by_ocean |>
+  dplyr::select(ocean, year, emissions_co2_mt, emissions_co2_dark_mt) |>
+  dplyr::rename(AIS = emissions_co2_mt, S1 = emissions_co2_dark_mt) |>
+  tidyr::pivot_longer(
+    -c(ocean, year),
+    values_to = "emissions_mt",
+    names_to = "fleet"
+  ) |>
+  dplyr::mutate(ocean = stringr::str_to_title(ocean))
+
+ggplot(
+  ocean_time_series_fig_data,
+  aes(x = year, y = emissions_mt, fill = fleet)
+) +
+  geom_area(position = 'stack', alpha = 0.9) +
+  geom_line(
+    data = subset(ocean_time_series_fig_data, fleet == "S1"),
+    aes(x = year, y = emissions_mt),
+    color = "white"
+  ) +
+  scale_y_continuous(
+    labels = scales::unit_format(unit = "M", scale = 1e-6),
+    limits = c(0, NA)
+  ) +
+  scale_fill_manual(
+    values = all_data_source_color_palette,
+    breaks = c("AIS", "S1")
+  ) +
+  scale_x_continuous(
+    breaks = seq(
+      analysis_start_year,
+      analysis_end_year
+    )
+  ) +
+  facet_wrap(~ocean, ncol = 1, scales = "free_y") +
+  theme_plot() +
+  labs(
+    x = "",
+    y = expression(Annual ~ CO[2] ~ emissions ~ (MT)),
+    fill = "Data source"
+  )
 ```
 
 ```{r}
@@ -3158,11 +3206,19 @@ number_s1_imaged_months_by_pixel |>
 ```{r}
 lm_other_gases_tidy_fit_stats_tbl <- lm_other_gases_tidy_fit_stats |>
   dplyr::mutate(term = stringr::str_remove_all(term, "_")) |>
+  dplyr::mutate(
+    pollutant = stringr::str_to_upper(pollutant) |>
+      stringr::str_replace_all("_", "."),
+    pollutant = ifelse(pollutant == "VOCS", "VOCs", pollutant)
+  ) |>
+  dplyr::mutate(
+    pollutant = forcats::fct_relevel(pollutant, pollutant_factor_levels_tables)
+  ) |>
   dplyr::select(-c(model, run_version_dark_fleet_rf)) |>
   dplyr::arrange(pollutant) |>
   dplyr::mutate(std_error = scales::scientific(std_error)) |>
   dplyr::rename(
-    Gas = pollutant,
+    Pollutant = pollutant,
     Term = term,
     `Coefficient estimate` = estimate,
     `Standard error` = std_error,
