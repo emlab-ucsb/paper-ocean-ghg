@@ -1110,7 +1110,7 @@ emissions_by_ocean_summary_tbl <- annual_emissions_by_ocean_normalized |>
   dplyr::ungroup() |>
   dplyr::left_join(percent_pixels_imaged_ocean_all_time, by = "ocean") |>
   dplyr::mutate(
-    `Percent of CO2 emissions by non-broadcasting vessels` = (emissions_co2_dark_mt /
+    `Percent of total (AIS+S1) CO2 emissions by non-broadcasting vessels` = (emissions_co2_dark_mt /
       emissions_co2_mt_total) |>
       scales::percent(accuracy = 0.01)
   ) |>
@@ -1123,10 +1123,10 @@ emissions_by_ocean_summary_tbl <- annual_emissions_by_ocean_normalized |>
   ) |>
   dplyr::select(
     Ocean = ocean,
-    `2024 CO2 emissions (million MT)` = emissions_co2_mmt,
-    `Percent of global 2024 emissions` = percent_annual_total,
-    `Percent of CO2 emissions by non-broadcasting vessels`,
-    `Percent change in CO2 emissions from 2017 to 2024` = percent_emissions_co2_mt_normalized,
+    `2024 total (AIS+S1) CO2 emissions (million MT)` = emissions_co2_mmt,
+    `Percent of global total (AIS+S1) CO2 2024 emissions` = percent_annual_total,
+    `Percent of total (AIS+S1) CO2 emissions by non-broadcasting vessels`,
+    `Percent change in total (AIS+S1) CO2 emissions from 2017 to 2024` = percent_emissions_co2_mt_normalized,
     `Percent observations imaged by S1 (across 2017-2024)` = fraction_n_imaged,
   ) |>
   tidyr::pivot_longer(cols = -Ocean) |>
@@ -1135,7 +1135,7 @@ emissions_by_ocean_summary_tbl <- annual_emissions_by_ocean_normalized |>
   knitr::kable(
     format = "latex",
     label = "emissions_by_ocean_summary_tbl",
-    caption = "For each ocean, summary of: 2024 CO$_2$ emissions (metric tonnes); percentage of global 2024 CO$_2$ emissions from across all oceans; percent of 2024 CO$_2$ emissions by non-broadcasting vessels; percent change in CO$_2$ emissions from 2017 to 2024; and the percentage of all observations in the dataset (pixel-months) from 2017-2024 that were imaged by S1.",
+    caption = "For each ocean, summary of: 2024 total (AIS+S1) CO$_2$ emissions (metric tonnes); percentage of global total (AIS+S1) 2024 CO$_2$ emissions from across all oceans; percent of 2024 total (AIS+S1) CO$_2$ emissions by non-broadcasting vessels; percent change in total (AIS+S1) CO$_2$ emissions from 2017 to 2024; and the percentage of all observations in the dataset (pixel-months) from 2017-2024 that were imaged by S1.",
     digits = 3
   ) |>
   kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
