@@ -2732,12 +2732,19 @@ all_varimp_data |>
   dplyr::filter(!is.na(model_feature_long)) |>
   dplyr::mutate(
     model = stringr::str_replace_all(model, "_", " ") |>
-      stringr::str_to_sentence() |>
+      stringr::str_to_sentence()
+  ) |>
+  dplyr::mutate(
+    model = ifelse(
+      model == "Emissions regression",
+      "CO2 emissions regression",
+      model
+    ) |>
       forcats::fct_relevel(
         "Detections classification",
         "Detections regression",
-        "Emissions regression"
-      ),
+        "CO2 emissions regression"
+      )
   ) |>
   ggplot(aes(
     x = importance,
@@ -3150,13 +3157,14 @@ number_s1_imaged_months_by_pixel |>
 
 ```{r}
 lm_other_gases_tidy_fit_stats_tbl <- lm_other_gases_tidy_fit_stats |>
+  dplyr::mutate(term = stringr::str_remove_all(term, "_")) |>
   dplyr::select(-c(model, run_version_dark_fleet_rf)) |>
   dplyr::arrange(pollutant) |>
   dplyr::mutate(std_error = scales::scientific(std_error)) |>
   dplyr::rename(
     Gas = pollutant,
     Term = term,
-    Estimate = estimate,
+    `Coefficient estimate` = estimate,
     `Standard error` = std_error,
     `T-statistic` = statistic,
     `p.value` = p_value
