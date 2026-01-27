@@ -57,12 +57,14 @@ annual_emissions_all_pollutants|stem|0bc87b705c56f5a7|2e728dc6b8be6695|5bdcac9b1
 total_spatial_co2_emissions_dark_by_footprint|stem|6a2dd43aece8d8e4|e433e8a5b8b23163|e55f50c9914606f2|-1663666381||t20477.1010903206s|s155509b|155509|rds|local|vector|||0.024||
 all_performance_metrics_file|stem|ae4428f9808bc160|e062e7babb7522c1|2c530c1562a7fbd1|-1333333579|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/all_performance_metrics.csv|t20477.197606737s|s4996b|4996|file|local|vector|||0.005||
 all_performance_metrics|stem|1744f84acbe86e27|94c46e0a343b2937|a75deaf831401d1a|-2088621195||t20477.197881735s|s1189b|1189|rds|local|vector|||0.135||
+number_s1_imaged_months_by_pixel_file|stem|f733c2402e42b670|3b14c8cecbc67dc7|2c530c1562a7fbd1|-304449923|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/number_s1_imaged_months_by_pixel.csv|t20479.9713754637s|s567865b|567865|file|local|vector|||0.005||
+number_s1_imaged_months_by_pixel|stem|b90fbb6b91f5f7c6|27fa9883b0898db1|be8380eda97cf41f|787452024||t20479.9716013452s|s123403b|123403|rds|local|vector|||0.141||
 pull_gfw_data_locally|function|f81141110805c5bf
 run_custom_bq_query|function|f51b83db0de796b8
 download_gfw_data|function|56ae83fa4e3ee8f3
 combine_EU_data|function|b5d57b0ec1728741
-.Random.seed|object|f8e371a2bb8229a4
+.Random.seed|object|04896723913d5755
 run_gfw_query_and_save_table|function|076f052fc2a40190
 summarize_dark_fleet_model_results_emissions|function|9b954b9580149f8d
 summarize_dark_fleet_ratios_spatial|function|3ff490bad87fc0e5
-quarto_notebook|stem|1f5366639ce18346|4e092b8ee380c350|b9f4814a507bf469|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20477.2664636084s|s11336966b|11336966|file|local|vector|||33.33||
+quarto_notebook|stem|ea0c7d64edb7e6d9|0d065f659ad4c439|51fe10689f1efae1|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20479.9846221092s|s11784606b|11784606|file|local|vector|||63.14||

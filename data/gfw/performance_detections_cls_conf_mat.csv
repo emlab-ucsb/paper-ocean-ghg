@@ -1,9 +1,9 @@
 prediction,truth,count,model,test,run_version_dark_fleet_rf
-TRUE,TRUE,200139,detections_classification,inside_footprint,_v20260120
-FALSE,TRUE,55110,detections_classification,inside_footprint,_v20260120
-TRUE,FALSE,55203,detections_classification,inside_footprint,_v20260120
-FALSE,FALSE,1195173,detections_classification,inside_footprint,_v20260120
-TRUE,TRUE,108964,detections_classification,outside_footprint,_v20260120
-FALSE,TRUE,87186,detections_classification,outside_footprint,_v20260120
-TRUE,FALSE,104027,detections_classification,outside_footprint,_v20260120
-FALSE,FALSE,2143783,detections_classification,outside_footprint,_v20260120
+TRUE,TRUE,200187,detections_classification,inside_footprint,_v20260126
+FALSE,TRUE,55062,detections_classification,inside_footprint,_v20260126
+TRUE,FALSE,55221,detections_classification,inside_footprint,_v20260126
+FALSE,FALSE,1195155,detections_classification,inside_footprint,_v20260126
+TRUE,TRUE,108964,detections_classification,outside_footprint,_v20260126
+FALSE,TRUE,87186,detections_classification,outside_footprint,_v20260126
+TRUE,FALSE,104006,detections_classification,outside_footprint,_v20260126
+FALSE,FALSE,2143804,detections_classification,outside_footprint,_v20260126
