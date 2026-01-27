@@ -301,6 +301,21 @@ list(
     ),
     format = "file"
   ),
+  # Get linear regression fit coefficients (from lm)
+  # For other gas regressions to convert CO2 emissions to other gases
+  tar_file(
+    name = lm_other_gases_tidy_fit_stats,
+    command = download_gfw_data(
+      bq_billing_project,
+      sql = "SELECT * FROM `world-fishing-827.proj_ocean_ghg.rf_s1_lm_other_gases_tidy_emissions_rgr_{run_version_dark}`" |>
+        stringr::str_glue(
+          run_version_dark = run_version_dark
+        ),
+      file_path = here::here(
+        "data/gfw/lm_other_gases_tidy_fit_stats.csv"
+      )
+    )
+  ),
   # Annual AIS-broadcasting CO2 emissions by vessel type
   tar_file_read(
     name = annual_ais_co2_emissions_by_vessel_type,

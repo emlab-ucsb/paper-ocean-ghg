@@ -71,7 +71,8 @@ targets::tar_load(c(
   "data_sources",
   "pixels_for_offshore_training_testing_split",
   "total_spatial_co2_emissions_by_ocean",
-  "number_s1_imaged_months_by_pixel"
+  "number_s1_imaged_months_by_pixel",
+  "lm_other_gases_tidy_fit_stats"
 ))
 ```
 
@@ -915,24 +916,29 @@ cowplot::plot_grid(
 #| fig-height: 7
 # Calculate normalized annual changes in CO2 emissions by major ocean basin
 
+total_spatial_co2_emissions_by_ocean <- total_spatial_co2_emissions_by_ocean |>
+  dplyr::mutate(
+    emissions_co2_mt_total = emissions_co2_dark_mt + emissions_co2_mt
+  )
+
 # Get analysis_start_year values for time-series normalization
 annual_emissions_by_ocean_starting <- total_spatial_co2_emissions_by_ocean |>
   dplyr::filter(year == analysis_start_year) |>
-  dplyr::mutate(emissions_co2_mt_starting = emissions_co2_mt) |>
-  dplyr::select(-c(year, emissions_co2_mt))
+  dplyr::mutate(emissions_co2_mt_total_starting = emissions_co2_mt_total) |>
+  dplyr::select(ocean, emissions_co2_mt_total_starting)
 
 annual_emissions_by_ocean_normalized <- total_spatial_co2_emissions_by_ocean |>
   dplyr::inner_join(annual_emissions_by_ocean_starting, by = "ocean") |>
   dplyr::mutate(
-    emissions_co2_mt_normalized = emissions_co2_mt /
-      emissions_co2_mt_starting -
+    emissions_co2_mt_normalized = emissions_co2_mt_total /
+      emissions_co2_mt_total_starting -
       1
   )
 ocean_data_ending <- annual_emissions_by_ocean_normalized |>
   dplyr::filter(year == 2024) |>
   dplyr::mutate(
     emissions_co2_mt_ending = paste0(
-      prettyNum(signif(emissions_co2_mt / 1e6, 3), big.mark = ","),
+      prettyNum(signif(emissions_co2_mt_total / 1e6, 3), big.mark = ","),
       " MMT"
     ),
     ocean = stringr::str_to_sentence(ocean)
@@ -1082,17 +1088,33 @@ cowplot::plot_grid(
 #| results = 'asis'
 
 # Make and output a table summarizing 2024 CO2 emissions by ocean, and change in emissions from 2017 to 2024 by ocean
+# Figure out for each ocean the fraction of observations that were imaged by s1
+percent_pixels_imaged_ocean_all_time <- annual_emissions_by_ocean_normalized |>
+  dplyr::group_by(ocean) |>
+  dplyr::summarise(
+    fraction_n_imaged = (sum(number_observations_imaged) /
+      sum(number_observations)) |>
+      scales::percent(accuracy = 0.01)
+  ) |>
+  dplyr::ungroup()
 emissions_by_ocean_summary_tbl <- annual_emissions_by_ocean_normalized |>
   dplyr::filter(year == 2024) |>
   dplyr::group_by(year) |>
   dplyr::mutate(
-    percent_annual_total = (emissions_co2_mt /
-      sum(emissions_co2_mt)) |>
+    percent_annual_total = (emissions_co2_mt_total /
+      sum(emissions_co2_mt_total)) |>
       scales::percent(accuracy = 0.01),
     percent_emissions_co2_mt_normalized = emissions_co2_mt_normalized |>
       scales::percent(accuracy = 0.01)
   ) |>
   dplyr::ungroup() |>
+  dplyr::left_join(percent_pixels_imaged_ocean_all_time, by = "ocean") |>
+  dplyr::mutate(
+    `Percent of CO2 emissions by non-broadcasting vessels` = (emissions_co2_dark_mt /
+      emissions_co2_mt_total) |>
+      scales::percent(accuracy = 0.01)
+  ) |>
+  dplyr::mutate(ocean = stringr::str_to_sentence(ocean)) |>
   dplyr::mutate(
     emissions_co2_mmt = prettyNum(
       signif(emissions_co2_mt / 1e6, 3),
@@ -1101,14 +1123,19 @@ emissions_by_ocean_summary_tbl <- annual_emissions_by_ocean_normalized |>
   ) |>
   dplyr::select(
     Ocean = ocean,
-    `CO2 emissions in 2024 (million MT)` = emissions_co2_mmt,
-    `Percent of total 2024 CO2 emissions` = percent_annual_total,
-    `Percent change in CO2 emissions from 2017 to 2024` = percent_emissions_co2_mt_normalized
+    `2024 CO2 emissions (million MT)` = emissions_co2_mmt,
+    `Percent of global 2024 emissions` = percent_annual_total,
+    `Percent of CO2 emissions by non-broadcasting vessels`,
+    `Percent change in CO2 emissions from 2017 to 2024` = percent_emissions_co2_mt_normalized,
+    `Percent observations imaged by S1 (across 2017-2024)` = fraction_n_imaged,
   ) |>
+  tidyr::pivot_longer(cols = -Ocean) |>
+  tidyr::pivot_wider(names_from = Ocean, values_from = value) |>
+  dplyr::rename(`Summary statistic` = name) |>
   knitr::kable(
     format = "latex",
     label = "emissions_by_ocean_summary_tbl",
-    caption = "For each ocean, summary of: total 2024 CO$_2$ emissions (metric tonnes); percentage of total 2024 CO$_2$ emissions from across all oceans; and percent change in CO$_2$ emissions from 2017 to 2024.",
+    caption = "For each ocean, summary of: 2024 CO$_2$ emissions (metric tonnes); percentage of global 2024 CO$_2$ emissions from across all oceans; percent of 2024 CO$_2$ emissions by non-broadcasting vessels; percent change in CO$_2$ emissions from 2017 to 2024; and the percentage of all observations in the dataset (pixel-months) from 2017-2024 that were imaged by S1.",
     digits = 3
   ) |>
   kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")

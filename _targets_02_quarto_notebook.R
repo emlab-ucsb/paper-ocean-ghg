@@ -87,6 +87,13 @@ list(
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
+    name = lm_other_gases_tidy_fit_stats,
+    command = here::here(
+      "data/gfw/lm_other_gases_tidy_fit_stats.csv"
+    ),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
     name = annual_ais_co2_emissions_by_vessel_type,
     command = here::here(
       "data/gfw/annual_ais_co2_emissions_by_vessel_type.csv"
