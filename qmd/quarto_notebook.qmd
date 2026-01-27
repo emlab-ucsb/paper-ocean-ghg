@@ -3146,3 +3146,38 @@ number_s1_imaged_months_by_pixel |>
     color = "none"
   )
 ```
+
+
+```{r}
+lm_other_gases_tidy_fit_stats_tbl <- lm_other_gases_tidy_fit_stats |>
+  dplyr::select(-c(model, run_version_dark_fleet_rf)) |>
+  dplyr::arrange(pollutant) |>
+  dplyr::mutate(std_error = scales::scientific(std_error)) |>
+  dplyr::rename(
+    Gas = pollutant,
+    Term = term,
+    Estimate = estimate,
+    `Standard error` = std_error,
+    `T-statistic` = statistic,
+    `p.value` = p_value
+  ) |>
+  knitr::kable(
+    format = "latex",
+    escape = FALSE,
+    booktabs = TRUE,
+    longtable = FALSE,
+    caption = "Linear regression fit statistics for the final models trained to estimate emissions of non-CO$_2$ gases from CO$_2$ emissions. The model for each gas has 2 fit terms.",
+    label = "lm_other_gases_tidy_fit_stats",
+    digits = 3
+  ) |>
+  kableExtra::kable_styling(
+    latex_options = c("scale_down", "hold_position"),
+    font_size = 7
+  ) |>
+  kableExtra::landscape()
+
+writeLines(
+  lm_other_gases_tidy_fit_stats_tbl,
+  here::here("tables/lm_other_gases_tidy_fit_stats.tex")
+)
+```
