@@ -753,7 +753,8 @@ total_annual_emissions_by_fleet_fig <- annual_emissions |>
   ) +
   theme(
     panel.grid.minor = element_blank(),
-    legend.position = c(0.75, 0.4),
+    legend.position = "inside",
+    legend.position.inside = c(0.75, 0.4),
     legend.background = element_rect(fill = "white", color = "gray"),
     legend.title = element_blank()
   )
@@ -805,7 +806,8 @@ normalized_annual_emissions_by_fleet_fig <- annual_emissions |>
   ) +
   theme(
     panel.grid.minor = element_blank(),
-    legend.position = c(0.25, 0.85),
+    legend.position = "inside",
+    legend.position.inside = c(0.25, 0.85),
     legend.background = element_rect(fill = "white", color = "gray"),
     legend.title = element_blank()
   )
@@ -984,7 +986,8 @@ annual_ocean_emissions_normalized_fig <- annual_emissions_by_ocean_normalized |>
   ) +
   theme(
     panel.grid.minor = element_blank(),
-    legend.position = c(0.175, 0.6),
+    legend.position = "inside",
+    legend.position.inside = c(0.175, 0.6),
     legend.direction = "vertical",
     legend.title = element_blank(),
     legend.background = element_rect(fill = "white", color = "gray")
@@ -1057,7 +1060,8 @@ emissions_comparison_figure_normalized <- all_edgar_gfw_data_normalized |>
   ) +
   theme(
     panel.grid.minor = element_blank(),
-    legend.position = c(0.35, 0.9),
+    legend.position = "inside",
+    legend.position.inside = c(0.35, 0.9),
     legend.direction = "vertical",
     legend.title = element_blank(),
     legend.background = element_rect(fill = "white", color = "gray")
@@ -1556,7 +1560,8 @@ time_series_by_fishing_fig_co2 <- ggplot(
   labs(x = "", y = expression(Monthly ~ CO[2] ~ emissions ~ (MT))) +
   theme(
     panel.grid.minor = element_blank(),
-    legend.position = c(0.15, 0.9),
+    legend.position = "inside",
+    legend.position.inside = c(0.15, 0.9),
     legend.background = element_rect(fill = "white", color = "gray"),
     legend.title = element_blank()
   ) +
@@ -2134,7 +2139,8 @@ make_pollutant_by_fleet_time_series_figure <- function(
     labs(x = "", y = y_axis_label) +
     theme(
       panel.grid.minor = element_blank(),
-      legend.position = c(0.60, 0.90),
+      legend.position = "inside",
+      legend.position.inside = c(0.60, 0.90),
       legend.background = element_rect(fill = "white", color = "gray"),
       legend.title = element_blank(),
       axis.title.y = element_text(size = 9),
