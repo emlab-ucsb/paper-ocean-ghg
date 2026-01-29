@@ -72,7 +72,9 @@ targets::tar_load(c(
   "pixels_for_offshore_training_testing_split",
   "total_spatial_co2_emissions_by_ocean",
   "number_s1_imaged_months_by_pixel",
-  "lm_other_gases_tidy_fit_stats"
+  "lm_other_gases_tidy_fit_stats",
+  "s1_time_series",
+  "length_size_bin_distributions"
 ))
 ```
 
@@ -3244,4 +3246,82 @@ writeLines(
   lm_other_gases_tidy_fit_stats_tbl,
   here::here("tables/lm_other_gases_tidy_fit_stats.tex")
 )
+```
+
+
+```{r}
+#| label: fig-s1-coverage-time-series
+#| fig-cap: Time series of monthly S1 statistics
+#| fig-width: 7.5
+#| fig-height: 8
+s1_time_series |>
+  dplyr::mutate(
+    month = lubridate::ymd(month),
+    fraction_detections_unmatched = n_s1_detections_unmatched /
+      (n_s1_detections_unmatched + n_s1_detections)
+  ) |>
+  tidyr::pivot_longer(-month) |>
+  dplyr::mutate(
+    name = dplyr::case_when(
+      name ==
+        "fraction_detections_unmatched" ~ "Fraction vessel detections unmatched",
+      name == "n_s1_detections" ~ "Number vessel detections",
+      name ==
+        "n_s1_detections_unmatched" ~ "Number vessel detections unmatched",
+      name == "s1_scene_area_km2" ~ "Total imaged area of S1 scenes (km^2)",
+      name == "s1_scenes" ~ "Number of S1 scenes"
+    ) |>
+      forcats::fct_relevel(c(
+        "Number of S1 scenes",
+        "Total imaged area of S1 scenes (km^2)",
+        "Number vessel detections",
+        "Number vessel detections unmatched"
+      ))
+  ) |>
+  ggplot(aes(x = month, y = value)) +
+  facet_wrap(name ~ ., ncol = 1, scales = "free") +
+  geom_line() +
+  scale_y_continuous(limits = c(0, NA), labels = scales::comma) +
+  theme_plot() +
+  scale_x_continuous(
+    breaks = seq(
+      lubridate::ymd(glue::glue("{analysis_start_year}-01-01")),
+      lubridate::ymd(glue::glue("{analysis_end_year+1}-01-01")),
+      by = "1 year"
+    ),
+    labels = seq(analysis_start_year, analysis_end_year + 1)
+  ) +
+  theme_plot() +
+  labs(x = "", y = "")
+```
+
+
+```{r}
+#| label: fig-length-bin-distributions
+#| fig-cap: Distributions showing the number of unique AIS vessels and number of S1 detections for each length size bin, disaggregted by fishing and non-fishing vessels.
+#| fig-width: 7.5
+#| fig-height: 6
+length_size_bin_distributions |>
+  dplyr::mutate(
+    fishing = ifelse(fishing, "Fishing", "Non-fishing") |> forcats::fct_rev()
+  ) |>
+  dplyr::mutate(
+    type = ifelse(
+      type == "ais_vessels",
+      "Number AIS vessels",
+      "Number S1 detections"
+    )
+  ) |>
+  dplyr::mutate(
+    length_size_bin = glue::glue(
+      "{length_size_bin}\n({length_bin_min}-{length_bin_max}m)"
+    ) |>
+      stringr::str_replace("-Infm", "+ m")
+  ) |>
+  ggplot(aes(x = length_size_bin, y = n)) +
+  facet_wrap(type ~ fishing, scales = "free") +
+  geom_bar(stat = "identity") +
+  theme_plot() +
+  labs(x = "Length size bin", y = "Count") +
+  scale_y_continuous(labels = scales::comma)
 ```
