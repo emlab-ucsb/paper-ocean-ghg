@@ -86,6 +86,37 @@ list(
     ),
     format = "file"
   ),
+  # Number of S1 detections (matched and unmathced), number of S1 scenes, and total S1 area imaged,
+  # by month, during our time period
+  tar_file_read(
+    name = s1_time_series,
+    command = here::here("sql/s1_time_series.sql"),
+    read = download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_dark = run_version_dark,
+          analysis_start_year = analysis_start_year,
+          analysis_end_year = analysis_end_year
+        ),
+      file_path = here::here("data/gfw/s1_time_series.csv"),
+    ),
+    format = "file"
+  ),
+  # Get distributions of AIS vessels and S1 detections by length size bin and fishing/non-fishing
+  tar_file_read(
+    name = length_size_bin_distributions,
+    command = here::here("sql/length_size_bin_distributions.sql"),
+    read = download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_dark = run_version_dark
+        ),
+      file_path = here::here("data/gfw/length_size_bin_distributions.csv"),
+    ),
+    format = "file"
+  ),
   # Performance estimates for dark fleet models (emissions regression; detections classification; and detections regrions).
   # Includes performance estimates for both inside and outside the S1 footprint
   tar_file(
