@@ -21,6 +21,11 @@ list(
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
+    name = ping_level_hours_distribution,
+    command = here::here("data/gfw/ping_level_hours_distribution.csv"),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
     name = n_s1_detections,
     command = here::here("data/gfw/n_s1_detections.csv"),
     read = readr::read_csv(!!.x)

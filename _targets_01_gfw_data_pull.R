@@ -70,6 +70,22 @@ list(
     ),
     format = "file"
   ),
+  # Distribution of ping-level hours values (min, mean, max, median)
+  tar_file_read(
+    name = ping_level_hours_distribution,
+    command = here::here("sql/ping_level_hours_distribution.sql"),
+    read = download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_ais = run_version_ais,
+          analysis_start_year = analysis_start_year,
+          analysis_end_year = analysis_end_year
+        ),
+      file_path = here::here("data/gfw/ping_level_hours_distribution.csv"),
+    ),
+    format = "file"
+  ),
   # Number of S1 detections used during our time period
   tar_file_read(
     name = n_s1_detections,
