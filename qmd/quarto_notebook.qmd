@@ -52,7 +52,6 @@ targets::tar_load(c(
   "total_spatial_emissions_by_pollutant",
   "annual_ais_to_dark_activity_extrapolation",
   "total_monthly_emissions_by_pollutant",
-  "annual_ais_co2_emissions_by_vessel_type",
   "port_visit_co2_emissions_by_country",
   "trip_co2_emissions_by_from_to_countries",
   "annual_global_emissions_by_receiver_type",
@@ -716,7 +715,8 @@ writeLines(
     
     - For fishing vessels, the total social cost of CO$_{2}$, CH$_{4}$, and N$_{2}$O emissions in 2022 was `r annual_sc_fishing_non_fishing |> dplyr::filter(fishing == "Fishing",year=="Total") |> dplyr::pull(sc_billion_usd) |> round()` billion USD. This represents about `r scales::percent((annual_sc_fishing_non_fishing |> dplyr::filter(fishing == "Fishing",year=="Total") |> dplyr::pull(sc_billion_usd))/159)` of the total value of all wild capture fisheries (using 159 billion USD as the 2022 value of wild capture fisheries).
 
-    - The maximum value for our ping-level hours (i.e., the maximum amount of time over which we estimate emissions for a single ping) is `r signif(ping_level_hours_distribution$max_hours,3)` hours. Most pings are significantly shorter: the mean value is `r signif(ping_level_hours_distribution$mean_hours,3)`, and the median value is `r signif(ping_level_hours_distribution$median_hours,3)`
+- The time between pings is typically small (the mean value is `r signif(ping_level_hours_distribution$mean_hours,3)`hours and the median value is`r signif(ping_level_hours_distribution$median_hours,3)` hours, or about `r round(ping_level_hours_distribution$mean_hours*60)` minutes and `r round(ping_level_hours_distribution$median_hours*60)` minutes respectively), while the maximum value for this across our dataset is `r round(ping_level_hours_distribution$max_hours)` hours (meaning this is the most amount of time over which we will estimate emissions for a single message)
+
 
     # Figures
 
@@ -954,14 +954,6 @@ ocean_data_ending <- annual_emissions_by_ocean_normalized |>
     ocean,
     emissions_co2_mt_ending,
     emissions_co2_mt_normalized
-  ) |>
-  # Manually move these down, so labels don't interact with each other
-  dplyr::mutate(
-    emissions_co2_mt_normalized = dplyr::case_when(
-      ocean == "indian" ~ emissions_co2_mt_normalized - 0.25,
-      ocean == "atlantic" ~ emissions_co2_mt_normalized - .1,
-      TRUE ~ emissions_co2_mt_normalized
-    )
   )
 
 annual_ocean_emissions_normalized_fig <- annual_emissions_by_ocean_normalized |>
@@ -1509,72 +1501,60 @@ pollutant_time_series_data_co2 <- total_monthly_emissions_by_pollutant |>
 
 ```{r}
 #| label: fig-ais-data-richness
-#| fig-cap: (A) 2024 CO$_{2}$ emissions by vessel type for AIS-broadcasting vessels. (B) 2024 CO$_{2}$ emissions by country for AIS-broadcasting vessels during domestic trips, international trips (where emissions of each trip are partitioned equally to its departure and arrival country), and during port stays. Countries with no values are shown in black.
+#| fig-cap: (A) CO$_{2}$ emissions by vessel type for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated across 2017-2024. (B) CO$_{2}$ emissions by country for AIS-broadcasting vessels during  during different activity types (international trips, port stays, and domestic trips), aggregated across 2017-2024. For both panels, emissions for each international trip are partitioned equally to its departure and arrival country), and during port stays. Countries with no values are shown in black.
 #| fig-width: 9
 #| fig-height: 8
 
-time_series_data_monthly_emissions_by_fishing <- monthly_aggregated_time_series |>
+# Divde international trip emissions equally to from and to countries
+international_trip_emissions_by_country <- trip_co2_emissions_by_from_to_countries |>
+  dplyr::filter(from_country_iso3 != to_country_iso3) |>
+  dplyr::mutate(emissions_co2_mt = emissions_co2_mt / 2) |>
+  dplyr::select(
+    country_iso3 = from_country_iso3,
+    emissions_co2_mt,
+    vessel_class
+  ) |>
+  dplyr::bind_rows(
+    trip_co2_emissions_by_from_to_countries |>
+      dplyr::mutate(emissions_co2_mt = emissions_co2_mt / 2) |>
+      dplyr::select(
+        country_iso3 = to_country_iso3,
+        emissions_co2_mt,
+        vessel_class
+      )
+  ) |>
+  dplyr::group_by(country_iso3, vessel_class) |>
+  dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt)) |>
+  dplyr::ungroup()
+
+domestic_trip_emissions_by_country <- trip_co2_emissions_by_from_to_countries |>
+  dplyr::filter(from_country_iso3 == to_country_iso3) |>
+  dplyr::select(
+    country_iso3 = from_country_iso3,
+    emissions_co2_mt,
+    vessel_class
+  )
+
+all_port_and_trip_emissions <- international_trip_emissions_by_country |>
+  dplyr::mutate(type = "International trips") |>
+  dplyr::bind_rows(
+    domestic_trip_emissions_by_country |>
+      dplyr::mutate(type = "Domestic trips")
+  ) |>
+  dplyr::bind_rows(
+    port_visit_co2_emissions_by_country |>
+      dplyr::rename(country_iso3 = port_country_iso3) |>
+      dplyr::mutate(type = "Port stays")
+  ) |>
   dplyr::mutate(
-    time = lubridate::ymd(time)
-  ) |>
-  dplyr::group_by(time, fishing) |>
-  dplyr::summarise(
-    total_emissions_co2_mt = sum(emissions_co2_mt + emissions_co2_dark_mt)
-  ) |>
+    type = forcats::fct_relevel(type, "International trips", "Port stays")
+  )
+
+emissions_by_vessel_class_df <-
+  all_port_and_trip_emissions |>
+  dplyr::group_by(vessel_class, type) |>
+  dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt)) |>
   dplyr::ungroup() |>
-  dplyr::mutate(
-    fleet = dplyr::case_when(
-      fishing == TRUE ~ "Fishing",
-      fishing == FALSE ~ "Non-fishing"
-    ),
-    fleet = factor(fleet, levels = c("Non-fishing", "Fishing"))
-  )
-
-time_series_by_fishing_fig_co2 <- ggplot(
-  time_series_data_monthly_emissions_by_fishing,
-  aes(x = time, y = total_emissions_co2_mt, fill = fleet)
-) +
-  geom_area(position = 'stack', alpha = 0.9) +
-  geom_line(
-    data = subset(
-      time_series_data_monthly_emissions_by_fishing,
-      fleet == "Fishing"
-    ),
-    aes(x = time, y = total_emissions_co2_mt),
-    color = "white"
-  ) +
-  scale_y_continuous(
-    labels = scales::comma,
-    limits = c(0, NA)
-  ) +
-  scale_fill_manual(
-    values = all_data_source_color_palette,
-    breaks = c("Non-fishing", "Fishing")
-  ) +
-  scale_x_continuous(
-    breaks = seq(
-      lubridate::ymd(glue::glue("{analysis_start_year}-01-01")),
-      lubridate::ymd(glue::glue("{analysis_end_year+1}-01-01")),
-      by = "1 year"
-    ),
-    labels = seq(analysis_start_year, analysis_end_year + 1)
-  ) +
-  theme_plot() +
-  labs(x = "", y = expression(Monthly ~ CO[2] ~ emissions ~ (MT))) +
-  theme(
-    panel.grid.minor = element_blank(),
-    legend.position = "inside",
-    legend.position.inside = c(0.15, 0.9),
-    legend.background = element_rect(fill = "white", color = "gray"),
-    legend.title = element_blank()
-  ) +
-  scale_y_continuous(
-    labels = scales::unit_format(unit = "M", scale = 1e-6),
-    limits = c(0, NA)
-  )
-
-emissions_by_vessel_class_barplot <- annual_ais_co2_emissions_by_vessel_type |>
-  dplyr::filter(year == 2024) |>
   dplyr::mutate(
     fishing = ifelse(
       vessel_class %in%
@@ -1612,60 +1592,50 @@ emissions_by_vessel_class_barplot <- annual_ais_co2_emissions_by_vessel_type |>
         "chemical oil",
         "chemical or oil"
       )
+  )
+
+emissions_by_vessel_class_summary <- emissions_by_vessel_class_df |>
+  dplyr::group_by(fishing, type) |>
+  dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt)) |>
+  dplyr::ungroup() |>
+  dplyr::arrange(fishing, -emissions_co2_mt)
+
+emissions_by_vessel_class_barplot <- emissions_by_vessel_class_df |>
+  dplyr::mutate(
+    type = stringr::str_replace_all(type, " ", "\n") |>
+      forcats::fct_relevel("International\ntrips", "Port\nstays")
   ) |>
   ggplot(aes(
     x = emissions_co2_mt,
-    y = reorder(vessel_class, emissions_co2_mt)
+    y = reorder(vessel_class, emissions_co2_mt),
+    fill = type
   )) +
-  geom_col(position = position_dodge2(preserve = "single")) +
+  geom_bar(stat = "identity", position = position_stack(reverse = TRUE)) +
   ggforce::facet_col(~fishing, space = "free", scales = "free") +
   theme_plot() +
   labs(
     x = expression(2024 ~ CO[2] ~ emissions ~ (MT)),
-    y = ""
+    y = "",
+    fill = ""
   ) +
   scale_x_continuous(
     labels = scales::unit_format(unit = "M", scale = 1e-6),
     limits = c(0, NA)
-  )
+  ) +
+  paletteer::scale_fill_paletteer_d(palette = "ltc::trio4") +
+  theme(legend.position = "bottom", legend.direction = "horizontal")
 
-
-# Divde international trip emissions equally to from and to countries
-international_trip_emissions_by_country <- trip_co2_emissions_by_from_to_countries |>
-  dplyr::filter(from_country_iso3 != to_country_iso3) |>
-  dplyr::mutate(emissions_co2_mt = emissions_co2_mt / 2) |>
-  dplyr::select(country_iso3 = from_country_iso3, emissions_co2_mt) |>
-  dplyr::bind_rows(
-    trip_co2_emissions_by_from_to_countries |>
-      dplyr::mutate(emissions_co2_mt = emissions_co2_mt / 2) |>
-      dplyr::select(country_iso3 = to_country_iso3, emissions_co2_mt)
-  ) |>
-  dplyr::group_by(country_iso3) |>
+all_port_and_trip_emissions_without_vessel_class <- all_port_and_trip_emissions |>
+  dplyr::group_by(country_iso3, type) |>
   dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt)) |>
   dplyr::ungroup()
-
-domestic_trip_emissions_by_country <- trip_co2_emissions_by_from_to_countries |>
-  dplyr::filter(from_country_iso3 == to_country_iso3) |>
-  dplyr::select(country_iso3 = from_country_iso3, emissions_co2_mt)
-
-all_port_and_trip_emissions <- international_trip_emissions_by_country |>
-  dplyr::mutate(type = "International trips") |>
-  dplyr::bind_rows(
-    domestic_trip_emissions_by_country |>
-      dplyr::mutate(type = "Domestic trips")
-  ) |>
-  dplyr::bind_rows(
-    port_visit_co2_emissions_by_country |>
-      dplyr::rename(country_iso3 = port_country_iso3) |>
-      dplyr::mutate(type = "Port stays")
-  )
 
 
 all_countries_for_plot <- land |>
   sf::st_drop_geometry() |>
   dplyr::select(country_iso3) |>
   tidyr::crossing(
-    all_port_and_trip_emissions |>
+    all_port_and_trip_emissions_without_vessel_class |>
       dplyr::distinct(type)
   )
 
@@ -1675,7 +1645,7 @@ port_trip_emissions_fig <- ggplot() +
     data = all_countries_for_plot |>
       dplyr::left_join(land, by = ) |>
       dplyr::left_join(
-        all_port_and_trip_emissions,
+        all_port_and_trip_emissions_without_vessel_class,
         by = c("country_iso3", "type")
       ) |>
       sf::st_as_sf(),
@@ -1709,18 +1679,6 @@ port_trip_emissions_fig <- ggplot() +
     legend.key.width = unit(1.75, "cm")
   )
 
-# cowplot::plot_grid(
-#   cowplot::plot_grid(
-#     time_series_by_fishing_fig_co2,
-#     emissions_by_vessel_class_barplot,
-#     ncol = 1,
-#     rel_heights = c(0.4, 0.6),
-#     labels = c("A", "B")
-#   ),
-#   port_trip_emissions_fig,
-#   labels = c("", "C"),
-#   rel_widths = c(0.52, 0.48)
-# )
 
 cowplot::plot_grid(
   emissions_by_vessel_class_barplot,
@@ -1729,6 +1687,12 @@ cowplot::plot_grid(
   labels = c("A", "B"),
   rel_widths = c(0.52, 0.48)
 )
+```
+
+```{r}
+#| results = 'asis'
+emissions_by_vessel_class_summary |>
+  knitr::kable()
 ```
 
 # Figure 3.1 -----

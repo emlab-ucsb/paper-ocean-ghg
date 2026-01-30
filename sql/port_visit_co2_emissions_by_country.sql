@@ -2,6 +2,7 @@ WITH
   port_visit_emissions AS(
   SELECT
     visit_id,
+    ssvid,
     emissions_co2_mt
   FROM
     `world-fishing-827.proj_ocean_ghg.port_visit_level_emissions_{run_version_ais}` ),
@@ -20,14 +21,27 @@ WITH
     AND EXTRACT(YEAR
     FROM
       end_timestamp) BETWEEN {analysis_start_year}
-    AND {analysis_end_year} )
+    AND {analysis_end_year} ),
+    vessel_class_info AS(
+  SELECT
+  ssvid,
+  vessel_class
+  FROM
+  `world-fishing-827.proj_ocean_ghg.vessel_info_{run_version_ais}`
+)
 SELECT
 port_country_iso3,
+vessel_class,
 SUM(emissions_co2_mt) emissions_co2_mt
 FROM
 port_visit_emissions
 JOIN
 port_visits
 USING(visit_id)
+  JOIN
+  vessel_class_info
+  USING
+  (ssvid)
 GROUP BY
-port_country_iso3
+port_country_iso3,
+vessel_class

@@ -109,13 +109,6 @@ list(
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
-    name = annual_ais_co2_emissions_by_vessel_type,
-    command = here::here(
-      "data/gfw/annual_ais_co2_emissions_by_vessel_type.csv"
-    ),
-    read = readr::read_csv(!!.x)
-  ),
-  tar_file_read(
     name = port_visit_co2_emissions_by_country,
     command = here::here(
       "data/gfw/port_visit_co2_emissions_by_country.csv"

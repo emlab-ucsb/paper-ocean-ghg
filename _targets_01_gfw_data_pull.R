@@ -363,25 +363,7 @@ list(
       )
     )
   ),
-  # Annual AIS-broadcasting CO2 emissions by vessel type
-  tar_file_read(
-    name = annual_ais_co2_emissions_by_vessel_type,
-    command = here::here("sql/annual_ais_co2_emissions_by_vessel_type.sql"),
-    read = download_gfw_data(
-      bq_billing_project,
-      sql = readr::read_file(!!.x) |>
-        stringr::str_glue(
-          run_version_ais = run_version_ais,
-          analysis_start_year = analysis_start_year,
-          analysis_end_year = analysis_end_year
-        ),
-      file_path = here::here(
-        "data/gfw/annual_ais_co2_emissions_by_vessel_type.csv"
-      )
-    ),
-    format = "file"
-  ),
-  # Total 2024 port visit CO2 emissions by country
+  # Total 2024 port visit CO2 emissions by country and vessel class
   tar_file_read(
     name = port_visit_co2_emissions_by_country,
     command = here::here("sql/port_visit_co2_emissions_by_country.sql"),
@@ -399,7 +381,7 @@ list(
     ),
     format = "file"
   ),
-  # Total 2024 trip-level CO2 emissions by from- and to-country
+  # Total 2024 trip-level CO2 emissions by from- and to-country and vessel class
   tar_file_read(
     name = trip_co2_emissions_by_from_to_countries,
     command = here::here("sql/trip_co2_emissions_by_from_to_countries.sql"),
