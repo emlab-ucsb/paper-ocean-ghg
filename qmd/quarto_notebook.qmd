@@ -1501,7 +1501,7 @@ pollutant_time_series_data_co2 <- total_monthly_emissions_by_pollutant |>
 
 ```{r}
 #| label: fig-ais-data-richness
-#| fig-cap: (A) CO$_{2}$ emissions by vessel type for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated across 2017-2024. (B) CO$_{2}$ emissions by country for AIS-broadcasting vessels during  during different activity types (international trips, port stays, and domestic trips), aggregated across 2017-2024. For both panels, emissions for each international trip are partitioned equally to its departure and arrival country), and during port stays. Countries with no values are shown in black.
+#| fig-cap: (A) CO$_{2}$ emissions by vessel type for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated across 2017-2024. (B) CO$_{2}$ emissions by country for AIS-broadcasting vessels during  during different activity types (international trips, port stays, and domestic trips), aggregated across 2017-2024. For both panels, emissions for each international trip are partitioned equally to its departure and arrival country. Countries with no values are shown in black.
 #| fig-width: 9
 #| fig-height: 8
 
@@ -1614,7 +1614,7 @@ emissions_by_vessel_class_barplot <- emissions_by_vessel_class_df |>
   ggforce::facet_col(~fishing, space = "free", scales = "free") +
   theme_plot() +
   labs(
-    x = expression(2024 ~ CO[2] ~ emissions ~ (MT)),
+    x = expression(2017 ~ through ~ 2024 ~ CO[2] ~ emissions ~ (MT)),
     y = "",
     fill = ""
   ) +
@@ -1663,7 +1663,7 @@ port_trip_emissions_fig <- ggplot() +
   ) +
   labs(
     x = "",
-    fill = expression(2024 ~ CO[2] ~ emissions ~ (MT)),
+    fill = expression(2017 ~ through ~ 2024 ~ CO[2] ~ emissions ~ (MT)),
   ) +
   guides(
     fill = guide_colorbar(
