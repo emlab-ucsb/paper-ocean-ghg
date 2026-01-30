@@ -55,6 +55,9 @@ ping_level_hours_distribution_file|stem|21c65b3147813212|6ff55cd1b62babe3|2c530c
 ping_level_hours_distribution|stem|bc4f8995b2191345|874c59eeb91c07c6|ec4e27f961452556|901135014|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/ping_level_hours_distribution.csv|t20482.9277313465s|s126b|126|file|local|vector|||33.314||
 trip_co2_emissions_by_from_to_countries_file|stem|e9eda133867bb7be|17136300339ae55c|2c530c1562a7fbd1|-603768744|/Users/gmcdonald/github/paper-ocean-ghg/sql/trip_co2_emissions_by_from_to_countries.sql|t20483.809992778s|s959b|959|file|local|vector|||0.005||
 trip_co2_emissions_by_from_to_countries|stem|d87ac3805d8b8997|c1eadea446f6d236|b8e5bc241c4e0cb5|-1986711739|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/trip_co2_emissions_by_from_to_countries.csv|t20483.8101016425s|s1545168b|1545168|file|local|vector|||7.34||
+port_visit_co2_emissions_by_country_file|stem|65277a25571100c5|8d72e8912a542725|2c530c1562a7fbd1|-1104675242|/Users/gmcdonald/github/paper-ocean-ghg/sql/port_visit_co2_emissions_by_country.sql|t20483.8106546903s|s984b|984|file|local|vector|||0.004||
+port_visit_co2_emissions_by_country|stem|08a46e5d21ffa8f5|4d060399cd460f50|8c1ae59ee4f08ba4|1915603956|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/port_visit_co2_emissions_by_country.csv|t20483.8109332735s|s128661b|128661|file|local|vector|||5.018||
+fraction_vessels_by_registry_info_file|stem||0e9a86a2f449595e|2c530c1562a7fbd1|1844929519|/Users/gmcdonald/github/paper-ocean-ghg/sql/fraction_vessels_by_registry_info.sql|t20483.8630412547s||0|file|local|vector|||||_paths_ missing files: /Users/gmcdonald/github/paper-ocean-ghg/sql/fraction_vessels_by_registry_info.sql
 pull_gfw_data_locally|function|f81141110805c5bf
 run_custom_bq_query|function|f51b83db0de796b8
 download_gfw_data|function|56ae83fa4e3ee8f3
@@ -62,5 +65,5 @@ combine_EU_data|function|b5d57b0ec1728741
 run_gfw_query_and_save_table|function|076f052fc2a40190
 summarize_dark_fleet_model_results_emissions|function|9b954b9580149f8d
 summarize_dark_fleet_ratios_spatial|function|3ff490bad87fc0e5
-port_visit_co2_emissions_by_country_file|stem|65277a25571100c5|8d72e8912a542725|2c530c1562a7fbd1|-1104675242|/Users/gmcdonald/github/paper-ocean-ghg/sql/port_visit_co2_emissions_by_country.sql|t20483.8106546903s|s984b|984|file|local|vector|||0.004||
-port_visit_co2_emissions_by_country|stem|08a46e5d21ffa8f5|4d060399cd460f50|8c1ae59ee4f08ba4|1915603956|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/port_visit_co2_emissions_by_country.csv|t20483.8109332735s|s128661b|128661|file|local|vector|||5.018||
+fraction_vessels_emissions_by_registry_info_file|stem|6ea7e844593e74f6|40f9eb13c00c8197|2c530c1562a7fbd1|-1839977368|/Users/gmcdonald/github/paper-ocean-ghg/sql/fraction_vessels_emissions_by_registry_info.sql|t20483.8612520001s|s723b|723|file|local|vector|||0.005||
+fraction_vessels_emissions_by_registry_info|stem|95179467be9f6435|e601befb91cd0fd1|37fbf2dbafaeb944|-518675064|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/fraction_vessels_emissions_by_registry_info.csv|t20483.8634680994s|s153b|153|file|local|vector|||6.281||

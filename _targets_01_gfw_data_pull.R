@@ -70,6 +70,25 @@ list(
     ),
     format = "file"
   ),
+  # Summarize number of unique vessels, and total CO2 AIS-based emissions,
+  # for vessels: on the IMO registry; on some other registry; and without any registry info
+  tar_file_read(
+    name = fraction_vessels_emissions_by_registry_info,
+    command = here::here("sql/fraction_vessels_emissions_by_registry_info.sql"),
+    read = download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_ais = run_version_ais,
+          analysis_start_year = analysis_start_year,
+          analysis_end_year = analysis_end_year
+        ),
+      file_path = here::here(
+        "data/gfw/fraction_vessels_emissions_by_registry_info.csv"
+      ),
+    ),
+    format = "file"
+  ),
   # Distribution of ping-level hours values (min, mean, max, median)
   tar_file_read(
     name = ping_level_hours_distribution,

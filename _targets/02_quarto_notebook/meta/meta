@@ -63,12 +63,14 @@ port_visit_co2_emissions_by_country_file|stem|08a46e5d21ffa8f5|ef7ce5e36e3037fe|
 port_visit_co2_emissions_by_country|stem|3b6f18bc99d3c57e|efb5bc46e11e467b|3027d3a0110e5b11|1915603956||t20483.811151758s|s42611b|42611|rds|local|vector|||0.132||
 trip_co2_emissions_by_from_to_countries_file|stem|d87ac3805d8b8997|8d15bc987b9a7c10|2c530c1562a7fbd1|-603768744|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/trip_co2_emissions_by_from_to_countries.csv|t20483.8101016425s|s1545168b|1545168|file|local|vector|||0.008||
 trip_co2_emissions_by_from_to_countries|stem|30b7d0b117ecb8d0|cc1a47d4eb0391c7|bfe4d843503072df|-1986711739||t20483.8112024167s|s419216b|419216|rds|local|vector|||0.142||
+fraction_vessels_emissions_by_registry_info_file|stem|95179467be9f6435|1b36e7bd687d3b39|2c530c1562a7fbd1|-1839977368|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/fraction_vessels_emissions_by_registry_info.csv|t20483.8634680994s|s153b|153|file|local|vector|||0.008||
+fraction_vessels_emissions_by_registry_info|stem|fba483798941b31f|05601326f6ec7403|1f04d9ba68dedb15|-518675064||t20483.8636809778s|s398b|398|rds|local|vector|||0.133||
 pull_gfw_data_locally|function|f81141110805c5bf
 run_custom_bq_query|function|f51b83db0de796b8
 download_gfw_data|function|56ae83fa4e3ee8f3
 combine_EU_data|function|b5d57b0ec1728741
-.Random.seed|object|6f5efd7407b5e1e6
+.Random.seed|object|01519858cdd45d99
 run_gfw_query_and_save_table|function|076f052fc2a40190
 summarize_dark_fleet_model_results_emissions|function|9b954b9580149f8d
 summarize_dark_fleet_ratios_spatial|function|3ff490bad87fc0e5
-quarto_notebook|stem|0aefc9299878e151|f10241545d2a8af6|2f3b9192272a3baf|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20483.8332381949s|s12478891b|12478891|file|local|vector|||86.91||
+quarto_notebook|stem|ef06fe4e73c4a685|c9bf3c6c8430823f|c1a5f5bf9e8c4c49|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20483.8757703693s|s12482507b|12482507|file|local|vector|||37.52||

@@ -21,6 +21,13 @@ list(
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
+    name = fraction_vessels_emissions_by_registry_info,
+    command = here::here(
+      "data/gfw/fraction_vessels_emissions_by_registry_info.csv"
+    ),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
     name = ping_level_hours_distribution,
     command = here::here("data/gfw/ping_level_hours_distribution.csv"),
     read = readr::read_csv(!!.x)
