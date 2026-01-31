@@ -33,7 +33,8 @@ SELECT
   from_country_iso3,
   to_country_iso3,
   vessel_class,
-  SUM(emissions_co2_mt) emissions_co2_mt
+  SUM(emissions_co2_mt) emissions_co2_mt,
+  COUNT(DISTINCT trip_id) n_unique_trips
 FROM
   trip_emissions
 JOIN

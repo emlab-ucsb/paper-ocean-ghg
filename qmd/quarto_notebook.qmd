@@ -683,6 +683,8 @@ fraction_vessels_emissions_by_registry_info_expanded <- fraction_vessels_emissio
     `r scales::comma(signif(n_ais_messages$n_billion_ais_messages, 3))`
     billion individual AIS messages
 
+    - We assign these individual pings to `r trip_co2_emissions_by_from_to_countries |> dplyr::filter(from_country_iso3!=to_country_iso3) |> dplyr::pull(n_unique_trips) |> sum() |> prettyNum(big.mark=",")` international trips, `r trip_co2_emissions_by_from_to_countries |> dplyr::filter(from_country_iso3==to_country_iso3) |> dplyr::pull(n_unique_trips) |> sum() |> prettyNum(big.mark=",")` domestic trips, and `r port_visit_co2_emissions_by_country |> dplyr::pull(n_unique_port_vists) |> sum() |> prettyNum(big.mark=",")` port visits.
+
     - We obtained a dataset containing  `r signif(n_s1_detections$n_million_s1_detections,3)` million vessel detections from 2017 to 2024, of which `r signif(n_s1_detections$n_million_s1_detections_unmatched,3)` million detections were not matched to a broadcasting vessel. These detections come from across more than  `r floor(n_s1_detections$n_thousand_s1_scenes)` thousand individual S1 scenes.
 
 -   Because many vessels do not broadcast AIS, current approaches solely
@@ -1530,11 +1532,14 @@ international_trip_emissions_by_country <- trip_co2_emissions_by_from_to_countri
   dplyr::select(
     country_iso3 = from_country_iso3,
     emissions_co2_mt,
-    vessel_class
+    vessel_class,
+    n_unique_trips
   ) |>
   dplyr::bind_rows(
     trip_co2_emissions_by_from_to_countries |>
-      dplyr::mutate(emissions_co2_mt = emissions_co2_mt / 2) |>
+      dplyr::mutate(
+        emissions_co2_mt = emissions_co2_mt / 2
+      ) |>
       dplyr::select(
         country_iso3 = to_country_iso3,
         emissions_co2_mt,
@@ -1542,7 +1547,9 @@ international_trip_emissions_by_country <- trip_co2_emissions_by_from_to_countri
       )
   ) |>
   dplyr::group_by(country_iso3, vessel_class) |>
-  dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt)) |>
+  dplyr::summarise(
+    emissions_co2_mt = sum(emissions_co2_mt)
+  ) |>
   dplyr::ungroup()
 
 domestic_trip_emissions_by_country <- trip_co2_emissions_by_from_to_countries |>
@@ -1561,7 +1568,9 @@ all_port_and_trip_emissions <- international_trip_emissions_by_country |>
   ) |>
   dplyr::bind_rows(
     port_visit_co2_emissions_by_country |>
-      dplyr::rename(country_iso3 = port_country_iso3) |>
+      dplyr::rename(
+        country_iso3 = port_country_iso3
+      ) |>
       dplyr::mutate(type = "Port stays")
   ) |>
   dplyr::mutate(
@@ -1697,14 +1706,6 @@ port_trip_emissions_fig <- ggplot() +
     legend.key.width = unit(1.75, "cm")
   )
 
-
-cowplot::plot_grid(
-  emissions_by_vessel_class_barplot,
-  port_trip_emissions_fig,
-  ncol = 2,
-  labels = c("A", "B"),
-  rel_widths = c(0.52, 0.48)
-)
 ```
 
 ```{r}

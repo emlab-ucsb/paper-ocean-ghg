@@ -32,7 +32,8 @@ WITH
 SELECT
 port_country_iso3,
 vessel_class,
-SUM(emissions_co2_mt) emissions_co2_mt
+SUM(emissions_co2_mt) emissions_co2_mt,
+  COUNT(DISTINCT visit_id) n_unique_port_vists
 FROM
 port_visit_emissions
 JOIN
