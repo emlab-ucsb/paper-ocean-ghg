@@ -960,6 +960,9 @@ annual_emissions_by_ocean_normalized <- total_spatial_co2_emissions_by_ocean |>
     emissions_co2_mt_normalized = emissions_co2_mt_total /
       emissions_co2_mt_total_starting -
       1
+  ) |>
+  dplyr::mutate(
+    ocean = paste0(stringr::str_to_sentence(ocean), " Ocean")
   )
 ocean_data_ending <- annual_emissions_by_ocean_normalized |>
   dplyr::filter(year == 2024) |>
@@ -967,8 +970,7 @@ ocean_data_ending <- annual_emissions_by_ocean_normalized |>
     emissions_co2_mt_ending = paste0(
       prettyNum(signif(emissions_co2_mt_total / 1e6, 3), big.mark = ","),
       " MMT"
-    ),
-    ocean = stringr::str_to_sentence(ocean)
+    )
   ) |>
   dplyr::select(
     ocean,
@@ -977,7 +979,6 @@ ocean_data_ending <- annual_emissions_by_ocean_normalized |>
   )
 
 annual_ocean_emissions_normalized_fig <- annual_emissions_by_ocean_normalized |>
-  dplyr::mutate(ocean = paste0(stringr::str_to_sentence(ocean), " Ocean")) |>
   ggplot() +
   geom_hline(yintercept = 0, linetype = 2) +
   geom_line(
@@ -986,7 +987,7 @@ annual_ocean_emissions_normalized_fig <- annual_emissions_by_ocean_normalized |>
   ) +
   scale_x_continuous(
     breaks = seq(2017, 2024),
-    limits = c(2017, 2025.5)
+    limits = c(2017, 2025)
   ) +
   scale_y_continuous(
     labels = scales::percent
@@ -1002,7 +1003,7 @@ annual_ocean_emissions_normalized_fig <- annual_emissions_by_ocean_normalized |>
   theme(
     panel.grid.minor = element_blank(),
     legend.position = "inside",
-    legend.position.inside = c(0.175, 0.6),
+    legend.position.inside = c(0.21, 0.6),
     legend.direction = "vertical",
     legend.title = element_blank(),
     legend.background = element_rect(fill = "white", color = "gray")
@@ -1013,19 +1014,25 @@ annual_ocean_emissions_normalized_fig <- annual_emissions_by_ocean_normalized |>
       "Southern Ocean",
       "Arctic Ocean",
       "Pacific Ocean",
-      "Indian Ocean",
-      "Atlantic Ocean"
+      "Atlantic Ocean",
+      "Indian Ocean"
     )
   ) +
-  geom_label(
+  ggrepel::geom_text_repel(
     data = ocean_data_ending,
     aes(
       x = 2025,
       y = emissions_co2_mt_normalized,
-      label = emissions_co2_mt_ending
-    )
+      label = emissions_co2_mt_ending,
+      color = ocean
+    ),
+    direction = "y",
+    show.legend = FALSE,
+    nudge_x = 0,
+    xlim = c(2024.1, 2024.6),
+    min.segment.length = Inf,
+    fontface = "bold"
   )
-
 
 # Summarize total emissions by data source for 2023, for putting on figure
 
@@ -1060,7 +1067,7 @@ emissions_comparison_figure_normalized <- all_edgar_gfw_data_normalized |>
   ) +
   scale_x_continuous(
     breaks = seq(2017, 2024),
-    limits = c(2017, 2025.5)
+    limits = c(2017, 2025)
   ) +
   scale_y_continuous(
     labels = scales::percent
@@ -1076,7 +1083,7 @@ emissions_comparison_figure_normalized <- all_edgar_gfw_data_normalized |>
   theme(
     panel.grid.minor = element_blank(),
     legend.position = "inside",
-    legend.position.inside = c(0.35, 0.9),
+    legend.position.inside = c(0.3, 0.9),
     legend.direction = "vertical",
     legend.title = element_blank(),
     legend.background = element_rect(fill = "white", color = "gray")
@@ -1089,13 +1096,19 @@ emissions_comparison_figure_normalized <- all_edgar_gfw_data_normalized |>
       "Other transportation sectors (EDGAR)"
     )
   ) +
-  geom_label(
+  ggrepel::geom_text_repel(
     data = all_edgar_gfw_data_ending,
     aes(
       x = 2025,
       y = emissions_co2_mt_normalized,
-      label = emissions_co2_mt_ending
-    )
+      label = emissions_co2_mt_ending,
+      color = data_source
+    ),
+    show.legend = FALSE,
+    nudge_x = 0,
+    xlim = c(2024.1, 2024.6),
+    min.segment.length = Inf,
+    fontface = "bold"
   )
 cowplot::plot_grid(
   annual_ocean_emissions_normalized_fig,
