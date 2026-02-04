@@ -3244,8 +3244,7 @@ lm_other_gases_tidy_fit_stats_tbl <- lm_other_gases_tidy_fit_stats |>
   kableExtra::kable_styling(
     latex_options = c("scale_down", "hold_position"),
     font_size = 7
-  ) |>
-  kableExtra::landscape()
+  )
 
 writeLines(
   lm_other_gases_tidy_fit_stats_tbl,
