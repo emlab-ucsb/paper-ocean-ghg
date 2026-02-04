@@ -1,129 +1,71 @@
-% Downloaded from https://www.science.org/content/page/preparing-manuscripts-using-latex
-\documentclass[12pt]{article}
+% Latex Nature styling files downloaded from https://www.springernature.com/gp/authors/campaigns/latex-author-support#c17590862
+\documentclass[lineno,pdflatex,sn-nature]{sn-jnl}
 
-% Add line numbers for initial submission
-\usepackage{lineno}
-\linenumbers
-\usepackage{newtxtext,newtxmath}
-% Float allows for figures to appear exactly where they do in the text
-% I'm leaving this in now for convenience, but it will need to be
-% removed before submitting, as will all the [H] commands next to the figures
-\usepackage{float}
-% Allow external graphics files
-\usepackage{graphicx}
+%% Included Nature packages
+\usepackage{graphicx}%
+\usepackage{multirow}%
+\usepackage{amsmath,amssymb,amsfonts}%
+\usepackage{amsthm}%
+\usepackage{mathrsfs}%
+\usepackage[title]{appendix}%
+\usepackage{xcolor}%
+\usepackage{textcomp}%
+\usepackage{manyfoot}%
+\usepackage{booktabs}%
+\usepackage{algorithm}%
+\usepackage{algorithmicx}%
+\usepackage{algpseudocode}%
+\usepackage{listings}%
 
-% Allow text color
-\usepackage{xcolor}
-
-\usepackage{pdflscape} % Fixes: Environment landscape undefined
-\usepackage{longtable} % Fixes: Environment longtable undefined
-\usepackage{array}     % Fixes: \arraybackslash undefined
-\usepackage{booktabs}  % Required for professional table horizontal lines
-
-% Use US letter sized paper with 1 inch margins
-\usepackage[letterpaper,margin=1in]{geometry}
-
-% Double line spacing, including in captions
-\linespread{1.5} % For some reason double spacing is 1.5, not 2.0!
-
-% One space after each sentence
-\frenchspacing
-
-% Abstract formatting and spacing - no heading
-\renewenvironment{abstract}
-	{\quotation}
-	{\endquotation}
-
-% No date in the title section
-\date{}
-
-% Reference section heading
-\renewcommand\refname{References and Notes}
-
-% Figure and Table labels in bold
-\makeatletter
-\renewcommand{\fnum@figure}{\textbf{Figure \thefigure}}
-\renewcommand{\fnum@table}{\textbf{Table \thetable}}
-\makeatother
-
-% Call the accompanying scicite.sty package.
-% This formats citation numbers in Science style.
-\usepackage{scicite}
-
-% Provides the \url command, and fixes a crash if URLs or DOIs contain underscores
+%% Add some additional packages
+\usepackage{float} 
+\usepackage{pdflscape}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{verbatim}
 \usepackage{url}
 
-% Allows you to comment out large chunks of code
-\usepackage{verbatim}
-
-%%%%%%%%%%%% CUSTOM COMMANDS AND PACKAGES %%%%%%%%%%%%
-
-% Please DO NOT import additional external packages or .sty files.
-% Those are unlikely to work with our conversion software and will cause problems later.
-% Don't add any more \usepackage{} commands.
-
+% Make it so figures aren't forced to the bottom of pages
+\raggedbottom
 
 %%%%%%%%%%%%%%%% TITLE AND AUTHORS %%%%%%%%%%%%%%%%
 
-% Title of the paper.
-% Keep it short and understandable by any reader of Science.
-% Avoid acronyms or jargon. Use sentence case.
-\def\scititle{Quantifying comprehensive marine vessel emissions using satellite data fusion}
-
-% Store the title in a variable for reuse in the supplement (otherwise \maketitle deletes it)
-\title{\bfseries \boldmath \scititle}
-
-% Author and institution list.
-% Institution numbers etc. should be hard-coded, do *not* use the \footnote command.
-\author{
-	% You can write out first names or use initials - either way is acceptable, but be consistent
-	Gavin~McDonald$^{1,2,3\ast}$,\and
-    Pol~Carbó-Mestre$^{1,2,3}$\and
-    Olivier~Deschenes$^{3,4}$,\and
-    Jennifer~Bone$^{1,2,3}$,\and
-    E.~Fernando~Cagua$^{5}$,\and
-    Anna~Hughes$^{5}$,\and
-    David~Kroodsma$^{5}$,\and
-    Fernando~S.~Paolo$^{5}$,\and
-    Mark~Powell$^{5}$,\and
-	Zihan~Wei$^{5}$,\and
-    Christopher~Costello$^{1,2,3}$\and
-        % Institution list, in a slightly smaller font
-	\small$^{1}$Marine Science Institute, University of California, Santa Barbara, USA 93106.\and
-	\small$^{2}$Bren School of Environmental Science \& Management, University of California, Santa Barbara, USA 93106.\and
-	\small$^{3}$Environmental Markets Lab, University of California, Santa Barbara, USA 93106.\and    
-	\small$^{4}$Department of Economics, University of California, Santa Barbara, USA 93106.\and    
-	\small$^{5}$Global Fishing Watch, Washington DC, USA 20036.\and    
-	% Identify at least one corresponding author, with contact email address
-	\small$^\ast$Corresponding author. Email: gmcdonald@bren.ucsb.edu}
-
-%%%%%%%%%%%%%%%%% END OF PREAMBLE %%%%%%%%%%%%%%%%
-
-% Remove this before submission - just keeping it for now for convenience
-% \date{Last compiled on: \today}
-
 \begin{document}
 
+\title[Quantifying comprehensive marine vessel emissions using satellite data fusion]{Quantifying comprehensive marine vessel emissions using satellite data fusion}
+
+%% Author List
+\author*[1,2,3]{\fnm{Gavin} \sur{McDonald}}\email{gmcdonald@bren.ucsb.edu}
+
+\author[1,2,3]{\fnm{Pol} \sur{Carbó-Mestre}}
+\author[3,4]{\fnm{Olivier} \sur{Deschenes}}
+\author[1,2,3]{\fnm{Jennifer} \sur{Bone}}
+\author[5]{\fnm{E. Fernando} \sur{Cagua}}
+\author[5]{\fnm{Anna} \sur{Hughes}}
+\author[5]{\fnm{David} \sur{Kroodsma}}
+\author[5]{\fnm{Fernando S.} \sur{Paolo}}
+\author[5]{\fnm{Mark} \sur{Powell}}
+\author[5]{\fnm{Zihan} \sur{Wei}}
+\author[1,2,3]{\fnm{Christopher} \sur{Costello}}
+
+%% Affiliations
+\affil[1]{\orgdiv{Marine Science Institute}, \orgname{University of California}, \orgaddress{\city{Santa Barbara}, \postcode{93106}, \state{CA}, \country{USA}}}
+
+\affil[2]{\orgdiv{Bren School of Environmental Science \& Management}, \orgname{University of California}, \orgaddress{\city{Santa Barbara}, \postcode{93106}, \state{CA}, \country{USA}}}
+
+\affil[3]{\orgdiv{Environmental Markets Lab}, \orgname{University of California}, \orgaddress{\city{Santa Barbara}, \postcode{93106}, \state{CA}, \country{USA}}}
+
+\affil[4]{\orgdiv{Department of Economics}, \orgname{University of California}, \orgaddress{\city{Santa Barbara}, \postcode{93106}, \state{CA}, \country{USA}}}
+
+\affil[5]{\orgname{Global Fishing Watch}, \orgaddress{\city{Washington}, \postcode{20036}, \state{DC}, \country{USA}}}
+
+\abstract{Accurately measuring marine vessel emissions is critical for mitigating greenhouse gases that drive climate change and other pollutants that impact local health. Current approaches rely on the Automatic Identification System (AIS), a high-resolution tracking system carried by many vessels. However, not all vessels carry AIS; and even for those that do, AIS broadcast and reception quality can be inconsistent over space and time. To account for this, we developed a method for quantifying comprehensive marine vessel emissions at global scale by fusing two independent types of satellite data: 1) individual vessel tracking using AIS to estimate vessel-level emissions when possible, and 2) vessel detections using synthetic aperture radar (SAR) imagery to estimate emissions for vessels that do not use AIS or are operating in areas with poor AIS reception. We found that vessels emitted approximately 1.39 billion metric tonnes of CO$_{2}$ in 2024, accounting for 16\% of global fossil fuel emissions from the transportation sector. Current AIS-only approaches underestimate the magnitude of 2024 emissions by 16.2\%. Meanwhile, because AIS coverage has generally been increasing over time, current AIS-only approaches overestimate the increasing emissions trend by 15.9\% (from 2017 to 2024). By resolving the confound between changes in monitoring and actual changes in emissions, our approach provides a comprehensive estimate of the magnitude, trends, and spatial patterns of marine vessel GHG emissions and non-GHG air pollutant emissions that can enable interventions designed to mitigate them.}
+
 \maketitle
-
-% Abstract, in bold
-% There are strict length limits, and not all formats have abstracts.
-% Consult the journal instructions to authors for details.
-% Do not cite any references in the abstract.
-\begin{abstract} \bfseries \boldmath
-
-% Start with one or two sentences of background
-% Then summarise the results of your observations, experiments, simulations etc.
-% End with a statement of your main conclusions
-
-Accurately measuring marine vessel emissions is critical for mitigating greenhouse gases that drive climate change and other pollutants that impact local health. Current approaches rely on the Automatic Identification System (AIS), a high-resolution tracking system carried by many vessels. However, not all vessels carry AIS; and even for those that do, AIS broadcast and reception quality can be inconsistent over space and time. To account for this, we developed a method for quantifying comprehensive marine vessel emissions at global scale by fusing two independent types of satellite data: 1) individual vessel tracking using AIS to estimate vessel-level emissions when possible, and 2) vessel detections using synthetic aperture radar (SAR) imagery to estimate emissions for vessels that do not use AIS or are operating in areas with poor AIS reception. We found that vessels emitted approximately 1.39 billion metric tonnes of CO$_{2}$ in 2024, accounting for 16\% of global fossil fuel emissions from the transportation sector. Current AIS-only approaches \textit{underestimate} the magnitude of 2024 emissions by 16.2\%. Meanwhile, because AIS coverage has generally been increasing over time, current AIS-only approaches \textit{overestimate} the increasing emissions trend by 15.9\% (from 2017 to 2024). By resolving the confound between changes in monitoring and actual changes in emissions, our approach provides a comprehensive estimate of the magnitude, trends, and spatial patterns of marine vessel GHG emissions and non-GHG air pollutant emissions that can enable interventions designed to mitigate them.
-
-\end{abstract}
 
 \section{Summary}
 
  Combusting fossil fuels has important implications for both climate change and local air pollution. The transportation sector contributes significantly towards these emissions through ocean-based vessels as well as through aviation, railways, and roadways. We focus on marine emissions where patchy tracking and outdated models leave a substantial fraction of emissions completely unaccounted for. As a result, global inventories chronically underestimate marine vessel emissions and misrepresent trends, undermining efforts to monitor, regulate, and mitigate their climate and local health impacts. Here we develop a novel approach that fuses two independent satellite-based data sources in order to monitor all large ocean-going vessels, regardless of whether they use onboard tracking systems or not. This allows us to provide, for the first time, a comprehensive and high-resolution picture of vessel emissions at-sea. It also serves as an example of how independent satellite-based data sources can be fused in order to disentangle changes in monitoring versus changes in the outcome being monitored. Our global marine vessel emissions dataset can serve as a key input to designing and evaluating interventions aimed at mitigating climate change and local health impacts.
-
 
 \section{Introduction}
 
@@ -142,7 +84,7 @@ Our approach yields monthly, spatially explicit estimates of marine vessel emiss
 
 \section{Results}
 
-To correctly estimate both the magnitude and trends of marine emissions, it is essential to fuse data from sources that monitor both broadcasting and non-broadcasting vessels. Using this data fusion approach, we find that total global CO$_{2}$ emissions at sea in 2024 was 1.39 billion MT (Fig. \ref{fig:fig-emissions-by-data-source-and-maps}A), with an increase of 33\% from 2017 to 2024 (Fig. \ref{fig:fig-emissions-by-data-source-and-maps}B). If only considering emissions from vessels that broadcast AIS, in line with currently accepted state-of-the-art models, global CO$_{2}$ emissions in 2024 would be only 1.17 billion MT (Fig. \ref{fig:fig-emissions-by-data-source-and-maps}A), with a more pronounced increase from 2017 to 2024 of 38\% (Fig. \ref{fig:fig-emissions-by-data-source-and-maps}B).  Thus using only AIS data from broadcasting vessels \textit{underestimates} current global CO$_{2}$ emissions by 16.2\%, and \textit{overestimates} the increasing trend for 2017--2024 by 15.9\% (see Tables \ref{tab:total_percent_change_by_fleet} and \ref{tab:pollutant_ais_underestimation_overestimation_summary} for summaries of all other GHGs and pollutants). Fusing AIS and S1 data also provides a comprehensive picture of spatial marine vessel emissions patterns and how those patterns change over time (Fig. \ref{fig:fig-emissions-by-data-source-and-maps}C and Fig. \ref{fig:fig-pollutant-maps}).
+To correctly estimate both the magnitude and trends of marine emissions, it is essential to fuse data from sources that monitor both broadcasting and non-broadcasting vessels. Using this data fusion approach, we find that total global CO$_{2}$ emissions at sea in 2024 was 1.39 billion MT (Fig. \ref{fig:fig-emissions-by-data-source-and-maps}A), with an increase of 33\% from 2017 to 2024 (Fig. \ref{fig:fig-emissions-by-data-source-and-maps}B). If only considering emissions from vessels that broadcast AIS, in line with currently accepted state-of-the-art models, global CO$_{2}$ emissions in 2024 would be only 1.17 billion MT (Fig. \ref{fig:fig-emissions-by-data-source-and-maps}A), with a more pronounced increase from 2017 to 2024 of 38\% (Fig. \ref{fig:fig-emissions-by-data-source-and-maps}B).  Thus using only AIS data from broadcasting vessels underestimates current global CO$_{2}$ emissions by 16.2\%, and overestimates the increasing trend for 2017--2024 by 15.9\% (see Tables \ref{tab:total_percent_change_by_fleet} and \ref{tab:pollutant_ais_underestimation_overestimation_summary} for summaries of all other GHGs and pollutants). Fusing AIS and S1 data also provides a comprehensive picture of spatial marine vessel emissions patterns and how those patterns change over time (Fig. \ref{fig:fig-emissions-by-data-source-and-maps}C and Fig. \ref{fig:fig-pollutant-maps}).
 
 
 \begin{figure}[H]
@@ -154,14 +96,14 @@ To correctly estimate both the magnitude and trends of marine emissions, it is e
 
 Estimating emissions from non-broadcasting vessels not only offers new insights on the overall magnitude and temporal trends of global emissions, but also provides nuanced spatial information and information disaggregated by fishing and non-fishing vessels (Fig. \ref{fig:fig-spatial-temporal-richness-by-fleet-total-pseudolog}). In 2024, 24\% of CO$_{2}$ emissions from fishing vessels were from non-broadcasting vessels, and 15.6\% of CO$_{2}$ emissions from non-fishing vessels were from non-broadcasting vessels (Fig. \ref{fig:fig-spatial-temporal-richness-by-fleet-total-pseudolog}A). For both types of vessels, this fraction of emissions from non-broadcasting vessels has been declining steadily since 2020, consistent with a steady increase in AIS monitoring over the period. The time series data reveal strong seasonal trends and event-driven variations in marine GHG emissions. We see consistent dips during major holidays including Christmas, New Year’s Day, and Chinese New Year, as well as during the COVID-19 pandemic (Fig. \ref{fig:fig-spatial-temporal-richness-by-fleet-total-pseudolog}A and Fig. \ref{fig:fig-pollutant-time-series}). Being able to spatially quantify emissions from non-broadcasting vessels fills  important gaps in our current understanding of where marine vessel emissions take place, particularly in southeast Asia, China, the Caribbean, and the Mediterranean (Fig. \ref{fig:fig-spatial-temporal-richness-by-fleet-total-pseudolog}B), crucial for targeting policy or private sector interventions. 
 
-Across the entire 2017 to 2024 time series, almost all non-broadcasting emissions (92.3\%) occurred inside the S1 footprint and in pixel-months that were imaged by S1 (Fig. \ref{fig:fig-spatial-coverage-footprint}). This makes sense because part of the Copernicus system's observation strategy for S1 is specifically focused on imaging coastal and shipping areas, where ship density is highest \cite{ESA2013S1Handbook}. Our machine learning model for predicting these emissions directly from observed S1 detection density achieves a high out-of-sample predictive performance (traditional R$^{2}$ = 0.98 and total percent error of -4.5\% for CO$_2$, Table \ref{tab:all_performance_metrics_table}). Only 6.9\% of non-broadcasting emissions occurred inside the S1 footprint but in pixel-months that weren't imaged by S1, requiring us to use a two-stage hurdle framework using both a classification model (F1 Score = 0.77) and a regression model (traditional R$^{2}$ = 0.61) to predict S1 detection density before predicting emissions (traditional R$^{2}$ = 0.98). Only 0.84\% of non-broadcasting emissions occurred outside the S1 footprint entirely, since most vessels operating in these open ocean areas use AIS.
-
 \begin{figure}[H]
     \centering
     \includegraphics[width=\columnwidth]{figures/fig-spatial-temporal-richness-by-fleet-total-pseudolog-1.png}
     \caption{(A) Time series of monthly global CO$_2$ emissions, shown for both AIS-broadcasting and S1-detected non-broadcasting vessels, and for both fishing and non-fishing vessels. (B) Spatial distribution of cumulative 2017-2024 CO$_{2}$ emissions from both AIS-broadcasting and S1-detected non-broadcasting vessels, for both fishing and non-fishing vessels, and shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale).}
     \label{fig:fig-spatial-temporal-richness-by-fleet-total-pseudolog}
 \end{figure}
+
+Across the entire 2017 to 2024 time series, almost all non-broadcasting emissions (92.3\%) occurred inside the S1 footprint and in pixel-months that were imaged by S1 (Fig. \ref{fig:fig-spatial-coverage-footprint}). This makes sense because part of the Copernicus system's observation strategy for S1 is specifically focused on imaging coastal and shipping areas, where ship density is highest \cite{ESA2013S1Handbook}. Our machine learning model for predicting these emissions directly from observed S1 detection density achieves a high out-of-sample predictive performance (traditional R$^{2}$ = 0.98 and total percent error of -4.5\% for CO$_2$, Table \ref{tab:all_performance_metrics_table}). Only 6.9\% of non-broadcasting emissions occurred inside the S1 footprint but in pixel-months that weren't imaged by S1, requiring us to use a two-stage hurdle framework using both a classification model (F1 Score = 0.77) and a regression model (traditional R$^{2}$ = 0.61) to predict S1 detection density before predicting emissions (traditional R$^{2}$ = 0.98). Only 0.84\% of non-broadcasting emissions occurred outside the S1 footprint entirely, since most vessels operating in these open ocean areas use AIS.
 
 Our vessel-level AIS-broadcasting emissions data provide a detailed understanding of marine vessel emissions across vessel classes and activity types (Fig. \ref{fig:fig-ais-data-richness}). Chemical and oil tankers, some of which transport fossil fuels including crude oil, are themselves the largest emitters (Fig. \ref{fig:fig-ais-data-richness}A). Trawlers, which use an energy-intensive fishing technique in which nets are dragged through the water \cite{coello2015ais}, are the highest-emitting type of fishing vessel. Emissions from AIS-broadcasting vessels can be assigned to port stays in particular countries and port-to-port voyages within- and between-countries by analyzing the movement tracks of each individual vessel (Fig. \ref{fig:fig-ais-data-richness}A-B). Most emissions for non-fishing vessels occur during international trips, while most emissions for fishing vessels occur during domestic trips. China, Japan, and the United States had the most CO$_{2}$ emissions during within-country domestic trips in 2024. China, Malaysia, and the United States had the most CO$_{2}$ emissions during international trips that started or ended in these countries in 2024 (where the emissions from each trip are partitioned equally to its departure and arrival country). China, United States, and Indonesia had the most CO$_{2}$ emissions during port stays.
 
@@ -203,8 +145,7 @@ Measuring emissions is a necessary step towards reducing them. Until now, quanti
 
 \clearpage 
 
-\bibliography{bibliography} % for a file named science_template.bib
-\bibliographystyle{sciencemag}
+\bibliography{bibliography}
 
 \section*{Acknowledgments}
 
@@ -368,7 +309,11 @@ For the random forest to predict CO$_2$ emissions, in order to capture the vesse
 
 We define a global spatial resolution of 1x1-degree which is used for all spatial model features, and use a monthly temporal units for all temporal model features. All models features used across the three models are summarized in Table \ref{tab:data_sources} and described below.
 
+\clearpage
+
 \input{tables/data_sources}
+
+\clearpage
 
 \paragraph{S1 vessel detection features}
 
@@ -400,7 +345,7 @@ To account for temporal variability in each of the three models, we include a nu
 
 \subsubsection{Data pre-processing}
 
-We perform the following data pre-processing steps, in this order, each time a model is trained or predictions are inferred. In order to avoid data leakage during performance testing, data pre-processing that performs calculations that directly use the data (i.e., imputation of missing values) is always performed \textit{only} on the training data. To do so, we leverage the recipes package in R \cite{recipes}.
+We perform the following data pre-processing steps, in this order, each time a model is trained or predictions are inferred. In order to avoid data leakage during performance testing, data pre-processing that performs calculations that directly use the data (i.e., imputation of missing values) is always performed  on the training data. To do so, we leverage the recipes package in R \cite{recipes}.
 
 1. We treat several features as categorical (fishing or non-fishing; the post-2020 temporal boolean; ocean; and for the detection classification and regression models that are disaggregated by vessel length bin, we treat the length bin as categorical)
 
@@ -427,7 +372,6 @@ We assessed model performance for each of the three models using two different e
 Because both emissions and detection predictions inside the S1 footprint are made for locations where emissions and detections data is available for training, (i.e., inside the footprint we are not generalizing to regions with unknown emissions and detections), we first evaluated performance inside the footprint using a stratified random $80\%$/$20\%$ training/testing split. For each of the three models, we stratify the random split by the dependent variable (presence/absence of unmatched detections for the detections classification model; density of unmatched detections for the detections regression model; and log-transformed emissions for the emissions regression model). 
 
 For the detection presence/absence classification model, we use an additional validation dataset to optimize the classification cutoff threshold. In this case, we use a $60\%$/$20\%$/$20\%$ training/ validation/ testing split.
-
 
 \paragraph{Simulated outside S1 footprint testing}
 
@@ -469,10 +413,7 @@ For the CO$_2$ emissions regression random forest, we simply train the model on 
 \end{figure}
 
 
-\begin{table}[H]
-    \centering
-    \input{tables/all_performance_metrics_table}
-\end{table}
+\input{tables/all_performance_metrics_table}
 
 \subsubsection{Feature importance}
 
@@ -490,10 +431,7 @@ After assessing model performance, we perform a final fit using the entire datas
 
 Here we look at the linear regression fit statistics for the final models to convert CO$_2$ emissions to emissions of non-CO$_2$ gases (other GHGs and non-GHG pollutants), trained using the full dataset (Table \ref{tab:lm_other_gases_tidy_fit_stats}).
 
-\begin{table}[H]
-    \centering
-    \input{tables/lm_other_gases_tidy_fit_stats}
-\end{table}
+\input{tables/lm_other_gases_tidy_fit_stats}
 
 \subsubsection{Predicting non-broadcasting emissions}
 
@@ -610,29 +548,15 @@ Table S1 to S5\\
 
 \subsection{Supplementary Tables}
 
-\begin{table}[H]
-    \centering
-    \input{tables/total_percent_change_by_fleet}
-\end{table}
+\input{tables/total_percent_change_by_fleet}
 
-\begin{table}[H]
-    \centering    \input{tables/pollutant_ais_underestimation_overestimation_summary}
-\end{table}
+\input{tables/pollutant_ais_underestimation_overestimation_summary}
 
-\begin{table}[H]
-    \centering
-    \input{tables/emissions_by_ocean_summary_tbl}
-\end{table}
+\input{tables/emissions_by_ocean_summary_tbl}
 
-\begin{table}[H]
-    \centering
-    \input{tables/emissions_by_data_source_summary_tbl}
-\end{table}
+\input{tables/emissions_by_data_source_summary_tbl}
 
-\begin{table}[H]
-    \centering
-    \input{tables/annual_sc_fishing_non_fishing_tbl}
-\end{table}
+\input{tables/annual_sc_fishing_non_fishing_tbl}
 
 \subsection{Comparing our emission estimates to other inventories}
 
@@ -675,12 +599,5 @@ Finally, in Fig. \ref{fig:fig-co2-emissions-change-map-by-receiver-type}, we see
     \caption{Spatial change in CO$_{2}$ emissions by AIS-broadcasting vessels between 2017 and 2024 (metric tonnes) by receiver type (satellite, terrestrial, and dynamic) and total across receiver types, at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale).}
     \label{fig:fig-co2-emissions-change-map-by-receiver-type}
 \end{figure}
-
-%%%%%%%%%%%%%%%% SUPPLEMENTARY REFERENCES %%%%%%%%%%%%%%%
-
-% Do NOT include a reference list in the supplement.
-% All references must be in a single list at the end of the main text.
-% The copyeditors will ensure that the correct reference list appears with each version of the paper
-% (print, HTML, PDF, mobile app, metadata for bibliographic databases etc.)
 
 \end{document}
