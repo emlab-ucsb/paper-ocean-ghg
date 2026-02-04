@@ -65,5 +65,4 @@ ping_level_hours_distribution|stem|ping_level_hours_distribution|0|skipped
 total_monthly_emissions_by_pollutant|stem|total_monthly_emissions_by_pollutant|0|skipped
 fraction_vessels_emissions_by_registry_info|stem|fraction_vessels_emissions_by_registry_info|0|skipped
 trip_emissions_for_mrv_validation|stem|trip_emissions_for_mrv_validation|0|skipped
-quarto_notebook|stem|quarto_notebook|0|dispatched
-quarto_notebook|stem|quarto_notebook|0|completed
+quarto_notebook|stem|quarto_notebook|0|skipped
