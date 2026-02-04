@@ -185,9 +185,9 @@ Using the latest data available from the EU's Emissions Database for Global Atmo
 
 \section{Discussion}
 
-A high resolution understanding of marine vessel emissions is essential for designing effective policy solutions. However, incomplete vessel tracking data and technical data processing challenges have previously hindered progress \cite{chen2024analysis}. Our method, which overcomes these challenges, provides the necessary spatiotemporal data necessary for analyzing interventions that could mitigate the GHG emissions that drive climate change, as well as other air pollutants that impact ambient air quality and health. One of the most promising such interventions would be the International Maritime Organization (IMO) Net Zero Framework, which would establish the world's first global carbon market for marine vessel emissions with the goal of achieving net-zero GHG emissions from international shipping by 2050 \cite{IMO_MEPC83_2025}. Additional types of interventions  include improved port queuing systems (e.g., in Los Angeles and Long Beach \cite{rhodes2025investigation}), fuel standards  (e.g., sulfur and nitrogen control areas \cite{jutterstrom2021impact}), other carbon markets (e.g., the EU Emissions Trading System \cite{mao2024towards}), and vessel speed reduction zones (e.g., in California \cite{zobell2021underwater}). Our data could also be used to quantify the spatial health impacts of air pollution related to shipping and fishing activity \cite{zhang2021global}, along with the associated environmental justice implications.
+A high resolution understanding of marine vessel emissions is essential for designing effective policy solutions. However, incomplete vessel tracking data and technical data processing challenges have previously hindered progress \cite{chen2024analysis}. Our method, which overcomes these challenges, provides the necessary spatiotemporal data necessary for analyzing interventions that could mitigate the GHG emissions that drive climate change, as well as other air pollutants that impact ambient air quality and health. One of the most promising such interventions would be the International Maritime Organization (IMO) Net-Zero Framework, which would establish the world's first global carbon market for marine vessel emissions with the goal of achieving net-zero GHG emissions from international shipping by 2050 \cite{IMO_MEPC83_2025}. Additional types of interventions  include improved port queuing systems (e.g., in Los Angeles and Long Beach \cite{rhodes2025investigation}), fuel standards  (e.g., sulfur and nitrogen control areas \cite{jutterstrom2021impact}), other carbon markets (e.g., the EU Emissions Trading System \cite{mao2024towards}), and vessel speed reduction zones (e.g., in California \cite{zobell2021underwater}). Our data could also be used to quantify the spatial health impacts of air pollution related to shipping and fishing activity \cite{zhang2021global}, along with the associated environmental justice implications.
 
-Carbon markets could play a role in mitigating marine vessel emissions, and accurate and high-resolution emissions data is critical for designing, monitoring, and evaluating such markets. The IMO is considering a global price on carbon for shipping emissions \cite{imo_carbon_price}, which will be voted on in October, 2026. In recent years, the European Union Emissions Trading System has already been expanded to include marine transportation under the EU emissions cap, and to subject vessel activity to and from European Economic Area ports to a carbon price \cite{kotzampasakis2025maritime}. Implementing a carbon market based on limiting emissions intensity (the amount of emissions per unit of activity or production) could be an effective strategy for mitigating marine vessel emissions, even with a growing number of vessels. Carbon markets that are based on carbon credits for emissions intensity rather than just on capping emissions, such as India's emerging carbon market \cite{gupta2023assessing}, allow for overall economic growth while still incentivizing more efficient activity. This is consistent with a review paper on current marine vessel emissions datasets, which concluded that measures aimed at increasing technical efficiency of ships could be an effective way to decouple emissions growth from global trade demand \cite{dengreview}.
+Carbon markets could play a role in mitigating marine vessel emissions, and accurate and high-resolution emissions data is critical for designing, monitoring, and evaluating such markets. The IMO is considering a global price on carbon for international shipping emissions by large vessels (over 5,000 gross tonnage) \cite{imo_carbon_price}, which will be discussed again for potential adoption in October, 2026 \cite{IMO2025NetZero}. In recent years, the European Union Emissions Trading System has already been expanded to include marine transportation under the EU emissions cap, and to subject vessel activity to and from European Economic Area ports to a carbon price \cite{kotzampasakis2025maritime}. Implementing a carbon market based on limiting emissions intensity (the amount of emissions per unit of activity or production) could be an effective strategy for mitigating marine vessel emissions, even with a growing number of vessels. Carbon markets that are based on carbon credits for emissions intensity rather than just on capping emissions, such as India's emerging carbon market \cite{gupta2023assessing}, allow for overall economic growth while still incentivizing more efficient activity. This is consistent with a review paper on current marine vessel emissions datasets, which concluded that measures aimed at increasing technical efficiency of ships could be an effective way to decouple emissions growth from global trade demand \cite{dengreview}.
 
 With a more complete picture of global emissions at sea, we are in a position to understand the magnitude of the climate externality social cost (SC) associated with marine vessels, and how it compares to the value of the products these vessels carry? First we look at non-fishing vessels (e.g., cargo, tanker, etc.) and compare the SC to the total value of goods traded at sea. By multiplying the social cost of carbon (283 USD/MT \cite{moore2024synthesis}), social cost of methane (2,900 USD/MT \cite{wang2023damage}), and social cost of nitrous oxide (49,600 USD/MT \cite{wang2023damage}) each respectively with our estimated emissions for these GHGs from non-fishing vessels, we estimate an annual global climate externality of 322 billion USD for non-fishing vessels in 2021 (Table \ref{tab:social_cost_summary_tbl}). This represents about 5\% of the total value of all goods transported by maritime trade (using 6.63 trillion USD as the 2021 value of maritime-traded goods \cite{hoffmeister2022developing}). By doing the same calculation for fishing vessels, we estimate an annual global climate externality of 22 billion USD for fishing vessels in 2022 (Table \ref{tab:social_cost_summary_tbl}). This represents about 14\% of the total value of global capture fisheries (using 159 billion USD as the 2022 total first sale value \cite{fisheries2024state}). Using a similar approach, our voyage-level emissions dataset could be used to estimate the social cost climate externalities for country-to-country trade flows, allowing for the calculation of country-to-country metrics such as the SC per USD value of goods traded, or the SC per metric tonne of goods traded. For vessels tracked with AIS, it is also possible to assign an externality cost to individual port-to-port trips. In addition to climate externalities, marine transportation contributes to significant human health impacts arising from air pollution \cite{zhang2021global}.
 
@@ -218,79 +218,10 @@ Conceptualization: GM and DK; Methodology: GM, PCM, OD, EFC, AH, DK,MP, ZW, and 
 
 There are no competing interests to declare.
 
-\paragraph*{Data and materials availability:} All code and data necessary for reproducing this analysis will be made available in a public GitHub repository with an accompanying Zenodo repository and DOI.
+\paragraph*{Data and materials availability:} All code and data necessary for reproducing this figures and tables in this analysis will be made available in a public GitHub repository with an accompanying Zenodo repository and DOI.
 
 
-%%%%%%%%%%%%%%%% SUPPLEMENT LIST %%%%%%%%%%%%%%%
-
-% List the contents of your Supplementary Materials, including the numbers of any
-% supplementary figures, tables, external data files etc. and any references that are
-% cited only in the supplement. In this example, refs. 7-8 are cited only in the supplement.
-% Fill out your numbers accordingly and delete any lines that aren't applicable.
-\subsection*{Supplementary materials}
-Materials and Methods\\
-Supplementary Text and Figures\\
-Figures S1 to S7\\
-Table S1 to S3\\
-
-
-%%%%%%%%%%%%%%%% END OF MAIN TEXT %%%%%%%%%%%%%%%
-
-\newpage
-
-%%%%%%%%%%%%%%%% START OF SUPPLEMENT %%%%%%%%%%%%%%%
-
-% Figures, tables, equations and pages in the supplement are numbered S1, S2 etc.
-\renewcommand{\thefigure}{S\arabic{figure}}
-\renewcommand{\thetable}{S\arabic{table}}
-\renewcommand{\theequation}{S\arabic{equation}}
-\renewcommand{\thepage}{S\arabic{page}}
-\setcounter{figure}{0}
-\setcounter{table}{0}
-\setcounter{equation}{0}
-\setcounter{page}{1} % not 0 as \newpage already started a supplementary page
-% References continue the numbering from the main text.
-
-
-%%%%%%%%%%%%%%%% SUPPLEMENT TITLE PAGE %%%%%%%%%%%%%%%
-
-\begin{center}
-\section*{Supplementary Materials for\\ \scititle}
-
-\author{
-	% You can write out first names or use initials - either way is acceptable, but be consistent
-	Gavin~McDonald$^\ast$,
-    Pol~Carbó-Mestre,
-    Olivier~Deschenes,
-    Jennifer~Bone,
-    E.~Fernando~Cagua,
-    Anna~Hughes,
-    David~Kroodsma,
-    Fernando~S.~Paolo,
-    Mark~Powell,
-	Zihan~Wei,
-    Christopher~Costello
-	\small$^\ast$Corresponding author. Email: gmcdonald@bren.ucsb.edu}
-\end{center}
-
-% Fill out the numbers for each type of supplementary material,
-% and delete any lines that aren't applicable.
-% These are just example numbers that don't match the rest of this template.
-\subsubsection*{This PDF file includes:}
-Materials and Methods\\
-Supplementary Figures, Tables, and Text\\
-Figures S1 to S7\\
-Table S1 to S3\\
-
-\newpage
-
-%%%%%%%%%%%%%%%% MATERIALS AND METHODS %%%%%%%%%%%%%%%
-
-%%% REMOVE THIS WHEN WE SUBMIT
-%%% This is not part of the original template, but just something I added for convenience for now
-%% We'll also need to add a 'sub' prefix before all of the following sections. so \section will become \subsection, and \subsection will become \subsubsection
-\setcounter{section}{1}
-\section*{Materials and Methods}
+\section*{Methods}
 
 This work relies on multiple sources of spatial and tabular data to assess marine vessel emissions globally. We use AIS data, vessel registry information, Sentinel-1 and Sentinel-2 derived data to construct our AIS-based emission model and the non-broadcasting emissions model (Fig. \ref{fig:gfw_emissions_framework_flowchart}).
 
@@ -384,7 +315,7 @@ In Table \ref{tab:tab-performance-tolerance-table}, performance peaks at a tradi
 
 \subsubsection{Sentinel-1 SAR data description}
 
-For our non-broadcasting vessel emission estimates, we leverage GFW vessel detections from Sentinel-1 (S1) Synthetic Aperture Radar (SAR) imagery \cite{paolo2024satellite}. For each vessel detection, the dataset provides its inferred vessel length and likelihood of being classified as either a fishing vessel or non-fishing vessel. By spatiotemporally matching AIS-broadcasting vessels to S1 detections, the dataset also categorizes each vessel detection as either an AIS-broadcasting vessel ('matched') or a non-broadcasting vessel ('unmatched') \cite{kroodsma2022revealing,paolo2024satellite}. The data filtering involved in the GFW vessel detections include removing detections within a 1-km buffer from the shoreline to reduce false positives from land-based objects due to inaccurately defined and dynamic coastlines, repeated detections of potentially fixed objects such as offshore infrastructure, detections from icy areas, moving vehicles close to shore, and other radar ambiguities \cite{paolo2024satellite}. In addition, we also remove detections from known vessel anchorages \cite{gfw_anchorages_website}. As a result, we used a dataset containing 29.2 million vessel detections from 2017 to 2024, of which 13.5 million detections were not matched to a broadcasting vessel ('unmatched'). These detections come from across more than 845,000 individual S1 scenes ((Fig. \ref{fig:fig-map-fraction-months-imaged}, Fig. \ref{fig:fig-s1-coverage-time-series}).
+For our non-broadcasting vessel emission estimates, we leverage GFW vessel detections from Sentinel-1 (S1) Synthetic Aperture Radar (SAR) imagery \cite{paolo2024satellite}. For each vessel detection, the dataset provides its inferred vessel length and likelihood of being classified as either a fishing vessel or non-fishing vessel. By spatiotemporally matching AIS-broadcasting vessels to S1 detections, the dataset also categorizes each vessel detection as either an AIS-broadcasting vessel ('matched') or a non-broadcasting vessel ('unmatched') \cite{kroodsma2022revealing,paolo2024satellite}. The data filtering involved in the GFW vessel detections include removing detections within a 1-km buffer from the shoreline to reduce false positives from land-based objects due to inaccurately defined and dynamic coastlines, repeated detections of potentially fixed objects such as offshore infrastructure, detections from icy areas, moving vehicles close to shore, and other radar ambiguities \cite{paolo2024satellite}. In addition, we also remove detections from known vessel anchorages \cite{gfw_anchorages_website}. Vessels detected at anchorage may or may not be active and actually emitting, so we limit our non-broadcasting vessel emissions estimation to focus only on those vessels that are away from anchorage and actively operating in the open water. As a result, we used a dataset containing 29.2 million vessel detections from 2017 to 2024, of which 13.5 million detections were not matched to a broadcasting vessel ('unmatched'). These detections come from across more than 845,000 individual S1 scenes ((Fig. \ref{fig:fig-map-fraction-months-imaged}, Fig. \ref{fig:fig-s1-coverage-time-series}).
 
 \subsubsection{Overview of non-broadcasting vessel emissions modeling framework}
 
@@ -548,8 +479,8 @@ After assessing model performance, we perform a final fit using the entire datas
 \begin{figure}[!p]
     \centering
     \includegraphics[width=\columnwidth]{figures/fig-feature-importance-1.png}
-    \caption{Feature importance plots for the: 1) detections classification model;
-2) detections regression model; and 3) emissions regression model.}
+    \caption{Feature importance plots for the: 1) detections (presence/absence) classification model;
+2) detections regression model; and 3) CO$_2$ emissions regression model.}
     \label{fig:fig-feature-importance}
 \end{figure}
 
@@ -577,7 +508,7 @@ For this prediction, we replaced the four matched S1 detection density features 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{figures/fig-spatial-coverage-footprint-1.png}
+    \includegraphics[width=0.8\columnwidth]{figures/fig-spatial-coverage-footprint-1.png}
     \caption{Spatial coverage of the non-broadcasting emissions model. Areas are categorized according to whether they fall inside or outside the S1 footprint and whether they have been imaged by S1 at any point in time. A given pixel may be imaged in some months but not in others. Pixels outside the footprint have never been imaged. The percentage of total CO$_{2}$ emissions from non-broadcasting vessels attributed to each category is shown.}
     \label{fig:fig-spatial-coverage-footprint}
 \end{figure}
@@ -586,19 +517,68 @@ For this prediction, we replaced the four matched S1 detection density features 
 
 For pixel-months where S1 detections were unavailable, either because they were not imaged due to spatiotemporal satellite heterogeneity or because they fall fully outside the S1 footprint, we first used the detections classification model to predict whether detections were present or absent for each of the four length bins and fishing/non-fishing vessel types. If detections were predicted, the subsequent detection regression model was used to predict the number of unmatched S1 detections per km² for each length bin and fishing/non-fishing vessel type. These predicted unmatched detection densities were then fed into the emissions regression model as the four separate length-bin-related model features (for each fishing/non-fishing vessel type) to predict the resulting emissions. We do this for all nine emissions regression models corresponding to the three GHGs and six pollutants. Of the total predicted non-broadcasting CO$_2$ emissions, 6.9\% corresponded to indirect estimations within the S1 footprint, while only 0.84\% occurred entirely outside the footprint (Fig. \ref{fig:fig-spatial-coverage-footprint}).
 
-\subsection{Comparing our emission estimates to other inventories}
 
-Our total emissions estimates (summed across broadcasting and non-broadcasting vessels) are consistent with other well-known global inventories: the International Maritime Organization (IMO) \cite{fourth2020greenhouse}, the EU's Emissions Database for Global Atmospheric Research (EDGAR) \cite{JRC143227}, and the Organization for Economic Co-operation and Development (OECD) experimental shipping database \cite{clarke2023co2} (Fig. \ref{fig:fig-inventory-comparison} and Table \ref{tab:inventory_comparison}). For each inventory, we pull all available years of data from 2017 through 2024. Both the IMO and OECD inventories leverage AIS data, with IMO using an AIS-based model similar to ours, and OECD leveraging a machine learning model trained on the EU MRV database that uses AIS movement data to inform certain model features and which uses this model to make predictions for AIS-broadcasting vessels not contained in the EU MRV database. The EDGAR inventory uses national fuel use data and regional emissions factors to estimate emissions. Our approach combining AIS and S1 data yields the highest estimates, as expected. The level of general agreement for this complex estimate across multiple sources provides support for the reliability and utility of our methodology and results.
+%%%%%%%%%%%%%%%% SUPPLEMENT LIST %%%%%%%%%%%%%%%
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\columnwidth]{figures/fig-inventory-comparison-1.png}
-    \caption{Comparison of annual marine vessel CO$_{2}$ emissions inventory estimates.}
-    \label{fig:fig-inventory-comparison}
-\end{figure}
+% List the contents of your Supplementary Materials, including the numbers of any
+% supplementary figures, tables, external data files etc. and any references that are
+% cited only in the supplement. In this example, refs. 7-8 are cited only in the supplement.
+% Fill out your numbers accordingly and delete any lines that aren't applicable.
+\subsection*{Supplementary materials}
+Supplementary Text and Figures\\
+Figures S1 to S7\\
+Table S1 to S5\\
 
-\input{tables/inventory_comparison}
 
+%%%%%%%%%%%%%%%% END OF MAIN TEXT %%%%%%%%%%%%%%%
+
+\newpage
+
+%%%%%%%%%%%%%%%% START OF SUPPLEMENT %%%%%%%%%%%%%%%
+
+% Figures, tables, equations and pages in the supplement are numbered S1, S2 etc.
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\theequation}{S\arabic{equation}}
+\renewcommand{\thepage}{S\arabic{page}}
+\setcounter{figure}{0}
+\setcounter{table}{0}
+\setcounter{equation}{0}
+\setcounter{page}{1} % not 0 as \newpage already started a supplementary page
+% References continue the numbering from the main text.
+
+
+%%%%%%%%%%%%%%%% SUPPLEMENT TITLE PAGE %%%%%%%%%%%%%%%
+
+\begin{center}
+\section*{Supplementary Materials for\\ \scititle}
+
+\author{
+	% You can write out first names or use initials - either way is acceptable, but be consistent
+	Gavin~McDonald$^\ast$,
+    Pol~Carbó-Mestre,
+    Olivier~Deschenes,
+    Jennifer~Bone,
+    E.~Fernando~Cagua,
+    Anna~Hughes,
+    David~Kroodsma,
+    Fernando~S.~Paolo,
+    Mark~Powell,
+	Zihan~Wei,
+    Christopher~Costello
+	\small$^\ast$Corresponding author. Email: gmcdonald@bren.ucsb.edu}
+\end{center}
+
+% Fill out the numbers for each type of supplementary material,
+% and delete any lines that aren't applicable.
+% These are just example numbers that don't match the rest of this template.
+\subsubsection*{This PDF file includes:}
+Supplementary Figures, Tables, and Text\\
+Figures S1 to S7\\
+Table S1 to S5\\
+
+\newpage
+\setcounter{section}{1}
 %%%%%%%%%%%%%%%% SUPPLEMENTARY TEXT %%%%%%%%%%%%%%%
 
 \section*{Supplementary Figures, Tables, and Text}
@@ -651,6 +631,19 @@ Our total emissions estimates (summed across broadcasting and non-broadcasting v
     \centering
     \input{tables/annual_sc_fishing_non_fishing_tbl}
 \end{table}
+
+\subsection{Comparing our emission estimates to other inventories}
+
+Our total emissions estimates (summed across broadcasting and non-broadcasting vessels) are consistent with other well-known global inventories: the International Maritime Organization (IMO) \cite{fourth2020greenhouse}, the EU's Emissions Database for Global Atmospheric Research (EDGAR) \cite{JRC143227}, and the Organization for Economic Co-operation and Development (OECD) experimental shipping database \cite{clarke2023co2} (Fig. \ref{fig:fig-inventory-comparison} and Table \ref{tab:inventory_comparison}). For each inventory, we pull all available years of data from 2017 through 2024. Both the IMO and OECD inventories leverage AIS data, with IMO using an AIS-based model similar to ours, and OECD leveraging a machine learning model trained on the EU MRV database that uses AIS movement data to inform certain model features and which uses this model to make predictions for AIS-broadcasting vessels not contained in the EU MRV database. The EDGAR inventory uses national fuel use data and regional emissions factors to estimate emissions. Our approach combining AIS and S1 data yields the highest estimates, as expected. The level of general agreement for this complex estimate across multiple sources provides support for the reliability and utility of our methodology and results.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/fig-inventory-comparison-1.png}
+    \caption{Comparison of annual marine vessel CO$_{2}$ emissions inventory estimates.}
+    \label{fig:fig-inventory-comparison}
+\end{figure}
+
+\input{tables/inventory_comparison}
 
 \subsection{Trends in AIS receiver types}
 
