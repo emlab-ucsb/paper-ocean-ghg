@@ -2765,7 +2765,7 @@ writeLines(
 #| label: fig-feature-importance
 #| fig-cap: Feature importance plots for the three final model fit random forests
 #| fig-height: 9
-#| fig-width: 7
+#| fig-width: 7.5
 
 all_varimp_data |>
   dplyr::left_join(
