@@ -6,7 +6,6 @@ annual_edgar_emissions_file|stem|f371a87ee2cc7fb7|18bad1b35fdeef9b|2c530c1562a7f
 registered_validation_data_file|stem|89b69b77f37ebc21|9b365df83548e78c|2c530c1562a7fbd1|-307448036|/Users/gmcdonald/github/paper-ocean-ghg/data/registered_validation_data/registered_validation_data.csv|t20480.9275889944s|s1022023b|1022023|file|local|vector|||0.001||
 mrv_data_validation_file|stem|ee902fe75c4963f3|cc6f013e35295de1|2c530c1562a7fbd1|-1183176423|/Users/gmcdonald/github/paper-ocean-ghg/data/MRV/mrv_data_validation.csv|t20480.9244463302s|s7253728b|7253728|file|local|vector|||0||
 annual_global_emissions_by_receiver_type_file|stem|37ffb1d752cfbca1|1607dbe2a94dae91|2c530c1562a7fbd1|-1682798962|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/annual_global_emissions_by_receiver_type.csv|t20480.9263569631s|s1524b|1524|file|local|vector|||0||
-data_sources_file|stem|256cb3723841f253|46a239b3b68851eb|2c530c1562a7fbd1|1170827296|/Users/gmcdonald/github/paper-ocean-ghg/data/data_sources.csv|t20475.7389024379s|s3406b|3406|file|local|vector|||0.001||
 oecd_data_file|stem|e6e73d3ba66c0d28|2c6dadda86046fb4|2c530c1562a7fbd1|1654771300|/Users/gmcdonald/github/paper-ocean-ghg/data/oecd/annual_oecd_experimental_data.csv|t20327.9033356538s|s2370b|2370|file|local|vector|||0.001||
 trip_emissions_for_mrv_validation_file|stem|c1962eeb26b815e8|a7a4f862e1330969|2c530c1562a7fbd1|-869772083|/Users/gmcdonald/github/paper-ocean-ghg/data/MRV/trip_emissions_for_mrv_validation.csv|t20480.9265732612s|s16027422b|16027422|file|local|vector|||0.001||
 n_unique_vessels_file|stem|56585e2d9c4666a0|8140f2efd801d434|2c530c1562a7fbd1|30567198|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/n_unique_vessels.csv|t20480.9247773581s|s24b|24|file|local|vector|||0.001||
@@ -20,7 +19,6 @@ registered_validation_data|stem|ae7890cfb99e407b|d2f7023744046030|bd2c680b6ebf49
 mrv_data_validation|stem|264a14bbb164936d|02a63dec589ad856|d8bdc2636ec944ad|-1156835875||t20480.9282237786s|s2726715b|2726715|rds|local|vector|||0.044||
 lm_other_gases_tidy_fit_stats|stem|f750d08853f86f23|cfc29f41fa3a4b61|741426f1e7498932|-869830728||t20480.9282241633s|s880b|880|rds|local|vector|||0.017||
 annual_global_emissions_by_receiver_type|stem|3cc4259efeda7dee|a15ed3cd0b15df56|beaa4af67f8f10b3|-454120393||t20480.9282246339s|s1037b|1037|rds|local|vector|||0.014||
-data_sources|stem|ceb108f58fac5ead|73c44d5b74410d9a|b0cdade6171deb05|1456474924||t20480.9282248682s|s1404b|1404|rds|local|vector|||0.015||
 oecd_data|stem|7ba90a0b5b717794|e61fa5b472f3aa78|f1e96eff7e0f1de8|-1839373977||t20480.9282257197s|s253b|253|rds|local|vector|||0.021||
 trip_emissions_for_mrv_validation|stem|ee59f53df2b80151|b64a32dabe8fb998|431f5a007f6d3b3b|1762988021||t20480.9282331368s|s5548778b|5548778|rds|local|vector|||0.07||
 n_s1_detections|stem|9ca6480cb68be16c|c682d60f0f8756cd|59bd6924dc874738|-1220995872||t20480.9282339296s|s343b|343|rds|local|vector|||0.014||
@@ -65,12 +63,14 @@ trip_co2_emissions_by_from_to_countries_file|stem|0445f1450bc61d57|8d15bc987b9a7
 port_visit_co2_emissions_by_country_file|stem|a7c2129ddaaeb796|ef7ce5e36e3037fe|2c530c1562a7fbd1|-1104675242|/Users/gmcdonald/github/paper-ocean-ghg/data/gfw/port_visit_co2_emissions_by_country.csv|t20483.917114735s|s141049b|141049|file|local|vector|||0||
 trip_co2_emissions_by_from_to_countries|stem|5d5e1826b5591e1f|cc1a47d4eb0391c7|f03018b7d2667fdd|-1986711739||t20483.9173242894s|s467343b|467343|rds|local|vector|||0.157||
 port_visit_co2_emissions_by_country|stem|d0feccb4b6573ab1|efb5bc46e11e467b|e8a3f047d12e6e09|1915603956||t20483.9173246982s|s50700b|50700|rds|local|vector|||0.024||
-quarto_notebook|stem|162797d4509973e5|c9bf3c6c8430823f|92ba25c1ff59b044|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20488.7794677575s|s11509146b|11509146|file|local|vector|||36.139||
+data_sources_file|stem|22c7f5badd84d9dc|46a239b3b68851eb|2c530c1562a7fbd1|1170827296|/Users/gmcdonald/github/paper-ocean-ghg/data/data_sources.csv|t20488.9495068838s|s3212b|3212|file|local|vector|||0.008||
+data_sources|stem|7125f42859a0e274|73c44d5b74410d9a|7fb256fc705db8f1|1456474924||t20488.9495814643s|s1351b|1351|rds|local|vector|||0.186||
 pull_gfw_data_locally|function|f81141110805c5bf
 run_custom_bq_query|function|f51b83db0de796b8
 download_gfw_data|function|56ae83fa4e3ee8f3
 combine_EU_data|function|b5d57b0ec1728741
-.Random.seed|object|d609471accdfcf2f
+.Random.seed|object|2d560eaa50880b0c
 run_gfw_query_and_save_table|function|076f052fc2a40190
 summarize_dark_fleet_model_results_emissions|function|9b954b9580149f8d
 summarize_dark_fleet_ratios_spatial|function|3ff490bad87fc0e5
+quarto_notebook|stem|31c2f1360b7b3024|c9bf3c6c8430823f|b4254c1e62ba4b52|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20488.9563382245s|s11514198b|11514198|file|local|vector|||36.603||

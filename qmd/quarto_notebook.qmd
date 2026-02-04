@@ -1192,11 +1192,14 @@ emissions_by_ocean_summary_tbl <- annual_emissions_by_ocean_normalized |>
   dplyr::ungroup() |>
   dplyr::left_join(percent_pixels_imaged_ocean_all_time, by = "ocean") |>
   dplyr::mutate(
-    `Percent of total (AIS+S1) CO2 emissions by non-broadcasting vessels` = (emissions_co2_dark_mt /
+    `Percent of total CO2 emissions by non-broadcasting` = (emissions_co2_dark_mt /
       emissions_co2_mt_total) |>
       scales::percent(accuracy = 0.01)
   ) |>
-  dplyr::mutate(ocean = stringr::str_to_sentence(ocean)) |>
+  dplyr::mutate(
+    ocean = stringr::str_to_sentence(ocean) |>
+      stringr::str_remove_all(" ocean")
+  ) |>
   dplyr::mutate(
     emissions_co2_mmt = prettyNum(
       signif(emissions_co2_mt / 1e6, 3),
@@ -1205,10 +1208,10 @@ emissions_by_ocean_summary_tbl <- annual_emissions_by_ocean_normalized |>
   ) |>
   dplyr::select(
     Ocean = ocean,
-    `2024 total (AIS+S1) CO2 emissions (million MT)` = emissions_co2_mmt,
-    `Percent of global total (AIS+S1) CO2 2024 emissions` = percent_annual_total,
-    `Percent of total (AIS+S1) CO2 emissions by non-broadcasting vessels`,
-    `Percent change in total (AIS+S1) CO2 emissions from 2017 to 2024` = percent_emissions_co2_mt_normalized,
+    `2024 total CO2 emissions (million MT)` = emissions_co2_mmt,
+    `Percent of total CO2 2024 emissions` = percent_annual_total,
+    `Percent of total CO2 emissions by non-broadcasting`,
+    `Percent change in total CO2 emissions (2017 to 2024)` = percent_emissions_co2_mt_normalized,
     `Percent observations imaged by S1 (across 2017-2024)` = fraction_n_imaged,
   ) |>
   tidyr::pivot_longer(cols = -Ocean) |>
@@ -1220,7 +1223,7 @@ emissions_by_ocean_summary_tbl <- annual_emissions_by_ocean_normalized |>
     caption = "For each ocean, summary of: 2024 total (AIS+S1) CO$_2$ emissions (metric tonnes); percentage of global total (AIS+S1) 2024 CO$_2$ emissions from across all oceans; percent of 2024 total (AIS+S1) CO$_2$ emissions by non-broadcasting vessels; percent change in total (AIS+S1) CO$_2$ emissions from 2017 to 2024; and the percentage of all observations in the dataset (pixel-months) from 2017-2024 that were imaged by S1.",
     digits = 3
   ) |>
-  kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
+  kableExtra::kable_styling(latex_options = "hold_position")
 
 emissions_by_ocean_summary_tbl
 
@@ -1255,8 +1258,8 @@ emissions_by_data_source_summary_tbl <- all_edgar_gfw_data_normalized |>
   dplyr::ungroup() |>
   dplyr::select(
     `Data source` = data_source,
-    `CO2 emissions in 2024 (billion MT)` = emissions_co2_bmt,
-    `Percent change in CO2 emissions from 2017 to 2024` = percent_emissions_co2_mt_normalized
+    `2024 emissions, billion MT` = emissions_co2_bmt,
+    `Change in emissions, 2017 to 2024` = percent_emissions_co2_mt_normalized
   ) |>
   knitr::kable(
     format = "latex",
@@ -2621,7 +2624,7 @@ ggplot(
 #| results = 'asis'
 all_performance_metrics_table <- all_performance_metrics |>
   dplyr::mutate(
-    model = stringr::str_replace_all(model, "_", "; ") |>
+    model = stringr::str_replace_all(model, "_", " ") |>
       stringr::str_to_sentence(),
     test = stringr::str_replace_all(test, "_", " ") |>
       stringr::str_to_sentence()
@@ -2656,22 +2659,21 @@ all_performance_metrics_table <- all_performance_metrics |>
         "rsq_trad_backtransformed_residuals" ~ "Traditional R² (backtransformed)",
       Metric == "rsq_trad" ~ "Traditional R²",
       Metric == "mae" ~ "MAE",
-      Metric ==
-        "aggregate_prediction_percent_error" ~ "Percent error of total summed predictions",
+      Metric == "aggregate_prediction_percent_error" ~ "Total percent error",
       TRUE ~ Metric
     ) |>
       forcats::fct_relevel("Traditional R²")
   ) |>
-  dplyr::mutate(Model = forcats::fct_relevel(Model, "Emissions; regression")) |>
+  dplyr::mutate(Model = forcats::fct_relevel(Model, "Emissions regression")) |>
   dplyr::arrange(Model, Metric) |>
   tidyr::pivot_wider(values_from = Estimate, names_from = Test) |>
   knitr::kable(
     format = "latex",
     label = "all_performance_metrics_table",
-    caption = "Summary of dark fleet model performance metrics for the: 1) emissions regression model; 2) detections classification mode; and 3) detections regression model. Performance estimates for each metric are shown for both the inside S1 footprint and outside S1 footprint tests. All metrics are calculated at the unit of observation except for 'Percent error of total summed predictions', which is the percentage error in the total sum of all predictions relative to the total sum of all truth values.",
+    caption = "Summary of dark fleet model performance metrics for the: 1) emissions regression model; 2) detections classification mode; and 3) detections regression model. Performance estimates for each metric are shown for both the inside S1 footprint and outside S1 footprint tests. All metrics are calculated at the unit of observation except for 'Total percent error', which is the percentage error in the total sum of all predictions relative to the total sum of all truth values.",
     digits = 2
   ) |>
-  kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
+  kableExtra::kable_styling(font_size = 7, latex_options = "hold_position")
 
 all_performance_metrics_table
 
@@ -2685,6 +2687,13 @@ writeLines(
   
 ```{r}
 total_percent_change_by_fleet_tbl <- total_percent_change_by_fleet |>
+  dplyr::mutate(
+    fleet = dplyr::case_when(
+      fleet == "AIS (broadcasting)" ~ "AIS",
+      fleet == "S1 (non-broadcasting)" ~ "S1",
+      TRUE ~ "AIS + S1"
+    )
+  ) |>
   dplyr::mutate(across(
     c(`2017`, `2024`),
     ~ signif(., 3) |>
@@ -2706,19 +2715,19 @@ total_percent_change_by_fleet_tbl <- total_percent_change_by_fleet |>
   ) |>
   dplyr::arrange(pollutant) |>
   dplyr::rename(
-    `Data source` = fleet,
+    `Source` = fleet,
     Pollutant = pollutant,
-    `2017 emissions (MT)` = `2017`,
-    `2024 emissions (MT)` = `2024`,
+    `2017 emissions, MT` = `2017`,
+    `2024 emissions, MT` = `2024`,
     `Percent 2024 total` = percent_total_2024,
-    `Percent change from 2017 to 2024` = percent_change
+    `2017 to 2024 change` = percent_change
   ) |>
   knitr::kable(
     format = "latex",
     label = "total_percent_change_by_fleet",
-    caption = "Summary of 2017 and 2024 emissions, by pollutant and data source."
+    caption = "Summary of 2017 and 2024 emissions, data source and pollutant."
   ) |>
-  kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
+  kableExtra::kable_styling(font_size = 6, latex_options = "hold_position")
 
 writeLines(
   total_percent_change_by_fleet_tbl,
@@ -2741,8 +2750,8 @@ pollutant_ais_underestimation_overestimation_summary_tbl <- pollutant_ais_undere
   dplyr::arrange(pollutant) |>
   dplyr::rename(
     Pollutant = pollutant,
-    "AIS-only underestimation of 2024 emissions" = ais_underestimation_2024,
-    "AIS-only overestimation of 2017-2024 emissions trend" = trend_overestimation_2017_2024
+    "Underestimation of 2024 emissions" = ais_underestimation_2024,
+    "Overestimation of 2017-2024 emissions trend" = trend_overestimation_2017_2024
   ) |>
   knitr::kable(
     format = "latex",
@@ -3107,15 +3116,13 @@ data_sources_table <- data_sources |>
     format = "latex",
     escape = FALSE,
     booktabs = TRUE,
-    longtable = FALSE,
-    caption = "Data sources for all included model features, including which random forest model uses the features (detections classification; detections regression; and/or emissions regression), the units, feature type, whether it varies spatially, whether it varies temporally, and the source name and reference citation.",
+    caption = "Data sources for all included model features, including which random forest model uses the features (M1: detections classification; M2: detections regression; and/or M3: emissions regression), the units, feature type, whether it varies spatially, whether it varies temporally, and the source name and reference citation.",
     label = "data_sources"
   ) |>
   kableExtra::kable_styling(
-    latex_options = c("scale_down", "hold_position"),
-    font_size = 7
-  ) |>
-  kableExtra::landscape()
+    latex_options = c("hold_position"),
+    font_size = 4
+  )
 
 writeLines(data_sources_table, here::here("tables/data_sources.tex"))
 ```
@@ -3234,15 +3241,12 @@ lm_other_gases_tidy_fit_stats_tbl <- lm_other_gases_tidy_fit_stats |>
   ) |>
   knitr::kable(
     format = "latex",
-    escape = FALSE,
-    booktabs = TRUE,
-    longtable = FALSE,
     caption = "Linear regression fit statistics for the final models trained to estimate emissions of non-CO$_2$ gases from CO$_2$ emissions. The model for each gas has 2 fit terms.",
     label = "lm_other_gases_tidy_fit_stats",
     digits = 3
   ) |>
   kableExtra::kable_styling(
-    latex_options = c("scale_down", "hold_position"),
+    latex_options = c("hold_position"),
     font_size = 7
   )
 

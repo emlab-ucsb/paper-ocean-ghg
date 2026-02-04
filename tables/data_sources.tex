@@ -1,25 +1,23 @@
-
-\begin{landscape}\begin{table}[!h]
+\begin{table}[!h]
 \centering
-\caption{\label{tab:data_sources}Data sources for all included model features, including which random forest model uses the features (detections classification; detections regression; and/or emissions regression), the units, feature type, whether it varies spatially, whether it varies temporally, and the source name and reference citation.}
+\caption{\label{tab:data_sources}Data sources for all included model features, including which random forest model uses the features (M1: detections classification; M2: detections regression; and/or M3: emissions regression), the units, feature type, whether it varies spatially, whether it varies temporally, and the source name and reference citation.}
 \centering
-\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
-\fontsize{7}{9}\selectfont
+\fontsize{4}{6}\selectfont
 \begin{tabular}[t]{lllllllllll}
 \toprule
-Model feature & Category & Detections classification & Detections regression & Emissions Regression & Units & Type & Spatial & Temporal & Source & Ref.\\
+Model feature & Category & M1 & M2 & M3 & Units & Type & Spatial & Temporal & Source & Ref.\\
 \midrule
-Presence/absence of unmatched S1 detections & Dependant variable & Yes & No & No & - & Boolean & Yes & Yes & GFW & \cite{paolo2024satellite}\\
-Unmatched S1 detections per km2 imaged & Dependant variable & No & Yes & No & detections/km2 & Numeric & Yes & Yes & GFW & \cite{paolo2024satellite}\\
-Log(AIS emissions) & Dependant variable & No & No & Yes & log(MT) & Numeric & Yes & Yes & emLab/GFW & AIS-based emissions model\\
-Vessel type (fishing or non-fishing) & S1 detection features & Yes & Yes & Yes & - & Boolean & Yes & Yes & GFW & \cite{paolo2024satellite}\\
+Presence/absence of unmatched S1 detections & Dependent variable & Yes & No & No & - & Boolean & Yes & Yes & GFW & \cite{paolo2024satellite}\\
+Unmatched S1 detections per km2 imaged & Dependent variable & No & Yes & No & detects/km2 & Numeric & Yes & Yes & GFW & \cite{paolo2024satellite}\\
+Log(AIS emissions) & Dependent variable & No & No & Yes & log(MT) & Numeric & Yes & Yes & GFW & -\\
+Vessel type (fishing or non-fishing) & Dependent variable & Yes & Yes & Yes & - & Boolean & Yes & Yes & GFW & \cite{paolo2024satellite}\\
 Lower threshold of vessel length bin & S1 detection features & Yes & Yes & No & m & Numeric & No & No & GFW & \cite{paolo2024satellite}\\
 \addlinespace
-Vessel length bin (4 categories) & S1 detection features & Yes & Yes & No & - & Categorical & Yes & Yes & GFW & \cite{paolo2024satellite}\\
-Matched S1 detections per km$^2$ of area imaged for each length bin & S1 detection features & No & No & Yes & detections/km2 & Numeric & Yes & Yes & GFW & \cite{paolo2024satellite}\\
-Days since start of study & Temporal features & Yes & Yes & Yes & Days & Numeric & No & Yes & GFW & \cite{kroodsma2018tracking}\\
+Vessel length bin (4 categories) & S1 detection features & Yes & Yes & No & - & Factor & Yes & Yes & GFW & \cite{paolo2024satellite}\\
+S1 detections per km$^2$ of area for each length bin & S1 detection features & No & No & Yes & detects/km2 & Numeric & Yes & Yes & GFW & \cite{paolo2024satellite}\\
+Days since start of study & Temporal features & Yes & Yes & Yes & days & Numeric & No & Yes & GFW & \cite{kroodsma2018tracking}\\
 Post-2020 IMO Sulphur policy & Temporal features & Yes & Yes & Yes & - & Boolean & No & Yes & IMO & \cite{imo_sulphur_2020}\\
-Ocean basin & Geographic features  & Yes & Yes & Yes & - & Categorical & Yes & No & GFW & \cite{kroodsma2018tracking}\\
+Ocean basin & Geographic features  & Yes & Yes & Yes & - & Factor & Yes & No & GFW & \cite{kroodsma2018tracking}\\
 \addlinespace
 Pixel water area & Geographic features  & Yes & Yes & Yes & km2 & Numeric & Yes & No & GFW & \cite{paolo2024satellite}\\
 Mean ocean depth & Geographic features  & Yes & Yes & Yes & m & Numeric & Yes & No & GFW & \cite{kroodsma2018tracking}\\
@@ -27,16 +25,15 @@ Mean distance from shore & Geographic features  & Yes & Yes & Yes & m & Numeric
 Mean distance from nearest port & Geographic features  & Yes & Yes & Yes & m & Numeric & Yes & No & GFW & \cite{kroodsma2018tracking}\\
 Distance to top 20 ports & Geographic features  & Yes & Yes & Yes & m & Numeric & Yes & No & Lloyd’s List & \cite{LloydsListTopPorts2024}\\
 \addlinespace
-Positions reported by AIS type a & AIS reception quality features PCA & Yes & Yes & Yes & - & Numeric & Yes & No & GFW & \cite{kroodsma2018tracking}\\
-Positions reported by AIS type b & AIS reception quality features PCA & Yes & Yes & Yes & - & Numeric & Yes & No & GFW & \cite{kroodsma2018tracking}\\
-Proportion of messages from dynamic AIS receivers & AIS reception quality features PCA & Yes & Yes & Yes & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
-Proportion of messages from terrestrial AIS receivers & AIS reception quality features PCA & Yes & Yes & Yes & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
-Proportion of messages from satellite AIS receivers & AIS reception quality features PCA & Yes & Yes & Yes & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
+Positions reported by AIS type a & AIS reception quality & Yes & Yes & Yes & - & Numeric & Yes & No & GFW & \cite{kroodsma2018tracking}\\
+Positions reported by AIS type b & AIS reception quality & Yes & Yes & Yes & - & Numeric & Yes & No & GFW & \cite{kroodsma2018tracking}\\
+Proportion of messages, dynamic AIS receivers & AIS reception quality & Yes & Yes & Yes & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
+Proportion of messages, terrestrial AIS receivers & AIS reception quality & Yes & Yes & Yes & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
+Proportion of messages, satellite AIS receivers & AIS reception quality & Yes & Yes & Yes & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
 \addlinespace
 Mean wind speed & Weather features & Yes & Yes & Yes & m/s & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
 Mean primary wave height & Weather features & Yes & Yes & Yes & m & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
 Mean primary wave period & Weather features & Yes & Yes & Yes & s & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
 \bottomrule
-\end{tabular}}
+\end{tabular}
 \end{table}
-\end{landscape}
