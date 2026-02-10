@@ -436,6 +436,7 @@ percent_increase_from_2017_to_2024 <- all_edgar_gfw_data_normalized |>
   )
 ```
 
+## Figure S4: Inventory comparison
 
 ```{r}
 #| label: fig-inventory-comparison
@@ -791,7 +792,9 @@ total_annual_emissions_by_fleet_fig <- annual_emissions |>
   )
 ```
 
-### Figure 2, panel B
+# Results
+
+## Figure 4, panel B
 
 ```{r}
 # Extract 2017 baseline values for normalizing time series to show relative change
@@ -844,7 +847,7 @@ normalized_annual_emissions_by_fleet_fig <- annual_emissions |>
   )
 ```
 
-### Figure 1, panel A
+## Figure 1, panel A
 
 ```{r}
 pollutant_map_data_co2 <- total_spatial_emissions_by_pollutant |>
@@ -920,7 +923,7 @@ co2_map <- pollutant_map_data_co2 |>
   )
 ```
 
-## Figure 1: Emissions by data source and spatial maps
+## Figure 1: Emissions by data source and maps
 
 ```{r}
 #| label: fig-emissions-by-data-source-and-maps
@@ -1126,7 +1129,7 @@ cowplot::plot_grid(
 )
 ```
 
-### Figure S3: Annual emissions by ocean and data source
+## Figure S3: Annual emissions by ocean and data source
 
 ```{r}
 #| label: fig-annual-emissions-by-ocean-and-data-source
@@ -1175,6 +1178,8 @@ ggplot(
     fill = "Data source"
   )
 ```
+
+## Table S3: Emissions by ocean summary
 
 ```{r}
 #| results = 'asis'
@@ -1243,6 +1248,8 @@ writeLines(
 )
 ```
 
+## Table S4: Emissions by data source summary
+
 ```{r}
 #| results = 'asis'
 
@@ -1289,9 +1296,9 @@ writeLines(
 ```
 
 
-# Supplementary figures and analyses
+# Methods: AIS-broadcasting vessels
 
-### Figure 9: AIS length-power relationship
+## Figure 9: AIS length-power relationship
 
 ```{r}
 #| label: fig-ais-length-power-relationship
@@ -1315,7 +1322,7 @@ vessel_size_info |>
   scale_y_continuous(labels = scales::comma)
 ```
 
-### Dark fleet emissions, by vessel size and type
+## Dark fleet emissions, by vessel size and type
 
 ```{r}
 #| label: fig-global-annual-co2-dark-emissions-by-type
@@ -1421,6 +1428,7 @@ pollutant_map_list <- purrr::map(
 #cowplot::plot_grid(plotlist = pollutant_map_list, ncol = 3)
 ```
 
+## Figure S1: Spatial distribution of pollutants
 
 ```{r}
 #| label: fig-pollutant-maps-qlog10
@@ -1743,9 +1751,7 @@ emissions_by_vessel_class_summary |>
   knitr::kable()
 ```
 
-# Figure 2: Time series and spatial distribution by fleet
-
-#### Spatial emissions by fleet (total)
+## Figure 2, spatial panels
 
 ```{r}
 #| label: fig-spatial-emissions-by-fleet-total-qlog10
@@ -2057,7 +2063,7 @@ plot_constrained <- cowplot::plot_grid(
 ```
 
 
-## Figure 2: Spatial-temporal richness by fleet
+## Figure 2: Spatial-temporal richness by fleet (combined)
 
 ```{r}
 #| label: fig-spatial-temporal-richness-by-fleet-total-pseudolog
@@ -2075,7 +2081,7 @@ cowplot::plot_grid(
 
 ```
 
-### Other plots
+## Port stay emissions by country
 
 ```{r}
 #| label: tbl-top-port-stay-emissions-by-country
@@ -2093,7 +2099,7 @@ all_port_and_trip_emissions |>
   knitr::kable()
 ```
 
-### Figure S2: Pollutant time series
+## Figure S2: Pollutant time series
 
 ```{r}
 #| label: fig-pollutant-time-series
@@ -2160,7 +2166,7 @@ make_pollutant_time_series_figure(
 ```
 
 
-### Figure 16: Spatial coverage footprint
+## Figure 16: Spatial coverage of non-broadcasting model
 
 ```{r}
 #| label: fig-spatial-coverage-footprint
@@ -2215,11 +2221,9 @@ total_spatial_co2_emissions_dark_by_footprint |>
   theme(legend.position = "none")
 ```
 
-# Discussion
+# Methods: AIS-broadcasting vessels (cont.)
 
-## Methods: AIS-broadcasting vessels
-
-### Figure 5: Registered data validation
+## Figure 5: Registered data validation
 
 ```{r}
 #| label: fig-registered-data-performance
@@ -2321,9 +2325,9 @@ ggplot(
   )
 ```
 
-### Table 1: MRV performance results
+## Table 1: MRV performance results
 
-### Figure 6: MRV validation
+## Figure 6: MRV validation
 
 ```{r}
 #| label: fig-mrv-performance
@@ -2511,11 +2515,9 @@ ggplot(
   )
 ```
 
-# Supplementary tables
+# Tables
 
-### Table 3: Performance metrics
-
-## Dark fleet model performance metrics 
+## Table 3: Model performance metrics
 
 ```{r}
 #| results = 'asis'
@@ -2580,19 +2582,7 @@ writeLines(
 )
 ```
 
-## Supplementary Tables
-
-### Table S1: Total percent change by fleet
-
-### Table S2: Pollutant underestimation summary
-
-### Table S3: Emissions by ocean summary
-
-### Table S4: Emissions by data source summary
-
-### Table S5: Annual social cost by fleet
-
-## Summary of 2017 and 2024 emissions, by pollutant and data source
+## Table S1: Total percent change by fleet
   
 ```{r}
 total_percent_change_by_fleet_tbl <- total_percent_change_by_fleet |>
@@ -2644,7 +2634,7 @@ writeLines(
 )
 ```
 
-## Underestimation of 2024 emissions using only AIS data, and overestimation of 2017 to 2024 emissions trend using only AIS data, by pollutant.
+## Table S2: Pollutant AIS underestimation summary
 
 ```{r}
 pollutant_ais_underestimation_overestimation_summary_tbl <- pollutant_ais_underestimation_overestimation_summary |>
@@ -2677,7 +2667,7 @@ writeLines(
 )
 ```
 
-### Figure 15: Feature importance
+## Figure 15: Feature importance
 
 ```{r}
 #| label: fig-feature-importance
@@ -2733,7 +2723,7 @@ all_varimp_data |>
   facet_wrap(model ~ ., ncol = 1, scales = "free")
 ```
 
-### Figure 12: Precision-recall curves
+## Figure 12: Precision-recall curves
 
 ```{r}
 #| label: fig-pr-curves
@@ -2756,7 +2746,7 @@ performance_detections_cls_roc_pr_curves |>
   theme_plot()
 ```
 
-### Figure 13: ROC curves
+## Figure 13: ROC curves
 
 ```{r}
 #| label: fig-roc-curves
@@ -2782,7 +2772,7 @@ performance_detections_cls_roc_pr_curves |>
 ```
 
 
-### Figure 14: Confusion matrices
+## Figure 14: Confusion matrices
 
 ```{r}
 #| label: fig-conf-mat
@@ -2805,9 +2795,9 @@ performance_detections_cls_conf_mat |>
 ```
 
 
-## Trends in AIS receiver types
+# Supplementary: Trends in AIS receiver types
 
-### Figure S9: Annual emissions by AIS receiver type
+## Figure S5: Annual emissions by AIS receiver type
 
 ```{r}
 #| label: fig-annual-emissions-by-ais-receiver-type
@@ -2855,7 +2845,7 @@ annual_global_emissions_by_receiver_type |>
   geom_vline(xintercept = 2022, linetype = 2)
 ```
 
-### Figure S10: Annual emissions by AIS receiver type for top flags
+## Figure S6: Annual emissions by AIS receiver type for top flags
 
 ```{r}
 #| label: fig-annual-emissions-by-ais-receiver-type-top-flags
@@ -2910,7 +2900,7 @@ annual_global_emissions_by_receiver_type_and_flag |>
 
 ```
 
-### Figure S11: Spatial change in emissions by receiver type
+## Figure S7: Spatial change in emissions by receiver type
 
 ```{r}
 #| label: fig-co2-emissions-change-map-by-receiver-type
@@ -3015,7 +3005,9 @@ performance_results |>
 ```
 
 
-# Table 2: Data sources used in non-broadcasting vessel emissions model
+# Methods: Non-broadcasting vessels (cont.)
+
+## Table 2: Data sources
 
 
 ```{r}
@@ -3043,7 +3035,7 @@ writeLines(data_sources_table, here::here("tables/data_sources.tex"))
 ```
 
 
-### Figure 11: Offshore training/testing map
+## Figure 11: Offshore training/testing map
 
 ```{r}
 #| label: fig-offshore-outside-footprint-training-testing-map
@@ -3086,9 +3078,7 @@ pixels_for_offshore_training_testing_split |>
   guides(color = guide_legend(reverse = TRUE))
 ```
 
-## Methods: Non-broadcasting vessels
-
-### Figure 7: Map showing S1 imaging coverage
+## Figure 7: S1 imaging coverage
 
 ```{r}
 #| label: fig-map-fraction-months-imaged
@@ -3137,6 +3127,7 @@ number_s1_imaged_months_by_pixel |>
   )
 ```
 
+## Table 4: Linear model fit statistics for other pollutants
 
 ```{r}
 lm_other_gases_tidy_fit_stats_tbl <- lm_other_gases_tidy_fit_stats |>
@@ -3178,7 +3169,7 @@ writeLines(
 ```
 
 
-### Figure 10: S1 coverage time series
+## Figure 10: S1 coverage time series
 
 ```{r}
 #| label: fig-s1-coverage-time-series
@@ -3227,7 +3218,7 @@ s1_time_series |>
 ```
 
 
-### Figure 8: Length bin distributions
+## Figure 8: Length bin distributions
 
 ```{r}
 #| label: fig-length-bin-distributions
