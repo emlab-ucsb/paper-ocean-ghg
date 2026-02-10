@@ -1427,19 +1427,21 @@ pollutant_map_list <- purrr::map(
       ) +
       geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
       scico::scale_fill_scico(
-        name = expression(Emissions ~ (MT / km^2)),
+        name = expression(CO[2] ~ emissions ~ (MT / km^2)),
         palette = "vik",
         midpoint = 0,
         trans = ggallin::pseudolog10_trans,
         na.value = "grey90",
+        breaks = c(-1e3, -1e2, -1e1, 0, 1e1, 1e2, 1e3),
         labels = scales::comma
       ) +
       scico::scale_color_scico(
-        name = expression(Emissions ~ (MT / km^2)),
+        name = expression(CO[2] ~ emissions ~ (MT / km^2)),
         palette = "vik",
         midpoint = 0,
         trans = ggallin::pseudolog10_trans,
         na.value = "grey90",
+        breaks = c(-1e3, -1e2, -1e1, 0, 1e1, 1e2, 1e3),
         labels = scales::comma
       ) +
       labs(x = "", y = "") +
@@ -1563,93 +1565,91 @@ pollutant_map_list <- purrr::map(
 cowplot::plot_grid(plotlist = pollutant_map_list, ncol = 3)
 ```
 
+## Figure 10: S1 coverage time series
 
 ```{r}
-#| label: make-fig-co2-emissions-time-series
-
-# Prepare monthly time series data for all pollutants (not just CO2)
-total_monthly_emissions_by_pollutant <- total_monthly_emissions_by_pollutant |>
-  dplyr::mutate(month = lubridate::ymd(month)) |>
-  tidyr::pivot_longer(
-    -month,
-    names_to = "pollutant",
-    values_to = "emissions_mt"
-  ) |>
+#| label: fig-s1-coverage-time-series
+#| fig-cap: Monthly statistics of global S1 coverage including total number of S1 scenes (top-left), total number of 1x1 degree pixels imaged (top-right), and total area imaged (bottom-left).
+#| fig-width: 7.5
+#| fig-height: 8
+# Reshape S1 time series data to long format and rename metrics for display
+s1_time_series |>
   dplyr::mutate(
-    pollutant = stringr::str_remove_all(pollutant, "emissions_") |>
-      stringr::str_remove_all("_total_mt") |>
-      stringr::str_to_upper() |>
-      stringr::str_replace_all("_", "."),
-    pollutant = ifelse(pollutant == "VOCS", "VOCs", pollutant)
+    month = lubridate::ymd(month),
+    fraction_detections_unmatched = n_s1_detections_unmatched /
+      (n_s1_detections_unmatched + n_s1_detections)
   ) |>
-  dplyr::filter(
-    lubridate::year(month) <= analysis_end_year,
-    lubridate::year(month) >= analysis_start_year
-  )
-
-pollutant_time_series_data_co2 <- total_monthly_emissions_by_pollutant |>
-  dplyr::filter(pollutant == "CO2")
-
+  tidyr::pivot_longer(-month) |>
+  dplyr::mutate(
+    name = dplyr::case_when(
+      name ==
+        "fraction_detections_unmatched" ~ "Fraction vessel detections unmatched",
+      name == "n_s1_detections" ~ "Number vessel detections",
+      name ==
+        "n_s1_detections_unmatched" ~ "Number vessel detections unmatched",
+      name == "s1_scene_area_km2" ~ "Total imaged area of S1 scenes (km^2)",
+      name == "s1_scenes" ~ "Number of S1 scenes"
+    ) |>
+      forcats::fct_relevel(c(
+        "Number of S1 scenes",
+        "Total imaged area of S1 scenes (km^2)",
+        "Number vessel detections",
+        "Number vessel detections unmatched"
+      ))
+  ) |>
+  ggplot(aes(x = month, y = value)) +
+  facet_wrap(name ~ ., ncol = 1, scales = "free") +
+  geom_line() +
+  scale_y_continuous(limits = c(0, NA), labels = scales::comma) +
+  theme_plot() +
+  scale_x_continuous(
+    breaks = seq(
+      lubridate::ymd(glue::glue("{analysis_start_year}-01-01")),
+      lubridate::ymd(glue::glue("{analysis_end_year+1}-01-01")),
+      by = "1 year"
+    ),
+    labels = seq(analysis_start_year, analysis_end_year + 1)
+  ) +
+  theme_plot() +
+  labs(x = "", y = "")
 ```
 
-
-## Figure 3: AIS data richness
+## Figure 8: Length bin distributions
 
 ```{r}
-#| label: fig-ais-data-richness
-#| fig-cap: (A) CO$_{2}$ emissions by vessel type for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated across 2017-2024. (B) CO$_{2}$ emissions by country for AIS-broadcasting vessels during  during different activity types (international trips, port stays, and domestic trips), aggregated across 2017-2024. For both panels, emissions for each international trip are partitioned equally to its departure and arrival country. Countries with no values are shown in black.
-#| fig-width: 9
-#| fig-height: 8
-
-# Allocate emissions from international trips equally to departure and arrival countries
-international_trip_emissions_by_country <- trip_co2_emissions_by_from_to_countries |>
-  dplyr::filter(from_country_iso3 != to_country_iso3) |>
-  dplyr::mutate(emissions_co2_mt = emissions_co2_mt / 2) |>
-  dplyr::select(
-    country_iso3 = from_country_iso3,
-    emissions_co2_mt,
-    vessel_class,
-    n_unique_trips
+#| label: fig-length-bin-distributions
+#| fig-cap: Distributions showing the number of unique AIS vessels and number of S1 detections for each length size bin, disaggregated by fishing and non-fishing vessels.
+#| fig-width: 7.5
+#| fig-height: 6
+# Plot count of AIS vessels and S1 detections by length size bin and vessel type
+length_size_bin_distributions |>
+  dplyr::mutate(
+    fishing = ifelse(fishing, "Fishing", "Non-fishing") |> forcats::fct_rev()
   ) |>
-  dplyr::bind_rows(
-    trip_co2_emissions_by_from_to_countries |>
-      dplyr::mutate(
-        emissions_co2_mt = emissions_co2_mt / 2
-      ) |>
-      dplyr::select(
-        country_iso3 = to_country_iso3,
-        emissions_co2_mt,
-        vessel_class
-      )
+  dplyr::mutate(
+    type = ifelse(
+      type == "ais_vessels",
+      "Number AIS vessels",
+      "Number S1 detections"
+    )
   ) |>
-  dplyr::group_by(country_iso3, vessel_class) |>
-  dplyr::summarise(
-    emissions_co2_mt = sum(emissions_co2_mt)
+  dplyr::mutate(
+    length_size_bin = glue::glue(
+      "{length_size_bin}\n({length_bin_min}-{length_bin_max}m)"
+    ) |>
+      stringr::str_replace("-Infm", "+ m")
   ) |>
-  dplyr::ungroup()
-
-# Sum domestic trip emissions by country (departure = arrival country)
-domestic_trip_emissions_by_country <- trip_co2_emissions_by_from_to_countries |>
-  dplyr::filter(from_country_iso3 == to_country_iso3) |>
-  dplyr::select(
-    country_iso3 = from_country_iso3,
-    emissions_co2_mt,
-    vessel_class
-  )
-
-# Combine international trips, domestic trips, and port stay emissions
-all_port_and_trip_emissions <- international_trip_emissions_by_country |>
-  dplyr::mutate(type = "International trips") |>
-  dplyr::bind_rows(
-    domestic_trip_emissions_by_country |>
-      dplyr::mutate(type = "Domestic trips")
-  ) |>
-  dplyr::bind_rows(
-    port_visit_co2_emissions_by_country |>
-      dplyr::rename(
-        country_iso3 = port_country_iso3
-      ) |>
-      dplyr::mutate(type = "Port stays")
+  ggplot(aes(x = length_size_bin, y = n)) +
+  facet_wrap(type ~ fishing, scales = "free") +
+  geom_bar(stat = "identity") +
+  theme_plot() +
+  labs(x = "Length size bin", y = "Count") +
+  scale_y_continuous(labels = scales::comma)
+```
+````
+This is the code block that represents the suggested code change:
+```quarto
+#| label: fig-feature-importance
   ) |>
   dplyr::mutate(
     type = forcats::fct_relevel(type, "International trips", "Port stays")
@@ -2756,6 +2756,8 @@ writeLines(
 # Join variable importance scores with human-readable feature names from data_sources,
 # then create faceted horizontal bar chart by model type
 all_varimp_data |>
+  dplyr::left_join(
+    data_sources,
     by = c("model_feature" = "Model feature shorthand")
   ) |>
   dplyr::rename(model_feature_long = `Model feature`) |>
