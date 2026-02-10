@@ -920,7 +920,7 @@ co2_map <- pollutant_map_data_co2 |>
   )
 ```
 
-### Figure 1, combined
+## Figure 1: Emissions by data source and spatial maps
 
 ```{r}
 #| label: fig-emissions-by-data-source-and-maps
@@ -942,7 +942,7 @@ cowplot::plot_grid(
 )
 ```
 
-### Figure 2
+## Figure 4: Emissions by ocean and comparison to EDGAR
 
 ```{r}
 #| label: fig-emissions-marine-ocean-other
@@ -1126,6 +1126,8 @@ cowplot::plot_grid(
 )
 ```
 
+### Figure S3: Annual emissions by ocean and data source
+
 ```{r}
 #| label: fig-annual-emissions-by-ocean-and-data-source
 #| fig-cap: Annual total CO$_{2}$ emissions by ocean, disaggregated by data source (AIS-broadcasting vessels, and non-broadcasting vessels detected by S1).
@@ -1289,7 +1291,7 @@ writeLines(
 
 # Supplementary figures and analyses
 
-### Relationship between length and engine power
+### Figure 9: AIS length-power relationship
 
 ```{r}
 #| label: fig-ais-length-power-relationship
@@ -1543,6 +1545,8 @@ pollutant_time_series_data_co2 <- total_monthly_emissions_by_pollutant |>
 
 ```
 
+
+## Figure 3: AIS data richness
 
 ```{r}
 #| label: fig-ais-data-richness
@@ -2053,6 +2057,8 @@ plot_constrained <- cowplot::plot_grid(
 ```
 
 
+## Figure 2: Spatial-temporal richness by fleet
+
 ```{r}
 #| label: fig-spatial-temporal-richness-by-fleet-total-pseudolog
 #| fig-cap: (A) Time series of monthly global CO$_2$ emissions, shown for both AIS-broadcasting and S1-detected non-broadcasting vessels, and disaggregated by fishing and non-fishing boats. (B) Spatial distribution of cumulative 2017-2024 CO$_{2}$ emissions from AIS-broadcasting and S1-detected non-broadcasting fleets, disaggregated by fishing and non-fishing vessels.
@@ -2086,6 +2092,8 @@ all_port_and_trip_emissions |>
   dplyr::slice_max(n = 3, order_by = emissions_co2_mt) |>
   knitr::kable()
 ```
+
+### Figure S2: Pollutant time series
 
 ```{r}
 #| label: fig-pollutant-time-series
@@ -2152,7 +2160,7 @@ make_pollutant_time_series_figure(
 ```
 
 
-### Spatial emissions by footprint group
+### Figure 16: Spatial coverage footprint
 
 ```{r}
 #| label: fig-spatial-coverage-footprint
@@ -2207,7 +2215,11 @@ total_spatial_co2_emissions_dark_by_footprint |>
   theme(legend.position = "none")
 ```
 
-### Registered data validation
+# Discussion
+
+## Methods: AIS-broadcasting vessels
+
+### Figure 5: Registered data validation
 
 ```{r}
 #| label: fig-registered-data-performance
@@ -2309,7 +2321,9 @@ ggplot(
   )
 ```
 
-### MRV validation
+### Table 1: MRV performance results
+
+### Figure 6: MRV validation
 
 ```{r}
 #| label: fig-mrv-performance
@@ -2499,6 +2513,8 @@ ggplot(
 
 # Supplementary tables
 
+### Table 3: Performance metrics
+
 ## Dark fleet model performance metrics 
 
 ```{r}
@@ -2563,6 +2579,18 @@ writeLines(
   here::here("tables/all_performance_metrics_table.tex")
 )
 ```
+
+## Supplementary Tables
+
+### Table S1: Total percent change by fleet
+
+### Table S2: Pollutant underestimation summary
+
+### Table S3: Emissions by ocean summary
+
+### Table S4: Emissions by data source summary
+
+### Table S5: Annual social cost by fleet
 
 ## Summary of 2017 and 2024 emissions, by pollutant and data source
   
@@ -2649,7 +2677,7 @@ writeLines(
 )
 ```
 
-### Feature importance
+### Figure 15: Feature importance
 
 ```{r}
 #| label: fig-feature-importance
@@ -2705,7 +2733,7 @@ all_varimp_data |>
   facet_wrap(model ~ ., ncol = 1, scales = "free")
 ```
 
-### Classification model performance
+### Figure 12: Precision-recall curves
 
 ```{r}
 #| label: fig-pr-curves
@@ -2727,6 +2755,8 @@ performance_detections_cls_roc_pr_curves |>
   ) +
   theme_plot()
 ```
+
+### Figure 13: ROC curves
 
 ```{r}
 #| label: fig-roc-curves
@@ -2752,6 +2782,8 @@ performance_detections_cls_roc_pr_curves |>
 ```
 
 
+### Figure 14: Confusion matrices
+
 ```{r}
 #| label: fig-conf-mat
 #| fig-cap: Confusion matrices of the detection classification model, shown for the inside S1 footprint (left) and outside S1 footprint (right) performance tests.
@@ -2773,7 +2805,9 @@ performance_detections_cls_conf_mat |>
 ```
 
 
-### Dynamic AIS - annual emissions and vessels by AIS receiver type
+## Trends in AIS receiver types
+
+### Figure S9: Annual emissions by AIS receiver type
 
 ```{r}
 #| label: fig-annual-emissions-by-ais-receiver-type
@@ -2821,7 +2855,7 @@ annual_global_emissions_by_receiver_type |>
   geom_vline(xintercept = 2022, linetype = 2)
 ```
 
-### Dynamic AIS - annual emissions by AIS receiver type for top flags
+### Figure S10: Annual emissions by AIS receiver type for top flags
 
 ```{r}
 #| label: fig-annual-emissions-by-ais-receiver-type-top-flags
@@ -2876,7 +2910,7 @@ annual_global_emissions_by_receiver_type_and_flag |>
 
 ```
 
-### Dynamic AIS - map showing spatial change in emissions by AIS receiver type
+### Figure S11: Spatial change in emissions by receiver type
 
 ```{r}
 #| label: fig-co2-emissions-change-map-by-receiver-type
@@ -3009,6 +3043,8 @@ writeLines(data_sources_table, here::here("tables/data_sources.tex"))
 ```
 
 
+### Figure 11: Offshore training/testing map
+
 ```{r}
 #| label: fig-offshore-outside-footprint-training-testing-map
 #| fig-cap: Maps of pixels that were used in the training and testing datasets for the outside S1 performance tests for each model. Pixels <=100km from the shore were used for training; pixels >100km from shore were used for testing. The exact training/testing split for each of the 3 models is shown.
@@ -3049,6 +3085,10 @@ pixels_for_offshore_training_testing_split |>
   guides(fill = guide_legend(reverse = TRUE)) +
   guides(color = guide_legend(reverse = TRUE))
 ```
+
+## Methods: Non-broadcasting vessels
+
+### Figure 7: Map showing S1 imaging coverage
 
 ```{r}
 #| label: fig-map-fraction-months-imaged
@@ -3138,6 +3178,8 @@ writeLines(
 ```
 
 
+### Figure 10: S1 coverage time series
+
 ```{r}
 #| label: fig-s1-coverage-time-series
 #| fig-cap: Monthly statistics of global S1 coverage including total number of S1 scenes (top-left), total number of 1x1 degree pixels imaged (top-right), and total area imaged (bottom-left).
@@ -3184,6 +3226,8 @@ s1_time_series |>
   labs(x = "", y = "")
 ```
 
+
+### Figure 8: Length bin distributions
 
 ```{r}
 #| label: fig-length-bin-distributions
