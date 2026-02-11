@@ -184,15 +184,6 @@ This will:
 3. Save all figures to `figures/`
 4. Save all LaTeX tables to `tables/`
 
-### Step 4: Compile the manuscript (optional)
-
-```bash
-pdflatex main.tex
-bibtex main
-pdflatex main.tex
-pdflatex main.tex
-```
-
 ## Checking pipeline status
 
 To see which targets are up to date or not:
@@ -207,11 +198,8 @@ targets::tar_visnetwork()
 
 `r/functions.R` contains:
 
-- `download_gfw_data()` — Executes a BigQuery SQL query and saves results as CSV
-- `run_gfw_query_and_save_table()` — Runs a query and saves results to a BigQuery destination table
+- `download_gfw_data()` — Executes a BigQuery SQL query and saves results in the repo as CSV
 - `combine_EU_data()` — Reads and combines annual EU MRV Excel files (2018–2024) into a single CSV
-- `summarize_dark_fleet_ratios_spatial()` — Aggregates dark-to-AIS vessel detection ratios by pixel
-- `summarize_dark_fleet_model_results_emissions()` — Summarizes dark fleet emissions by time and space
 
 ## Licensing
 

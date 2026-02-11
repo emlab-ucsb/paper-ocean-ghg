@@ -724,29 +724,58 @@ top_type_by_fishing_non_fishing <- emissions_by_vessel_class_df |>
 
 # In-line manuscript statistics
 
--   The transportation sector is a major source of global greenhouse gas
-    (GHG) and local air pollution emissions, responsible for
-    `r fraction_co2_from_transportation` of all CO$_{2}$ emissions
-    globally in 2024
+## Abstract
 
--   For over
-    `r scales::comma(signif(n_unique_vessels$n_unique_vessels, 2))`
-    AIS-broadcasting vessels, we quantify point-estimate emissions for
-    each vessel using precise latitude/longitude/timestamp information
-    for over
-    `r scales::comma(signif(n_ais_messages$n_billion_ais_messages, 3))`
-    billion individual AIS messages
+-  We found that vessels emitted approximately `r signif((total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS + S1", pollutant == "co2") |> dplyr::pull('2024'))/1e9,3)` billion metric tonnes of CO$_{2}$ in 2024, accounting for `r percent_transportation_emmissions_from_marine_2024` of global fossil fuel emissions from the transportation sector. 
 
-- We assign these individual pings to `r trip_co2_emissions_by_from_to_countries |> dplyr::filter(from_country_iso3!=to_country_iso3) |> dplyr::pull(n_unique_trips) |> sum() |> prettyNum(big.mark=",")` international trips, `r trip_co2_emissions_by_from_to_countries |> dplyr::filter(from_country_iso3==to_country_iso3) |> dplyr::pull(n_unique_trips) |> sum() |> prettyNum(big.mark=",")` domestic trips, and `r port_visit_co2_emissions_by_country |> dplyr::pull(n_unique_port_vists) |> sum() |> prettyNum(big.mark=",")` port visits.
+- Current AIS-only approaches underestimate the magnitude of 2024 emissions by `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(ais_underestimation_2024)`. Meanwhile, because AIS coverage has generally been increasing over time, current AIS-only approaches overestimate the increasing emissions trend by `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(trend_overestimation_2017_2024)` (from 2017 to 2024).
 
-- We obtained a dataset containing  `r signif(n_s1_detections$n_million_s1_detections,3)` million vessel detections from 2017 to 2024, of which `r signif(n_s1_detections$n_million_s1_detections_unmatched,3)` million detections were not matched to a broadcasting vessel. These detections come from across more than  `r floor(n_s1_detections$n_thousand_s1_scenes)` thousand individual S1 scenes.
+## Introduction
 
--   Because many vessels do not broadcast AIS, current approaches solely
-    based on AIS \textit{underestimate} current global emissions by
-    `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(ais_underestimation_2024)`
-    (in 2024), and \textit{overestimate} the increasing trend by
-    `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(trend_overestimation_2017_2024)`
-    (from `r analysis_start_year` to `r analysis_end_year`).
+- Climate change mitigation requires accurate accounting across sectors; while the transportation sector as a whole was responsible for `r fraction_co2_from_transportation` of all global CO$_{2}$ emissions in 2024, fundamental gaps remain in understanding the contribution by marine vessels. 
+
+- For over  `r scales::comma(signif(n_unique_vessels$n_unique_vessels, 2))` AIS-broadcasting vessels, we quantify emissions for
+each vessel using precise latitude/longitude/timestamp information for over `r scales::comma(signif(n_ais_messages$n_billion_ais_messages, 3))` billion individual AIS messages.
+
+## Results
+
+-  Using this data fusion approach, we find that total global CO$_{2}$ emissions at sea in 2024 was `r signif((total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS + S1", pollutant == "co2") |> dplyr::pull('2024'))/1e9,3)` billion MT, with an increase of `r scales::percent(total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS + S1", pollutant == "co2") |> dplyr::pull(percent_change))` from 2017 to 2024. If only considering emissions from vessels that broadcast AIS, in line with currently accepted state-of-the-art models, global CO$_{2}$ emissions in 2024 would be only `r signif((total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS (broadcasting)", pollutant == "co2") |> dplyr::pull('2024'))/1e9,3)` billion MT, with a more pronounced increase from 2017 to 2024 of `r scales::percent(total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS (broadcasting)", pollutant == "co2") |> dplyr::pull(percent_change))`.   
+
+- Thus using only AIS data from broadcasting vessels underestimates current global CO$_{2}$ emissions by  `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(ais_underestimation_2024)`, and overestimates the increasing trend for 2017--2024 by `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(trend_overestimation_2017_2024)`
+
+-   Across the entire `r analysis_start_year` to `r analysis_end_year`
+    time series,
+    `r dark_emissions_by_area |>   dplyr::filter(inside_footprint & s1_imaged) |>   dplyr::pull(percent_total)`
+    of non-broadcasting emissions occurred inside the S1 footprint and
+    in pixel-months that were imaged;
+    `r dark_emissions_by_area |>   dplyr::filter(inside_footprint & !s1_imaged) |>   dplyr::pull(percent_total)`
+    occurred inside the S1 footprint but in pixel-months that weren't
+    imaged; and
+    `r dark_emissions_by_area |>   dplyr::filter(!inside_footprint) |>   dplyr::pull(percent_total)`
+    occurred outside the S1 footprint entirely.
+
+-   In `r analysis_end_year`,
+    `r dark_emissions_by_fishing |> dplyr::filter(fishing) |> dplyr::pull(percent_dark)`
+    of CO$_{2}$ emissions from fishing vessels were from
+    non-broadcasting vessels, and
+    `r dark_emissions_by_fishing |> dplyr::filter(!fishing) |> dplyr::pull(percent_dark)`
+    of CO$_{2}$ emissions from non-fishing vessels were from
+    non-broadcasting vessels. For both types of vessels, this fraction
+    of emissions from non-broadcasting vessels has been declining
+    steadily since 2020.
+
+
+- Most emissions for non-fishing vessels occur during `r top_type_by_fishing_non_fishing |> dplyr::filter(fishing == "Non-fishing") |> dplyr::pull(type) |> stringr::str_to_lower()`, while most emissions for fishing vessels occur during `r top_type_by_fishing_non_fishing |> dplyr::filter(fishing == "Fishing") |> dplyr::pull(type) |> stringr::str_to_lower()`.
+
+- `r all_port_and_trip_emissions_top_3 |> dplyr::filter(type == "Domestic trips") |> dplyr::pull(country) |> glue::glue_collapse(", ", last = ", and ")` had the most CO$_{2}$ emissions during within-country domestic trips in 2024. 
+
+- `r all_port_and_trip_emissions_top_3 |> dplyr::filter(type == "International trips") |> dplyr::pull(country) |> glue::glue_collapse(", ", last = ", and ")` had the most CO$_{2}$ emissions during international trips that started or ended in these countries in 2024 (where the emissions from each trip are partitioned equally to its departure and arrival country).
+
+- `r all_port_and_trip_emissions_top_3 |> dplyr::filter(type == "Port stays") |> dplyr::pull(country) |> glue::glue_collapse(", ", last = ", and ")` had the most CO$_{2}$ emissions during port stays.
+
+- Of the roughly `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "Total") |> dplyr::pull(n_unique_vessels) |> signif(3) |> prettyNum(big.mark=",")` AIS-broadcasting vessels in our analysis, only `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "imo") |> dplyr::pull(n_unique_vessels) |> signif(3) |> prettyNum(big.mark=",")` (`r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "imo") |> dplyr::pull(fraction_n_unique_vessels) |> scales::percent()`) are listed with the IMO, while `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "other_registry") |> dplyr::pull(n_unique_vessels) |> signif(3) |> prettyNum(big.mark=",")` (`r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "other_registry") |> dplyr::pull(fraction_n_unique_vessels) |> scales::percent()`) are listed on some other public registry; this leaves over `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "no_registry") |> dplyr::pull(n_unique_vessels) |> signif(3) |> prettyNum(big.mark=",")` vessels (`r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "no_registry") |> dplyr::pull(fraction_n_unique_vessels) |> scales::percent()`) that have no public registry information and must rely completely on modeled vessel characteristics (main engine power and design speed).
+
+- Because many large vessels are already listed with the IMO, the majority of our total CO$_2$ emissions come from these vessels (`r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "imo") |> dplyr::pull(fraction_emissions_co2_mt) |> scales::percent()`); `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "other_registry") |> dplyr::pull(fraction_emissions_co2_mt) |> scales::percent()` come from vessels listed on other registries; and `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "no_registry") |> dplyr::pull(fraction_emissions_co2_mt) |> scales::percent()` come from vessels with no public registry information and which rely entirely on modeled vessel characteristics.
 
 -   Using the latest data available from the EU's Emissions Database for
     Global Atmospheric Research (EDGAR), we estimate that in 2024 marine
@@ -760,45 +789,20 @@ top_type_by_fishing_non_fishing <- emissions_by_vessel_class_df |>
     times faster than the growth rate of other transportation
     emissions, and `r round(   (percent_increase_from_2017_to_2024 |>     dplyr::filter(data_source == "Marine vessels (AIS + S1)") |>     dplyr::pull(emissions_co2_mt_normalized)) /     (percent_increase_from_2017_to_2024 |>       dplyr::filter(data_source == "All sectors (EDGAR)") |>       dplyr::pull(emissions_co2_mt_normalized)) )` faster than the growth rate of total global emissions across all sectors.
 
--   Across the entire `r analysis_start_year` to `r analysis_end_year`
-    time series,
-    `r dark_emissions_by_area |>   dplyr::filter(inside_footprint & s1_imaged) |>   dplyr::pull(percent_total)`
-    of non-broadcasting emissions occurred inside the S1 footprint and
-    in pixel-months that were imaged;
-    `r dark_emissions_by_area |>   dplyr::filter(inside_footprint & !s1_imaged) |>   dplyr::pull(percent_total)`
-    occurred inside the S1 footprint but in pixel-months that weren't
-    imaged; and
-    `r dark_emissions_by_area |>   dplyr::filter(!inside_footprint) |>   dplyr::pull(percent_total)`
-    occurred outside the S1 footprint entirely.
 
-- Most emissions for non-fishing vessels occur during `r top_type_by_fishing_non_fishing |> dplyr::filter(fishing == "Non-fishing") |> dplyr::pull(type) |> stringr::str_to_lower()`, while most emissions for fishing vessels occur during `r top_type_by_fishing_non_fishing |> dplyr::filter(fishing == "Fishing") |> dplyr::pull(type) |> stringr::str_to_lower()`.
-
-- `r all_port_and_trip_emissions_top_3 |> dplyr::filter(type == "Domestic trips") |> dplyr::pull(country) |> glue::glue_collapse(", ", last = ", and ")` had the most CO$_{2}$ emissions during within-country domestic trips in 2024. 
-
-- `r all_port_and_trip_emissions_top_3 |> dplyr::filter(type == "International trips") |> dplyr::pull(country) |> glue::glue_collapse(", ", last = ", and ")` had the most CO$_{2}$ emissions during international trips that started or ended in these countries in 2024 (where the emissions from each trip are partitioned equally to its departure and arrival country).
-
-- `r all_port_and_trip_emissions_top_3 |> dplyr::filter(type == "Port stays") |> dplyr::pull(country) |> glue::glue_collapse(", ", last = ", and ")` had the most CO$_{2}$ emissions during port stays.
-
--   In `r analysis_end_year`,
-    `r dark_emissions_by_fishing |> dplyr::filter(fishing) |> dplyr::pull(percent_dark)`
-    of CO$_{2}$ emissions from fishing vessels were from
-    non-broadcasting vessels, and
-    `r dark_emissions_by_fishing |> dplyr::filter(!fishing) |> dplyr::pull(percent_dark)`
-    of CO$_{2}$ emissions from non-fishing vessels were from
-    non-broadcasting vessels. For both types of vessels, this fraction
-    of emissions from non-broadcasting vessels has been declining
-    steadily since 2020.
+## Discussion
 
 - For non-fishing vessels, the total social cost of CO$_{2}$, CH$_{4}$, and N$_{2}$O emissions in 2021 was `r annual_sc_fishing_non_fishing |> dplyr::filter(fishing == "Non-fishing",year=="Total") |> dplyr::pull(sc_billion_usd) |> round()` billion USD. This represents about `r scales::percent((annual_sc_fishing_non_fishing |> dplyr::filter(fishing == "Non-fishing",year=="Total") |> dplyr::pull(sc_billion_usd))/1e3/6.63)` of the total value of all goods transported by maritime trade (using 6.63 trillion USD as the 2021 value of maritime-traded goods).
     
 - For fishing vessels, the total social cost of CO$_{2}$, CH$_{4}$, and N$_{2}$O emissions in 2022 was `r annual_sc_fishing_non_fishing |> dplyr::filter(fishing == "Fishing",year=="Total") |> dplyr::pull(sc_billion_usd) |> round()` billion USD. This represents about `r scales::percent((annual_sc_fishing_non_fishing |> dplyr::filter(fishing == "Fishing",year=="Total") |> dplyr::pull(sc_billion_usd))/159)` of the total value of all wild capture fisheries (using 159 billion USD as the 2022 value of wild capture fisheries).
 
-- The time between pings is typically small (the mean value is `r signif(ping_level_hours_distribution$mean_hours,3)` hours and the median value is`r signif(ping_level_hours_distribution$median_hours,3)` hours, or about `r round(ping_level_hours_distribution$mean_hours*60)` minutes and `r round(ping_level_hours_distribution$median_hours*60)` minutes respectively), while the maximum value for this across our dataset is `r round(ping_level_hours_distribution$max_hours)` hours (meaning this is the most amount of time over which we will estimate emissions for a single message)
+## Methods
 
-- Of the roughly `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "Total") |> dplyr::pull(n_unique_vessels) |> signif(3) |> prettyNum(big.mark=",")` AIS-broadcasting vessels in our analysis, only `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "imo") |> dplyr::pull(n_unique_vessels) |> signif(3) |> prettyNum(big.mark=",")` (`r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "imo") |> dplyr::pull(fraction_n_unique_vessels) |> scales::percent()`) are listed with the IMO, while `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "other_registry") |> dplyr::pull(n_unique_vessels) |> signif(3) |> prettyNum(big.mark=",")` (`r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "other_registry") |> dplyr::pull(fraction_n_unique_vessels) |> scales::percent()`) are listed on some other public registry; this leaves over `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "no_registry") |> dplyr::pull(n_unique_vessels) |> signif(3) |> prettyNum(big.mark=",")` vessels (`r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "no_registry") |> dplyr::pull(fraction_n_unique_vessels) |> scales::percent()`) that have no public registry information and must rely completely on modeled vessel characteristics (main engine power and design speed).
+- The time between pings is typically small (the mean value is `r signif(ping_level_hours_distribution$mean_hours,3)` hours and the median value is`r signif(ping_level_hours_distribution$median_hours,3)` hours, or about `r round(ping_level_hours_distribution$mean_hours*60)` minutes and `r round(ping_level_hours_distribution$median_hours*60)` minutes respectively), while the maximum value for this across our dataset is `r round(ping_level_hours_distribution$max_hours)` hours (meaning this is the most amount of time over which we will estimate emissions for a single message).
 
-- Because many large vessels are already listed with the IMO, the majority of our total CO$_2$ emissions come from these vessels (`r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "imo") |> dplyr::pull(fraction_emissions_co2_mt) |> scales::percent()`); `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "other_registry") |> dplyr::pull(fraction_emissions_co2_mt) |> scales::percent()` come from vessels listed on other registries; and `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "no_registry") |> dplyr::pull(fraction_emissions_co2_mt) |> scales::percent()` come from vessels with no public registry information and which rely entirely on modeled vessel characteristics.
+- In all, we analyze AIS data for over `r scales::comma(signif(n_unique_vessels$n_unique_vessels, 2))` AIS-broadcasting vessels, across  `r scales::comma(signif(n_ais_messages$n_billion_ais_messages, 3))`  billion individual timestamped AIS messages which are assigned to`r signif((trip_co2_emissions_by_from_to_countries |> dplyr::filter(from_country_iso3!=to_country_iso3) |> dplyr::pull(n_unique_trips) |> sum())/1e6,3)` million international trips, `r signif((trip_co2_emissions_by_from_to_countries |> dplyr::filter(from_country_iso3==to_country_iso3) |> dplyr::pull(n_unique_trips) |> sum())/1e6,3)` million domestic trips, and `r signif((port_visit_co2_emissions_by_country |> dplyr::pull(n_unique_port_vists) |> sum())/1e6,3)` million port visits.
 
+- As a result, we used a dataset containing `r signif(n_s1_detections$n_million_s1_detections,3)` million vessel detections from 2017 to 2024, of which `r signif(n_s1_detections$n_million_s1_detections_unmatched,3)` million detections were not matched to a broadcasting vessel ('unmatched'). These detections come from across more than `r prettyNum(floor(n_s1_detections$n_thousand_s1_scenes)*1000,big.mark = ",")` individual S1 scenes.
 
 # Results
 
