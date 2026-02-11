@@ -29,7 +29,7 @@ knitr::opts_chunk$set(
   fig.path = "../figures/"
 )
 
-# Load libraries
+# Load librariers
 library(ggplot2)
 library(sf)
 
@@ -40,7 +40,6 @@ analysis_end_year <- 2024
 ```{r}
 #| label: load-data
 #| cache: FALSE
-# Load all pre-computed targets (BigQuery results, model outputs, validation data)
 targets::tar_load(c(
   "n_unique_vessels",
   "n_ais_messages",
@@ -82,9 +81,8 @@ targets::tar_load(c(
 ```{r}
 #| label: setup-graphics
 
-# Define pollutant ordering for figures: greenhouse gases first (CO2, CH4, N2O),
-# then local air pollutants (CO, NOX, SOX, PM2.5, PM10, VOCs)
-# Use R expressions with brackets for subscripts in figure labels
+# For figures and tables, order pollutants first for GHG pollutants,
+# then local pollutants. For figures, we use expressions to show subscripts
 pollutant_factor_levels <- c(
   "CO[2]",
   "CH[4]",
@@ -97,15 +95,14 @@ pollutant_factor_levels <- c(
   "VOCs"
 )
 
-# Create pollutant labels for tables by removing R expression syntax
-# (brackets and asterisks) to get plain text labels
+# Set pollutant levels for tables
+# For tables, we don't use expressions
 pollutant_factor_levels_tables <- pollutant_factor_levels |>
   stringr::str_remove_all("\\[") |>
   stringr::str_remove_all("\\]") |>
   stringr::str_remove_all("\\*]*")
 
-# Define consistent color palette using Okabe-Ito colorblind-friendly colors
-# for all data sources, fleets, and inventories across figures
+# Use Okabe-Ito colorblind-friendly colors
 all_data_source_color_palette <- c(
   "Marine vessels (AIS + S1)" = paletteer::paletteer_d(
     "colorblindr::OkabeIto"
@@ -144,11 +141,10 @@ theme_plot <- function() {
     )
 }
 
-# Use Equal Earth projection for all maps (preserves area, suitable for global data)
+# Set map projection for all map figures
 map_projection <- "+proj=eqearth"
 
-# Create global bounding box polygon for map backgrounds
-# Traces the outline of the globe from 90°N to 90°S and back
+# Create bounding box of globe, for making black map backgrounds
 lats <- c(90:-90, -90:90, 90)
 longs <- c(rep(c(180, -180), each = 181), 180)
 world_bbox_sf <-
@@ -173,16 +169,16 @@ land <- sf::st_read(
   )
 
 
-# Functions to convert 1×1 degree lat/lon pixels to area in square kilometers
-# Based on: https://stackoverflow.com/a/1253545
-
-# Convert degrees to radians
+# Convert lat/lon pixel area to square km
+# https://stackoverflow.com/a/1253545
+# Need function to convert degrees to radians
+# https://stackoverflow.com/q/32370485
 deg2rad <- function(deg) {
   (deg * pi) / (180)
 }
 
-# Calculate pixel area in km² at a given latitude
-# Accounts for Earth's curvature (pixels are smaller near poles)
+# Given a latitude, what is a pixel's area?
+# https://stackoverflow.com/a/1253545
 lat_to_area <- function(lat) {
   110.574 * (111.320 * cos(deg2rad(lat)))
 }
@@ -191,8 +187,6 @@ lat_to_area <- function(lat) {
 
 ```{r}
 #| label: wrangle-edgar-data
-# Reshape EDGAR emissions data from wide to long format, convert units from
-# kilotonnes to metric tonnes, and flag land-based transportation sectors
 annual_edgar_tranportation_emissions <- annual_edgar_emissions |>
   dplyr::select(
     -c(
@@ -233,8 +227,7 @@ annual_edgar_tranportation_emissions <- annual_edgar_emissions |>
   # Only need years that correspond to our dataset
   dplyr::filter(year >= analysis_start_year, year <= analysis_end_year)
 
-# Calculate what fraction of global 2024 CO2 emissions came from all transportation sectors
-# (marine + land-based + aviation) versus all other sectors combined
+# Fraction of global 2024 CO2 emissions that came from transportation sectors
 fraction_co2_from_transportation <- annual_edgar_tranportation_emissions |>
   dplyr::mutate(
     transportation = ifelse(
@@ -258,8 +251,7 @@ fraction_co2_from_transportation <- annual_edgar_tranportation_emissions |>
 
 ```{r}
 #| label: wrangle-gfw-time-series-emissions-data
-# Reshape GFW emissions from wide to long, separating AIS-broadcasting from
-# non-broadcasting ("dark") fleet emissions based on column name suffix
+
 annual_emissions_all_pollutants <- annual_emissions_all_pollutants |>
   tidyr::pivot_longer(
     -c(year, fishing),
@@ -279,8 +271,8 @@ annual_emissions_all_pollutants <- annual_emissions_all_pollutants |>
       stringr::str_remove_all("_dark")
   )
 
-# Add a "Total" fleet category that sums AIS-broadcasting and non-broadcasting
 annual_emissions_all_pollutants_with_total <- annual_emissions_all_pollutants |>
+  # Add total, that aggregates across broadcasting and non-broadcasting
   dplyr::bind_rows(
     annual_emissions_all_pollutants |>
       dplyr::group_by(year, fishing, pollutant) |>
@@ -289,15 +281,13 @@ annual_emissions_all_pollutants_with_total <- annual_emissions_all_pollutants |>
       dplyr::mutate(fleet = "Total")
   )
 
-# Reshape emissions data from wide to long format and separate AIS-broadcasting
-# from non-broadcasting ("dark") fleet emissions for all pollutants
+# Aggregate emissions across fishing/non-fishing
 annual_emissions <- annual_emissions_all_pollutants_with_total |>
   dplyr::group_by(year, fleet, pollutant) |>
   dplyr::summarise(emissions_mt = sum(emissions_mt)) |>
   dplyr::ungroup()
 
-# Calculate percent change in emissions from 2017 to 2024 for each fleet
-# and pollutant, including the non-broadcasting fleet's share of 2024 total
+# Calculate the total percent change in emissions by fleet
 total_percent_change_by_fleet <- annual_emissions |>
   dplyr::filter(
     year %in% c(analysis_start_year, analysis_end_year),
@@ -331,8 +321,8 @@ total_percent_change_by_fleet <- annual_emissions |>
 ```
 
 ```{r}
-# Quantify underestimation of 2024 emissions when using only AIS data
-# (excluding non-broadcasting vessels detected by S1)
+# For each pollutant, estimate how much emissions are underestimated by just using AIS
+# As compared to using AIS + S1
 ais_scale_underestimation_2024 <- total_percent_change_by_fleet |>
   dplyr::filter(fleet != "S1 (non-broadcasting)") |>
   dplyr::select(fleet, pollutant, `2024`) |>
@@ -346,8 +336,8 @@ ais_scale_underestimation_2024 <- total_percent_change_by_fleet |>
     emissions_mt_2024_ais_s1 = `AIS + S1`
   )
 
-# Quantify overestimation of 2017→2024 emissions growth trend when using only AIS
-# (AIS fleet declined less than total fleet, making trend appear larger)
+# For each pollutant, estimate how much the 2017->2024 trend in emissions is underestimated by just using AIS
+# As compared to using AIS + S1
 ais_trend_overestimation_2017_2024 <- total_percent_change_by_fleet |>
   dplyr::filter(fleet != "S1 (non-broadcasting)") |>
   dplyr::select(fleet, pollutant, percent_change) |>
@@ -363,7 +353,7 @@ ais_trend_overestimation_2017_2024 <- total_percent_change_by_fleet |>
     trend_2017_2024_ais_s1 = `AIS + S1`
   )
 
-# Combine 2024 underestimation and trend overestimation metrics into summary table
+# Put all this information together
 pollutant_ais_underestimation_overestimation_summary <- ais_scale_underestimation_2024 |>
   dplyr::left_join(ais_trend_overestimation_2017_2024, by = "pollutant") |>
   dplyr::select(
@@ -375,8 +365,7 @@ pollutant_ais_underestimation_overestimation_summary <- ais_scale_underestimatio
 
 ```{r}
 #| label: wrangel-edgar-data
-# Extract land-based transportation emissions from EDGAR for comparison
-# (includes road, rail, aviation, but excludes marine transport)
+# Calculate annual other transportation emissions from EDGAR
 land_based_transportation_emissions_edgar <- annual_edgar_tranportation_emissions |>
   dplyr::filter(land_based_tranpsportation) |>
   dplyr::group_by(year) |>
@@ -385,15 +374,12 @@ land_based_transportation_emissions_edgar <- annual_edgar_tranportation_emission
   dplyr::mutate(data_source = "Other transportation sectors (EDGAR)")
 
 
-# Total global emissions across ALL EDGAR sectors (transportation + all others)
 global_emissions_edgar <- annual_edgar_tranportation_emissions |>
   dplyr::group_by(year) |>
   dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt, na.rm = TRUE)) |>
   dplyr::ungroup() |>
   dplyr::mutate(data_source = "All sectors (EDGAR)")
 
-# Combine EDGAR land-based transportation, EDGAR global/all-sector, and GFW marine
-# vessel CO2 emissions into a single dataset for cross-inventory comparison
 all_edgar_gfw_data <- land_based_transportation_emissions_edgar |>
   dplyr::bind_rows(global_emissions_edgar) |>
   dplyr::bind_rows(
@@ -410,7 +396,6 @@ all_edgar_gfw_data_starting <- all_edgar_gfw_data |>
   dplyr::mutate(emissions_co2_mt_starting = emissions_co2_mt) |>
   dplyr::select(-c(year, emissions_co2_mt))
 
-# Normalize all emissions time series to 2017 baseline for relative change comparison
 all_edgar_gfw_data_normalized <- all_edgar_gfw_data |>
   dplyr::inner_join(all_edgar_gfw_data_starting, by = "data_source") |>
   dplyr::mutate(
@@ -420,7 +405,6 @@ all_edgar_gfw_data_normalized <- all_edgar_gfw_data |>
   )
 
 
-# Calculate marine vessel share of total transportation CO2 emissions in 2024
 percent_transportation_emmissions_from_marine_2024 <- all_edgar_gfw_data |>
   dplyr::filter(year == 2024) |>
   dplyr::select(-year) |>
@@ -436,7 +420,6 @@ percent_transportation_emmissions_from_marine_2024 <- all_edgar_gfw_data |>
   ) |>
   dplyr::pull(percent)
 
-# Extract 2024 normalized values for in-text reporting of growth rates
 percent_increase_from_2017_to_2024 <- all_edgar_gfw_data_normalized |>
   dplyr::filter(year == 2024) |>
   dplyr::mutate(
@@ -446,14 +429,12 @@ percent_increase_from_2017_to_2024 <- all_edgar_gfw_data_normalized |>
   )
 ```
 
-## Figure S4: Inventory comparison
 
 ```{r}
 #| label: fig-inventory-comparison
-#| fig-cap: Comparison of marine vessel CO$_{2}$ emissions from this work to other inventories, by year.
+#| fig-cap: Comparison of annual marine vessel CO$_{2}$ emissions inventory estimates.
 #| fig-width: 9
 #| fig-height: 6
-# Extract EDGAR marine-only ("Water-borne Navigation") CO2 emissions for comparison
 marine_based_transportation_emissions_edgar <- annual_edgar_tranportation_emissions |>
   dplyr::filter(sector == "Water-borne Navigation") |>
   dplyr::group_by(year) |>
@@ -461,15 +442,12 @@ marine_based_transportation_emissions_edgar <- annual_edgar_tranportation_emissi
   dplyr::ungroup() |>
   dplyr::mutate(data_source = "EDGAR")
 
-# IMO Fourth GHG Study (2020) benchmark emissions estimates for 2016-2018
 imo_data <- tibble::tibble(
   year = c(2016, 2017, 2018),
   emissions_co2_mt = c(1.026e9, 1.064e9, 1.056e9)
 ) |>
   dplyr::mutate(data_source = "IMO")
 
-# Combine all inventory sources (GFW AIS+S1, GFW AIS-only, EDGAR, OECD, IMO)
-# into one dataset for multi-inventory comparison figure
 all_inventory_data <- all_edgar_gfw_data |>
   dplyr::filter(data_source == "Marine vessels (AIS + S1)") |>
   dplyr::mutate(data_source = "GFW (AIS + S1)") |>
@@ -508,7 +486,6 @@ all_inventory_data |>
     breaks = c("GFW (AIS + S1)", "IMO", "GFW (AIS)", "OECD", "EDGAR")
   )
 
-# Generate LaTeX table comparing annual emissions across all inventories
 all_inventory_data |>
   dplyr::mutate(
     emissions_co2_mt = as.character(signif(emissions_co2_mt, 3) / 1e9)
@@ -533,8 +510,7 @@ all_inventory_data |>
 
 ```{r}
 #| label: wrangle-gfw-spatials-emissions-data
-# Reshape spatial emissions to long format, standardize pollutant names,
-# normalize emissions by pixel area (km²), and pivot to compare 2017 vs 2024
+# Total spatial emissions by pollutant for analysis_start_year and 2024
 total_spatial_emissions_by_pollutant <- total_spatial_emissions_by_pollutant |>
   tidyr::pivot_longer(
     -c(lat_bin, lon_bin, year),
@@ -558,9 +534,7 @@ total_spatial_emissions_by_pollutant <- total_spatial_emissions_by_pollutant |>
 ```
 
 ```{r}
-# Calculate fraction of non-broadcasting emissions occurring in three categories:
-# 1) inside S1 footprint in imaged months, 2) inside footprint in non-imaged months,
-# 3) outside S1 footprint entirely (where extrapolation is needed)
+# Summarize fraction of all estimate dark emissions that occurred inside the S1 footprint and in months that were imaged; inside the S1 footprint and in months that weren't imaged; and outside the S1 footprint entirely
 dark_emissions_by_area <- monthly_aggregated_time_series |>
   dplyr::group_by(inside_footprint, s1_imaged) |>
   dplyr::summarise(emissions_co2_dark_mt = sum(emissions_co2_dark_mt)) |>
@@ -577,8 +551,8 @@ dark_emissions_by_area <- monthly_aggregated_time_series |>
     )
   )
 
-# Calculate what fraction of 2024 CO2 emissions came from non-broadcasting vessels,
-# separated by fishing and non-fishing fleets
+# Summarize fraction of 2024 CO2 emissions that came from non-broadcasting vessels,
+# disaggregated by fishing and non-fishing
 dark_emissions_by_fishing <- monthly_aggregated_time_series |>
   dplyr::filter(lubridate::year(time) == 2024) |>
   dplyr::group_by(fishing) |>
@@ -594,7 +568,6 @@ dark_emissions_by_fishing <- monthly_aggregated_time_series |>
     )
   )
 
-# Plot annual fraction of emissions from non-broadcasting vessels by fishing status
 monthly_fraction_fig <- monthly_aggregated_time_series |>
   dplyr::group_by(fishing, year = lubridate::year(time)) |>
   dplyr::summarise(
@@ -627,7 +600,6 @@ social_cost_methane_usd_per_mt_ch4 <- 2900
 # From Wang and Teng 2023: https://www.nature.com/articles/s41558-023-01803-4
 social_cost_nitrous_oxide_usd_per_mt_n2o <- 49600
 
-# Assemble social cost lookup table for joining with emissions data
 social_cost_tibble <- tibble::tibble(
   pollutant = c("co2", "ch4", "n2o"),
   sc_usd_per_mt = c(
@@ -637,9 +609,6 @@ social_cost_tibble <- tibble::tibble(
   )
 )
 
-# Calculate social cost of GHG emissions by fishing vs non-fishing fleets.
-# Uses 2021 for non-fishing (matched to maritime trade value data year)
-# and 2022 for fishing (matched to wild capture fisheries value data year)
 annual_sc_fishing_non_fishing <- annual_emissions_all_pollutants_with_total |>
   dplyr::filter(fleet %in% c("AIS-broadcasting", "Non-broadcasting")) |>
   dplyr::group_by(year, fishing, pollutant) |>
@@ -662,7 +631,6 @@ annual_sc_fishing_non_fishing <- annual_emissions_all_pollutants_with_total |>
   ) |>
   dplyr::mutate(pollutant = stringr::str_to_upper(pollutant))
 
-# Format social cost summary as LaTeX table for manuscript
 annual_sc_fishing_non_fishing_tbl <- annual_sc_fishing_non_fishing |>
   dplyr::select(
     Year = year,
@@ -687,8 +655,8 @@ writeLines(
 ```
 
 ```{r}
-# Calculate number of vessels and their total CO2 emissions by registry status:
-# IMO registry, other registries, or no registry information available
+# Summarize number of vessels and total CO2 emissions for vessels that are:
+# on the IMO registry; on some other registry; and without any registry info
 fraction_vessels_emissions_by_registry_info_expanded <- fraction_vessels_emissions_by_registry_info |>
   dplyr::mutate(
     fraction_n_unique_vessels = n_unique_vessels / sum(n_unique_vessels)
@@ -776,7 +744,6 @@ fraction_vessels_emissions_by_registry_info_expanded <- fraction_vessels_emissio
     ### Figure 1, panel A
 
 ```{r}
-# Plot absolute annual CO2 emissions time series by data source (AIS, S1, combined)
 total_annual_emissions_by_fleet_fig <- annual_emissions |>
   dplyr::filter(pollutant == "co2") |>
   dplyr::mutate(
@@ -815,18 +782,15 @@ total_annual_emissions_by_fleet_fig <- annual_emissions |>
   )
 ```
 
-# Results
-
-## Figure 4, panel B
+### Figure 2, panel B
 
 ```{r}
-# Extract 2017 baseline values for normalizing time series to show relative change
+# Get analysis_start_year values for time-series normalization
 annual_co2_emissions_starting <- annual_emissions |>
   dplyr::filter(pollutant == "co2", year == analysis_start_year) |>
   dplyr::mutate(emissions_co2_mt_starting = emissions_mt) |>
   dplyr::select(-c(year, emissions_mt))
 
-# Plot relative change in CO2 emissions from 2017 baseline by data source
 normalized_annual_emissions_by_fleet_fig <- annual_emissions |>
   dplyr::filter(pollutant == "co2") |>
   dplyr::left_join(annual_co2_emissions_starting, by = "fleet") |>
@@ -871,10 +835,9 @@ normalized_annual_emissions_by_fleet_fig <- annual_emissions |>
   )
 ```
 
-## Figure 1, panel A
+### Figure 1, panel A
 
 ```{r}
-# Prepare CO2 spatial data: 2024 absolute levels and 2017-to-2024 change
 pollutant_map_data_co2 <- total_spatial_emissions_by_pollutant |>
   dplyr::filter(pollutant %in% c("CO2")) |>
   dplyr::mutate(
@@ -891,7 +854,6 @@ pollutant_map_data_co2 <- total_spatial_emissions_by_pollutant |>
     cols = c(emissions_mt_per_km2_delta_abs, emissions_mt_per_km2_2024)
   )
 
-# Render diverging color map of CO2 emissions (2024 levels and 2017-2024 change)
 co2_map <- pollutant_map_data_co2 |>
   dplyr::mutate(
     name = ifelse(
@@ -949,15 +911,16 @@ co2_map <- pollutant_map_data_co2 |>
   )
 ```
 
-## Figure 1: Emissions by data source and maps
+### Figure 1, combined
 
 ```{r}
 #| label: fig-emissions-by-data-source-and-maps
-#| fig-cap: (A) Annual marine vessel CO$_{2}$ emissions, with each line colored based on the data source. (B) Relative change in annual marine vessel CO$_{2}$ emissions from a 2017 baseline, with each line colored based on the data source. (C) Spatial map of CO$_{2}$ emissions in 2024 (top) and change in CO$_{2}$ emissions between 2017 and 2024 (bottom), aggregated across AIS-broadcasting vessels and non-broadcasting vessels, and shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel.
+#| fig-cap: (A) Annual marine vessel CO$_{2}$ emissions, with each line colored based on the data source. (B) Relative change in annual marine vessel CO$_{2}$ emissions from a 2017 baseline, with each line colored based on the data source. (C) Spatial map of CO$_{2}$ emissions in 2024 (top) and change in CO$_{2}$ emissions between 2017 and 2024 (bottom), aggregated across AIS-broadcasting vessels and non-broadcasting vessels, and shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale).
 #| fig-width: 9
 #| fig-height: 6
-# Compose Figure 1: panels A (absolute) and B (relative) time series + C (spatial map)
 cowplot::plot_grid(
+  cowplot::plot_grid(
+    total_annual_emissions_by_fleet_fig,
     normalized_annual_emissions_by_fleet_fig,
     ncol = 1,
     labels = c("A", "B")
@@ -970,16 +933,15 @@ cowplot::plot_grid(
 )
 ```
 
-## Figure 4: Emissions by ocean and comparison to EDGAR
+### Figure 2
 
 ```{r}
 #| label: fig-emissions-marine-ocean-other
-#| fig-cap: (A) Trend in CO$_{2}$ emissions by ocean (normalized to a 2017 baseline). (B) Comparison in trend of CO$_{2}$ emissions data (normalized to a 2017 baseline) between marine transportation emissions from this work, other transportation emissions from EDGAR, and total emissions from all sectors from EDGAR.
+#| fig-cap: (A) Trend in CO$_{2}$ emissions by ocean (normalized to 2017 baseline), use our fused AIS+S1 marine vessel data. (B) Comparison in trend of CO$_{2}$ emissions data (normalized to 2017 baseline) between marine transportation emissions from GFW, other transportation emissions from EDGAR, and all sector emissions from EDGAR. On the right-hand side of the figure, 2024 absolute values (in millions of metric tonnes) are shown as text and color-coded for each line.
 #| fig-width: 7.5
 #| fig-height: 7
-# Normalize annual CO2 emissions by ocean basin to 2017 baseline for trend comparison
+# Calculate normalized annual changes in CO2 emissions by major ocean basin
 
-# Combine AIS-broadcasting and non-broadcasting emissions into a single total
 total_spatial_co2_emissions_by_ocean <- total_spatial_co2_emissions_by_ocean |>
   dplyr::mutate(
     emissions_co2_mt_total = emissions_co2_dark_mt + emissions_co2_mt
@@ -991,7 +953,6 @@ annual_emissions_by_ocean_starting <- total_spatial_co2_emissions_by_ocean |>
   dplyr::mutate(emissions_co2_mt_total_starting = emissions_co2_mt_total) |>
   dplyr::select(ocean, emissions_co2_mt_total_starting)
 
-# Normalize each ocean's emissions to its 2017 value for trend comparison
 annual_emissions_by_ocean_normalized <- total_spatial_co2_emissions_by_ocean |>
   dplyr::inner_join(annual_emissions_by_ocean_starting, by = "ocean") |>
   dplyr::mutate(
@@ -1002,7 +963,6 @@ annual_emissions_by_ocean_normalized <- total_spatial_co2_emissions_by_ocean |>
   dplyr::mutate(
     ocean = paste0(stringr::str_to_sentence(ocean), " Ocean")
   )
-# Extract 2024 endpoint values for labeling lines on the trend figure
 ocean_data_ending <- annual_emissions_by_ocean_normalized |>
   dplyr::filter(year == 2024) |>
   dplyr::mutate(
@@ -1017,7 +977,6 @@ ocean_data_ending <- annual_emissions_by_ocean_normalized |>
     emissions_co2_mt_normalized
   )
 
-# Plot CO2 emissions trend by ocean basin, normalized to 2017 baseline
 annual_ocean_emissions_normalized_fig <- annual_emissions_by_ocean_normalized |>
   ggplot() +
   geom_hline(yintercept = 0, linetype = 2) +
@@ -1074,9 +1033,8 @@ annual_ocean_emissions_normalized_fig <- annual_emissions_by_ocean_normalized |>
     fontface = "bold"
   )
 
-# Calculate 2024 total emissions by data source for annotation on figure
+# Summarize total emissions by data source for 2023, for putting on figure
 
-# Extract 2024 endpoint labels (BMT) for annotating comparison trend lines
 all_edgar_gfw_data_ending <- all_edgar_gfw_data_normalized |>
   dplyr::filter(year == 2024) |>
   dplyr::mutate(
@@ -1091,7 +1049,6 @@ all_edgar_gfw_data_ending <- all_edgar_gfw_data_normalized |>
     emissions_co2_mt_normalized
   )
 
-# Plot normalized CO2 trend comparing marine vessels to EDGAR land transport and total
 emissions_comparison_figure_normalized <- all_edgar_gfw_data_normalized |>
   dplyr::filter(
     data_source %in%
@@ -1160,14 +1117,11 @@ cowplot::plot_grid(
 )
 ```
 
-## Figure S3: Annual emissions by ocean and data source
-
 ```{r}
 #| label: fig-annual-emissions-by-ocean-and-data-source
-#| fig-cap: Annual total CO$_{2}$ emissions by ocean, disaggregated by data source (AIS-broadcasting vessels, and non-broadcasting vessels detected by S1).
+#| fig-cap: Annual total CO2 emissions by ocean, disaggregated by data source (AIS-broadcasting vessels, and non-broadcasting vessels detected by S1).
 #| fig-width: 7.5
 #| fig-height: 7.5
-# Reshape ocean emissions for stacked area chart showing AIS vs S1 contributions
 ocean_time_series_fig_data <- total_spatial_co2_emissions_by_ocean |>
   dplyr::select(ocean, year, emissions_co2_mt, emissions_co2_dark_mt) |>
   dplyr::rename(AIS = emissions_co2_mt, S1 = emissions_co2_dark_mt) |>
@@ -1211,14 +1165,11 @@ ggplot(
   )
 ```
 
-## Table S3: Emissions by ocean summary
-
 ```{r}
 #| results = 'asis'
 
-# Create supplementary table of 2024 CO2 emissions by ocean basin,
-# including 2017-2024 change and S1 imaging coverage fraction
-# Calculate S1 imaging coverage (fraction of pixel-months imaged) by ocean basin
+# Make and output a table summarizing 2024 CO2 emissions by ocean, and change in emissions from 2017 to 2024 by ocean
+# Figure out for each ocean the fraction of observations that were imaged by s1
 percent_pixels_imaged_ocean_all_time <- annual_emissions_by_ocean_normalized |>
   dplyr::group_by(ocean) |>
   dplyr::summarise(
@@ -1227,7 +1178,6 @@ percent_pixels_imaged_ocean_all_time <- annual_emissions_by_ocean_normalized |>
       scales::percent(accuracy = 0.01)
   ) |>
   dplyr::ungroup()
-# Build summary table of 2024 emissions by ocean with change, dark fraction, and S1 coverage
 emissions_by_ocean_summary_tbl <- annual_emissions_by_ocean_normalized |>
   dplyr::filter(year == 2024) |>
   dplyr::group_by(year) |>
@@ -1282,14 +1232,10 @@ writeLines(
 )
 ```
 
-## Table S4: Emissions by data source summary
-
 ```{r}
 #| results = 'asis'
 
-# Create supplementary table of 2024 CO2 emissions by data source (AIS vs S1),
-# including 2017-2024 absolute and percent change
-# Build summary table comparing 2024 emissions and 2017-2024 change across data sources
+# Make and output a table summarizing 2024 CO2 emissions by data source, and change in emissions from 2017 to 2024 by data source
 emissions_by_data_source_summary_tbl <- all_edgar_gfw_data_normalized |>
   dplyr::filter(
     data_source %in%
@@ -1331,16 +1277,15 @@ writeLines(
 ```
 
 
-# Methods: AIS-broadcasting vessels
+# Supplementary figures
 
-## Figure 9: AIS length-power relationship
+### Relationship between length and engine power
 
 ```{r}
 #| label: fig-ais-length-power-relationship
-#| fig-cap: Relationship between main engine power (killowatts) and length (meters) for all AIS-broadcasting vessels, disaggregated by fishing and non-fishing vessels.
+#| fig-cap: Relationship between main engine power (killowatts) and length (meters) for all AIS-broadcasting vessels, disaggregated by non-fishing and fishing vessels.
 #| fig-height: 7
 #| fig-width: 6
-# Scatter plot of vessel length vs main engine power, faceted by fishing/non-fishing
 vessel_size_info |>
   dplyr::mutate(
     fishing = ifelse(
@@ -1358,7 +1303,7 @@ vessel_size_info |>
   scale_y_continuous(labels = scales::comma)
 ```
 
-## Dark fleet emissions, by vessel size and type
+### Dark fleet emissions, by vessel size and type
 
 ```{r}
 #| label: fig-global-annual-co2-dark-emissions-by-type
@@ -1368,7 +1313,6 @@ vessel_size_info |>
 #| include: false
 #| eval: false
 
-# [Disabled] Bar chart of dark fleet CO2 emissions by vessel size class over time
 summarized_s1_dark_fleet_data |>
   ggplot(aes(
     x = year,
@@ -1390,7 +1334,6 @@ summarized_s1_dark_fleet_data |>
 #| fig-width: 8
 #| fig-height: 8
 
-# Recode pollutant names to R expression format for parsed facet labels
 pollutant_map_data_all <- total_spatial_emissions_by_pollutant |>
   dplyr::mutate(
     pollutant = dplyr::case_when(
@@ -1427,21 +1370,19 @@ pollutant_map_list <- purrr::map(
       ) +
       geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
       scico::scale_fill_scico(
-        name = expression(CO[2] ~ emissions ~ (MT / km^2)),
+        name = expression(Emissions ~ (MT / km^2)),
         palette = "vik",
         midpoint = 0,
         trans = ggallin::pseudolog10_trans,
         na.value = "grey90",
-        breaks = c(-1e3, -1e2, -1e1, 0, 1e1, 1e2, 1e3),
         labels = scales::comma
       ) +
       scico::scale_color_scico(
-        name = expression(CO[2] ~ emissions ~ (MT / km^2)),
+        name = expression(Emissions ~ (MT / km^2)),
         palette = "vik",
         midpoint = 0,
         trans = ggallin::pseudolog10_trans,
         na.value = "grey90",
-        breaks = c(-1e3, -1e2, -1e1, 0, 1e1, 1e2, 1e3),
         labels = scales::comma
       ) +
       labs(x = "", y = "") +
@@ -1468,15 +1409,13 @@ pollutant_map_list <- purrr::map(
 #cowplot::plot_grid(plotlist = pollutant_map_list, ncol = 3)
 ```
 
-## Figure S1: Spatial distribution of pollutants
 
 ```{r}
 #| label: fig-pollutant-maps-qlog10
-#| fig-cap: Spatial distribution of 2024 emissions for each pollutant.
+#| fig-cap: Spatial maps 2024 emissions for each GHG and pollutant, aggregated across AIS-broadcasting vessels and non-broadcasting vessels, and shown at a 1x1 degree spatial resolution. Emissions are area-normalized for each pixel (metric tonnes per square kilometer), and shown using a log-10 scale.
 #| fig-width: 8
 #| fig-height: 8
 
-# Recode pollutant names and set scale limits with 1st percentile floor per pollutant
 pollutant_map_data_all <- total_spatial_emissions_by_pollutant |>
   dplyr::mutate(
     pollutant = dplyr::case_when(
@@ -1565,97 +1504,94 @@ pollutant_map_list <- purrr::map(
 cowplot::plot_grid(plotlist = pollutant_map_list, ncol = 3)
 ```
 
-## Figure 10: S1 coverage time series
 
 ```{r}
-#| label: fig-s1-coverage-time-series
-#| fig-cap: Monthly statistics of global S1 coverage including total number of S1 scenes (top-left), total number of 1x1 degree pixels imaged (top-right), and total area imaged (bottom-left).
-#| fig-width: 7.5
+#| label: make-fig-co2-emissions-time-series
+
+# Total monthly non-spatial emissions by pollutant
+total_monthly_emissions_by_pollutant <- total_monthly_emissions_by_pollutant |>
+  dplyr::mutate(month = lubridate::ymd(month)) |>
+  tidyr::pivot_longer(
+    -month,
+    names_to = "pollutant",
+    values_to = "emissions_mt"
+  ) |>
+  dplyr::mutate(
+    pollutant = stringr::str_remove_all(pollutant, "emissions_") |>
+      stringr::str_remove_all("_total_mt") |>
+      stringr::str_to_upper() |>
+      stringr::str_replace_all("_", "."),
+    pollutant = ifelse(pollutant == "VOCS", "VOCs", pollutant)
+  ) |>
+  dplyr::filter(
+    lubridate::year(month) <= analysis_end_year,
+    lubridate::year(month) >= analysis_start_year
+  )
+
+pollutant_time_series_data_co2 <- total_monthly_emissions_by_pollutant |>
+  dplyr::filter(pollutant == "CO2")
+
+```
+
+
+```{r}
+#| label: fig-ais-data-richness
+#| fig-cap: "Richness of AIS-broadcasting vessel emissions data, showing: (A) CO$_{2}$ emissions by vessel type for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated across 2017-2024. (B) CO$_{2}$ emissions by country for AIS-broadcasting vessels during  during different activity types (international trips, port stays, and domestic trips), aggregated across 2017-2024. For both panels, emissions for each international trip are partitioned equally to its departure and arrival country). Countries with no values are shown in black."
+#| fig-width: 9
 #| fig-height: 8
-# Reshape S1 time series data to long format and rename metrics for display
-s1_time_series |>
-  dplyr::mutate(
-    month = lubridate::ymd(month),
-    fraction_detections_unmatched = n_s1_detections_unmatched /
-      (n_s1_detections_unmatched + n_s1_detections)
-  ) |>
-  tidyr::pivot_longer(-month) |>
-  dplyr::mutate(
-    name = dplyr::case_when(
-      name ==
-        "fraction_detections_unmatched" ~ "Fraction vessel detections unmatched",
-      name == "n_s1_detections" ~ "Number vessel detections",
-      name ==
-        "n_s1_detections_unmatched" ~ "Number vessel detections unmatched",
-      name == "s1_scene_area_km2" ~ "Total imaged area of S1 scenes (km^2)",
-      name == "s1_scenes" ~ "Number of S1 scenes"
-    ) |>
-      forcats::fct_relevel(c(
-        "Number of S1 scenes",
-        "Total imaged area of S1 scenes (km^2)",
-        "Number vessel detections",
-        "Number vessel detections unmatched"
-      ))
-  ) |>
-  ggplot(aes(x = month, y = value)) +
-  facet_wrap(name ~ ., ncol = 1, scales = "free") +
-  geom_line() +
-  scale_y_continuous(limits = c(0, NA), labels = scales::comma) +
-  theme_plot() +
-  scale_x_continuous(
-    breaks = seq(
-      lubridate::ymd(glue::glue("{analysis_start_year}-01-01")),
-      lubridate::ymd(glue::glue("{analysis_end_year+1}-01-01")),
-      by = "1 year"
-    ),
-    labels = seq(analysis_start_year, analysis_end_year + 1)
-  ) +
-  theme_plot() +
-  labs(x = "", y = "")
-```
 
-## Figure 8: Length bin distributions
+# Divde international trip emissions equally to from and to countries
+international_trip_emissions_by_country <- trip_co2_emissions_by_from_to_countries |>
+  dplyr::filter(from_country_iso3 != to_country_iso3) |>
+  dplyr::mutate(emissions_co2_mt = emissions_co2_mt / 2) |>
+  dplyr::select(
+    country_iso3 = from_country_iso3,
+    emissions_co2_mt,
+    vessel_class,
+    n_unique_trips
+  ) |>
+  dplyr::bind_rows(
+    trip_co2_emissions_by_from_to_countries |>
+      dplyr::mutate(
+        emissions_co2_mt = emissions_co2_mt / 2
+      ) |>
+      dplyr::select(
+        country_iso3 = to_country_iso3,
+        emissions_co2_mt,
+        vessel_class
+      )
+  ) |>
+  dplyr::group_by(country_iso3, vessel_class) |>
+  dplyr::summarise(
+    emissions_co2_mt = sum(emissions_co2_mt)
+  ) |>
+  dplyr::ungroup()
 
-```{r}
-#| label: fig-length-bin-distributions
-#| fig-cap: Distributions showing the number of unique AIS vessels and number of S1 detections for each length size bin, disaggregated by fishing and non-fishing vessels.
-#| fig-width: 7.5
-#| fig-height: 6
-# Plot count of AIS vessels and S1 detections by length size bin and vessel type
-length_size_bin_distributions |>
-  dplyr::mutate(
-    fishing = ifelse(fishing, "Fishing", "Non-fishing") |> forcats::fct_rev()
+domestic_trip_emissions_by_country <- trip_co2_emissions_by_from_to_countries |>
+  dplyr::filter(from_country_iso3 == to_country_iso3) |>
+  dplyr::select(
+    country_iso3 = from_country_iso3,
+    emissions_co2_mt,
+    vessel_class
+  )
+
+all_port_and_trip_emissions <- international_trip_emissions_by_country |>
+  dplyr::mutate(type = "International trips") |>
+  dplyr::bind_rows(
+    domestic_trip_emissions_by_country |>
+      dplyr::mutate(type = "Domestic trips")
   ) |>
-  dplyr::mutate(
-    type = ifelse(
-      type == "ais_vessels",
-      "Number AIS vessels",
-      "Number S1 detections"
-    )
-  ) |>
-  dplyr::mutate(
-    length_size_bin = glue::glue(
-      "{length_size_bin}\n({length_bin_min}-{length_bin_max}m)"
-    ) |>
-      stringr::str_replace("-Infm", "+ m")
-  ) |>
-  ggplot(aes(x = length_size_bin, y = n)) +
-  facet_wrap(type ~ fishing, scales = "free") +
-  geom_bar(stat = "identity") +
-  theme_plot() +
-  labs(x = "Length size bin", y = "Count") +
-  scale_y_continuous(labels = scales::comma)
-```
-````
-This is the code block that represents the suggested code change:
-```quarto
-#| label: fig-feature-importance
+  dplyr::bind_rows(
+    port_visit_co2_emissions_by_country |>
+      dplyr::rename(
+        country_iso3 = port_country_iso3
+      ) |>
+      dplyr::mutate(type = "Port stays")
   ) |>
   dplyr::mutate(
     type = forcats::fct_relevel(type, "International trips", "Port stays")
   )
 
-# Classify vessel types as fishing/non-fishing and format names for display
 emissions_by_vessel_class_df <-
   all_port_and_trip_emissions |>
   dplyr::group_by(vessel_class, type) |>
@@ -1700,14 +1636,12 @@ emissions_by_vessel_class_df <-
       )
   )
 
-# Summarize total emissions by fishing status and activity type for table
 emissions_by_vessel_class_summary <- emissions_by_vessel_class_df |>
   dplyr::group_by(fishing, type) |>
   dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt)) |>
   dplyr::ungroup() |>
   dplyr::arrange(fishing, -emissions_co2_mt)
 
-# Stacked bar chart of emissions by vessel class, colored by activity type
 emissions_by_vessel_class_barplot <- emissions_by_vessel_class_df |>
   dplyr::mutate(
     type = stringr::str_replace_all(type, " ", "\n") |>
@@ -1733,14 +1667,12 @@ emissions_by_vessel_class_barplot <- emissions_by_vessel_class_df |>
   paletteer::scale_fill_paletteer_d(palette = "ltc::trio4") +
   theme(legend.position = "bottom", legend.direction = "horizontal")
 
-# Aggregate emissions by country (across all vessel classes) for choropleth map
 all_port_and_trip_emissions_without_vessel_class <- all_port_and_trip_emissions |>
   dplyr::group_by(country_iso3, type) |>
   dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt)) |>
   dplyr::ungroup()
 
 
-# Create complete grid of countries x activity types so missing countries show as NA
 all_countries_for_plot <- land |>
   sf::st_drop_geometry() |>
   dplyr::select(country_iso3) |>
@@ -1749,7 +1681,6 @@ all_countries_for_plot <- land |>
       dplyr::distinct(type)
   )
 
-# Choropleth map of CO2 emissions by country and activity type
 port_trip_emissions_fig <- ggplot() +
   geom_sf(data = world_bbox_sf, fill = "grey90") +
   geom_sf(
@@ -1790,15 +1721,24 @@ port_trip_emissions_fig <- ggplot() +
     legend.key.width = unit(1.75, "cm")
   )
 
+cowplot::plot_grid(
+  emissions_by_vessel_class_barplot,
+  port_trip_emissions_fig,
+  ncol = 2,
+  labels = c("A", "B"),
+  rel_widths = c(0.52, 0.48)
+)
 ```
 
 ```{r}
 #| results = 'asis'
-# Summary table of emissions by vessel class and activity type
 emissions_by_vessel_class_summary |>
+  knitr::kable()
 ```
 
-## Figure 2, spatial panels
+# Figure 3.1 -----
+
+#### Spatial emissions by fleet (total)
 
 ```{r}
 #| label: fig-spatial-emissions-by-fleet-total-qlog10
@@ -1806,12 +1746,9 @@ emissions_by_vessel_class_summary |>
 #| fig-width: 8
 #| fig-height: 4
 
-# Define complete 1-degree lat/lon grid for filling missing spatial pixels
 target_lons <- unique(as.integer(longs))
 target_lats <- unique(as.integer(lats))
 
-# Aggregate 2017-2024 spatial emissions by fleet (AIS vs S1) and vessel type,
-# normalize by pixel area, and fill missing pixels with NA for complete grid
 spatial_co2_emissions_ais_dark_by_fleet <- annual_spatial_co2_emissions_ais_dark_by_fleet |>
   dplyr::group_by(lon_bin, lat_bin, fishing) |>
   dplyr::summarise(
@@ -1837,7 +1774,6 @@ spatial_co2_emissions_ais_dark_by_fleet <- annual_spatial_co2_emissions_ais_dark
   )
 
 
-# Set color scale limits using 1st-99th percentile of AIS fleet emissions
 scale_limits <- spatial_co2_emissions_ais_dark_by_fleet |>
   dplyr::filter(fleet == "emissions_co2_mt") |>
   dplyr::summarize(
@@ -1846,7 +1782,6 @@ scale_limits <- spatial_co2_emissions_ais_dark_by_fleet |>
   ) |>
   as.numeric()
 
-# Faceted map of cumulative CO2 emissions by fleet and vessel type (log10 scale)
 spatial_emissions_by_fleet_total_plot_qlog10 <- spatial_co2_emissions_ais_dark_by_fleet |>
   dplyr::mutate(
     fleet = factor(
@@ -1933,7 +1868,6 @@ spatial_emissions_by_fleet_total_plot_qlog10 <- spatial_co2_emissions_ais_dark_b
 #| fig-width: 8
 #| fig-height: 4
 
-# Same faceted map but with pseudolog10 scale (better for near-zero values)
 spatial_emissions_by_fleet_total_plot_pseudolog <- spatial_co2_emissions_ais_dark_by_fleet |>
   dplyr::mutate(
     fleet = factor(
@@ -2023,7 +1957,6 @@ spatial_emissions_by_fleet_total_plot_pseudolog <- spatial_co2_emissions_ais_dar
 #| fig-width: 8
 #| fig-height: 7
 
-# Reshape monthly time series to long format with fleet (AIS/S1) and vessel type
 time_series_data_monthly_emissions_by_fleet <- monthly_aggregated_time_series |>
   dplyr::group_by(time, fishing) |>
   dplyr::summarise(
@@ -2050,7 +1983,6 @@ time_series_data_monthly_emissions_by_fleet <- monthly_aggregated_time_series |>
     fishing = factor(fishing, levels = c("Non-fishing", "Fishing"))
   )
 
-# Reusable function to create stacked area time series by fleet and vessel type
 make_pollutant_by_fleet_time_series_figure <- function(
   pollutant_time_series_data,
   y_axis_label
@@ -2098,7 +2030,6 @@ make_pollutant_by_fleet_time_series_figure <- function(
     )
 }
 
-# Generate monthly CO2 emissions time series with stacked AIS and S1 areas
 time_series_by_fleet_fig_co2 <- make_pollutant_by_fleet_time_series_figure(
   time_series_data_monthly_emissions_by_fleet,
   y_axis_label = expression(Monthly ~ CO[2] ~ emissions ~ (MT))
@@ -2108,7 +2039,6 @@ time_series_by_fleet_fig_co2 <- make_pollutant_by_fleet_time_series_figure(
     limits = c(0, NA)
   )
 
-# Add padding around time series plot for alignment with spatial map below
 plot_constrained <- cowplot::plot_grid(
   NULL,
   time_series_by_fleet_fig_co2 +
@@ -2120,16 +2050,15 @@ plot_constrained <- cowplot::plot_grid(
 ```
 
 
-## Figure 2: Spatial-temporal richness by fleet (combined)
-
 ```{r}
 #| label: fig-spatial-temporal-richness-by-fleet-total-pseudolog
-#| fig-cap: (A) Time series of monthly global CO$_2$ emissions, shown for both AIS-broadcasting and S1-detected non-broadcasting vessels, and disaggregated by fishing and non-fishing boats. (B) Spatial distribution of cumulative 2017-2024 CO$_{2}$ emissions from AIS-broadcasting and S1-detected non-broadcasting fleets, disaggregated by fishing and non-fishing vessels.
+#| fig-cap: (A) Time series of monthly global CO$_2$ emissions, shown for both AIS-broadcasting and S1-detected non-broadcasting vessels, and for both fishing and non-fishing vessels. (B) Spatial distribution of cumulative 2017-2024 CO$_{2}$ emissions from both AIS-broadcasting and S1-detected non-broadcasting vessels, for both fishing and non-fishing vessels, and shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale).
 #| fig-width: 8
 #| fig-height: 7
 
-# Compose Figure 2: monthly time series (panel A) + spatial emission maps (panel B)
 cowplot::plot_grid(
+  plot_constrained,
+  spatial_emissions_by_fleet_total_plot_pseudolog,
   ncol = 1,
   rel_heights = c(0.35, 0.65),
   labels = c("A", "B")
@@ -2137,12 +2066,11 @@ cowplot::plot_grid(
 
 ```
 
-## Port stay emissions by country
+### Other plots
 
 ```{r}
 #| label: tbl-top-port-stay-emissions-by-country
 #| tbl-cap: Top 10 countries in terms of 2024 port stay emissions.
-# Show top 3 countries by emissions for each activity type
 all_port_and_trip_emissions |>
   dplyr::mutate(
     country = countrycode::countrycode(
@@ -2156,15 +2084,12 @@ all_port_and_trip_emissions |>
   knitr::kable()
 ```
 
-## Figure S2: Pollutant time series
-
 ```{r}
 #| label: fig-pollutant-time-series
-#| fig-cap: Time series of monthly global emissions for each pollutant.
+#| fig-cap: Time series of monthly global emissions for each GHG and pollutant, aggregated across AIS-broadcasting vessels and non-broadcasting vessels for which we only have Sentinel-1 data.
 #| fig-width: 8
 #| fig-height: 8
 
-# Recode all pollutant names to R expression format for parsed facet labels
 pollutant_time_series_data_all <- total_monthly_emissions_by_pollutant |>
   dplyr::mutate(
     pollutant = dplyr::case_when(
@@ -2182,7 +2107,6 @@ pollutant_time_series_data_all <- total_monthly_emissions_by_pollutant |>
     pollutant = forcats::fct_relevel(pollutant, pollutant_factor_levels)
   )
 
-# Reusable function to create faceted line plot of monthly emissions per pollutant
 make_pollutant_time_series_figure <- function(
   pollutant_time_series_data,
   y_axis_label
@@ -2225,16 +2149,14 @@ make_pollutant_time_series_figure(
 ```
 
 
-## Figure 16: Spatial coverage of non-broadcasting model
+### Spatial emissions by footprint group
 
 ```{r}
 #| label: fig-spatial-coverage-footprint
-#| fig-cap: Spatial coverage of the non-broadcasting emissions model. Areas are classified according to whether they fall inside or outside the S1 footprint and whether they have been imaged by S1 at any point in time. A given pixel may be imaged in some months but not in others. Pixels outside the footprint have never been imaged. The percentage of total CO$_{2}$ emissions from non-broadcasting vessels attributed to each category is shown.
+#| fig-cap: Spatial coverage of the non-broadcasting emissions model. Areas are categorized according to whether they fall inside or outside the S1 footprint and whether they have been imaged by S1 at any point in time. A given pixel may be imaged in some months but not in others. Pixels outside the footprint have never been imaged. The percentage of total CO$_{2}$ emissions from non-broadcasting vessels attributed to each category is shown.
 #| fig-width: 5
 #| fig-height: 7
 
-# Map S1 footprint coverage, classifying pixels by imaging status and
-# annotating each category with its share of non-broadcasting emissions
 total_spatial_co2_emissions_dark_by_footprint |>
   dplyr::left_join(
     dark_emissions_by_area |>
@@ -2282,24 +2204,19 @@ total_spatial_co2_emissions_dark_by_footprint |>
   theme(legend.position = "none")
 ```
 
-# Methods: AIS-broadcasting vessels (cont.)
-
-## Figure 5: Registered data validation
+### Registered data validation
 
 ```{r}
 #| label: fig-registered-data-performance
-#| fig-cap: Comparison of daily vessel-level CO$_{2}$ emissions estimated using our model with registered emissions from 40 commercial vessels in Taiwan during 2014. CO$_{2}$ estimates are computed using vessel characteristics from the IMO registry (left panel), our random-forest imputed vessel characteristics (center panel), or registered power and design speed (right panel).
+#| fig-cap: Comparison of daily vessel-level CO$_{2}$ emissions estimated using our model with registered emissions from a proprietary vessel database (based on main engine fuel consumption over 24 hours). Estimates are shown using main engine power and design speed from IMO (left), our machine learning random forest models (center), and the same registered dataset (right). The solid red line shows a linear regression fit, while the dashed line represents the 1:1 line. Performance values for traditional R$^{2}$ are shown for each set of vessel characteristics. Over 15,000 vessels are represented in the figure, and blue shading indicates point density. All data are rule-of-three compliant, meaning each cell (20x20 mt) displayed contains at least three vessels.
 #| fig-width: 8
 #| fig-height: 4
-# Define ordered model levels for facet comparison:
-# IMO lookup vs ML-imputed vs actual registered vessel characteristics
 model_levels <- c(
   "IMO report lookup table",
   "ML-derived engine power\nand design speed",
   "Registered data"
 )
 
-# Pivot validation data to long format comparing each model's estimate vs registered truth
 vessel_long <- registered_validation_data |>
   dplyr::select(
     co2_emissions_tonnes_registered,
@@ -2315,7 +2232,6 @@ vessel_long <- registered_validation_data |>
   dplyr::mutate(Model = factor(Model, levels = model_levels)) # Order levels
 
 
-# Calculate traditional R² for each model to annotate on scatterplot panels
 r2_labels <- vessel_long |>
   dplyr::group_by(Model) |>
   yardstick::rsq_trad(
@@ -2390,24 +2306,21 @@ ggplot(
   )
 ```
 
-## Table 1: MRV performance results
-
-## Figure 6: MRV validation
+### MRV validation
 
 ```{r}
 #| label: fig-mrv-performance
-#| fig-cap: Comparison of annual vessel-level CO$_{2}$ emissions estimated using our model with published emissions from the EU MRV database for the same 2,276 vessel-years. The sample is restricted to vessel-years where time-at-sea from AIS differs by $<$15\% from time-at-sea reported in MRV. The dashed line is the 1:1 line.
+#| fig-cap: Comparison of annual vessel-level CO$_{2}$ emissions estimated using our model with published emissions from the EU MRV database. The sample includes 2,276 observations from yearly aggregated vessel trips where hours at sea differ by no more than 15\% between our data and the MRV dataset. The solid red line shows the linear regression fit, and the dashed line represents the 1:1 line.
 #| fig-width: 8
 #| fig-height: 5
 
 ## Emissions validation ----
-# Define metric set for comparing model predictions to observed values
 validation_performance_metrics <- yardstick::metric_set(
   yardstick::rsq,
   yardstick::rsq_trad
 )
 
-# Load and prepare EU MRV validation dataset
+# EU dataset
 eu_validation_data_updated <- mrv_data_validation |>
   dplyr::filter(total_time_spent_at_sea_hours != 0) |>
   dplyr::mutate(
@@ -2418,8 +2331,7 @@ eu_validation_data_updated <- mrv_data_validation |>
   dplyr::rename(
     total_time_spent_at_sea_hours_eu = total_time_spent_at_sea_hours
   )
-# Join trip-level emission estimates with MRV reported emissions for comparison
-# Join GFW trip-level emission estimates with MRV reported emissions for comparison
+# Emission results by trip
 eu_validation_trip_updated <- trip_emissions_for_mrv_validation |>
   dplyr::filter(total_time_spent_at_sea_hours != 0) |>
   dplyr::rename(
@@ -2427,7 +2339,6 @@ eu_validation_trip_updated <- trip_emissions_for_mrv_validation |>
     total_time_spent_at_sea_hours_gfw = total_time_spent_at_sea_hours
   )
 
-# Helper: identify duplicate rows by key columns (for deduplication check)
 find_duplicates <- function(data, key_columns) {
   duplicate_indices <- duplicated(data[key_columns]) |
     duplicated(data[key_columns], fromLast = TRUE)
@@ -2435,7 +2346,6 @@ find_duplicates <- function(data, key_columns) {
   return(duplicates)
 }
 
-# Helper: aggregate duplicate vessel-years by summing numeric and concatenating text cols
 aggregate_duplicates <- function(data, group_by_cols, sum_cols, concat_cols) {
   aggregated_data <- data |>
     dplyr::group_by(dplyr::across(dplyr::all_of(group_by_cols))) |>
@@ -2468,8 +2378,7 @@ eu_validation_trip_updated <- aggregate_duplicates(
   concat_columns
 )
 
-# Merge GFW and MRV data by vessel IMO number and reporting year,
-# then compute absolute difference in hours-at-sea between datasets
+# Data selection and filtering
 merged_df <- merge(
   eu_validation_data_updated,
   eu_validation_trip_updated,
@@ -2486,9 +2395,7 @@ merged_df$max <- pmax(
   merged_df$total_time_spent_at_sea_hours_gfw
 )
 
-# Define function to test different time-at-sea mismatch thresholds
-# and calculate resulting R² performance metrics
-# Test how R² varies as we tighten/loosen the hours-at-sea mismatch threshold
+# Function to filter data and calculate performance metrics based on a threshold
 calculate_metrics <- function(threshold, merged_df) {
   filtered_hours_df <- subset(merged_df, diff / max < threshold)
   filtered_df <- filtered_hours_df |>
@@ -2516,21 +2423,18 @@ calculate_metrics <- function(threshold, merged_df) {
   return(comparison_results)
 }
 
-# Test thresholds from 1% to 50% time-at-sea difference
-# Sweep thresholds from 5% to 40% to identify optimal hours-at-sea filter
+# Range of thresholds to test
 thresholds <- seq(0.05, 0.4, 0.05)
-# Apply threshold function across all test values to find optimal cutoff
+# Apply calculate_metrics function over range of thresholds
 performance_results <- purrr::map_df(
   thresholds,
   ~ calculate_metrics(.x, merged_df)
 )
 
-# Select threshold yielding highest traditional R² for final validation figure
 best_performance <- performance_results |>
   dplyr::filter(rsq_trad == max(rsq_trad))
 
-# Use 15% threshold (shows best R² performance) for final validation analysis
-# Apply best threshold and extract columns for validation scatterplot
+# Select data with threshold of 0.15 the one showing best performance
 filtered_hours_df <- subset(merged_df, diff / max < best_performance$threshold)
 filtered_df <- filtered_hours_df |>
   dplyr::select(co2_trip_emissions_eu, co2_trip_emissions_gfw)
@@ -2589,14 +2493,12 @@ ggplot(
   )
 ```
 
-# Tables
+# Supplementary tables
 
-## Table 3: Model performance metrics
+## Dark fleet model performance metrics 
 
 ```{r}
 #| results = 'asis'
-# Format all model performance metrics (emissions regression, detection
-# classification, detection regression) as LaTeX table for manuscript
 all_performance_metrics_table <- all_performance_metrics |>
   dplyr::mutate(
     model = stringr::str_replace_all(model, "_", " ") |>
@@ -2658,10 +2560,9 @@ writeLines(
 )
 ```
 
-## Table S1: Total percent change by fleet
+## Summary of 2017 and 2024 emissions, by pollutant and data source
   
 ```{r}
-# Format 2017 vs 2024 emissions change by fleet and pollutant as LaTeX table
 total_percent_change_by_fleet_tbl <- total_percent_change_by_fleet |>
   dplyr::mutate(
     fleet = dplyr::case_when(
@@ -2711,10 +2612,9 @@ writeLines(
 )
 ```
 
-## Table S2: Pollutant AIS underestimation summary
+## Underestimation of 2024 emissions using only AIS data, and overestimation of 2017 to 2024 emissions trend using only AIS data, by pollutant.
 
 ```{r}
-# Format AIS-only underestimation and trend overestimation by pollutant as LaTeX table
 pollutant_ais_underestimation_overestimation_summary_tbl <- pollutant_ais_underestimation_overestimation_summary |>
   dplyr::mutate(
     pollutant = stringr::str_to_upper(pollutant) |>
@@ -2745,16 +2645,14 @@ writeLines(
 )
 ```
 
-## Figure 15: Feature importance
+### Feature importance
 
 ```{r}
 #| label: fig-feature-importance
-#| fig-cap: Feature importance plots for the: 1) detections (presence/absence) classification model; 2) detections regression model; and 3) CO$_2$ emissions regression model.
+#| fig-cap: Feature importance plots for the 1) detections (presence/absence) classification model; 2) detections regression model; and 3) CO$_2$ emissions regression model.
 #| fig-height: 9
 #| fig-width: 7.5
 
-# Join variable importance scores with human-readable feature names from data_sources,
-# then create faceted horizontal bar chart by model type
 all_varimp_data |>
   dplyr::left_join(
     data_sources,
@@ -2803,14 +2701,13 @@ all_varimp_data |>
   facet_wrap(model ~ ., ncol = 1, scales = "free")
 ```
 
-## Figure 12: Precision-recall curves
+### Classification model performance
 
 ```{r}
 #| label: fig-pr-curves
-#| fig-cap: Precision-recall curves of the detection presence/absence classification model, shown for the inside S1 footprint (left) and outside S1 footprint (right) performance tests.
+#| fig-cap: Precision-recall curves of the detection presence/absence classification model, shown for both the inside S1 footprint test and simulated outside S1 footprint test.
 #| fig-height: 3
 
-# Plot precision-recall curves for inside/outside S1 footprint tests
 performance_detections_cls_roc_pr_curves |>
   tidyr::pivot_wider(names_from = "metric", values_from = "estimate") |>
   dplyr::mutate(
@@ -2827,14 +2724,11 @@ performance_detections_cls_roc_pr_curves |>
   theme_plot()
 ```
 
-## Figure 13: ROC curves
-
 ```{r}
 #| label: fig-roc-curves
-#| fig-cap: Receiver Operating Characteristic (ROC) curves of the detection classification model, shown for the inside S1 footprint (left) and outside S1 footprint (right) performance tests.
+#| fig-cap: Receiver Operating Characteristic (ROC) curves of the detection classification model, shown for both the inside S1 footprint test and simulated outside S1 footprint test.
 #| fig-height: 3
 
-# Plot ROC curves for inside/outside S1 footprint tests
 performance_detections_cls_roc_pr_curves |>
   tidyr::pivot_wider(names_from = "metric", values_from = "estimate") |>
   dplyr::mutate(
@@ -2854,14 +2748,11 @@ performance_detections_cls_roc_pr_curves |>
 ```
 
 
-## Figure 14: Confusion matrices
-
 ```{r}
 #| label: fig-conf-mat
-#| fig-cap: Confusion matrices of the detection classification model, shown for the inside S1 footprint (left) and outside S1 footprint (right) performance tests.
+#| fig-cap: Confusion matrices of the detection classification model, shown for both the inside S1 footprint test and simulated outside S1 footprint test.
 #| fig-height: 3
 
-# Plot confusion matrices as heatmaps for inside/outside S1 footprint tests
 performance_detections_cls_conf_mat |>
   dplyr::mutate(
     test = stringr::str_replace_all(test, "_", " ") |> stringr::str_to_title()
@@ -2878,17 +2769,13 @@ performance_detections_cls_conf_mat |>
 ```
 
 
-# Supplementary: Trends in AIS receiver types
-
-## Figure S5: Annual emissions by AIS receiver type
+### Dynamic AIS - annual emissions and vessels by AIS receiver type
 
 ```{r}
 #| label: fig-annual-emissions-by-ais-receiver-type
-#| fig-cap: Annual total CO$_{2}$ emissions (metric tonnes) by the AIS-broadcasting fleet, disaggregated by AIS receiver type (satellite, terrestrial, and dynamic). The dashed vertical line corresponds to 2022, the first year in which dynamic AIS was widely adopted.
+#| fig-cap: Annual total CO$_{2}$ emissions (metric tonnes) by AIS-broadcasting vessels, AIS pings (i.e., individual vessel timestamped location messages), and number of unique AIS-broadcasting vessels. Trends are disaggregated by AIS receiver type (satellite, terrestrial, and dynamic), and also shown as a total aggregated across receiver types. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.
 # | #| fig-width: 4
 #| fig-height: 7
-# Clean and prepare AIS receiver type data: remove unknown type, fill gaps,
-# and exclude incomplete 2025 data
 annual_global_emissions_by_receiver_type <- annual_global_emissions_by_receiver_type |>
   # Don't include unknown receiver type
   dplyr::filter(receiver_type != "unknown") |>
@@ -2930,15 +2817,13 @@ annual_global_emissions_by_receiver_type |>
   geom_vline(xintercept = 2022, linetype = 2)
 ```
 
-## Figure S6: Annual emissions by AIS receiver type for top flags
+### Dynamic AIS - annual emissions by AIS receiver type for top flags
 
 ```{r}
 #| label: fig-annual-emissions-by-ais-receiver-type-top-flags
-#| fig-cap: Annual total CO$_{2}$ emissions (metric tonnes) by the AIS-broadcasting fleet, disaggregated by AIS receiver type (satellite, terrestrial, and dynamic), for the top 10 flags with the most total emissions in 2024. The dashed vertical line corresponds to 2022, the first year in which dynamic AIS was widely adopted.
+#| fig-cap: Annual total CO$_{2}$ emissions (metric tonnes) by AIS-broadcasting vessels, disaggregated by AIS receiver type (satellite, terrestrial, and dynamic) and total aggregated across receiver types, for the top 10 flags with the most emissions in 2024. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.
 #| fig-width: 7.5
 #| fig-height: 6
-# Add country names, clean receiver types, and fill missing combinations for
-# top-10 flag state comparison
 annual_global_emissions_by_receiver_type_and_flag <- annual_global_emissions_by_receiver_type_and_flag |>
   # Add column name for country name based on flag
 
@@ -2964,7 +2849,6 @@ annual_global_emissions_by_receiver_type_and_flag <- annual_global_emissions_by_
   # Don't use 2025 data, since the year is incomplete
   dplyr::filter(year < 2025)
 
-# Identify top 10 flag states by total 2024 emissions for figure
 top_n_flags_2024 <- annual_global_emissions_by_receiver_type_and_flag |>
   dplyr::filter(year == 2024, receiver_type == "Total") |>
   dplyr::slice_max(n = 10, order_by = emissions_co2_mt) |>
@@ -2988,15 +2872,14 @@ annual_global_emissions_by_receiver_type_and_flag |>
 
 ```
 
-## Figure S7: Spatial change in emissions by receiver type
+### Dynamic AIS - map showing spatial change in emissions by AIS receiver type
 
 ```{r}
 #| label: fig-co2-emissions-change-map-by-receiver-type
-#| fig-cap: Spatial change in CO$_{2}$ emissions by the AIS-broadcasting fleet between 2017 and 2024 (metric tonnes) by receiver type (satellite, terrestrial, and dynamic), at a 1x1 degree spatial resolution.
+#| fig-cap: Spatial change in CO$_{2}$ emissions by AIS-broadcasting vessels between 2017 and 2024 (metric tonnes) by receiver type (satellite, terrestrial, and dynamic) and total across receiver types, at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale).
 #| fig-width: 7.5
 #| fig-height: 8
-# Prepare spatial data by receiver type, normalize by pixel area,
-# and exclude incomplete 2025 data
+# Annual spatial CO2 emissions vt receiver type  (satellite; dynamic; or terrestrial)
 annual_spatial_emissions_by_receiver_type <- annual_spatial_emissions_by_receiver_type |>
   dplyr::mutate(
     receiver_type = stringr::str_to_sentence(receiver_type) |>
@@ -3069,7 +2952,6 @@ annual_spatial_emissions_by_receiver_type |>
 ## MRV performance validation table
 
 ```{r}
-# Format MRV validation results across time-at-sea thresholds as LaTeX table
 performance_results |>
   dplyr::mutate(
     rsq = signif(rsq, 2),
@@ -3095,13 +2977,10 @@ performance_results |>
 ```
 
 
-# Methods: Non-broadcasting vessels (cont.)
-
-## Table 2: Data sources
+# Non-broadcasting model data sources
 
 
 ```{r}
-# Format model feature data sources as LaTeX table (models M1/M2/M3, units, type, source)
 data_sources_table <- data_sources |>
   dplyr::select(-`Model feature shorthand`) |>
   dplyr::mutate(
@@ -3126,14 +3005,11 @@ writeLines(data_sources_table, here::here("tables/data_sources.tex"))
 ```
 
 
-## Figure 11: Offshore training/testing map
-
 ```{r}
 #| label: fig-offshore-outside-footprint-training-testing-map
-#| fig-cap: Maps of pixels that were used in the training and testing datasets for the outside S1 performance tests for each model. Pixels <=100km from the shore were used for training; pixels >100km from shore were used for testing. The exact training/testing split for each of the 3 models is shown.
+#| fig-cap: Maps of pixels that were used in the training and testing datasets for the simulated outside S1 footprint performance tests for each model. Pixels $<=$ 100km from the shore were used for training; pixels $>$ 100km from shore were used for testing.
 #| fig-width: 7.5
 #| fig-height: 7.5
-# Map training (<=100km from shore) vs testing (>100km) pixels for each model
 pixels_for_offshore_training_testing_split |>
   dplyr::mutate(type = ifelse(offshore_pixel, "Testing", "Training")) |>
   dplyr::mutate(
@@ -3170,14 +3046,11 @@ pixels_for_offshore_training_testing_split |>
   guides(color = guide_legend(reverse = TRUE))
 ```
 
-## Figure 7: S1 imaging coverage
-
 ```{r}
 #| label: fig-map-fraction-months-imaged
 #| fig-cap: Map showing the percentage of months from 2017 through 2024 that were imaged by S1 for each 1x1 degree pixel.
 #| fig-width: 7.5
 #| fig-height: 5
-# Map showing fraction of 2017-2024 months each pixel was imaged by S1
 number_s1_imaged_months_by_pixel |>
   dplyr::mutate(
     fraction_months_imaged = number_months_imaged / number_months
@@ -3220,10 +3093,8 @@ number_s1_imaged_months_by_pixel |>
   )
 ```
 
-## Table 4: Linear model fit statistics for other pollutants
 
 ```{r}
-# Format linear regression coefficients for non-CO2 pollutant models as LaTeX table
 lm_other_gases_tidy_fit_stats_tbl <- lm_other_gases_tidy_fit_stats |>
   dplyr::mutate(term = stringr::str_remove_all(term, "_")) |>
   dplyr::mutate(
@@ -3263,14 +3134,11 @@ writeLines(
 ```
 
 
-## Figure 10: S1 coverage time series
-
 ```{r}
 #| label: fig-s1-coverage-time-series
-#| fig-cap: Monthly statistics of global S1 coverage including total number of S1 scenes (top-left), total number of 1x1 degree pixels imaged (top-right), and total area imaged (bottom-left).
+#| fig-cap: Monthly statistics of global S1 coverage including total number of S1 scenes, total imaged area across all S1 scenes, total number of vessel detections, total number of vessel detections that could not be matched to an AIS-broadcasting vessels, and fraction of the total number of vessel detections that could not be matched to an AIS-broadcasting vessels.
 #| fig-width: 7.5
 #| fig-height: 8
-# Reshape S1 time series data to long format and rename metrics for display
 s1_time_series |>
   dplyr::mutate(
     month = lubridate::ymd(month),
@@ -3313,14 +3181,11 @@ s1_time_series |>
 ```
 
 
-## Figure 8: Length bin distributions
-
 ```{r}
 #| label: fig-length-bin-distributions
 #| fig-cap: Distributions showing the number of unique AIS vessels and number of S1 detections for each length size bin, disaggregated by fishing and non-fishing vessels.
 #| fig-width: 7.5
 #| fig-height: 6
-# Plot count of AIS vessels and S1 detections by length size bin and vessel type
 length_size_bin_distributions |>
   dplyr::mutate(
     fishing = ifelse(fishing, "Fishing", "Non-fishing") |> forcats::fct_rev()
