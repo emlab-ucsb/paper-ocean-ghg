@@ -198,8 +198,8 @@ targets::tar_visnetwork()
 
 `r/functions.R` contains:
 
-- `download_gfw_data()` — Executes a BigQuery SQL query and saves results in the repo as CSV
-- `combine_EU_data()` — Reads and combines annual EU MRV Excel files (2018–2024) into a single CSV
+- `download_gfw_data()` — Executes a BigQuery SQL query and saves results in the repo as CSV. Note that this function can only be used by those who have special permissions to Global Fishing Watch data on BigQuery.
+- `combine_EU_data()` — Reads and combines annual EU MRV Excel files (2018–2024) into a single tibble
 
 ## Licensing
 

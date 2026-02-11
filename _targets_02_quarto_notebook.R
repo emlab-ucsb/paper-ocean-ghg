@@ -178,12 +178,14 @@ list(
     ),
     read = readr::read_csv(!!.x)
   ),
-  tar_file_read(
+  tar_target(
+    name = mrv_raw_files,
+    command = list.files(here::here("data/MRV/raw"), full.names = TRUE),
+    format = "file"
+  ),
+  tar_target(
     name = mrv_data_validation,
-    command = here::here(
-      "data/MRV/mrv_data_validation.csv"
-    ),
-    read = readr::read_csv(!!.x)
+    command = combine_EU_data(mrv_raw_files)
   ),
   tar_file_read(
     name = trip_emissions_for_mrv_validation,

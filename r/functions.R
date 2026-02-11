@@ -13,13 +13,8 @@ download_gfw_data <- function(sql, bq_billing_project, file_path, ...) {
 # Function to access and combine CO2 emissions data from EU maritime transport
 # Downloaded from https://mrv.emsa.europa.eu/# on July 10, 2025
 # Each year is download separately for 2018-2024; we then combine them
-combine_EU_data <- function(save_path) {
-  all_files <- list.files(
-    here::here("data/MRV/raw"),
-    full.names = TRUE
-  )
-
-  combined <- purrr::map_df(all_files, function(year_tmp_file) {
+combine_EU_data <- function(mrv_raw_files) {
+  combined <- purrr::map_df(mrv_raw_files, function(year_tmp_file) {
     data <- readxl::read_excel(year_tmp_file, skip = 2, col_names = TRUE) |>
       janitor::clean_names()
 
@@ -68,5 +63,5 @@ combine_EU_data <- function(save_path) {
       )
   })
 
-  readr::write_csv(combined, save_path)
+  combined
 }
