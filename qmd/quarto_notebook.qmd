@@ -598,6 +598,130 @@ fraction_vessels_emissions_by_registry_info_expanded <- fraction_vessels_emissio
   janitor::adorn_totals()
 ```
 
+```{r}
+# Prep trip and port stay data
+
+# Divde international trip emissions equally to from and to countries
+international_trip_emissions_by_country <- trip_co2_emissions_by_from_to_countries |>
+  dplyr::filter(from_country_iso3 != to_country_iso3) |>
+  dplyr::mutate(emissions_co2_mt = emissions_co2_mt / 2) |>
+  dplyr::select(
+    country_iso3 = from_country_iso3,
+    emissions_co2_mt,
+    vessel_class,
+    n_unique_trips
+  ) |>
+  dplyr::bind_rows(
+    trip_co2_emissions_by_from_to_countries |>
+      dplyr::mutate(
+        emissions_co2_mt = emissions_co2_mt / 2
+      ) |>
+      dplyr::select(
+        country_iso3 = to_country_iso3,
+        emissions_co2_mt,
+        vessel_class
+      )
+  ) |>
+  dplyr::group_by(country_iso3, vessel_class) |>
+  dplyr::summarise(
+    emissions_co2_mt = sum(emissions_co2_mt)
+  ) |>
+  dplyr::ungroup()
+
+domestic_trip_emissions_by_country <- trip_co2_emissions_by_from_to_countries |>
+  dplyr::filter(from_country_iso3 == to_country_iso3) |>
+  dplyr::select(
+    country_iso3 = from_country_iso3,
+    emissions_co2_mt,
+    vessel_class
+  )
+
+all_port_and_trip_emissions <- international_trip_emissions_by_country |>
+  dplyr::mutate(type = "International trips") |>
+  dplyr::bind_rows(
+    domestic_trip_emissions_by_country |>
+      dplyr::mutate(type = "Domestic trips")
+  ) |>
+  dplyr::bind_rows(
+    port_visit_co2_emissions_by_country |>
+      dplyr::rename(
+        country_iso3 = port_country_iso3
+      ) |>
+      dplyr::mutate(type = "Port stays")
+  ) |>
+  dplyr::mutate(
+    type = forcats::fct_relevel(type, "International trips", "Port stays")
+  )
+
+  # Top 3 countries in terms of 2024 international trips, domestic trips, and port stays
+all_port_and_trip_emissions_top_3 <- all_port_and_trip_emissions |>
+  dplyr::group_by(country_iso3, type) |>
+  dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt)) |>
+  dplyr::ungroup() |>
+  dplyr::mutate(
+    country = countrycode::countrycode(
+      country_iso3,
+      "iso3c",
+      "country.name"
+    )
+  ) |>
+  dplyr::group_by(type) |>
+  dplyr::slice_max(n = 3, order_by = emissions_co2_mt) |>
+  dplyr::ungroup()
+
+emissions_by_vessel_class_df <-
+  all_port_and_trip_emissions |>
+  dplyr::group_by(vessel_class, type) |>
+  dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt)) |>
+  dplyr::ungroup() |>
+  dplyr::mutate(
+    fishing = ifelse(
+      vessel_class %in%
+        c(
+          "trawlers",
+          "squid_jigger",
+          "tuna_purse_seines",
+          "set_longlines",
+          "pole_and_line",
+          "set_gillnets",
+          "pots_and_traps",
+          "dredge_fishing",
+          "other_seines",
+          "other_purse_seines",
+          "trollers",
+          "drifting_longlines",
+          "driftnets",
+          "fish_factory",
+          "other_fishing"
+        ),
+      "Fishing",
+      "Non-fishing"
+    ) |>
+      forcats::fct_rev()
+  ) |>
+  dplyr::mutate(
+    vessel_class = stringr::str_replace_all(
+      vessel_class,
+      "\\.",
+      ": "
+    ) |>
+      stringr::str_replace_all("_", " ") |>
+      stringr::str_to_sentence() |>
+      stringr::str_replace_all(
+        "chemical oil",
+        "chemical or oil"
+      )
+  )
+
+top_type_by_fishing_non_fishing <- emissions_by_vessel_class_df |>
+  dplyr::group_by(fishing, type) |>
+  dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt)) |>
+  dplyr::ungroup() |>
+  dplyr::group_by(fishing) |>
+  dplyr::slice_max(n = 1, order_by = emissions_co2_mt) |>
+  dplyr::ungroup()
+```
+
 # In-line manuscript statistics
 
 -   The transportation sector is a major source of global greenhouse gas
@@ -646,6 +770,14 @@ fraction_vessels_emissions_by_registry_info_expanded <- fraction_vessels_emissio
     imaged; and
     `r dark_emissions_by_area |>   dplyr::filter(!inside_footprint) |>   dplyr::pull(percent_total)`
     occurred outside the S1 footprint entirely.
+
+- Most emissions for non-fishing vessels occur during `r top_type_by_fishing_non_fishing |> dplyr::filter(fishing == "Non-fishing") |> dplyr::pull(type) |> stringr::str_to_lower()`, while most emissions for fishing vessels occur during `r top_type_by_fishing_non_fishing |> dplyr::filter(fishing == "Fishing") |> dplyr::pull(type) |> stringr::str_to_lower()`.
+
+- `r all_port_and_trip_emissions_top_3 |> dplyr::filter(type == "Domestic trips") |> dplyr::pull(country) |> glue::glue_collapse(", ", last = ", and ")` had the most CO$_{2}$ emissions during within-country domestic trips in 2024. 
+
+- `r all_port_and_trip_emissions_top_3 |> dplyr::filter(type == "International trips") |> dplyr::pull(country) |> glue::glue_collapse(", ", last = ", and ")` had the most CO$_{2}$ emissions during international trips that started or ended in these countries in 2024 (where the emissions from each trip are partitioned equally to its departure and arrival country).
+
+- `r all_port_and_trip_emissions_top_3 |> dplyr::filter(type == "Port stays") |> dplyr::pull(country) |> glue::glue_collapse(", ", last = ", and ")` had the most CO$_{2}$ emissions during port stays.
 
 -   In `r analysis_end_year`,
     `r dark_emissions_by_fishing |> dplyr::filter(fishing) |> dplyr::pull(percent_dark)`
@@ -1094,108 +1226,6 @@ cowplot::plot_grid(
 #| fig-width: 9
 #| fig-height: 8
 
-# Divde international trip emissions equally to from and to countries
-international_trip_emissions_by_country <- trip_co2_emissions_by_from_to_countries |>
-  dplyr::filter(from_country_iso3 != to_country_iso3) |>
-  dplyr::mutate(emissions_co2_mt = emissions_co2_mt / 2) |>
-  dplyr::select(
-    country_iso3 = from_country_iso3,
-    emissions_co2_mt,
-    vessel_class,
-    n_unique_trips
-  ) |>
-  dplyr::bind_rows(
-    trip_co2_emissions_by_from_to_countries |>
-      dplyr::mutate(
-        emissions_co2_mt = emissions_co2_mt / 2
-      ) |>
-      dplyr::select(
-        country_iso3 = to_country_iso3,
-        emissions_co2_mt,
-        vessel_class
-      )
-  ) |>
-  dplyr::group_by(country_iso3, vessel_class) |>
-  dplyr::summarise(
-    emissions_co2_mt = sum(emissions_co2_mt)
-  ) |>
-  dplyr::ungroup()
-
-domestic_trip_emissions_by_country <- trip_co2_emissions_by_from_to_countries |>
-  dplyr::filter(from_country_iso3 == to_country_iso3) |>
-  dplyr::select(
-    country_iso3 = from_country_iso3,
-    emissions_co2_mt,
-    vessel_class
-  )
-
-all_port_and_trip_emissions <- international_trip_emissions_by_country |>
-  dplyr::mutate(type = "International trips") |>
-  dplyr::bind_rows(
-    domestic_trip_emissions_by_country |>
-      dplyr::mutate(type = "Domestic trips")
-  ) |>
-  dplyr::bind_rows(
-    port_visit_co2_emissions_by_country |>
-      dplyr::rename(
-        country_iso3 = port_country_iso3
-      ) |>
-      dplyr::mutate(type = "Port stays")
-  ) |>
-  dplyr::mutate(
-    type = forcats::fct_relevel(type, "International trips", "Port stays")
-  )
-
-emissions_by_vessel_class_df <-
-  all_port_and_trip_emissions |>
-  dplyr::group_by(vessel_class, type) |>
-  dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt)) |>
-  dplyr::ungroup() |>
-  dplyr::mutate(
-    fishing = ifelse(
-      vessel_class %in%
-        c(
-          "trawlers",
-          "squid_jigger",
-          "tuna_purse_seines",
-          "set_longlines",
-          "pole_and_line",
-          "set_gillnets",
-          "pots_and_traps",
-          "dredge_fishing",
-          "other_seines",
-          "other_purse_seines",
-          "trollers",
-          "drifting_longlines",
-          "driftnets",
-          "fish_factory",
-          "other_fishing"
-        ),
-      "Fishing",
-      "Non-fishing"
-    ) |>
-      forcats::fct_rev()
-  ) |>
-  dplyr::mutate(
-    vessel_class = stringr::str_replace_all(
-      vessel_class,
-      "\\.",
-      ": "
-    ) |>
-      stringr::str_replace_all("_", " ") |>
-      stringr::str_to_sentence() |>
-      stringr::str_replace_all(
-        "chemical oil",
-        "chemical or oil"
-      )
-  )
-
-emissions_by_vessel_class_summary <- emissions_by_vessel_class_df |>
-  dplyr::group_by(fishing, type) |>
-  dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt)) |>
-  dplyr::ungroup() |>
-  dplyr::arrange(fishing, -emissions_co2_mt)
-
 emissions_by_vessel_class_barplot <- emissions_by_vessel_class_df |>
   dplyr::mutate(
     type = stringr::str_replace_all(type, " ", "\n") |>
@@ -1282,28 +1312,6 @@ cowplot::plot_grid(
   labels = c("A", "B"),
   rel_widths = c(0.52, 0.48)
 )
-```
-
-```{r}
-#| results = 'asis'
-emissions_by_vessel_class_summary |>
-  knitr::kable()
-```
-
-```{r}
-#| label: tbl-top-port-stay-emissions-by-country
-#| tbl-cap: Top 10 countries in terms of 2024 port stay emissions.
-all_port_and_trip_emissions |>
-  dplyr::mutate(
-    country = countrycode::countrycode(
-      country_iso3,
-      "iso3c",
-      "country.name"
-    )
-  ) |>
-  dplyr::group_by(type) |>
-  dplyr::slice_max(n = 3, order_by = emissions_co2_mt) |>
-  knitr::kable()
 ```
 
 ## Figure 4
