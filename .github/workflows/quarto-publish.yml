@@ -33,6 +33,14 @@ jobs:
         with:
           version: 'release'
 
+      - name: Setup renv cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/renv
+          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-renv-
+
       - name: Install renv
         run: |
           install.packages('renv')
@@ -41,6 +49,12 @@ jobs:
       - name: Restore R packages
         run: |
           renv::restore()
+        shell: Rscript {0}
+
+      - name: Run targets pipeline
+        run: |
+          Sys.setenv(TAR_PROJECT = "02_quarto_notebook")
+          targets::tar_make()
         shell: Rscript {0}
         
       - name: Render Quarto notebook to HTML
