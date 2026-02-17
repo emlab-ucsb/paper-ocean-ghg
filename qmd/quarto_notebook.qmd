@@ -4,6 +4,13 @@ author: "emLab, UCSB and GFW"
 date: last-modified
 date-format: "[Last Updated on] MMMM DD, YYYY"
 format:
+  html:
+    toc: true
+    toc-location: left
+    number-sections: true
+    code-fold: true
+    embed-resources: true
+    theme: cosmo
   pdf:
     toc: true
     number-sections: true
