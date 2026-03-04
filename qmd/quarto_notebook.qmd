@@ -178,12 +178,14 @@ deg2rad <- function(deg) {
   (deg * pi) / (180)
 }
 
-# Given a latitude, what is a pixel's area?
-# https://stackoverflow.com/a/1253545
-lat_to_area <- function(lat) {
-  110.574 * (111.320 * cos(deg2rad(lat)))
+# Given a latitude and pixel size, what is a pixel's area?
+# https://stackover flow.com/a/1253545
+lat_to_area <- function(lat, pixel_size) {
+  110.574 * (111.320 * cos(deg2rad(lat + pixel_size / 2)))
 }
 
+# We use a 1x1 degree pixel size for our spatial emissions data, so set pixel_size to 1 degree
+pixel_size_analysis <- 1
 ```
 
 ```{r}
@@ -473,7 +475,10 @@ total_spatial_emissions_by_pollutant <- total_spatial_emissions_by_pollutant |>
       stringr::str_replace_all("_", "."),
     pollutant = ifelse(pollutant == "VOCS", "VOCs", pollutant)
   ) |>
-  dplyr::mutate(emissions_mt_per_km2 = emissions_mt / lat_to_area(lat_bin)) |>
+  dplyr::mutate(
+    emissions_mt_per_km2 = emissions_mt /
+      lat_to_area(lat_bin, pixel_size_analysis)
+  ) |>
   dplyr::select(-emissions_mt) |>
   tidyr::pivot_wider(
     names_from = "year",
@@ -940,7 +945,7 @@ co2_map <- pollutant_map_data_co2 |>
     palette = "vik",
     midpoint = 0,
     trans = ggallin::pseudolog10_trans,
-    na.value = "grey90",
+    na.value = scico::scico(n = 1, palette = "vik", begin = 0.5, end = 0.5),
     breaks = c(-1e3, -1e2, -1e1, 0, 1e1, 1e2, 1e3),
     labels = scales::comma
   ) +
@@ -949,7 +954,7 @@ co2_map <- pollutant_map_data_co2 |>
     palette = "vik",
     midpoint = 0,
     trans = ggallin::pseudolog10_trans,
-    na.value = "grey90",
+    na.value = scico::scico(n = 1, palette = "vik", begin = 0.5, end = 0.5),
     breaks = c(-1e3, -1e2, -1e1, 0, 1e1, 1e2, 1e3),
     labels = scales::comma
   ) +
@@ -1100,7 +1105,8 @@ spatial_co2_emissions_ais_dark_by_fleet <- annual_spatial_co2_emissions_ais_dark
     values_to = "emissions_co2_mt"
   ) |>
   dplyr::mutate(
-    emissions_mt_per_km2 = emissions_co2_mt / lat_to_area(lat_bin),
+    emissions_mt_per_km2 = emissions_co2_mt /
+      lat_to_area(lat_bin, pixel_size_analysis),
     # emissions_mt_per_km2_year = emissions_mt_per_km2 / length(analysis_end_year:analysis_start_year) # If use, update SQL to pull data by year
   ) |>
   tidyr::complete(
@@ -1145,7 +1151,7 @@ spatial_emissions_by_fleet_total_plot_pseudolog <- spatial_co2_emissions_ais_dar
     end = 1,
     trans = ggallin::pseudolog10_trans,
     breaks = c(10, 100, 1000, 10000),
-    na.value = "grey95",
+    na.value = scico::scico(n = 1, palette = "vik", begin = 0.5, end = 0.5),
     labels = scales::comma,
     guide = "none"
   ) +
@@ -1158,7 +1164,7 @@ spatial_emissions_by_fleet_total_plot_pseudolog <- spatial_co2_emissions_ais_dar
     end = 1,
     trans = ggallin::pseudolog10_trans,
     breaks = c(10, 100, 1000, 10000),
-    na.value = "grey95",
+    na.value = scico::scico(n = 1, palette = "vik", begin = 0.5, end = 0.5),
     labels = scales::comma
   ) +
   labs(x = "", y = "") +
@@ -2405,7 +2411,7 @@ pollutant_map_list <- purrr::map(
         end = 1,
         limits = scale_limits,
         trans = "log10",
-        na.value = "grey90",
+        na.value = scico::scico(n = 1, palette = "vik", begin = 0.5, end = 0.5),
         labels = scales::scientific
       ) +
       scico::scale_color_scico(
@@ -2415,7 +2421,7 @@ pollutant_map_list <- purrr::map(
         end = 1,
         limits = scale_limits,
         trans = "log10",
-        na.value = "grey90",
+        na.value = scico::scico(n = 1, palette = "vik", begin = 0.5, end = 0.5),
         labels = scales::scientific
       ) +
       labs(x = "", y = "") +
@@ -2979,7 +2985,8 @@ annual_spatial_emissions_by_receiver_type <- annual_spatial_emissions_by_receive
   # Don't use 2025 data, since the year is incomplete
   dplyr::filter(year < 2025) |>
   dplyr::mutate(
-    emissions_mt_per_km2 = emissions_co2_mt / lat_to_area(lat_bin)
+    emissions_mt_per_km2 = emissions_co2_mt /
+      lat_to_area(lat_bin, pixel_size_analysis)
   ) |>
   dplyr::select(-emissions_co2_mt)
 
@@ -3006,7 +3013,7 @@ annual_spatial_emissions_by_receiver_type |>
     palette = "vik",
     midpoint = 0,
     trans = ggallin::pseudolog10_trans,
-    na.value = "grey90",
+    na.value = scico::scico(n = 1, palette = "vik", begin = 0.5, end = 0.5),
     breaks = c(-1e3, -1e2, -1e1, 0, 1e1, 1e2, 1e3),
     labels = scales::comma
   ) +
@@ -3018,7 +3025,7 @@ annual_spatial_emissions_by_receiver_type |>
     palette = "vik",
     midpoint = 0,
     trans = ggallin::pseudolog10_trans,
-    na.value = "grey90",
+    na.value = scico::scico(n = 1, palette = "vik", begin = 0.5, end = 0.5),
     breaks = c(-1e3, -1e2, -1e1, 0, 1e1, 1e2, 1e3),
     labels = scales::comma
   ) +
@@ -3087,7 +3094,7 @@ pollutant_map_list <- purrr::map(
         palette = "vik",
         midpoint = 0,
         trans = ggallin::pseudolog10_trans,
-        na.value = "grey90",
+        na.value = scico::scico(n = 1, palette = "vik", begin = 0.5, end = 0.5),
         labels = scales::comma
       ) +
       scico::scale_color_scico(
@@ -3095,7 +3102,7 @@ pollutant_map_list <- purrr::map(
         palette = "vik",
         midpoint = 0,
         trans = ggallin::pseudolog10_trans,
-        na.value = "grey90",
+        na.value = scico::scico(n = 1, palette = "vik", begin = 0.5, end = 0.5),
         labels = scales::comma
       ) +
       labs(x = "", y = "") +
