@@ -1996,7 +1996,7 @@ s1_time_series |>
   dplyr::mutate(
     month = lubridate::ymd(month),
     fraction_detections_unmatched = n_s1_detections_unmatched /
-      (n_s1_detections_unmatched + n_s1_detections)
+      (n_s1_detections)
   ) |>
   tidyr::pivot_longer(-month) |>
   dplyr::mutate(
