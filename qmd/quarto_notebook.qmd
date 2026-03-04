@@ -298,11 +298,7 @@ total_percent_change_by_fleet <- annual_emissions |>
   dplyr::arrange(pollutant) |>
   dplyr::group_by(pollutant) |>
   dplyr::mutate(
-    percent_total_2024 = ifelse(
-      fleet == "AIS + S1",
-      "-",
-      (`2024` / sum(`2024`))
-    )
+    percent_total_2024 = (`2024` / sum(`2024`))
   ) |>
   dplyr::ungroup() %>%
   split(.[, c("pollutant")]) %>%
@@ -613,6 +609,7 @@ international_trip_emissions_by_country <- trip_co2_emissions_by_from_to_countri
   ) |>
   dplyr::bind_rows(
     trip_co2_emissions_by_from_to_countries |>
+      dplyr::filter(from_country_iso3 != to_country_iso3) |>
       dplyr::mutate(
         emissions_co2_mt = emissions_co2_mt / 2
       ) |>
@@ -653,7 +650,7 @@ all_port_and_trip_emissions <- international_trip_emissions_by_country |>
     type = forcats::fct_relevel(type, "International trips", "Port stays")
   )
 
-  # Top 3 countries in terms of 2024 international trips, domestic trips, and port stays
+# Top 3 countries in terms of 2024 international trips, domestic trips, and port stays
 all_port_and_trip_emissions_top_3 <- all_port_and_trip_emissions |>
   dplyr::group_by(country_iso3, type) |>
   dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt)) |>
@@ -1729,7 +1726,7 @@ performance_results <- purrr::map_df(
 )
 
 best_performance <- performance_results |>
-  dplyr::filter(rsq_trad == max(rsq_trad))
+  dplyr::slice_max(order_by = rsq_trad, n = 1)
 
 # Select data with threshold of 0.15 the one showing best performance
 filtered_hours_df <- subset(merged_df, diff / max < best_performance$threshold)
@@ -1758,11 +1755,11 @@ mrv_performance_results_tbl <- performance_results |>
     caption = "Performance summary across different thresholds for the hours at sea tolerance between datasets. Results are shown using the R$^{2}$ (measuring linear association between observed and predicted values) and traditional R$^{2}$ (proportion of variance explained compared to the mean-only baseline).",
     escape = FALSE
   ) |>
-  kableExtra::kable_styling(font_size = 8, latex_options = "hold_position") 
-  
+  kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
+
 mrv_performance_results_tbl
 
-mrv_performance_results_tbl|>
+mrv_performance_results_tbl |>
   writeLines(
     here::here("tables/mrv_performance_results.tex")
   )
@@ -1959,7 +1956,7 @@ data_sources_table <- data_sources |>
     font_size = 4
   )
 
-  data_sources_table
+data_sources_table
 
 writeLines(data_sources_table, here::here("tables/data_sources.tex"))
 ```
@@ -2227,7 +2224,7 @@ lm_other_gases_tidy_fit_stats_tbl <- lm_other_gases_tidy_fit_stats |>
     font_size = 7
   )
 
-  lm_other_gases_tidy_fit_stats_tbl
+lm_other_gases_tidy_fit_stats_tbl
 
 writeLines(
   lm_other_gases_tidy_fit_stats_tbl,
@@ -2853,11 +2850,11 @@ all_inventory_data_kable <- all_inventory_data |>
     label = "inventory_comparison",
     caption = "Comparison of annual marine vessel CO$_{2}$ emissions inventory estimates (billions of metric tonnes)."
   ) |>
-  kableExtra::kable_styling(font_size = 8, latex_options = "hold_position") 
-  
-  all_inventory_data_kable
-  
-  all_inventory_data_kable|>
+  kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
+
+all_inventory_data_kable
+
+all_inventory_data_kable |>
   writeLines(
     here::here("tables/inventory_comparison.tex")
   )

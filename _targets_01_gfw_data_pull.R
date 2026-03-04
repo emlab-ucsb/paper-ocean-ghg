@@ -504,11 +504,6 @@ list(
     ),
     format = "file"
   ),
-  # MRV data validation
-  tar_target(
-    name = mrv_data_validation,
-    command = combine_EU_data(here::here("data/MRV/mrv_data_validation.csv")),
-  ),
   # Trip emissions to validate using MRV data
   tar_file_read(
     name = trip_emissions_for_mrv_validation,
