@@ -186,6 +186,14 @@ lat_to_area <- function(lat, pixel_size) {
 
 # We use a 1x1 degree pixel size for our spatial emissions data, so set pixel_size to 1 degree
 pixel_size_analysis <- 1
+
+# Set map background color as the midpoint value from scico::scico vik, which we use for
+map_background_color <- scico::scico(
+  n = 1,
+  palette = "vik",
+  begin = 0.5,
+  end = 0.5
+)
 ```
 
 ```{r}
@@ -462,7 +470,7 @@ all_inventory_data <- all_edgar_gfw_data |>
 ```{r}
 #| label: wrangle-gfw-spatials-emissions-data
 # Total spatial emissions by pollutant for analysis_start_year and 2024
-total_spatial_emissions_by_pollutant <- total_spatial_emissions_by_pollutant |>
+total_spatial_emissions_by_pollutant_formatted <- total_spatial_emissions_by_pollutant |>
   tidyr::pivot_longer(
     -c(lat_bin, lon_bin, year),
     names_to = "pollutant",
@@ -904,7 +912,7 @@ normalized_annual_emissions_by_fleet_fig <- annual_emissions |>
 
 ```{r}
 # Figure 1 C
-pollutant_map_data_co2 <- total_spatial_emissions_by_pollutant |>
+pollutant_map_data_co2 <- total_spatial_emissions_by_pollutant_formatted |>
   dplyr::filter(pollutant %in% c("CO2")) |>
   dplyr::mutate(
     emissions_mt_per_km2_delta_abs = emissions_mt_per_km2_2024 -
@@ -929,7 +937,10 @@ co2_map <- pollutant_map_data_co2 |>
     )
   ) |>
   ggplot() +
-  geom_sf(data = world_bbox_sf, fill = "grey90") +
+  geom_sf(
+    data = world_bbox_sf,
+    fill = map_background_color
+  ) +
   ggspatial::geom_spatial_tile(
     aes(
       x = lon_bin + 0.5,
@@ -945,7 +956,7 @@ co2_map <- pollutant_map_data_co2 |>
     palette = "vik",
     midpoint = 0,
     trans = ggallin::pseudolog10_trans,
-    na.value = scico::scico(n = 1, palette = "vik", begin = 0.5, end = 0.5),
+    na.value = map_background_color,
     breaks = c(-1e3, -1e2, -1e1, 0, 1e1, 1e2, 1e3),
     labels = scales::comma
   ) +
@@ -954,7 +965,7 @@ co2_map <- pollutant_map_data_co2 |>
     palette = "vik",
     midpoint = 0,
     trans = ggallin::pseudolog10_trans,
-    na.value = scico::scico(n = 1, palette = "vik", begin = 0.5, end = 0.5),
+    na.value = map_background_color,
     breaks = c(-1e3, -1e2, -1e1, 0, 1e1, 1e2, 1e3),
     labels = scales::comma
   ) +
@@ -1151,7 +1162,7 @@ spatial_emissions_by_fleet_total_plot_pseudolog <- spatial_co2_emissions_ais_dar
     end = 1,
     trans = ggallin::pseudolog10_trans,
     breaks = c(10, 100, 1000, 10000),
-    na.value = scico::scico(n = 1, palette = "vik", begin = 0.5, end = 0.5),
+    na.value = map_background_color,
     labels = scales::comma,
     guide = "none"
   ) +
@@ -1164,7 +1175,7 @@ spatial_emissions_by_fleet_total_plot_pseudolog <- spatial_co2_emissions_ais_dar
     end = 1,
     trans = ggallin::pseudolog10_trans,
     breaks = c(10, 100, 1000, 10000),
-    na.value = scico::scico(n = 1, palette = "vik", begin = 0.5, end = 0.5),
+    na.value = map_background_color,
     labels = scales::comma
   ) +
   labs(x = "", y = "") +
@@ -1273,7 +1284,10 @@ all_countries_for_plot <- land |>
   )
 
 port_trip_emissions_fig <- ggplot() +
-  geom_sf(data = world_bbox_sf, fill = "grey90") +
+  geom_sf(
+    data = world_bbox_sf,
+    fill = map_background_color
+  ) +
   geom_sf(
     data = all_countries_for_plot |>
       dplyr::left_join(land, by = ) |>
@@ -1845,7 +1859,10 @@ number_s1_imaged_months_by_pixel |>
     fraction_months_imaged = number_months_imaged / number_months
   ) |>
   ggplot() +
-  geom_sf(data = world_bbox_sf, fill = "grey90") +
+  geom_sf(
+    data = world_bbox_sf,
+    fill = map_background_color
+  ) +
   ggspatial::geom_spatial_tile(
     aes(
       x = lon_bin + 0.5,
@@ -2030,7 +2047,10 @@ pixels_for_offshore_training_testing_split |>
       stringr::str_to_sentence()
   ) |>
   ggplot() +
-  geom_sf(data = world_bbox_sf, fill = "grey90") +
+  geom_sf(
+    data = world_bbox_sf,
+    fill = map_background_color
+  ) +
   ggspatial::geom_spatial_tile(
     aes(
       x = lon_bin + 0.5,
@@ -2327,7 +2347,11 @@ total_spatial_co2_emissions_dark_by_footprint |>
   ) |>
   dplyr::ungroup() |>
   ggplot() +
-  geom_sf(data = world_bbox_sf, fill = "grey90", color = NA) +
+  geom_sf(
+    data = world_bbox_sf,
+    fill = map_background_color,
+    color = NA
+  ) +
   ggspatial::geom_spatial_tile(
     aes(
       x = lon_bin + 0.5,
@@ -2360,7 +2384,7 @@ total_spatial_co2_emissions_dark_by_footprint |>
 #| fig-width: 8
 #| fig-height: 8
 
-pollutant_map_data_all <- total_spatial_emissions_by_pollutant |>
+pollutant_map_data_all <- total_spatial_emissions_by_pollutant_formatted |>
   dplyr::mutate(
     pollutant = dplyr::case_when(
       pollutant == "CO2" ~ "CO[2]",
@@ -2394,7 +2418,10 @@ pollutant_map_list <- purrr::map(
 
     pollutant_map_data |>
       ggplot() +
-      geom_sf(data = world_bbox_sf, fill = "grey90") +
+      geom_sf(
+        data = world_bbox_sf,
+        fill = map_background_color
+      ) +
       ggspatial::geom_spatial_tile(
         aes(
           x = lon_bin + 0.5,
@@ -2411,7 +2438,7 @@ pollutant_map_list <- purrr::map(
         end = 1,
         limits = scale_limits,
         trans = "log10",
-        na.value = scico::scico(n = 1, palette = "vik", begin = 0.5, end = 0.5),
+        na.value = map_background_color,
         labels = scales::scientific
       ) +
       scico::scale_color_scico(
@@ -2421,7 +2448,7 @@ pollutant_map_list <- purrr::map(
         end = 1,
         limits = scale_limits,
         trans = "log10",
-        na.value = scico::scico(n = 1, palette = "vik", begin = 0.5, end = 0.5),
+        na.value = map_background_color,
         labels = scales::scientific
       ) +
       labs(x = "", y = "") +
@@ -2457,6 +2484,23 @@ cowplot::plot_grid(plotlist = pollutant_map_list, ncol = 3)
 #| fig-height: 8
 
 pollutant_time_series_data_all <- total_monthly_emissions_by_pollutant |>
+  dplyr::mutate(month = lubridate::ymd(month)) |>
+  tidyr::pivot_longer(
+    -month,
+    names_to = "pollutant",
+    values_to = "emissions_mt"
+  ) |>
+  dplyr::mutate(
+    pollutant = stringr::str_remove_all(pollutant, "emissions_") |>
+      stringr::str_remove_all("_total_mt") |>
+      stringr::str_to_upper() |>
+      stringr::str_replace_all("_", "."),
+    pollutant = ifelse(pollutant == "VOCS", "VOCs", pollutant)
+  ) |>
+  dplyr::filter(
+    lubridate::year(month) <= analysis_end_year,
+    lubridate::year(month) >= analysis_start_year
+  ) |>
   dplyr::mutate(
     pollutant = dplyr::case_when(
       pollutant == "CO2" ~ "CO[2]",
@@ -2996,7 +3040,10 @@ annual_spatial_emissions_by_receiver_type |>
   dplyr::mutate(across(c(`2017`, `2024`), ~ tidyr::replace_na(., 0))) |>
   dplyr::mutate(emissions_mt_per_km2 = `2024` - `2017`) |>
   ggplot() +
-  geom_sf(data = world_bbox_sf, fill = "grey90") +
+  geom_sf(
+    data = world_bbox_sf,
+    fill = map_background_color
+  ) +
   ggspatial::geom_spatial_tile(aes(
     x = lon_bin + 0.5,
     y = lat_bin + 0.5,
@@ -3013,7 +3060,7 @@ annual_spatial_emissions_by_receiver_type |>
     palette = "vik",
     midpoint = 0,
     trans = ggallin::pseudolog10_trans,
-    na.value = scico::scico(n = 1, palette = "vik", begin = 0.5, end = 0.5),
+    na.value = map_background_color,
     breaks = c(-1e3, -1e2, -1e1, 0, 1e1, 1e2, 1e3),
     labels = scales::comma
   ) +
@@ -3025,7 +3072,7 @@ annual_spatial_emissions_by_receiver_type |>
     palette = "vik",
     midpoint = 0,
     trans = ggallin::pseudolog10_trans,
-    na.value = scico::scico(n = 1, palette = "vik", begin = 0.5, end = 0.5),
+    na.value = map_background_color,
     breaks = c(-1e3, -1e2, -1e1, 0, 1e1, 1e2, 1e3),
     labels = scales::comma
   ) +
@@ -3045,115 +3092,4 @@ annual_spatial_emissions_by_receiver_type |>
   scale_x_continuous(expand = c(0, 1)) +
   scale_y_continuous(expand = c(0, 1)) +
   coord_sf(crs = map_projection)
-```
-
-
-```{r}
-#| label: fig-pollutant-maps-pseudolog
-#| fig-cap: Spatial map of 2024 emissions for each pollutant, aggregated across the AIS-broadcasting fleet and non-broadcasting, and shown at a 1x1 degree spatial resolution
-#| fig-width: 8
-#| fig-height: 8
-
-pollutant_map_data_all <- total_spatial_emissions_by_pollutant |>
-  dplyr::mutate(
-    pollutant = dplyr::case_when(
-      pollutant == "CO2" ~ "CO[2]",
-      pollutant == "N2O" ~ "N[2]*O",
-      pollutant == "CH4" ~ "CH[4]",
-      pollutant == "PM2.5" ~ "PM[2.5]",
-      pollutant == "PM10" ~ "PM[10]",
-      pollutant == "SOX" ~ "SO[X]",
-      pollutant == "NOX" ~ "NO[X]",
-      TRUE ~ pollutant
-    )
-  ) |>
-  dplyr::mutate(
-    pollutant = forcats::fct_relevel(pollutant, pollutant_factor_levels)
-  )
-
-pollutant_map_list <- purrr::map(
-  unique(pollutant_map_data_all$pollutant),
-  function(pollutant_tmp) {
-    pollutant_tmp <- as.character(pollutant_tmp)
-
-    pollutant_map_data_all |>
-      dplyr::filter(pollutant == pollutant_tmp) |>
-      ggplot() +
-      geom_sf(data = world_bbox_sf, fill = "grey90") +
-      ggspatial::geom_spatial_tile(
-        aes(
-          x = lon_bin + 0.5,
-          y = lat_bin + 0.5,
-          color = emissions_mt_per_km2_2024,
-          fill = emissions_mt_per_km2_2024
-        )
-      ) +
-      geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
-      scico::scale_fill_scico(
-        name = expression(Emissions ~ (MT / km^2)),
-        palette = "vik",
-        midpoint = 0,
-        trans = ggallin::pseudolog10_trans,
-        na.value = scico::scico(n = 1, palette = "vik", begin = 0.5, end = 0.5),
-        labels = scales::comma
-      ) +
-      scico::scale_color_scico(
-        name = expression(Emissions ~ (MT / km^2)),
-        palette = "vik",
-        midpoint = 0,
-        trans = ggallin::pseudolog10_trans,
-        na.value = scico::scico(n = 1, palette = "vik", begin = 0.5, end = 0.5),
-        labels = scales::comma
-      ) +
-      labs(x = "", y = "") +
-      theme_void() +
-      guides(
-        fill = guide_colorbar(
-          title.position = "top",
-          title.hjust = 0.5,
-          frame.colour = "black",
-          ticks.colour = "black"
-        )
-      ) +
-      scale_x_continuous(expand = c(0, 1)) +
-      scale_y_continuous(expand = c(0, 1)) +
-      theme(
-        legend.position = "bottom",
-        legend.direction = "horizontal",
-        legend.key.width = unit(1, "cm")
-      ) +
-      facet_wrap(pollutant ~ ., labeller = label_parsed)
-  }
-)
-
-#cowplot::plot_grid(plotlist = pollutant_map_list, ncol = 3)
-```
-
-
-```{r}
-#| label: make-fig-co2-emissions-time-series
-
-# Total monthly non-spatial emissions by pollutant
-total_monthly_emissions_by_pollutant <- total_monthly_emissions_by_pollutant |>
-  dplyr::mutate(month = lubridate::ymd(month)) |>
-  tidyr::pivot_longer(
-    -month,
-    names_to = "pollutant",
-    values_to = "emissions_mt"
-  ) |>
-  dplyr::mutate(
-    pollutant = stringr::str_remove_all(pollutant, "emissions_") |>
-      stringr::str_remove_all("_total_mt") |>
-      stringr::str_to_upper() |>
-      stringr::str_replace_all("_", "."),
-    pollutant = ifelse(pollutant == "VOCS", "VOCs", pollutant)
-  ) |>
-  dplyr::filter(
-    lubridate::year(month) <= analysis_end_year,
-    lubridate::year(month) >= analysis_start_year
-  )
-
-pollutant_time_series_data_co2 <- total_monthly_emissions_by_pollutant |>
-  dplyr::filter(pollutant == "CO2")
-
 ```
