@@ -1099,10 +1099,6 @@ time_series_by_fleet_fig_co2 <- make_pollutant_by_fleet_time_series_figure(
 
 ```{r}
 # Figure 2B
-
-target_lons <- unique(as.integer(longs))
-target_lats <- unique(as.integer(lats))
-
 spatial_co2_emissions_ais_dark_by_fleet <- annual_spatial_co2_emissions_ais_dark_by_fleet |>
   dplyr::group_by(lon_bin, lat_bin, fishing) |>
   dplyr::summarise(
@@ -1117,15 +1113,7 @@ spatial_co2_emissions_ais_dark_by_fleet <- annual_spatial_co2_emissions_ais_dark
   ) |>
   dplyr::mutate(
     emissions_mt_per_km2 = emissions_co2_mt /
-      lat_to_area(lat_bin, pixel_size_analysis),
-    # emissions_mt_per_km2_year = emissions_mt_per_km2 / length(analysis_end_year:analysis_start_year) # If use, update SQL to pull data by year
-  ) |>
-  tidyr::complete(
-    lon_bin = target_lons,
-    lat_bin = target_lats,
-    fishing,
-    fleet,
-    fill = list(emissions_mt_per_km2 = NA)
+      lat_to_area(lat_bin, pixel_size_analysis)
   )
 
 spatial_emissions_by_fleet_total_plot_pseudolog <- spatial_co2_emissions_ais_dark_by_fleet |>
