@@ -1278,7 +1278,7 @@ port_trip_emissions_fig <- ggplot() +
   ) +
   geom_sf(
     data = all_countries_for_plot |>
-      dplyr::left_join(land, by = ) |>
+      dplyr::left_join(land, by = "country_iso3") |>
       dplyr::left_join(
         all_port_and_trip_emissions_without_vessel_class,
         by = c("country_iso3", "type")
@@ -3010,6 +3010,8 @@ annual_global_emissions_by_receiver_type_and_flag |>
 #| fig-height: 8
 # Annual spatial CO2 emissions vt receiver type  (satellite; dynamic; or terrestrial)
 annual_spatial_emissions_by_receiver_type <- annual_spatial_emissions_by_receiver_type |>
+  # Don't include unknown receiver type
+  dplyr::filter(receiver_type != "unknown") |>
   dplyr::mutate(
     receiver_type = stringr::str_to_sentence(receiver_type) |>
       forcats::fct_relevel("Satellite", "Terrestrial", "Dynamic")
