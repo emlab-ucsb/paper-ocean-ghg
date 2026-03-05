@@ -1402,10 +1402,10 @@ annual_ocean_emissions_normalized_fig <- annual_emissions_by_ocean_normalized |>
     palette = "Dark2",
     breaks = c(
       "Southern Ocean",
-      "Arctic Ocean",
       "Pacific Ocean",
       "Atlantic Ocean",
-      "Indian Ocean"
+      "Indian Ocean",
+      "Arctic Ocean"
     )
   ) +
   ggrepel::geom_text_repel(
