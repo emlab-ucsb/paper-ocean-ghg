@@ -1,7 +1,12 @@
 fishing,length_size_bin,n,type,length_bin_min,length_bin_max
-FALSE,4,5943131,s1_detections,150,Inf
-TRUE,1,12386770,s1_detections,0,25
-TRUE,4,214464,s1_detections,75,Inf
+FALSE,2,4373932,s1_detections,50,100
+FALSE,3,3424603,s1_detections,100,150
+TRUE,3,927534,s1_detections,50,75
+FALSE,4,5990653,s1_detections,150,Inf
+TRUE,1,12446726,s1_detections,0,25
+TRUE,4,215606,s1_detections,75,Inf
+TRUE,2,5188356,s1_detections,25,50
+FALSE,1,1504574,s1_detections,0,50
 FALSE,1,652771,ais_vessels,0,50
 FALSE,2,135268,ais_vessels,50,100
 FALSE,3,35950,ais_vessels,100,150
@@ -10,8 +15,3 @@ TRUE,1,108240,ais_vessels,0,25
 TRUE,2,74843,ais_vessels,25,50
 TRUE,3,7840,ais_vessels,50,75
 TRUE,4,3546,ais_vessels,75,Inf
-FALSE,1,1493379,s1_detections,0,50
-FALSE,2,4343878,s1_detections,50,100
-FALSE,3,3398626,s1_detections,100,150
-TRUE,3,922290,s1_detections,50,75
-TRUE,2,5159893,s1_detections,25,50
