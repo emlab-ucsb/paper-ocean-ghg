@@ -26,7 +26,7 @@ list(
   # Define the version of the dark fleet dataset to pull
   tar_target(
     name = run_version_dark,
-    "v20260304"
+    "v20260305"
   ),
   # Set analysis start year
   tar_target(
