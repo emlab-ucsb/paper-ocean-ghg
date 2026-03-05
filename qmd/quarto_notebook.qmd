@@ -2206,6 +2206,7 @@ writeLines(
 
 ```{r}
 #| results: 'asis'
+
 lm_other_gases_tidy_fit_stats_tbl <- lm_other_gases_tidy_fit_stats |>
   dplyr::mutate(term = stringr::str_remove_all(term, "_")) |>
   dplyr::mutate(

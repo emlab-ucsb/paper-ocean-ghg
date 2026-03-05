@@ -31,5 +31,5 @@ SELECT
 FROM
 combined
 LEFT JOIN
-(SELECT * FROM `world-fishing-827.proj_ocean_ghg.rf_vessel_length_bins_v20260126`)
+(SELECT * FROM `world-fishing-827.proj_ocean_ghg.rf_vessel_length_bins_{run_version_dark}`)
 USING(fishing,length_size_bin)
