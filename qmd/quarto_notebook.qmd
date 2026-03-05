@@ -336,7 +336,7 @@ ais_scale_underestimation_2024 <- total_percent_change_by_fleet |>
   tidyr::pivot_wider(names_from = "fleet", values_from = `2024`) |>
   dplyr::mutate(
     ais_underestimation_2024 = (1 - `AIS (broadcasting)` / `AIS + S1`) |>
-      scales::percent(accuracy = 0.01)
+      scales::percent(accuracy = 1)
   ) |>
   dplyr::rename(
     emissions_mt_2024_ais = `AIS (broadcasting)`,
@@ -353,7 +353,7 @@ ais_trend_overestimation_2017_2024 <- total_percent_change_by_fleet |>
     trend_overestimation_2017_2024 = (`AIS (broadcasting)` /
       `AIS + S1` -
       1) |>
-      scales::percent(accuracy = 0.01)
+      scales::percent(accuracy = 1)
   ) |>
   dplyr::rename(
     trend_2017_2024_ais = `AIS (broadcasting)`,
@@ -526,7 +526,7 @@ dark_emissions_by_fishing <- monthly_aggregated_time_series |>
   dplyr::mutate(
     percent_dark = scales::percent(
       emissions_co2_dark_mt / (emissions_co2_dark_mt + emissions_co2_mt),
-      accuracy = 0.1
+      accuracy = 1
     )
   )
 
