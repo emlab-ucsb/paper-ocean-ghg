@@ -26,7 +26,7 @@ list(
   # Define the version of the dark fleet dataset to pull
   tar_target(
     name = run_version_dark,
-    "v20260305"
+    "v20260316"
   ),
   # Set analysis start year
   tar_target(
@@ -239,7 +239,7 @@ list(
     ),
     format = "file"
   ),
-  # Spatial gridded 2016 and 2024 emissions by pollutant
+  # Spatial gridded 2017 and 2024 emissions by pollutant
   # Aggregated across AIS-broadcasting and non-broadcasting fleets
   tar_file_read(
     name = total_spatial_emissions_by_pollutant,
@@ -382,7 +382,7 @@ list(
       )
     )
   ),
-  # Total 2024 port visit CO2 emissions by country and vessel class
+  # Total annual port visit CO2 emissions by country and vessel class
   tar_file_read(
     name = port_visit_co2_emissions_by_country,
     command = here::here("sql/port_visit_co2_emissions_by_country.sql"),
@@ -391,8 +391,8 @@ list(
       sql = readr::read_file(!!.x) |>
         stringr::str_glue(
           run_version_ais = run_version_ais,
-          analysis_start_year = 2024,
-          analysis_end_year = 2024
+          analysis_start_year = analysis_start_year,
+          analysis_end_year = analysis_end_year
         ),
       file_path = here::here(
         "data/gfw/port_visit_co2_emissions_by_country.csv"
@@ -400,7 +400,7 @@ list(
     ),
     format = "file"
   ),
-  # Total 2024 trip-level CO2 emissions by from- and to-country and vessel class
+  # Total annual trip-level CO2 emissions by from- and to-country and vessel class
   tar_file_read(
     name = trip_co2_emissions_by_from_to_countries,
     command = here::here("sql/trip_co2_emissions_by_from_to_countries.sql"),
@@ -409,8 +409,8 @@ list(
       sql = readr::read_file(!!.x) |>
         stringr::str_glue(
           run_version_ais = run_version_ais,
-          analysis_start_year = 2024,
-          analysis_end_year = 2024
+          analysis_start_year = analysis_start_year,
+          analysis_end_year = analysis_end_year
         ),
       file_path = here::here(
         "data/gfw/trip_co2_emissions_by_from_to_countries.csv"
