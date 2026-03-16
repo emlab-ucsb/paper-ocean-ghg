@@ -10,7 +10,8 @@ WITH
   SELECT
     trip_id,
     from_country_iso3,
-    to_country_iso3
+    to_country_iso3,
+    EXTRACT(YEAR FROM arrival_timestamp) year
   FROM
     `world-fishing-827.proj_ocean_ghg.voyage_info_{run_version_ais}`
   WHERE
@@ -33,6 +34,7 @@ SELECT
   from_country_iso3,
   to_country_iso3,
   vessel_class,
+  year,
   SUM(emissions_co2_mt) emissions_co2_mt,
   COUNT(DISTINCT trip_id) n_unique_trips
 FROM
@@ -48,4 +50,5 @@ USING
 GROUP BY
   from_country_iso3,
   to_country_iso3,
-  vessel_class
+  vessel_class,
+  year

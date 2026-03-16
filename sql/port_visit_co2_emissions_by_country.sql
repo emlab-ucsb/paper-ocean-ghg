@@ -10,7 +10,8 @@ WITH
   SELECT
     visit_id,
     # For port visits, from- and to-country are the same
-    from_country_iso3 port_country_iso3
+    from_country_iso3 port_country_iso3,
+    EXTRACT(YEAR FROM end_timestamp) year
   FROM
     `world-fishing-827.proj_ocean_ghg.port_visit_info_{run_version_ais}`
   WHERE
@@ -32,6 +33,7 @@ WITH
 SELECT
 port_country_iso3,
 vessel_class,
+year,
 SUM(emissions_co2_mt) emissions_co2_mt,
   COUNT(DISTINCT visit_id) n_unique_port_vists
 FROM
@@ -45,4 +47,5 @@ USING(visit_id)
   (ssvid)
 GROUP BY
 port_country_iso3,
-vessel_class
+vessel_class,
+year

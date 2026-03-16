@@ -609,9 +609,11 @@ fraction_vessels_emissions_by_registry_info_expanded <- fraction_vessels_emissio
 
 ```{r}
 # Prep trip and port stay data
-
+# All trips and port stays correspond to those that ended in 2024
 # Divde international trip emissions equally to from and to countries
+
 international_trip_emissions_by_country <- trip_co2_emissions_by_from_to_countries |>
+  dplyr::filter(year == 2024) |>
   dplyr::filter(from_country_iso3 != to_country_iso3) |>
   dplyr::mutate(emissions_co2_mt = emissions_co2_mt / 2) |>
   dplyr::select(
@@ -622,6 +624,7 @@ international_trip_emissions_by_country <- trip_co2_emissions_by_from_to_countri
   ) |>
   dplyr::bind_rows(
     trip_co2_emissions_by_from_to_countries |>
+      dplyr::filter(year == 2024) |>
       dplyr::filter(from_country_iso3 != to_country_iso3) |>
       dplyr::mutate(
         emissions_co2_mt = emissions_co2_mt / 2
@@ -639,6 +642,7 @@ international_trip_emissions_by_country <- trip_co2_emissions_by_from_to_countri
   dplyr::ungroup()
 
 domestic_trip_emissions_by_country <- trip_co2_emissions_by_from_to_countries |>
+  dplyr::filter(year == 2024) |>
   dplyr::filter(from_country_iso3 == to_country_iso3) |>
   dplyr::select(
     country_iso3 = from_country_iso3,
@@ -654,6 +658,7 @@ all_port_and_trip_emissions <- international_trip_emissions_by_country |>
   ) |>
   dplyr::bind_rows(
     port_visit_co2_emissions_by_country |>
+      dplyr::filter(year == 2024) |>
       dplyr::rename(
         country_iso3 = port_country_iso3
       ) |>
@@ -808,9 +813,9 @@ each vessel using precise latitude/longitude/timestamp information for over `r s
 
 ## Methods
 
-- The time between pings is typically small (the mean value is `r signif(ping_level_hours_distribution$mean_hours,3)` hours and the median value is`r signif(ping_level_hours_distribution$median_hours,3)` hours, or about `r round(ping_level_hours_distribution$mean_hours*60)` minutes and `r round(ping_level_hours_distribution$median_hours*60)` minutes respectively), while the maximum value for this across our dataset is `r round(ping_level_hours_distribution$max_hours)` hours (meaning this is the most amount of time over which we will estimate emissions for a single message).
+- The time between pings is typically small (the mean value is `r signif(ping_level_hours_distribution$mean_hours,3)` hours and the median value is `r signif(ping_level_hours_distribution$median_hours,3)` hours, or about `r round(ping_level_hours_distribution$mean_hours*60)` minutes and `r round(ping_level_hours_distribution$median_hours*60)` minutes respectively), while the maximum value for this across our dataset is `r round(ping_level_hours_distribution$max_hours)` hours (meaning this is the most amount of time over which we will estimate emissions for a single message).
 
-- In all, we analyze AIS data for over `r scales::comma(signif(n_unique_vessels$n_unique_vessels, 2))` AIS-broadcasting vessels, across  `r scales::comma(signif(n_ais_messages$n_billion_ais_messages, 3))`  billion individual timestamped AIS messages which are assigned to`r signif((trip_co2_emissions_by_from_to_countries |> dplyr::filter(from_country_iso3!=to_country_iso3) |> dplyr::pull(n_unique_trips) |> sum())/1e6,3)` million international trips, `r signif((trip_co2_emissions_by_from_to_countries |> dplyr::filter(from_country_iso3==to_country_iso3) |> dplyr::pull(n_unique_trips) |> sum())/1e6,3)` million domestic trips, and `r signif((port_visit_co2_emissions_by_country |> dplyr::pull(n_unique_port_vists) |> sum())/1e6,3)` million port visits.
+- In all, we analyze AIS data for over `r scales::comma(signif(n_unique_vessels$n_unique_vessels, 2))` AIS-broadcasting vessels, across  `r scales::comma(signif(n_ais_messages$n_billion_ais_messages, 3))`  billion individual timestamped AIS messages which are assigned to `r signif((trip_co2_emissions_by_from_to_countries |> dplyr::filter(from_country_iso3!=to_country_iso3) |> dplyr::pull(n_unique_trips) |> sum())/1e6,3)` million international trips, `r signif((trip_co2_emissions_by_from_to_countries |> dplyr::filter(from_country_iso3==to_country_iso3) |> dplyr::pull(n_unique_trips) |> sum())/1e6,3)` million domestic trips, and `r signif((port_visit_co2_emissions_by_country |> dplyr::pull(n_unique_port_vists) |> sum())/1e6,3)` million port visits that occurred between 2017 and 2024.
 
 - As a result, we used a dataset containing `r signif(n_s1_detections$n_million_s1_detections,3)` million vessel detections from 2017 to 2024, of which `r signif(n_s1_detections$n_million_s1_detections_unmatched,3)` million detections were not matched to a broadcasting vessel ('unmatched'). These detections come from across more than `r prettyNum(floor(n_s1_detections$n_thousand_s1_scenes)*1000,big.mark = ",")` individual S1 scenes.
 
@@ -1229,7 +1234,7 @@ cowplot::plot_grid(
 
 ```{r}
 #| label: fig-ais-data-richness
-#| fig-cap: "Richness of AIS-broadcasting vessel emissions data, showing: (A) CO$_{2}$ emissions by vessel type for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated across 2017-2024. (B) CO$_{2}$ emissions by country for AIS-broadcasting vessels during  during different activity types (international trips, port stays, and domestic trips), aggregated across 2017-2024. For both panels, emissions for each international trip are partitioned equally to its departure and arrival country). Countries with no values are shown in black."
+#| fig-cap: "Richness of AIS-broadcasting vessel emissions data, showing: (A) CO$_{2}$ emissions by vessel type for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in 2024. (B) CO$_{2}$ emissions by country for AIS-broadcasting vessels during  during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in 2024. For both panels, emissions for each international trip are partitioned equally to its departure and arrival country). Countries with no values are shown in black."
 #| fig-width: 9
 #| fig-height: 8
 
@@ -1247,7 +1252,7 @@ emissions_by_vessel_class_barplot <- emissions_by_vessel_class_df |>
   ggforce::facet_col(~fishing, space = "free", scales = "free") +
   theme_plot() +
   labs(
-    x = expression(2017 ~ through ~ 2024 ~ CO[2] ~ emissions ~ (MT)),
+    x = expression(2024 ~ CO[2] ~ emissions ~ (MT)),
     y = "",
     fill = ""
   ) +
@@ -1299,7 +1304,7 @@ port_trip_emissions_fig <- ggplot() +
   ) +
   labs(
     x = "",
-    fill = expression(2017 ~ through ~ 2024 ~ CO[2] ~ emissions ~ (MT)),
+    fill = expression(2024 ~ CO[2] ~ emissions ~ (MT)),
   ) +
   guides(
     fill = guide_colorbar(
@@ -1907,17 +1912,26 @@ length_size_bin_distributions |>
     )
   ) |>
   dplyr::mutate(
-    length_size_bin = glue::glue(
-      "{length_size_bin}\n({length_bin_min}-{length_bin_max}m)"
+    length_size_bin_label = glue::glue(
+      "{length_size_bin} ({length_bin_min}-{length_bin_max}m)"
     ) |>
-      stringr::str_replace("-Infm", "+ m")
+      stringr::str_replace("-Infm", "+ m"),
+    length_size_bin_label = forcats::fct_reorder(
+      length_size_bin_label,
+      as.numeric(length_size_bin)
+    )
   ) |>
-  ggplot(aes(x = length_size_bin, y = n)) +
-  facet_wrap(type ~ fishing, scales = "free") +
-  geom_bar(stat = "identity") +
-  theme_plot() +
+  ggplot(aes(x = length_size_bin_label, y = n)) +
+  facet_grid(type ~ fishing, scales = "free", space = "free_x") +
+  geom_col(stat = "identity") +
+  theme_bw() +
   labs(x = "Length size bin", y = "Count") +
-  scale_y_continuous(labels = scales::comma)
+  scale_y_continuous(labels = scales::comma) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.background = element_rect(fill = "transparent", color = NA)
+  )
+
 ```
 
 ## Figure 10
