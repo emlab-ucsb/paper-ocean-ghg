@@ -431,7 +431,8 @@ percent_increase_from_2017_to_2024 <- all_edgar_gfw_data_normalized |>
   dplyr::filter(year == 2024) |>
   dplyr::mutate(
     emissions_co2_mt_normalized_percent = scales::percent(
-      emissions_co2_mt_normalized
+      emissions_co2_mt_normalized,
+      accuracy = 1
     )
   )
 ```
@@ -737,6 +738,86 @@ top_type_by_fishing_non_fishing <- emissions_by_vessel_class_df |>
   dplyr::ungroup()
 ```
 
+```{r}
+# Calculate normalized annual changes in CO2 emissions by major ocean basin
+
+total_spatial_co2_emissions_by_ocean <- total_spatial_co2_emissions_by_ocean |>
+  dplyr::mutate(
+    emissions_co2_mt_total = emissions_co2_dark_mt + emissions_co2_mt
+  )
+
+# Get analysis_start_year values for time-series normalization
+annual_emissions_by_ocean_starting <- total_spatial_co2_emissions_by_ocean |>
+  dplyr::filter(year == analysis_start_year) |>
+  dplyr::mutate(emissions_co2_mt_total_starting = emissions_co2_mt_total) |>
+  dplyr::select(ocean, emissions_co2_mt_total_starting)
+
+annual_emissions_by_ocean_normalized <- total_spatial_co2_emissions_by_ocean |>
+  dplyr::inner_join(annual_emissions_by_ocean_starting, by = "ocean") |>
+  dplyr::mutate(
+    emissions_co2_mt_normalized = emissions_co2_mt_total /
+      emissions_co2_mt_total_starting -
+      1
+  ) |>
+  dplyr::mutate(
+    ocean = paste0(stringr::str_to_sentence(ocean), " Ocean")
+  )
+ocean_data_ending <- annual_emissions_by_ocean_normalized |>
+  dplyr::filter(year == 2024) |>
+  dplyr::mutate(
+    emissions_co2_mt_ending = paste0(
+      prettyNum(signif(emissions_co2_mt_total / 1e6, 3), big.mark = ","),
+      " MMT"
+    )
+  ) |>
+  dplyr::select(
+    ocean,
+    emissions_co2_mt_ending,
+    emissions_co2_mt_normalized
+  )
+
+# Make and output a table summarizing 2024 CO2 emissions by ocean, and change in emissions from 2017 to 2024 by ocean
+# Figure out for each ocean the fraction of observations that were imaged by s1
+percent_pixels_imaged_ocean_all_time <- annual_emissions_by_ocean_normalized |>
+  dplyr::group_by(ocean) |>
+  dplyr::summarise(
+    fraction_n_imaged = (sum(number_observations_imaged) /
+      sum(number_observations)) |>
+      scales::percent(accuracy = 0.01)
+  ) |>
+  dplyr::ungroup()
+
+emissions_by_ocean_summary_tbl <- annual_emissions_by_ocean_normalized |>
+  dplyr::filter(year == 2024) |>
+  dplyr::group_by(year) |>
+  dplyr::mutate(
+    percent_annual_total = (emissions_co2_mt_total /
+      sum(emissions_co2_mt_total)) |>
+      scales::percent(accuracy = 0.01),
+    percent_emissions_co2_mt_normalized = emissions_co2_mt_normalized |>
+      scales::percent(accuracy = 0.01),
+    percent_emissions_co2_mt_normalized_rounded = emissions_co2_mt_normalized |>
+      scales::percent(accuracy = 1)
+  ) |>
+  dplyr::ungroup() |>
+  dplyr::left_join(percent_pixels_imaged_ocean_all_time, by = "ocean") |>
+  dplyr::mutate(
+    `Percent of total CO2 emissions by non-broadcasting` = (emissions_co2_dark_mt /
+      emissions_co2_mt_total) |>
+      scales::percent(accuracy = 0.01)
+  ) |>
+  dplyr::mutate(
+    ocean = stringr::str_to_sentence(ocean) |>
+      stringr::str_remove_all(" ocean")
+  ) |>
+  dplyr::mutate(
+    emissions_co2_mmt = prettyNum(
+      signif(emissions_co2_mt / 1e6, 3),
+      big.mark = ","
+    )
+  )
+```
+
 # In-line manuscript statistics
 
 ## Abstract
@@ -780,6 +861,16 @@ each vessel using precise latitude/longitude/timestamp information for over `r s
     steadily since 2020.
 
 
+- Across the entire 2017 to 2024 time series, almost all non-broadcasting emissions (`r dark_emissions_by_area |> dplyr::filter(inside_footprint,s1_imaged) |> dplyr::pull(percent_total)`) occurred inside the S1 footprint and in pixel-months that were imaged by S1. 
+
+- Our machine learning model for predicting these emissions directly from observed S1 detection density achieves a high out-of-sample predictive performance (traditional R2 = `r all_performance_metrics |> dplyr::filter(metric == "rsq_trad",pollutant == "co2",model=="emissions_regression",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)` and total percent error of `r all_performance_metrics |> dplyr::filter(metric == "aggregate_prediction_percent_error",pollutant == "co2",model=="emissions_regression",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)`% for CO$_2$). 
+
+- Only `r dark_emissions_by_area |> dplyr::filter(inside_footprint,!s1_imaged) |> dplyr::pull(percent_total)` of non-broadcasting emissions occurred inside the S1 footprint but in pixel-months that weren't imaged by S1, requiring us to use a two-stage hurdle framework using both a classification model (F1 Score = `r all_performance_metrics |> dplyr::filter(metric == "f_meas",model=="detections_classification",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)`) and a regression model (traditional R2 = `r all_performance_metrics |> dplyr::filter(metric == "rsq_trad",model=="detections_regression",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)`) to predict S1 detection density before predicting emissions (traditional R$^{2}$ = `r all_performance_metrics |> dplyr::filter(metric == "rsq_trad",pollutant == "co2",model=="emissions_regression",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)`). 
+
+- Only `r dark_emissions_by_area |> dplyr::filter(!inside_footprint,!s1_imaged) |> dplyr::pull(percent_total)` of non-broadcasting emissions occurred outside the S1 footprint entirely, since most vessels operating in these open ocean areas use AIS.
+
+
+
 - Most emissions for non-fishing vessels occur during `r top_type_by_fishing_non_fishing |> dplyr::filter(fishing == "Non-fishing") |> dplyr::pull(type) |> stringr::str_to_lower()`, while most emissions for fishing vessels occur during `r top_type_by_fishing_non_fishing |> dplyr::filter(fishing == "Fishing") |> dplyr::pull(type) |> stringr::str_to_lower()`.
 
 - `r all_port_and_trip_emissions_top_3 |> dplyr::filter(type == "Domestic trips") |> dplyr::pull(country) |> glue::glue_collapse(", ", last = ", and ")` had the most CO$_{2}$ emissions during within-country domestic trips in 2024. 
@@ -791,6 +882,17 @@ each vessel using precise latitude/longitude/timestamp information for over `r s
 - Of the roughly `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "Total") |> dplyr::pull(n_unique_vessels) |> signif(3) |> prettyNum(big.mark=",")` AIS-broadcasting vessels in our analysis, only `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "imo") |> dplyr::pull(n_unique_vessels) |> signif(3) |> prettyNum(big.mark=",")` (`r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "imo") |> dplyr::pull(fraction_n_unique_vessels) |> scales::percent()`) are listed with the IMO, while `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "other_registry") |> dplyr::pull(n_unique_vessels) |> signif(3) |> prettyNum(big.mark=",")` (`r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "other_registry") |> dplyr::pull(fraction_n_unique_vessels) |> scales::percent()`) are listed on some other public registry; this leaves over `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "no_registry") |> dplyr::pull(n_unique_vessels) |> signif(3) |> prettyNum(big.mark=",")` vessels (`r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "no_registry") |> dplyr::pull(fraction_n_unique_vessels) |> scales::percent()`) that have no public registry information and must rely completely on modeled vessel characteristics (main engine power and design speed).
 
 - Because many large vessels are already listed with the IMO, the majority of our total CO$_2$ emissions come from these vessels (`r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "imo") |> dplyr::pull(fraction_emissions_co2_mt) |> scales::percent()`); `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "other_registry") |> dplyr::pull(fraction_emissions_co2_mt) |> scales::percent()` come from vessels listed on other registries; and `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "no_registry") |> dplyr::pull(fraction_emissions_co2_mt) |> scales::percent()` come from vessels with no public registry information and which rely entirely on modeled vessel characteristics.
+
+- Although vessel activity in the Southern Ocean represents a very small fractions of
+the world’s marine vessel emissions (`r emissions_by_ocean_summary_tbl |> dplyr::filter(ocean=="Southern") |> dplyr::pull(percent_annual_total)`), it represents the part of the world experi-
+encing the highest growth rate of marine vessel emissions (`r emissions_by_ocean_summary_tbl |> dplyr::filter(ocean=="Southern") |> dplyr::pull(percent_emissions_co2_mt_normalized_rounded)`).
+
+- These polar estimates are primarily driven by AIS-broadcasting vessels, with only a
+small fraction coming from non-broadcasting vessels (`r emissions_by_ocean_summary_tbl |> dplyr::filter(ocean=="Southern") |> dplyr::pull('Percent of total CO2 emissions by non-broadcasting')` in the Southern Ocean). 
+
+- Polar regions have extremely limited S1 coverage (only `r emissions_by_ocean_summary_tbl |> dplyr::filter(ocean=="Southern") |> dplyr::pull(fraction_n_imaged)` of
+pixel-months in the Southern Ocean were imaged by S1), meaning that trends there
+may be more susceptible to AIS adoption biases. 
 
 -   Using the latest data available from the EU's Emissions Database for
     Global Atmospheric Research (EDGAR), we estimate that in 2024 marine
@@ -818,6 +920,11 @@ each vessel using precise latitude/longitude/timestamp information for over `r s
 - In all, we analyze AIS data for over `r scales::comma(signif(n_unique_vessels$n_unique_vessels, 2))` AIS-broadcasting vessels, across  `r scales::comma(signif(n_ais_messages$n_billion_ais_messages, 3))`  billion individual timestamped AIS messages which are assigned to `r signif((trip_co2_emissions_by_from_to_countries |> dplyr::filter(from_country_iso3!=to_country_iso3) |> dplyr::pull(n_unique_trips) |> sum())/1e6,3)` million international trips, `r signif((trip_co2_emissions_by_from_to_countries |> dplyr::filter(from_country_iso3==to_country_iso3) |> dplyr::pull(n_unique_trips) |> sum())/1e6,3)` million domestic trips, and `r signif((port_visit_co2_emissions_by_country |> dplyr::pull(n_unique_port_vists) |> sum())/1e6,3)` million port visits that occurred between 2017 and 2024.
 
 - As a result, we used a dataset containing `r signif(n_s1_detections$n_million_s1_detections,3)` million vessel detections from 2017 to 2024, of which `r signif(n_s1_detections$n_million_s1_detections_unmatched,3)` million detections were not matched to a broadcasting vessel ('unmatched'). These detections come from across more than `r prettyNum(floor(n_s1_detections$n_thousand_s1_scenes)*1000,big.mark = ",")` individual S1 scenes.
+
+- We were able to use this direct estimation approach for `r dark_emissions_by_area |> dplyr::filter(inside_footprint,s1_imaged) |> dplyr::pull(percent_total)` of the total estimated non-broadcasting CO$_2$ emissions .
+
+- Of the total predicted non-broadcasting CO$_2$ emissions, `r  dark_emissions_by_area |> dplyr::filter(inside_footprint,!s1_imaged) |> dplyr::pull(percent_total)` corresponded to indirect estimations within the S1 footprint, while only  `r  dark_emissions_by_area |> dplyr::filter(!inside_footprint,!s1_imaged) |> dplyr::pull(percent_total)` occurred entirely outside the footprint
+
 
 # Results
 
@@ -1336,42 +1443,6 @@ cowplot::plot_grid(
 #| fig-cap: (A) Trend in CO$_{2}$ emissions by ocean (normalized to 2017 baseline), use our fused AIS+S1 marine vessel data. (B) Comparison in trend of CO$_{2}$ emissions data (normalized to 2017 baseline) between marine transportation emissions from GFW, other transportation emissions from EDGAR, and all sector emissions from EDGAR. On the right-hand side of the figure, 2024 absolute values (in millions of metric tonnes) are shown as text and color-coded for each line.
 #| fig-width: 7.5
 #| fig-height: 7
-# Calculate normalized annual changes in CO2 emissions by major ocean basin
-
-total_spatial_co2_emissions_by_ocean <- total_spatial_co2_emissions_by_ocean |>
-  dplyr::mutate(
-    emissions_co2_mt_total = emissions_co2_dark_mt + emissions_co2_mt
-  )
-
-# Get analysis_start_year values for time-series normalization
-annual_emissions_by_ocean_starting <- total_spatial_co2_emissions_by_ocean |>
-  dplyr::filter(year == analysis_start_year) |>
-  dplyr::mutate(emissions_co2_mt_total_starting = emissions_co2_mt_total) |>
-  dplyr::select(ocean, emissions_co2_mt_total_starting)
-
-annual_emissions_by_ocean_normalized <- total_spatial_co2_emissions_by_ocean |>
-  dplyr::inner_join(annual_emissions_by_ocean_starting, by = "ocean") |>
-  dplyr::mutate(
-    emissions_co2_mt_normalized = emissions_co2_mt_total /
-      emissions_co2_mt_total_starting -
-      1
-  ) |>
-  dplyr::mutate(
-    ocean = paste0(stringr::str_to_sentence(ocean), " Ocean")
-  )
-ocean_data_ending <- annual_emissions_by_ocean_normalized |>
-  dplyr::filter(year == 2024) |>
-  dplyr::mutate(
-    emissions_co2_mt_ending = paste0(
-      prettyNum(signif(emissions_co2_mt_total / 1e6, 3), big.mark = ","),
-      " MMT"
-    )
-  ) |>
-  dplyr::select(
-    ocean,
-    emissions_co2_mt_ending,
-    emissions_co2_mt_normalized
-  )
 
 annual_ocean_emissions_normalized_fig <- annual_emissions_by_ocean_normalized |>
   ggplot() +
@@ -2720,33 +2791,8 @@ percent_pixels_imaged_ocean_all_time <- annual_emissions_by_ocean_normalized |>
       scales::percent(accuracy = 0.01)
   ) |>
   dplyr::ungroup()
-emissions_by_ocean_summary_tbl <- annual_emissions_by_ocean_normalized |>
-  dplyr::filter(year == 2024) |>
-  dplyr::group_by(year) |>
-  dplyr::mutate(
-    percent_annual_total = (emissions_co2_mt_total /
-      sum(emissions_co2_mt_total)) |>
-      scales::percent(accuracy = 0.01),
-    percent_emissions_co2_mt_normalized = emissions_co2_mt_normalized |>
-      scales::percent(accuracy = 0.01)
-  ) |>
-  dplyr::ungroup() |>
-  dplyr::left_join(percent_pixels_imaged_ocean_all_time, by = "ocean") |>
-  dplyr::mutate(
-    `Percent of total CO2 emissions by non-broadcasting` = (emissions_co2_dark_mt /
-      emissions_co2_mt_total) |>
-      scales::percent(accuracy = 0.01)
-  ) |>
-  dplyr::mutate(
-    ocean = stringr::str_to_sentence(ocean) |>
-      stringr::str_remove_all(" ocean")
-  ) |>
-  dplyr::mutate(
-    emissions_co2_mmt = prettyNum(
-      signif(emissions_co2_mt / 1e6, 3),
-      big.mark = ","
-    )
-  ) |>
+
+emissions_by_ocean_summary_tbl <- emissions_by_ocean_summary_tbl |>
   dplyr::select(
     Ocean = ocean,
     `2024 total CO2 emissions (million MT)` = emissions_co2_mmt,
