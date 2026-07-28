@@ -33,8 +33,20 @@ knitr::opts_chunk$set(
 library(ggplot2)
 library(sf)
 
-analysis_start_year <- 2017
-analysis_end_year <- 2024
+# Pull the analysis years from the data pull pipeline, so they can never drift
+# out of sync with the data we actually pulled
+targets_store <- file.path("..", "_targets", "01_gfw_data_pull")
+analysis_start_year <- targets::tar_read(analysis_start_year, store = targets_store)
+analysis_end_year <- targets::tar_read(analysis_end_year, store = targets_store)
+
+# pivot_wider names emissions columns after the actual years, so refer to them
+# through these rather than hard-coding a year
+start_col <- as.character(analysis_start_year)
+end_col <- as.character(analysis_end_year)
+
+# EDGAR (and the other inventories) only run through 2024, so comparisons against
+# them stay on the latest year each inventory has, not on analysis_end_year
+edgar_comparison_year <- 2024
 ```
 
 ```{r}
@@ -160,9 +172,7 @@ world_bbox_sf <-
 # ESRI World Countries Generalized Shapefile
 # Downloaded from https://www.arcgis.com/home/item.html?id=fa510018bdd044b08fc64d2a16bc680a
 land <- sf::st_read(
-  here::here(
-    "data/World_Countries_Generalized_Shapefile/World_Countries_Generalized.shp"
-  ),
+  file.path("..", "data", "World_Countries_Generalized_Shapefile", "World_Countries_Generalized.shp"),
   quiet = TRUE
 ) |>
   dplyr::mutate(
@@ -1846,7 +1856,7 @@ mrv_performance_results_tbl
 
 mrv_performance_results_tbl |>
   writeLines(
-    here::here("tables/mrv_performance_results.tex")
+    file.path("..", "tables", "mrv_performance_results.tex")
   )
 ```
 
@@ -2055,7 +2065,7 @@ data_sources_table <- data_sources |>
 
 data_sources_table
 
-writeLines(data_sources_table, here::here("tables/data_sources.tex"))
+writeLines(data_sources_table, file.path("..", "tables", "data_sources.tex"))
 ```
 
 
@@ -2284,7 +2294,7 @@ all_performance_metrics_table
 
 writeLines(
   all_performance_metrics_table,
-  here::here("tables/all_performance_metrics_table.tex")
+  file.path("..", "tables", "all_performance_metrics_table.tex")
 )
 ```
 
@@ -2329,7 +2339,7 @@ lm_other_gases_tidy_fit_stats_tbl
 
 writeLines(
   lm_other_gases_tidy_fit_stats_tbl,
-  here::here("tables/lm_other_gases_tidy_fit_stats.tex")
+  file.path("..", "tables", "lm_other_gases_tidy_fit_stats.tex")
 )
 ```
 
@@ -2736,7 +2746,7 @@ total_percent_change_by_fleet_tbl
 
 writeLines(
   total_percent_change_by_fleet_tbl,
-  here::here("tables/total_percent_change_by_fleet.tex")
+  file.path("..", "tables", "total_percent_change_by_fleet.tex")
 )
 ```
 
@@ -2770,9 +2780,7 @@ pollutant_ais_underestimation_overestimation_summary_tbl
 
 writeLines(
   pollutant_ais_underestimation_overestimation_summary_tbl,
-  here::here(
-    "tables/pollutant_ais_underestimation_overestimation_summary.tex"
-  )
+  file.path("..", "tables", "pollutant_ais_underestimation_overestimation_summary.tex")
 )
 ```
 
@@ -2816,7 +2824,7 @@ emissions_by_ocean_summary_tbl
 
 writeLines(
   emissions_by_ocean_summary_tbl,
-  here::here("tables/emissions_by_ocean_summary_tbl.tex")
+  file.path("..", "tables", "emissions_by_ocean_summary_tbl.tex")
 )
 ```
 
@@ -2862,7 +2870,7 @@ emissions_by_data_source_summary_tbl
 
 writeLines(
   emissions_by_data_source_summary_tbl,
-  here::here("tables/emissions_by_data_source_summary_tbl.tex")
+  file.path("..", "tables", "emissions_by_data_source_summary_tbl.tex")
 )
 ```
 
@@ -2892,7 +2900,7 @@ annual_sc_fishing_non_fishing_tbl
 
 writeLines(
   annual_sc_fishing_non_fishing_tbl,
-  here::here("tables/annual_sc_fishing_non_fishing_tbl.tex")
+  file.path("..", "tables", "annual_sc_fishing_non_fishing_tbl.tex")
 )
 ```
 
@@ -2956,7 +2964,7 @@ all_inventory_data_kable
 
 all_inventory_data_kable |>
   writeLines(
-    here::here("tables/inventory_comparison.tex")
+    file.path("..", "tables", "inventory_comparison.tex")
   )
 ```
 

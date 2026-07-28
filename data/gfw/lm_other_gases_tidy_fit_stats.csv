@@ -1,17 +1,41 @@
 pollutant,term,estimate,std_error,statistic,p_value,run_version_dark_fleet_rf,model
-ch4,emissions_co2_mt:post_2020FALSE,2e-5,8.64937e-9,1993.61877,0,_v20260316,emissions_regression
-n2o,emissions_co2_mt:post_2020FALSE,5e-5,3.48635e-9,14253.70338,0,_v20260316,emissions_regression
-co,emissions_co2_mt:post_2020FALSE,8.2e-4,3.34924e-7,2455.04369,0,_v20260316,emissions_regression
-nox,emissions_co2_mt:post_2020FALSE,0.01688,8.33097e-6,2026.45711,0,_v20260316,emissions_regression
-sox,emissions_co2_mt:post_2020FALSE,0.00618,3.63444e-8,170143.41365,0,_v20260316,emissions_regression
-vocs,emissions_co2_mt:post_2020FALSE,0.00121,3.56528e-7,3405.44228,0,_v20260316,emissions_regression
-pm2_5,emissions_co2_mt:post_2020FALSE,0.00175,1.13175e-7,15453.04612,0,_v20260316,emissions_regression
-pm10,emissions_co2_mt:post_2020FALSE,0.0019,1.23091e-7,15453.04612,0,_v20260316,emissions_regression
-ch4,emissions_co2_mt:post_2020TRUE,2e-5,6.15788e-9,2857.1301,0,_v20260316,emissions_regression
-n2o,emissions_co2_mt:post_2020TRUE,5e-5,2.48209e-9,20123.20076,0,_v20260316,emissions_regression
-co,emissions_co2_mt:post_2020TRUE,8.3e-4,2.38448e-7,3471.33772,0,_v20260316,emissions_regression
-nox,emissions_co2_mt:post_2020TRUE,0.01677,5.9312e-6,2826.8733,0,_v20260316,emissions_regression
-sox,emissions_co2_mt:post_2020TRUE,0.00124,2.58752e-8,47783.67418,0,_v20260316,emissions_regression
-vocs,emissions_co2_mt:post_2020TRUE,0.00124,2.53829e-7,4902.13313,0,_v20260316,emissions_regression
-pm2_5,emissions_co2_mt:post_2020TRUE,3.6e-4,8.05748e-8,4512.64988,0,_v20260316,emissions_regression
-pm10,emissions_co2_mt:post_2020TRUE,4e-4,8.76339e-8,4512.64988,0,_v20260316,emissions_regression
+ch4,emissions_co2_mt:log(mean_distance_from_shore_m + 1),1.2516e-6,3.29477e-9,379.87463,0,_v20260714,emissions_regression
+ch4,emissions_co2_mt:post_2020FALSE:fishingFALSE,-1.20557e-6,3.16901e-8,-38.04248,2.16496e-316,_v20260714,emissions_regression
+ch4,emissions_co2_mt:post_2020TRUE:fishingFALSE,-1.92423e-6,3.13653e-8,-61.34903,0,_v20260714,emissions_regression
+ch4,emissions_co2_mt:post_2020FALSE:fishingTRUE,3.69474e-6,8.41549e-8,43.90407,0,_v20260714,emissions_regression
+ch4,emissions_co2_mt:post_2020TRUE:fishingTRUE,3.73478e-6,4.51925e-8,82.64154,0,_v20260714,emissions_regression
+n2o,emissions_co2_mt:log(mean_distance_from_shore_m + 1),7.13487e-7,2.31684e-9,307.95688,0,_v20260714,emissions_regression
+n2o,emissions_co2_mt:post_2020FALSE:fishingFALSE,4e-5,2.22841e-8,1869.42289,0,_v20260714,emissions_regression
+n2o,emissions_co2_mt:post_2020TRUE:fishingFALSE,4e-5,2.20557e-8,1865.72798,0,_v20260714,emissions_regression
+n2o,emissions_co2_mt:post_2020FALSE:fishingTRUE,4e-5,5.91768e-8,727.0406,0,_v20260714,emissions_regression
+n2o,emissions_co2_mt:post_2020TRUE:fishingTRUE,4e-5,3.17788e-8,1379.91905,0,_v20260714,emissions_regression
+co,emissions_co2_mt:log(mean_distance_from_shore_m + 1),6e-5,1.57386e-7,382.28651,0,_v20260714,emissions_regression
+co,emissions_co2_mt:post_2020FALSE:fishingFALSE,3e-5,1.51379e-6,19.23637,1.91467e-82,_v20260714,emissions_regression
+co,emissions_co2_mt:post_2020TRUE:fishingFALSE,-5.48706e-6,1.49827e-6,-3.66226,2.5e-4,_v20260714,emissions_regression
+co,emissions_co2_mt:post_2020FALSE:fishingTRUE,2.7e-4,4.01995e-6,67.86919,0,_v20260714,emissions_regression
+co,emissions_co2_mt:post_2020TRUE:fishingTRUE,2.8e-4,2.15877e-6,128.06946,0,_v20260714,emissions_regression
+nox,emissions_co2_mt:log(mean_distance_from_shore_m + 1),0.00202,4.32636e-6,466.68134,0,_v20260714,emissions_regression
+nox,emissions_co2_mt:post_2020FALSE:fishingFALSE,-0.00734,4e-5,-176.27352,0,_v20260714,emissions_regression
+nox,emissions_co2_mt:post_2020TRUE:fishingFALSE,-0.00845,4e-5,-205.24263,0,_v20260714,emissions_regression
+nox,emissions_co2_mt:post_2020FALSE:fishingTRUE,-9.7e-4,1.1e-4,-8.81664,1.18167e-18,_v20260714,emissions_regression
+nox,emissions_co2_mt:post_2020TRUE:fishingTRUE,-0.00214,6e-5,-36.12896,1.33583e-285,_v20260714,emissions_regression
+sox,emissions_co2_mt:log(mean_distance_from_shore_m + 1),-1e-5,7.1519e-8,-173.06216,0,_v20260714,emissions_regression
+sox,emissions_co2_mt:post_2020FALSE:fishingFALSE,0.0063,6.87892e-7,9164.18939,0,_v20260714,emissions_regression
+sox,emissions_co2_mt:post_2020TRUE:fishingFALSE,0.00166,6.80841e-7,2441.10262,0,_v20260714,emissions_regression
+sox,emissions_co2_mt:post_2020FALSE:fishingTRUE,0.00637,1.82674e-6,3486.12851,0,_v20260714,emissions_regression
+sox,emissions_co2_mt:post_2020TRUE:fishingTRUE,0.00167,9.80986e-7,1705.57534,0,_v20260714,emissions_regression
+vocs,emissions_co2_mt:log(mean_distance_from_shore_m + 1),1e-4,2.01784e-7,495.65033,0,_v20260714,emissions_regression
+vocs,emissions_co2_mt:post_2020FALSE:fishingFALSE,-3.9e-4,1.94082e-6,-203.02436,0,_v20260714,emissions_regression
+vocs,emissions_co2_mt:post_2020TRUE:fishingFALSE,-4.4e-4,1.92093e-6,-227.9912,0,_v20260714,emissions_regression
+vocs,emissions_co2_mt:post_2020FALSE:fishingTRUE,-2e-4,5.15397e-6,-39.04448,0,_v20260714,emissions_regression
+vocs,emissions_co2_mt:post_2020TRUE:fishingTRUE,-2.1e-4,2.76776e-6,-75.68566,0,_v20260714,emissions_regression
+pm2_5,emissions_co2_mt:log(mean_distance_from_shore_m + 1),4e-5,9.10957e-8,400.99166,0,_v20260714,emissions_regression
+pm2_5,emissions_co2_mt:post_2020FALSE:fishingFALSE,4.1e-4,8.76188e-7,472.5365,0,_v20260714,emissions_regression
+pm2_5,emissions_co2_mt:post_2020TRUE:fishingFALSE,5e-5,8.67206e-7,58.14747,0,_v20260714,emissions_regression
+pm2_5,emissions_co2_mt:post_2020FALSE:fishingTRUE,5.3e-4,2.32677e-6,228.92378,0,_v20260714,emissions_regression
+pm2_5,emissions_co2_mt:post_2020TRUE:fishingTRUE,2.1e-4,1.24951e-6,168.40456,0,_v20260714,emissions_regression
+pm10,emissions_co2_mt:log(mean_distance_from_shore_m + 1),4e-5,9.90171e-8,400.99166,0,_v20260714,emissions_regression
+pm10,emissions_co2_mt:post_2020FALSE:fishingFALSE,4.5e-4,9.52378e-7,472.5365,0,_v20260714,emissions_regression
+pm10,emissions_co2_mt:post_2020TRUE:fishingFALSE,5e-5,9.42615e-7,58.14747,0,_v20260714,emissions_regression
+pm10,emissions_co2_mt:post_2020FALSE:fishingTRUE,5.8e-4,2.52909e-6,228.92378,0,_v20260714,emissions_regression
+pm10,emissions_co2_mt:post_2020TRUE:fishingTRUE,2.3e-4,1.35816e-6,168.40456,0,_v20260714,emissions_regression

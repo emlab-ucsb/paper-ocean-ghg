@@ -16,6 +16,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -179,52,FALSE,emissions_regression
 -179,64,TRUE,emissions_regression
 -179,65,FALSE,emissions_regression
+-178,-20,FALSE,emissions_regression
 -178,-19,FALSE,emissions_regression
 -178,-18,TRUE,emissions_regression
 -178,-15,TRUE,emissions_regression
@@ -57,7 +58,6 @@ lon_bin,lat_bin,offshore_pixel,model
 -175,-14,TRUE,emissions_regression
 -175,51,FALSE,emissions_regression
 -175,52,FALSE,emissions_regression
--175,53,FALSE,emissions_regression
 -175,59,TRUE,emissions_regression
 -175,60,TRUE,emissions_regression
 -175,64,FALSE,emissions_regression
@@ -76,6 +76,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -174,59,TRUE,emissions_regression
 -174,60,TRUE,emissions_regression
 -174,61,TRUE,emissions_regression
+-174,62,TRUE,emissions_regression
 -174,63,FALSE,emissions_regression
 -174,64,FALSE,emissions_regression
 -173,-21,TRUE,emissions_regression
@@ -172,6 +173,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -169,58,TRUE,emissions_regression
 -169,59,TRUE,emissions_regression
 -169,60,TRUE,emissions_regression
+-169,61,TRUE,emissions_regression
 -169,62,TRUE,emissions_regression
 -169,63,TRUE,emissions_regression
 -169,64,TRUE,emissions_regression
@@ -435,6 +437,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -154,58,FALSE,emissions_regression
 -154,59,FALSE,emissions_regression
 -154,71,TRUE,emissions_regression
+-153,-18,FALSE,emissions_regression
 -153,-17,FALSE,emissions_regression
 -153,16,TRUE,emissions_regression
 -153,17,TRUE,emissions_regression
@@ -491,14 +494,18 @@ lon_bin,lat_bin,offshore_pixel,model
 -149,-19,FALSE,emissions_regression
 -149,-18,FALSE,emissions_regression
 -149,-17,FALSE,emissions_regression
+-149,-16,FALSE,emissions_regression
+-149,-15,FALSE,emissions_regression
 -149,49,TRUE,emissions_regression
 -149,50,TRUE,emissions_regression
 -149,58,TRUE,emissions_regression
 -149,59,FALSE,emissions_regression
 -149,60,FALSE,emissions_regression
+-148,-14,FALSE,emissions_regression
 -148,58,TRUE,emissions_regression
 -148,59,FALSE,emissions_regression
 -148,60,FALSE,emissions_regression
+-148,61,FALSE,emissions_regression
 -147,58,TRUE,emissions_regression
 -147,59,FALSE,emissions_regression
 -147,60,FALSE,emissions_regression
@@ -553,6 +560,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -138,56,FALSE,emissions_regression
 -138,57,FALSE,emissions_regression
 -138,58,FALSE,emissions_regression
+-138,59,FALSE,emissions_regression
 -138,69,TRUE,emissions_regression
 -137,50,TRUE,emissions_regression
 -137,51,TRUE,emissions_regression
@@ -563,6 +571,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -137,56,FALSE,emissions_regression
 -137,57,FALSE,emissions_regression
 -137,58,FALSE,emissions_regression
+-137,59,FALSE,emissions_regression
 -137,69,TRUE,emissions_regression
 -136,50,TRUE,emissions_regression
 -136,51,TRUE,emissions_regression
@@ -597,6 +606,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -134,55,FALSE,emissions_regression
 -134,56,FALSE,emissions_regression
 -134,57,FALSE,emissions_regression
+-134,58,FALSE,emissions_regression
 -134,69,TRUE,emissions_regression
 -133,46,TRUE,emissions_regression
 -133,47,TRUE,emissions_regression
@@ -647,6 +657,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -130,51,FALSE,emissions_regression
 -130,52,FALSE,emissions_regression
 -130,53,FALSE,emissions_regression
+-130,54,FALSE,emissions_regression
 -130,55,FALSE,emissions_regression
 -130,69,TRUE,emissions_regression
 -129,38,TRUE,emissions_regression
@@ -794,6 +805,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -121,34,FALSE,emissions_regression
 -121,35,FALSE,emissions_regression
 -121,69,TRUE,emissions_regression
+-120,25,TRUE,emissions_regression
 -120,26,TRUE,emissions_regression
 -120,27,TRUE,emissions_regression
 -120,28,TRUE,emissions_regression
@@ -1018,6 +1030,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -99,15,TRUE,emissions_regression
 -99,16,FALSE,emissions_regression
 -99,68,TRUE,emissions_regression
+-98,-3,TRUE,emissions_regression
 -98,5,TRUE,emissions_regression
 -98,12,TRUE,emissions_regression
 -98,13,TRUE,emissions_regression
@@ -1031,6 +1044,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -98,25,FALSE,emissions_regression
 -98,26,FALSE,emissions_regression
 -98,27,FALSE,emissions_regression
+-97,-2,TRUE,emissions_regression
 -97,12,TRUE,emissions_regression
 -97,13,TRUE,emissions_regression
 -97,14,FALSE,emissions_regression
@@ -1046,6 +1060,8 @@ lon_bin,lat_bin,offshore_pixel,model
 -97,27,FALSE,emissions_regression
 -97,28,FALSE,emissions_regression
 -97,68,TRUE,emissions_regression
+-96,-4,TRUE,emissions_regression
+-96,2,TRUE,emissions_regression
 -96,5,TRUE,emissions_regression
 -96,11,TRUE,emissions_regression
 -96,12,TRUE,emissions_regression
@@ -1067,6 +1083,8 @@ lon_bin,lat_bin,offshore_pixel,model
 -96,29,FALSE,emissions_regression
 -96,68,TRUE,emissions_regression
 -96,69,TRUE,emissions_regression
+-95,4,TRUE,emissions_regression
+-95,7,TRUE,emissions_regression
 -95,10,TRUE,emissions_regression
 -95,11,TRUE,emissions_regression
 -95,12,TRUE,emissions_regression
@@ -1188,6 +1206,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -91,26,FALSE,emissions_regression
 -91,27,FALSE,emissions_regression
 -91,28,FALSE,emissions_regression
+-91,29,FALSE,emissions_regression
 -91,62,TRUE,emissions_regression
 -91,63,TRUE,emissions_regression
 -90,-3,FALSE,emissions_regression
@@ -1383,7 +1402,6 @@ lon_bin,lat_bin,offshore_pixel,model
 -83,27,FALSE,emissions_regression
 -83,28,FALSE,emissions_regression
 -83,62,TRUE,emissions_regression
--82,-35,TRUE,emissions_regression
 -82,-34,TRUE,emissions_regression
 -82,-9,TRUE,emissions_regression
 -82,-8,TRUE,emissions_regression
@@ -1626,6 +1644,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -78,59,TRUE,emissions_regression
 -78,62,TRUE,emissions_regression
 -78,63,TRUE,emissions_regression
+-77,-54,TRUE,emissions_regression
 -77,-53,TRUE,emissions_regression
 -77,-52,TRUE,emissions_regression
 -77,-51,TRUE,emissions_regression
@@ -1640,7 +1659,6 @@ lon_bin,lat_bin,offshore_pixel,model
 -77,-42,TRUE,emissions_regression
 -77,-41,TRUE,emissions_regression
 -77,-32,TRUE,emissions_regression
--77,-31,TRUE,emissions_regression
 -77,-20,TRUE,emissions_regression
 -77,-19,TRUE,emissions_regression
 -77,-18,TRUE,emissions_regression
@@ -1812,6 +1830,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -74,-55,TRUE,emissions_regression
 -74,-54,FALSE,emissions_regression
 -74,-53,FALSE,emissions_regression
+-74,-52,FALSE,emissions_regression
 -74,-51,TRUE,emissions_regression
 -74,-48,TRUE,emissions_regression
 -74,-47,FALSE,emissions_regression
@@ -1881,6 +1900,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -73,-54,FALSE,emissions_regression
 -73,-53,FALSE,emissions_regression
 -73,-52,FALSE,emissions_regression
+-73,-46,FALSE,emissions_regression
 -73,-45,FALSE,emissions_regression
 -73,-44,FALSE,emissions_regression
 -73,-43,FALSE,emissions_regression
@@ -2008,6 +2028,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -71,-21,FALSE,emissions_regression
 -71,-20,FALSE,emissions_regression
 -71,-19,FALSE,emissions_regression
+-71,-18,FALSE,emissions_regression
 -71,11,FALSE,emissions_regression
 -71,12,FALSE,emissions_regression
 -71,13,FALSE,emissions_regression
@@ -2242,6 +2263,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -66,-44,FALSE,emissions_regression
 -66,-43,FALSE,emissions_regression
 -66,-42,FALSE,emissions_regression
+-66,-41,FALSE,emissions_regression
 -66,10,FALSE,emissions_regression
 -66,11,FALSE,emissions_regression
 -66,12,TRUE,emissions_regression
@@ -2397,7 +2419,6 @@ lon_bin,lat_bin,offshore_pixel,model
 -63,-43,TRUE,emissions_regression
 -63,-42,TRUE,emissions_regression
 -63,-41,FALSE,emissions_regression
--63,-40,FALSE,emissions_regression
 -63,-39,FALSE,emissions_regression
 -63,10,FALSE,emissions_regression
 -63,11,FALSE,emissions_regression
@@ -2585,6 +2606,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -60,49,FALSE,emissions_regression
 -60,50,TRUE,emissions_regression
 -60,53,FALSE,emissions_regression
+-60,54,FALSE,emissions_regression
 -60,55,FALSE,emissions_regression
 -60,56,TRUE,emissions_regression
 -60,58,TRUE,emissions_regression
@@ -2716,6 +2738,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -57,49,FALSE,emissions_regression
 -57,50,FALSE,emissions_regression
 -57,51,FALSE,emissions_regression
+-57,52,FALSE,emissions_regression
 -57,53,FALSE,emissions_regression
 -57,54,TRUE,emissions_regression
 -57,55,TRUE,emissions_regression
@@ -2799,7 +2822,6 @@ lon_bin,lat_bin,offshore_pixel,model
 -54,9,TRUE,emissions_regression
 -54,10,TRUE,emissions_regression
 -54,11,TRUE,emissions_regression
--54,12,TRUE,emissions_regression
 -54,14,TRUE,emissions_regression
 -54,42,TRUE,emissions_regression
 -54,43,TRUE,emissions_regression
@@ -2974,6 +2996,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -45,-26,FALSE,emissions_regression
 -45,-25,FALSE,emissions_regression
 -45,-24,FALSE,emissions_regression
+-45,-23,FALSE,emissions_regression
 -45,-3,FALSE,emissions_regression
 -45,-2,FALSE,emissions_regression
 -45,-1,TRUE,emissions_regression
@@ -3139,6 +3162,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -36,-11,FALSE,emissions_regression
 -36,-10,FALSE,emissions_regression
 -36,-9,FALSE,emissions_regression
+-36,-7,FALSE,emissions_regression
 -36,-6,FALSE,emissions_regression
 -36,-5,FALSE,emissions_regression
 -36,-4,TRUE,emissions_regression
@@ -3253,7 +3277,6 @@ lon_bin,lat_bin,offshore_pixel,model
 -31,45,TRUE,emissions_regression
 -30,-18,TRUE,emissions_regression
 -30,-17,TRUE,emissions_regression
--30,-16,TRUE,emissions_regression
 -30,-13,TRUE,emissions_regression
 -30,-12,TRUE,emissions_regression
 -30,-11,TRUE,emissions_regression
@@ -3390,6 +3413,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -26,62,TRUE,emissions_regression
 -26,63,TRUE,emissions_regression
 -26,64,FALSE,emissions_regression
+-26,65,FALSE,emissions_regression
 -26,66,FALSE,emissions_regression
 -25,-22,TRUE,emissions_regression
 -25,-21,TRUE,emissions_regression
@@ -3594,6 +3618,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -20,65,FALSE,emissions_regression
 -20,66,FALSE,emissions_regression
 -20,67,FALSE,emissions_regression
+-20,68,TRUE,emissions_regression
 -19,-35,TRUE,emissions_regression
 -19,6,TRUE,emissions_regression
 -19,7,TRUE,emissions_regression
@@ -3677,6 +3702,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -18,39,TRUE,emissions_regression
 -18,40,TRUE,emissions_regression
 -18,49,TRUE,emissions_regression
+-18,52,TRUE,emissions_regression
 -18,53,TRUE,emissions_regression
 -18,54,TRUE,emissions_regression
 -18,55,TRUE,emissions_regression
@@ -3752,6 +3778,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -17,64,FALSE,emissions_regression
 -17,66,FALSE,emissions_regression
 -17,67,FALSE,emissions_regression
+-17,68,TRUE,emissions_regression
 -16,3,TRUE,emissions_regression
 -16,4,TRUE,emissions_regression
 -16,5,TRUE,emissions_regression
@@ -3913,6 +3940,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -13,5,TRUE,emissions_regression
 -13,6,FALSE,emissions_regression
 -13,7,FALSE,emissions_regression
+-13,27,FALSE,emissions_regression
 -13,28,FALSE,emissions_regression
 -13,29,FALSE,emissions_regression
 -13,30,FALSE,emissions_regression
@@ -4265,6 +4293,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -5,54,FALSE,emissions_regression
 -5,55,FALSE,emissions_regression
 -5,56,FALSE,emissions_regression
+-5,57,FALSE,emissions_regression
 -5,58,FALSE,emissions_regression
 -5,59,FALSE,emissions_regression
 -5,60,FALSE,emissions_regression
@@ -4407,6 +4436,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -1,67,TRUE,emissions_regression
 -1,68,TRUE,emissions_regression
 -1,69,TRUE,emissions_regression
+-1,70,TRUE,emissions_regression
 0,-16,TRUE,emissions_regression
 0,-15,TRUE,emissions_regression
 0,0,FALSE,emissions_regression
@@ -4593,6 +4623,7 @@ lon_bin,lat_bin,offshore_pixel,model
 4,41,FALSE,emissions_regression
 4,42,FALSE,emissions_regression
 4,43,FALSE,emissions_regression
+4,51,FALSE,emissions_regression
 4,52,FALSE,emissions_regression
 4,53,FALSE,emissions_regression
 4,54,FALSE,emissions_regression
@@ -4635,6 +4666,7 @@ lon_bin,lat_bin,offshore_pixel,model
 5,41,TRUE,emissions_regression
 5,42,FALSE,emissions_regression
 5,43,FALSE,emissions_regression
+5,52,FALSE,emissions_regression
 5,53,FALSE,emissions_regression
 5,54,FALSE,emissions_regression
 5,55,FALSE,emissions_regression
@@ -4681,6 +4713,7 @@ lon_bin,lat_bin,offshore_pixel,model
 6,56,FALSE,emissions_regression
 6,57,FALSE,emissions_regression
 6,58,FALSE,emissions_regression
+6,59,FALSE,emissions_regression
 6,60,FALSE,emissions_regression
 6,61,FALSE,emissions_regression
 6,62,FALSE,emissions_regression
@@ -4721,6 +4754,7 @@ lon_bin,lat_bin,offshore_pixel,model
 7,56,FALSE,emissions_regression
 7,57,FALSE,emissions_regression
 7,58,FALSE,emissions_regression
+7,60,FALSE,emissions_regression
 7,61,FALSE,emissions_regression
 7,62,FALSE,emissions_regression
 7,63,FALSE,emissions_regression
@@ -4764,6 +4798,7 @@ lon_bin,lat_bin,offshore_pixel,model
 8,56,FALSE,emissions_regression
 8,57,FALSE,emissions_regression
 8,58,FALSE,emissions_regression
+8,62,FALSE,emissions_regression
 8,63,FALSE,emissions_regression
 8,64,FALSE,emissions_regression
 8,65,FALSE,emissions_regression
@@ -4847,6 +4882,7 @@ lon_bin,lat_bin,offshore_pixel,model
 10,42,FALSE,emissions_regression
 10,43,FALSE,emissions_regression
 10,44,FALSE,emissions_regression
+10,53,FALSE,emissions_regression
 10,54,FALSE,emissions_regression
 10,55,FALSE,emissions_regression
 10,56,FALSE,emissions_regression
@@ -4992,6 +5028,7 @@ lon_bin,lat_bin,offshore_pixel,model
 13,53,FALSE,emissions_regression
 13,54,FALSE,emissions_regression
 13,55,FALSE,emissions_regression
+13,65,FALSE,emissions_regression
 13,66,FALSE,emissions_regression
 13,67,FALSE,emissions_regression
 13,68,FALSE,emissions_regression
@@ -5030,6 +5067,7 @@ lon_bin,lat_bin,offshore_pixel,model
 14,54,FALSE,emissions_regression
 14,55,FALSE,emissions_regression
 14,56,FALSE,emissions_regression
+14,66,FALSE,emissions_regression
 14,67,FALSE,emissions_regression
 14,68,FALSE,emissions_regression
 14,69,FALSE,emissions_regression
@@ -5106,6 +5144,7 @@ lon_bin,lat_bin,offshore_pixel,model
 16,56,FALSE,emissions_regression
 16,57,FALSE,emissions_regression
 16,58,FALSE,emissions_regression
+16,67,FALSE,emissions_regression
 16,68,FALSE,emissions_regression
 16,69,FALSE,emissions_regression
 16,70,FALSE,emissions_regression
@@ -5145,6 +5184,7 @@ lon_bin,lat_bin,offshore_pixel,model
 17,56,FALSE,emissions_regression
 17,57,FALSE,emissions_regression
 17,58,FALSE,emissions_regression
+17,59,FALSE,emissions_regression
 17,60,FALSE,emissions_regression
 17,61,FALSE,emissions_regression
 17,62,FALSE,emissions_regression
@@ -5351,6 +5391,7 @@ lon_bin,lat_bin,offshore_pixel,model
 23,63,FALSE,emissions_regression
 23,64,FALSE,emissions_regression
 23,65,FALSE,emissions_regression
+23,69,FALSE,emissions_regression
 23,70,FALSE,emissions_regression
 23,71,FALSE,emissions_regression
 23,72,FALSE,emissions_regression
@@ -5463,6 +5504,7 @@ lon_bin,lat_bin,offshore_pixel,model
 28,-35,TRUE,emissions_regression
 28,-34,FALSE,emissions_regression
 28,-33,FALSE,emissions_regression
+28,30,FALSE,emissions_regression
 28,31,FALSE,emissions_regression
 28,32,TRUE,emissions_regression
 28,33,TRUE,emissions_regression
@@ -5543,6 +5585,7 @@ lon_bin,lat_bin,offshore_pixel,model
 31,-32,TRUE,emissions_regression
 31,-31,FALSE,emissions_regression
 31,-30,FALSE,emissions_regression
+31,-29,FALSE,emissions_regression
 31,31,FALSE,emissions_regression
 31,32,FALSE,emissions_regression
 31,33,FALSE,emissions_regression
@@ -5574,6 +5617,7 @@ lon_bin,lat_bin,offshore_pixel,model
 32,-26,FALSE,emissions_regression
 32,28,FALSE,emissions_regression
 32,29,FALSE,emissions_regression
+32,30,FALSE,emissions_regression
 32,31,FALSE,emissions_regression
 32,32,FALSE,emissions_regression
 32,33,FALSE,emissions_regression
@@ -5622,6 +5666,7 @@ lon_bin,lat_bin,offshore_pixel,model
 33,45,FALSE,emissions_regression
 33,46,FALSE,emissions_regression
 33,66,FALSE,emissions_regression
+33,68,FALSE,emissions_regression
 33,69,FALSE,emissions_regression
 33,70,FALSE,emissions_regression
 33,71,FALSE,emissions_regression
@@ -5683,6 +5728,7 @@ lon_bin,lat_bin,offshore_pixel,model
 35,26,FALSE,emissions_regression
 35,27,FALSE,emissions_regression
 35,28,FALSE,emissions_regression
+35,32,FALSE,emissions_regression
 35,33,FALSE,emissions_regression
 35,34,FALSE,emissions_regression
 35,35,FALSE,emissions_regression
@@ -5843,6 +5889,7 @@ lon_bin,lat_bin,offshore_pixel,model
 39,42,FALSE,emissions_regression
 39,43,FALSE,emissions_regression
 39,44,FALSE,emissions_regression
+39,47,FALSE,emissions_regression
 39,64,FALSE,emissions_regression
 39,65,FALSE,emissions_regression
 39,66,TRUE,emissions_regression
@@ -5877,6 +5924,7 @@ lon_bin,lat_bin,offshore_pixel,model
 40,-5,FALSE,emissions_regression
 40,-4,FALSE,emissions_regression
 40,-3,TRUE,emissions_regression
+40,14,TRUE,emissions_regression
 40,15,FALSE,emissions_regression
 40,16,FALSE,emissions_regression
 40,17,TRUE,emissions_regression
@@ -5920,6 +5968,7 @@ lon_bin,lat_bin,offshore_pixel,model
 41,-4,TRUE,emissions_regression
 41,-3,TRUE,emissions_regression
 41,-2,FALSE,emissions_regression
+41,13,TRUE,emissions_regression
 41,14,FALSE,emissions_regression
 41,15,FALSE,emissions_regression
 41,16,FALSE,emissions_regression
@@ -6116,6 +6165,7 @@ lon_bin,lat_bin,offshore_pixel,model
 48,27,FALSE,emissions_regression
 48,28,FALSE,emissions_regression
 48,29,FALSE,emissions_regression
+48,30,FALSE,emissions_regression
 48,67,TRUE,emissions_regression
 48,68,TRUE,emissions_regression
 48,69,TRUE,emissions_regression
@@ -6183,6 +6233,7 @@ lon_bin,lat_bin,offshore_pixel,model
 50,13,TRUE,emissions_regression
 50,14,FALSE,emissions_regression
 50,15,TRUE,emissions_regression
+50,24,FALSE,emissions_regression
 50,25,FALSE,emissions_regression
 50,26,FALSE,emissions_regression
 50,27,FALSE,emissions_regression
@@ -6473,6 +6524,7 @@ lon_bin,lat_bin,offshore_pixel,model
 65,24,FALSE,emissions_regression
 65,25,FALSE,emissions_regression
 65,69,FALSE,emissions_regression
+65,70,TRUE,emissions_regression
 65,71,TRUE,emissions_regression
 65,72,TRUE,emissions_regression
 65,73,TRUE,emissions_regression
@@ -6502,6 +6554,7 @@ lon_bin,lat_bin,offshore_pixel,model
 67,71,TRUE,emissions_regression
 67,72,TRUE,emissions_regression
 67,73,TRUE,emissions_regression
+68,-51,TRUE,emissions_regression
 68,-8,TRUE,emissions_regression
 68,-7,TRUE,emissions_regression
 68,9,TRUE,emissions_regression
@@ -6546,6 +6599,7 @@ lon_bin,lat_bin,offshore_pixel,model
 71,-1,TRUE,emissions_regression
 71,0,TRUE,emissions_regression
 71,1,TRUE,emissions_regression
+71,5,TRUE,emissions_regression
 71,6,TRUE,emissions_regression
 71,7,TRUE,emissions_regression
 71,16,TRUE,emissions_regression
@@ -6610,6 +6664,7 @@ lon_bin,lat_bin,offshore_pixel,model
 73,15,FALSE,emissions_regression
 73,16,FALSE,emissions_regression
 73,17,FALSE,emissions_regression
+73,18,FALSE,emissions_regression
 73,67,FALSE,emissions_regression
 73,68,FALSE,emissions_regression
 73,69,FALSE,emissions_regression
@@ -6805,6 +6860,7 @@ lon_bin,lat_bin,offshore_pixel,model
 88,19,TRUE,emissions_regression
 88,20,FALSE,emissions_regression
 88,21,FALSE,emissions_regression
+88,22,FALSE,emissions_regression
 88,75,TRUE,emissions_regression
 88,76,TRUE,emissions_regression
 89,10,TRUE,emissions_regression
@@ -6812,6 +6868,7 @@ lon_bin,lat_bin,offshore_pixel,model
 89,19,TRUE,emissions_regression
 89,20,FALSE,emissions_regression
 89,21,FALSE,emissions_regression
+89,22,FALSE,emissions_regression
 89,75,TRUE,emissions_regression
 89,78,TRUE,emissions_regression
 90,5,TRUE,emissions_regression
@@ -6837,6 +6894,7 @@ lon_bin,lat_bin,offshore_pixel,model
 91,11,FALSE,emissions_regression
 91,12,FALSE,emissions_regression
 91,13,FALSE,emissions_regression
+91,16,TRUE,emissions_regression
 91,17,TRUE,emissions_regression
 91,18,FALSE,emissions_regression
 91,19,FALSE,emissions_regression
@@ -6877,6 +6935,7 @@ lon_bin,lat_bin,offshore_pixel,model
 93,17,TRUE,emissions_regression
 93,18,FALSE,emissions_regression
 93,19,FALSE,emissions_regression
+93,20,FALSE,emissions_regression
 94,2,TRUE,emissions_regression
 94,3,TRUE,emissions_regression
 94,4,FALSE,emissions_regression
@@ -6972,6 +7031,7 @@ lon_bin,lat_bin,offshore_pixel,model
 99,10,FALSE,emissions_regression
 99,11,FALSE,emissions_regression
 99,12,FALSE,emissions_regression
+99,13,FALSE,emissions_regression
 100,-4,FALSE,emissions_regression
 100,-3,FALSE,emissions_regression
 100,-2,FALSE,emissions_regression
@@ -7070,6 +7130,8 @@ lon_bin,lat_bin,offshore_pixel,model
 105,6,FALSE,emissions_regression
 105,7,TRUE,emissions_regression
 105,8,TRUE,emissions_regression
+105,9,FALSE,emissions_regression
+105,10,FALSE,emissions_regression
 105,18,FALSE,emissions_regression
 105,19,FALSE,emissions_regression
 106,-9,FALSE,emissions_regression
@@ -7089,6 +7151,7 @@ lon_bin,lat_bin,offshore_pixel,model
 106,7,TRUE,emissions_regression
 106,8,TRUE,emissions_regression
 106,9,FALSE,emissions_regression
+106,10,FALSE,emissions_regression
 106,17,FALSE,emissions_regression
 106,18,FALSE,emissions_regression
 106,19,FALSE,emissions_regression
@@ -7182,6 +7245,7 @@ lon_bin,lat_bin,offshore_pixel,model
 110,-5,FALSE,emissions_regression
 110,-4,FALSE,emissions_regression
 110,-3,FALSE,emissions_regression
+110,-2,FALSE,emissions_regression
 110,1,FALSE,emissions_regression
 110,2,FALSE,emissions_regression
 110,3,TRUE,emissions_regression
@@ -7298,6 +7362,7 @@ lon_bin,lat_bin,offshore_pixel,model
 114,-31,FALSE,emissions_regression
 114,-30,FALSE,emissions_regression
 114,-29,FALSE,emissions_regression
+114,-28,FALSE,emissions_regression
 114,-23,FALSE,emissions_regression
 114,-22,FALSE,emissions_regression
 114,-21,FALSE,emissions_regression
@@ -7459,6 +7524,8 @@ lon_bin,lat_bin,offshore_pixel,model
 118,22,FALSE,emissions_regression
 118,23,FALSE,emissions_regression
 118,24,FALSE,emissions_regression
+118,25,FALSE,emissions_regression
+118,37,FALSE,emissions_regression
 118,38,FALSE,emissions_regression
 118,39,FALSE,emissions_regression
 119,-37,TRUE,emissions_regression
@@ -7957,6 +8024,7 @@ lon_bin,lat_bin,offshore_pixel,model
 127,39,FALSE,emissions_regression
 127,73,TRUE,emissions_regression
 128,-33,TRUE,emissions_regression
+128,-16,FALSE,emissions_regression
 128,-15,FALSE,emissions_regression
 128,-14,TRUE,emissions_regression
 128,-13,TRUE,emissions_regression
@@ -8239,6 +8307,7 @@ lon_bin,lat_bin,offshore_pixel,model
 135,-3,FALSE,emissions_regression
 135,-2,FALSE,emissions_regression
 135,-1,FALSE,emissions_regression
+135,0,TRUE,emissions_regression
 135,7,FALSE,emissions_regression
 135,8,FALSE,emissions_regression
 135,29,TRUE,emissions_regression
@@ -8281,6 +8350,7 @@ lon_bin,lat_bin,offshore_pixel,model
 136,32,FALSE,emissions_regression
 136,33,FALSE,emissions_regression
 136,34,FALSE,emissions_regression
+136,35,FALSE,emissions_regression
 136,36,FALSE,emissions_regression
 136,37,FALSE,emissions_regression
 136,38,FALSE,emissions_regression
@@ -8398,6 +8468,7 @@ lon_bin,lat_bin,offshore_pixel,model
 139,-11,TRUE,emissions_regression
 139,-10,FALSE,emissions_regression
 139,-9,FALSE,emissions_regression
+139,-8,FALSE,emissions_regression
 139,-3,FALSE,emissions_regression
 139,-2,FALSE,emissions_regression
 139,-1,TRUE,emissions_regression
@@ -8410,6 +8481,7 @@ lon_bin,lat_bin,offshore_pixel,model
 139,33,FALSE,emissions_regression
 139,34,FALSE,emissions_regression
 139,35,FALSE,emissions_regression
+139,37,FALSE,emissions_regression
 139,38,FALSE,emissions_regression
 139,39,FALSE,emissions_regression
 139,40,FALSE,emissions_regression
@@ -8514,6 +8586,7 @@ lon_bin,lat_bin,offshore_pixel,model
 141,76,TRUE,emissions_regression
 142,-40,FALSE,emissions_regression
 142,-39,FALSE,emissions_regression
+142,-13,FALSE,emissions_regression
 142,-12,FALSE,emissions_regression
 142,-11,FALSE,emissions_regression
 142,-10,FALSE,emissions_regression
@@ -8637,6 +8710,7 @@ lon_bin,lat_bin,offshore_pixel,model
 145,-16,FALSE,emissions_regression
 145,-15,FALSE,emissions_regression
 145,-14,FALSE,emissions_regression
+145,-13,TRUE,emissions_regression
 145,-12,TRUE,emissions_regression
 145,-11,TRUE,emissions_regression
 145,-10,TRUE,emissions_regression
@@ -8716,14 +8790,17 @@ lon_bin,lat_bin,offshore_pixel,model
 146,54,TRUE,emissions_regression
 146,58,TRUE,emissions_regression
 146,59,TRUE,emissions_regression
+146,73,TRUE,emissions_regression
 146,74,TRUE,emissions_regression
 146,75,TRUE,emissions_regression
 146,76,TRUE,emissions_regression
+147,-45,FALSE,emissions_regression
 147,-44,FALSE,emissions_regression
 147,-43,FALSE,emissions_regression
 147,-41,FALSE,emissions_regression
 147,-40,FALSE,emissions_regression
 147,-39,FALSE,emissions_regression
+147,-38,FALSE,emissions_regression
 147,-20,FALSE,emissions_regression
 147,-19,FALSE,emissions_regression
 147,-18,FALSE,emissions_regression
@@ -8741,7 +8818,6 @@ lon_bin,lat_bin,offshore_pixel,model
 147,-4,TRUE,emissions_regression
 147,-3,FALSE,emissions_regression
 147,-2,FALSE,emissions_regression
-147,1,TRUE,emissions_regression
 147,2,TRUE,emissions_regression
 147,13,TRUE,emissions_regression
 147,15,TRUE,emissions_regression
@@ -8789,6 +8865,7 @@ lon_bin,lat_bin,offshore_pixel,model
 148,59,FALSE,emissions_regression
 148,72,TRUE,emissions_regression
 148,73,TRUE,emissions_regression
+148,75,TRUE,emissions_regression
 149,-42,FALSE,emissions_regression
 149,-41,FALSE,emissions_regression
 149,-40,FALSE,emissions_regression
@@ -8924,7 +9001,6 @@ lon_bin,lat_bin,offshore_pixel,model
 152,49,TRUE,emissions_regression
 152,50,TRUE,emissions_regression
 152,58,TRUE,emissions_regression
-152,59,FALSE,emissions_regression
 152,71,TRUE,emissions_regression
 152,75,TRUE,emissions_regression
 153,-36,TRUE,emissions_regression
@@ -8956,7 +9032,6 @@ lon_bin,lat_bin,offshore_pixel,model
 153,-5,FALSE,emissions_regression
 153,-4,FALSE,emissions_regression
 153,-3,FALSE,emissions_regression
-153,7,TRUE,emissions_regression
 153,45,TRUE,emissions_regression
 153,46,TRUE,emissions_regression
 153,47,TRUE,emissions_regression
@@ -8988,6 +9063,7 @@ lon_bin,lat_bin,offshore_pixel,model
 154,-13,TRUE,emissions_regression
 154,-12,TRUE,emissions_regression
 154,-11,TRUE,emissions_regression
+154,-10,TRUE,emissions_regression
 154,-8,TRUE,emissions_regression
 154,-7,FALSE,emissions_regression
 154,-6,FALSE,emissions_regression
@@ -9018,7 +9094,6 @@ lon_bin,lat_bin,offshore_pixel,model
 155,-26,TRUE,emissions_regression
 155,-25,TRUE,emissions_regression
 155,-24,TRUE,emissions_regression
-155,-23,TRUE,emissions_regression
 155,-22,TRUE,emissions_regression
 155,-21,TRUE,emissions_regression
 155,-13,TRUE,emissions_regression
@@ -9152,7 +9227,6 @@ lon_bin,lat_bin,offshore_pixel,model
 162,-12,TRUE,emissions_regression
 162,-11,TRUE,emissions_regression
 162,-10,FALSE,emissions_regression
-162,-9,FALSE,emissions_regression
 162,54,TRUE,emissions_regression
 162,55,FALSE,emissions_regression
 162,56,FALSE,emissions_regression
@@ -9421,6 +9495,7 @@ lon_bin,lat_bin,offshore_pixel,model
 176,-17,FALSE,emissions_regression
 176,51,TRUE,emissions_regression
 176,52,TRUE,emissions_regression
+176,53,TRUE,emissions_regression
 176,61,TRUE,emissions_regression
 176,62,TRUE,emissions_regression
 176,64,FALSE,emissions_regression
@@ -9551,6 +9626,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -77,-52,TRUE,detections_classification
 -76,-52,TRUE,detections_classification
 -75,-52,TRUE,detections_classification
+-74,-52,FALSE,detections_classification
 -73,-52,FALSE,detections_classification
 -70,-52,FALSE,detections_classification
 -69,-52,FALSE,detections_classification
@@ -9576,6 +9652,8 @@ lon_bin,lat_bin,offshore_pixel,model
 -77,-50,TRUE,detections_classification
 -76,-50,FALSE,detections_classification
 -75,-50,FALSE,detections_classification
+-74,-50,FALSE,detections_classification
+-69,-50,FALSE,detections_classification
 -68,-50,FALSE,detections_classification
 -67,-50,TRUE,detections_classification
 -77,-49,TRUE,detections_classification
@@ -9619,6 +9697,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -76,-46,FALSE,detections_classification
 -75,-46,FALSE,detections_classification
 -74,-46,FALSE,detections_classification
+-73,-46,FALSE,detections_classification
 -68,-46,FALSE,detections_classification
 -67,-46,FALSE,detections_classification
 -66,-46,FALSE,detections_classification
@@ -9700,6 +9779,7 @@ lon_bin,lat_bin,offshore_pixel,model
 144,-42,FALSE,detections_classification
 145,-42,FALSE,detections_classification
 146,-42,FALSE,detections_classification
+147,-42,FALSE,detections_classification
 148,-42,FALSE,detections_classification
 149,-42,FALSE,detections_classification
 169,-42,TRUE,detections_classification
@@ -9713,6 +9793,7 @@ lon_bin,lat_bin,offshore_pixel,model
 177,-42,TRUE,detections_classification
 178,-42,TRUE,detections_classification
 -74,-41,FALSE,detections_classification
+-66,-41,FALSE,detections_classification
 -65,-41,FALSE,detections_classification
 -63,-41,FALSE,detections_classification
 -62,-41,FALSE,detections_classification
@@ -9825,6 +9906,7 @@ lon_bin,lat_bin,offshore_pixel,model
 140,-38,FALSE,detections_classification
 144,-38,FALSE,detections_classification
 145,-38,FALSE,detections_classification
+147,-38,FALSE,detections_classification
 148,-38,FALSE,detections_classification
 149,-38,FALSE,detections_classification
 150,-38,FALSE,detections_classification
@@ -10013,6 +10095,7 @@ lon_bin,lat_bin,offshore_pixel,model
 135,-34,FALSE,detections_classification
 136,-34,FALSE,detections_classification
 137,-34,FALSE,detections_classification
+138,-34,FALSE,detections_classification
 151,-34,FALSE,detections_classification
 152,-34,FALSE,detections_classification
 153,-34,FALSE,detections_classification
@@ -10310,6 +10393,7 @@ lon_bin,lat_bin,offshore_pixel,model
 167,-24,FALSE,detections_classification
 -72,-23,FALSE,detections_classification
 -71,-23,FALSE,detections_classification
+-45,-23,FALSE,detections_classification
 -44,-23,FALSE,detections_classification
 -43,-23,FALSE,detections_classification
 -42,-23,FALSE,detections_classification
@@ -10347,6 +10431,7 @@ lon_bin,lat_bin,offshore_pixel,model
 167,-23,FALSE,detections_classification
 -72,-22,FALSE,detections_classification
 -71,-22,FALSE,detections_classification
+-42,-22,FALSE,detections_classification
 -41,-22,FALSE,detections_classification
 -40,-22,FALSE,detections_classification
 -39,-22,FALSE,detections_classification
@@ -10631,6 +10716,8 @@ lon_bin,lat_bin,offshore_pixel,model
 123,-16,FALSE,detections_classification
 124,-16,FALSE,detections_classification
 125,-16,FALSE,detections_classification
+128,-16,FALSE,detections_classification
+129,-16,TRUE,detections_classification
 135,-16,FALSE,detections_classification
 136,-16,FALSE,detections_classification
 137,-16,FALSE,detections_classification
@@ -10661,6 +10748,7 @@ lon_bin,lat_bin,offshore_pixel,model
 45,-15,FALSE,detections_classification
 46,-15,FALSE,detections_classification
 47,-15,FALSE,detections_classification
+48,-15,FALSE,detections_classification
 50,-15,FALSE,detections_classification
 51,-15,TRUE,detections_classification
 52,-15,TRUE,detections_classification
@@ -10764,6 +10852,7 @@ lon_bin,lat_bin,offshore_pixel,model
 137,-13,FALSE,detections_classification
 140,-13,FALSE,detections_classification
 141,-13,FALSE,detections_classification
+142,-13,FALSE,detections_classification
 143,-13,FALSE,detections_classification
 144,-13,FALSE,detections_classification
 145,-13,TRUE,detections_classification
@@ -11091,6 +11180,7 @@ lon_bin,lat_bin,offshore_pixel,model
 98,-2,TRUE,detections_classification
 99,-2,FALSE,detections_classification
 100,-2,FALSE,detections_classification
+103,-2,FALSE,detections_classification
 104,-2,FALSE,detections_classification
 105,-2,FALSE,detections_classification
 106,-2,FALSE,detections_classification
@@ -11207,6 +11297,7 @@ lon_bin,lat_bin,offshore_pixel,model
 96,2,TRUE,detections_classification
 97,2,FALSE,detections_classification
 98,2,FALSE,detections_classification
+99,2,FALSE,detections_classification
 100,2,FALSE,detections_classification
 101,2,FALSE,detections_classification
 102,2,FALSE,detections_classification
@@ -11561,6 +11652,7 @@ lon_bin,lat_bin,offshore_pixel,model
 102,9,FALSE,detections_classification
 103,9,FALSE,detections_classification
 104,9,FALSE,detections_classification
+105,9,FALSE,detections_classification
 106,9,FALSE,detections_classification
 107,9,FALSE,detections_classification
 108,9,TRUE,detections_classification
@@ -11633,6 +11725,8 @@ lon_bin,lat_bin,offshore_pixel,model
 102,10,FALSE,detections_classification
 103,10,FALSE,detections_classification
 104,10,FALSE,detections_classification
+105,10,FALSE,detections_classification
+106,10,FALSE,detections_classification
 107,10,FALSE,detections_classification
 108,10,FALSE,detections_classification
 109,10,TRUE,detections_classification
@@ -11826,6 +11920,7 @@ lon_bin,lat_bin,offshore_pixel,model
 96,13,FALSE,detections_classification
 97,13,FALSE,detections_classification
 98,13,TRUE,detections_classification
+99,13,FALSE,detections_classification
 100,13,FALSE,detections_classification
 109,13,FALSE,detections_classification
 119,13,FALSE,detections_classification
@@ -11863,6 +11958,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -19,14,FALSE,detections_classification
 -18,14,FALSE,detections_classification
 -17,14,FALSE,detections_classification
+40,14,TRUE,detections_classification
 41,14,FALSE,detections_classification
 42,14,FALSE,detections_classification
 43,14,FALSE,detections_classification
@@ -11936,6 +12032,7 @@ lon_bin,lat_bin,offshore_pixel,model
 54,15,TRUE,detections_classification
 72,15,FALSE,detections_classification
 73,15,FALSE,detections_classification
+74,15,FALSE,detections_classification
 80,15,FALSE,detections_classification
 81,15,FALSE,detections_classification
 82,15,FALSE,detections_classification
@@ -12146,6 +12243,7 @@ lon_bin,lat_bin,offshore_pixel,model
 59,18,TRUE,detections_classification
 71,18,FALSE,detections_classification
 72,18,FALSE,detections_classification
+73,18,FALSE,detections_classification
 83,18,FALSE,detections_classification
 84,18,FALSE,detections_classification
 85,18,FALSE,detections_classification
@@ -12224,6 +12322,7 @@ lon_bin,lat_bin,offshore_pixel,model
 91,19,FALSE,detections_classification
 92,19,FALSE,detections_classification
 93,19,FALSE,detections_classification
+94,19,FALSE,detections_classification
 105,19,FALSE,detections_classification
 106,19,FALSE,detections_classification
 108,19,FALSE,detections_classification
@@ -12290,6 +12389,7 @@ lon_bin,lat_bin,offshore_pixel,model
 90,20,TRUE,detections_classification
 91,20,FALSE,detections_classification
 92,20,FALSE,detections_classification
+93,20,FALSE,detections_classification
 106,20,FALSE,detections_classification
 107,20,FALSE,detections_classification
 108,20,FALSE,detections_classification
@@ -12421,6 +12521,8 @@ lon_bin,lat_bin,offshore_pixel,model
 69,22,FALSE,detections_classification
 70,22,FALSE,detections_classification
 72,22,FALSE,detections_classification
+88,22,FALSE,detections_classification
+89,22,FALSE,detections_classification
 90,22,FALSE,detections_classification
 91,22,FALSE,detections_classification
 113,22,FALSE,detections_classification
@@ -12465,6 +12567,7 @@ lon_bin,lat_bin,offshore_pixel,model
 36,23,FALSE,detections_classification
 37,23,FALSE,detections_classification
 38,23,FALSE,detections_classification
+51,23,FALSE,detections_classification
 52,23,FALSE,detections_classification
 57,23,FALSE,detections_classification
 58,23,FALSE,detections_classification
@@ -12567,6 +12670,7 @@ lon_bin,lat_bin,offshore_pixel,model
 56,25,FALSE,detections_classification
 57,25,FALSE,detections_classification
 58,25,FALSE,detections_classification
+118,25,FALSE,detections_classification
 119,25,FALSE,detections_classification
 120,25,FALSE,detections_classification
 121,25,FALSE,detections_classification
@@ -12621,6 +12725,7 @@ lon_bin,lat_bin,offshore_pixel,model
 130,26,FALSE,detections_classification
 -116,27,FALSE,detections_classification
 -115,27,FALSE,detections_classification
+-114,27,FALSE,detections_classification
 -113,27,FALSE,detections_classification
 -112,27,FALSE,detections_classification
 -111,27,FALSE,detections_classification
@@ -12639,6 +12744,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -16,27,FALSE,detections_classification
 -15,27,FALSE,detections_classification
 -14,27,FALSE,detections_classification
+-13,27,FALSE,detections_classification
 33,27,FALSE,detections_classification
 34,27,FALSE,detections_classification
 35,27,FALSE,detections_classification
@@ -12713,6 +12819,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -94,29,FALSE,detections_classification
 -93,29,FALSE,detections_classification
 -92,29,FALSE,detections_classification
+-91,29,FALSE,detections_classification
 -90,29,FALSE,detections_classification
 -89,29,FALSE,detections_classification
 -88,29,FALSE,detections_classification
@@ -12784,7 +12891,10 @@ lon_bin,lat_bin,offshore_pixel,model
 18,30,FALSE,detections_classification
 19,30,FALSE,detections_classification
 20,30,FALSE,detections_classification
+28,30,FALSE,detections_classification
 29,30,FALSE,detections_classification
+32,30,FALSE,detections_classification
+48,30,FALSE,detections_classification
 49,30,FALSE,detections_classification
 120,30,FALSE,detections_classification
 121,30,FALSE,detections_classification
@@ -12894,6 +13004,7 @@ lon_bin,lat_bin,offshore_pixel,model
 32,32,FALSE,detections_classification
 33,32,FALSE,detections_classification
 34,32,FALSE,detections_classification
+35,32,FALSE,detections_classification
 120,32,FALSE,detections_classification
 121,32,FALSE,detections_classification
 122,32,FALSE,detections_classification
@@ -13151,6 +13262,7 @@ lon_bin,lat_bin,offshore_pixel,model
 133,35,FALSE,detections_classification
 134,35,FALSE,detections_classification
 135,35,FALSE,detections_classification
+136,35,FALSE,detections_classification
 138,35,FALSE,detections_classification
 139,35,FALSE,detections_classification
 140,35,FALSE,detections_classification
@@ -13314,6 +13426,7 @@ lon_bin,lat_bin,offshore_pixel,model
 26,37,FALSE,detections_classification
 27,37,FALSE,detections_classification
 28,37,FALSE,detections_classification
+118,37,FALSE,detections_classification
 119,37,FALSE,detections_classification
 120,37,FALSE,detections_classification
 121,37,FALSE,detections_classification
@@ -13330,6 +13443,7 @@ lon_bin,lat_bin,offshore_pixel,model
 136,37,FALSE,detections_classification
 137,37,FALSE,detections_classification
 138,37,FALSE,detections_classification
+139,37,FALSE,detections_classification
 140,37,FALSE,detections_classification
 141,37,FALSE,detections_classification
 142,37,FALSE,detections_classification
@@ -13548,6 +13662,7 @@ lon_bin,lat_bin,offshore_pixel,model
 120,40,FALSE,detections_classification
 121,40,FALSE,detections_classification
 122,40,FALSE,detections_classification
+127,40,TRUE,detections_classification
 128,40,FALSE,detections_classification
 129,40,FALSE,detections_classification
 130,40,FALSE,detections_classification
@@ -13877,6 +13992,7 @@ lon_bin,lat_bin,offshore_pixel,model
 35,45,FALSE,detections_classification
 36,45,FALSE,detections_classification
 37,45,FALSE,detections_classification
+38,45,FALSE,detections_classification
 136,45,FALSE,detections_classification
 137,45,FALSE,detections_classification
 138,45,FALSE,detections_classification
@@ -13937,6 +14053,7 @@ lon_bin,lat_bin,offshore_pixel,model
 36,46,FALSE,detections_classification
 37,46,FALSE,detections_classification
 38,46,FALSE,detections_classification
+39,46,FALSE,detections_classification
 137,46,FALSE,detections_classification
 138,46,FALSE,detections_classification
 139,46,FALSE,detections_classification
@@ -13993,6 +14110,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -3,47,FALSE,detections_classification
 37,47,FALSE,detections_classification
 38,47,FALSE,detections_classification
+39,47,FALSE,detections_classification
 138,47,FALSE,detections_classification
 139,47,FALSE,detections_classification
 140,47,FALSE,detections_classification
@@ -14025,6 +14143,8 @@ lon_bin,lat_bin,offshore_pixel,model
 -61,48,FALSE,detections_classification
 -60,48,FALSE,detections_classification
 -59,48,FALSE,detections_classification
+-58,48,FALSE,detections_classification
+-55,48,FALSE,detections_classification
 -54,48,FALSE,detections_classification
 -53,48,FALSE,detections_classification
 -52,48,FALSE,detections_classification
@@ -14187,6 +14307,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -130,51,FALSE,detections_classification
 -129,51,FALSE,detections_classification
 -128,51,FALSE,detections_classification
+-127,51,FALSE,detections_classification
 -81,51,TRUE,detections_classification
 -80,51,TRUE,detections_classification
 -79,51,TRUE,detections_classification
@@ -14213,6 +14334,7 @@ lon_bin,lat_bin,offshore_pixel,model
 1,51,FALSE,detections_classification
 2,51,FALSE,detections_classification
 3,51,FALSE,detections_classification
+4,51,FALSE,detections_classification
 140,51,FALSE,detections_classification
 141,51,FALSE,detections_classification
 142,51,FALSE,detections_classification
@@ -14255,6 +14377,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -81,52,TRUE,detections_classification
 -80,52,TRUE,detections_classification
 -79,52,TRUE,detections_classification
+-57,52,FALSE,detections_classification
 -56,52,FALSE,detections_classification
 -55,52,FALSE,detections_classification
 -15,52,TRUE,detections_classification
@@ -14273,6 +14396,7 @@ lon_bin,lat_bin,offshore_pixel,model
 2,52,FALSE,detections_classification
 3,52,FALSE,detections_classification
 4,52,FALSE,detections_classification
+5,52,FALSE,detections_classification
 141,52,FALSE,detections_classification
 143,52,FALSE,detections_classification
 144,52,TRUE,detections_classification
@@ -14336,6 +14460,7 @@ lon_bin,lat_bin,offshore_pixel,model
 7,53,FALSE,detections_classification
 8,53,FALSE,detections_classification
 9,53,FALSE,detections_classification
+10,53,FALSE,detections_classification
 11,53,FALSE,detections_classification
 13,53,FALSE,detections_classification
 14,53,FALSE,detections_classification
@@ -14376,11 +14501,13 @@ lon_bin,lat_bin,offshore_pixel,model
 -133,54,FALSE,detections_classification
 -132,54,FALSE,detections_classification
 -131,54,FALSE,detections_classification
+-130,54,FALSE,detections_classification
 -83,54,TRUE,detections_classification
 -82,54,TRUE,detections_classification
 -81,54,TRUE,detections_classification
 -80,54,TRUE,detections_classification
 -79,54,TRUE,detections_classification
+-60,54,FALSE,detections_classification
 -59,54,FALSE,detections_classification
 -58,54,FALSE,detections_classification
 -57,54,TRUE,detections_classification
@@ -14392,6 +14519,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -11,54,FALSE,detections_classification
 -10,54,FALSE,detections_classification
 -9,54,FALSE,detections_classification
+-8,54,FALSE,detections_classification
 -7,54,FALSE,detections_classification
 -6,54,FALSE,detections_classification
 -5,54,FALSE,detections_classification
@@ -14572,6 +14700,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -79,56,TRUE,detections_classification
 -78,56,TRUE,detections_classification
 -77,56,TRUE,detections_classification
+-63,56,FALSE,detections_classification
 -62,56,FALSE,detections_classification
 -61,56,FALSE,detections_classification
 -60,56,TRUE,detections_classification
@@ -14679,6 +14808,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -8,57,FALSE,detections_classification
 -7,57,FALSE,detections_classification
 -6,57,FALSE,detections_classification
+-5,57,FALSE,detections_classification
 -4,57,FALSE,detections_classification
 -3,57,FALSE,detections_classification
 -2,57,FALSE,detections_classification
@@ -14739,6 +14869,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -137,58,FALSE,detections_classification
 -136,58,FALSE,detections_classification
 -135,58,FALSE,detections_classification
+-134,58,FALSE,detections_classification
 -95,58,FALSE,detections_classification
 -94,58,FALSE,detections_classification
 -93,58,FALSE,detections_classification
@@ -14847,6 +14978,8 @@ lon_bin,lat_bin,offshore_pixel,model
 -141,59,FALSE,detections_classification
 -140,59,FALSE,detections_classification
 -139,59,FALSE,detections_classification
+-138,59,FALSE,detections_classification
+-137,59,FALSE,detections_classification
 -136,59,FALSE,detections_classification
 -95,59,FALSE,detections_classification
 -94,59,FALSE,detections_classification
@@ -14908,9 +15041,11 @@ lon_bin,lat_bin,offshore_pixel,model
 3,59,FALSE,detections_classification
 4,59,FALSE,detections_classification
 5,59,FALSE,detections_classification
+6,59,FALSE,detections_classification
 9,59,FALSE,detections_classification
 10,59,FALSE,detections_classification
 11,59,FALSE,detections_classification
+17,59,FALSE,detections_classification
 18,59,FALSE,detections_classification
 19,59,FALSE,detections_classification
 20,59,FALSE,detections_classification
@@ -14949,6 +15084,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -144,60,TRUE,detections_classification
 -143,60,TRUE,detections_classification
 -142,60,FALSE,detections_classification
+-140,60,FALSE,detections_classification
 -95,60,TRUE,detections_classification
 -94,60,TRUE,detections_classification
 -93,60,TRUE,detections_classification
@@ -15004,12 +15140,14 @@ lon_bin,lat_bin,offshore_pixel,model
 4,60,FALSE,detections_classification
 5,60,FALSE,detections_classification
 6,60,FALSE,detections_classification
+7,60,FALSE,detections_classification
 17,60,FALSE,detections_classification
 18,60,FALSE,detections_classification
 19,60,FALSE,detections_classification
 20,60,FALSE,detections_classification
 21,60,FALSE,detections_classification
 22,60,FALSE,detections_classification
+23,60,FALSE,detections_classification
 24,60,FALSE,detections_classification
 25,60,FALSE,detections_classification
 26,60,FALSE,detections_classification
@@ -15029,6 +15167,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -151,61,FALSE,detections_classification
 -150,61,FALSE,detections_classification
 -149,61,FALSE,detections_classification
+-148,61,FALSE,detections_classification
 -147,61,FALSE,detections_classification
 -95,61,TRUE,detections_classification
 -94,61,TRUE,detections_classification
@@ -15164,6 +15303,7 @@ lon_bin,lat_bin,offshore_pixel,model
 5,62,FALSE,detections_classification
 6,62,FALSE,detections_classification
 7,62,FALSE,detections_classification
+8,62,FALSE,detections_classification
 17,62,FALSE,detections_classification
 18,62,FALSE,detections_classification
 19,62,FALSE,detections_classification
@@ -15246,6 +15386,7 @@ lon_bin,lat_bin,offshore_pixel,model
 23,63,FALSE,detections_classification
 36,63,FALSE,detections_classification
 37,63,FALSE,detections_classification
+38,63,FALSE,detections_classification
 -180,64,TRUE,detections_classification
 -179,64,TRUE,detections_classification
 -178,64,TRUE,detections_classification
@@ -15342,7 +15483,9 @@ lon_bin,lat_bin,offshore_pixel,model
 -169,65,TRUE,detections_classification
 -168,65,FALSE,detections_classification
 -167,65,FALSE,detections_classification
+-162,65,TRUE,detections_classification
 -91,65,TRUE,detections_classification
+-90,65,FALSE,detections_classification
 -89,65,TRUE,detections_classification
 -88,65,TRUE,detections_classification
 -87,65,TRUE,detections_classification
@@ -15387,6 +15530,7 @@ lon_bin,lat_bin,offshore_pixel,model
 10,65,FALSE,detections_classification
 11,65,FALSE,detections_classification
 12,65,FALSE,detections_classification
+13,65,FALSE,detections_classification
 21,65,FALSE,detections_classification
 22,65,FALSE,detections_classification
 23,65,FALSE,detections_classification
@@ -15399,6 +15543,8 @@ lon_bin,lat_bin,offshore_pixel,model
 38,65,FALSE,detections_classification
 39,65,FALSE,detections_classification
 40,65,FALSE,detections_classification
+44,65,FALSE,detections_classification
+179,65,TRUE,detections_classification
 -179,66,FALSE,detections_classification
 -175,66,TRUE,detections_classification
 -174,66,TRUE,detections_classification
@@ -15462,6 +15608,7 @@ lon_bin,lat_bin,offshore_pixel,model
 11,66,FALSE,detections_classification
 12,66,FALSE,detections_classification
 13,66,FALSE,detections_classification
+14,66,FALSE,detections_classification
 32,66,FALSE,detections_classification
 33,66,FALSE,detections_classification
 34,66,FALSE,detections_classification
@@ -15482,6 +15629,7 @@ lon_bin,lat_bin,offshore_pixel,model
 71,66,FALSE,detections_classification
 72,66,FALSE,detections_classification
 73,66,FALSE,detections_classification
+-177,67,TRUE,detections_classification
 -176,67,TRUE,detections_classification
 -175,67,TRUE,detections_classification
 -174,67,TRUE,detections_classification
@@ -15550,6 +15698,7 @@ lon_bin,lat_bin,offshore_pixel,model
 13,67,FALSE,detections_classification
 14,67,FALSE,detections_classification
 15,67,FALSE,detections_classification
+16,67,FALSE,detections_classification
 32,67,FALSE,detections_classification
 40,67,TRUE,detections_classification
 41,67,TRUE,detections_classification
@@ -15582,6 +15731,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -167,68,FALSE,detections_classification
 -166,68,FALSE,detections_classification
 -165,68,TRUE,detections_classification
+-164,68,FALSE,detections_classification
 -114,68,TRUE,detections_classification
 -113,68,TRUE,detections_classification
 -112,68,TRUE,detections_classification
@@ -15631,6 +15781,7 @@ lon_bin,lat_bin,offshore_pixel,model
 15,68,FALSE,detections_classification
 16,68,FALSE,detections_classification
 17,68,FALSE,detections_classification
+33,68,FALSE,detections_classification
 36,68,TRUE,detections_classification
 37,68,TRUE,detections_classification
 38,68,TRUE,detections_classification
@@ -15656,15 +15807,18 @@ lon_bin,lat_bin,offshore_pixel,model
 58,68,FALSE,detections_classification
 59,68,FALSE,detections_classification
 60,68,FALSE,detections_classification
+61,68,TRUE,detections_classification
 66,68,FALSE,detections_classification
 67,68,FALSE,detections_classification
 68,68,FALSE,detections_classification
+69,68,FALSE,detections_classification
 72,68,FALSE,detections_classification
 73,68,FALSE,detections_classification
 74,68,FALSE,detections_classification
 75,68,FALSE,detections_classification
 76,68,TRUE,detections_classification
 77,68,TRUE,detections_classification
+78,68,TRUE,detections_classification
 169,68,FALSE,detections_classification
 170,68,FALSE,detections_classification
 -180,69,TRUE,detections_classification
@@ -15680,10 +15834,13 @@ lon_bin,lat_bin,offshore_pixel,model
 -165,69,TRUE,detections_classification
 -164,69,TRUE,detections_classification
 -163,69,TRUE,detections_classification
+-146,69,TRUE,detections_classification
+-145,69,TRUE,detections_classification
 -143,69,TRUE,detections_classification
 -108,69,FALSE,detections_classification
 -107,69,FALSE,detections_classification
 -106,69,FALSE,detections_classification
+-105,69,FALSE,detections_classification
 -104,69,FALSE,detections_classification
 -98,69,TRUE,detections_classification
 -97,69,TRUE,detections_classification
@@ -15724,6 +15881,8 @@ lon_bin,lat_bin,offshore_pixel,model
 19,69,FALSE,detections_classification
 20,69,FALSE,detections_classification
 21,69,FALSE,detections_classification
+22,69,FALSE,detections_classification
+23,69,FALSE,detections_classification
 29,69,FALSE,detections_classification
 30,69,FALSE,detections_classification
 31,69,FALSE,detections_classification
@@ -15777,6 +15936,7 @@ lon_bin,lat_bin,offshore_pixel,model
 168,69,FALSE,detections_classification
 169,69,FALSE,detections_classification
 170,69,FALSE,detections_classification
+171,69,FALSE,detections_classification
 172,69,FALSE,detections_classification
 173,69,TRUE,detections_classification
 174,69,TRUE,detections_classification
@@ -15822,6 +15982,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -86,70,TRUE,detections_classification
 -85,70,TRUE,detections_classification
 -84,70,TRUE,detections_classification
+-83,70,TRUE,detections_classification
 -82,70,TRUE,detections_classification
 -81,70,TRUE,detections_classification
 2,70,TRUE,detections_classification
@@ -15878,6 +16039,7 @@ lon_bin,lat_bin,offshore_pixel,model
 67,70,FALSE,detections_classification
 73,70,FALSE,detections_classification
 74,70,FALSE,detections_classification
+77,70,TRUE,detections_classification
 78,70,TRUE,detections_classification
 130,70,FALSE,detections_classification
 131,70,TRUE,detections_classification
@@ -15999,8 +16161,10 @@ lon_bin,lat_bin,offshore_pixel,model
 137,71,FALSE,detections_classification
 138,71,FALSE,detections_classification
 139,71,TRUE,detections_classification
+144,71,TRUE,detections_classification
 145,71,TRUE,detections_classification
 146,71,TRUE,detections_classification
+148,71,TRUE,detections_classification
 149,71,TRUE,detections_classification
 150,71,TRUE,detections_classification
 151,71,TRUE,detections_classification
@@ -16076,6 +16240,7 @@ lon_bin,lat_bin,offshore_pixel,model
 120,72,TRUE,detections_classification
 121,72,TRUE,detections_classification
 122,72,TRUE,detections_classification
+123,72,TRUE,detections_classification
 128,72,FALSE,detections_classification
 129,72,FALSE,detections_classification
 130,72,FALSE,detections_classification
@@ -16355,6 +16520,7 @@ lon_bin,lat_bin,offshore_pixel,model
 93,75,TRUE,detections_classification
 95,75,TRUE,detections_classification
 96,75,TRUE,detections_classification
+97,75,TRUE,detections_classification
 112,75,TRUE,detections_classification
 113,75,TRUE,detections_classification
 114,75,TRUE,detections_classification
@@ -16416,6 +16582,8 @@ lon_bin,lat_bin,offshore_pixel,model
 98,76,TRUE,detections_classification
 99,76,TRUE,detections_classification
 100,76,TRUE,detections_classification
+101,76,TRUE,detections_classification
+105,76,TRUE,detections_classification
 106,76,TRUE,detections_classification
 107,76,TRUE,detections_classification
 108,76,TRUE,detections_classification
@@ -16864,6 +17032,7 @@ lon_bin,lat_bin,offshore_pixel,model
 144,-9,FALSE,detections_classification
 145,-9,FALSE,detections_classification
 146,-9,FALSE,detections_classification
+147,-9,TRUE,detections_classification
 148,-9,FALSE,detections_classification
 149,-9,FALSE,detections_classification
 150,-9,TRUE,detections_classification
@@ -16890,9 +17059,11 @@ lon_bin,lat_bin,offshore_pixel,model
 136,-8,TRUE,detections_classification
 137,-8,FALSE,detections_classification
 138,-8,FALSE,detections_classification
+139,-8,FALSE,detections_classification
 143,-8,FALSE,detections_classification
 144,-8,FALSE,detections_classification
 145,-8,FALSE,detections_classification
+146,-8,FALSE,detections_classification
 147,-8,FALSE,detections_classification
 148,-8,TRUE,detections_classification
 149,-8,FALSE,detections_classification
@@ -17180,6 +17351,7 @@ lon_bin,lat_bin,offshore_pixel,model
 129,-2,FALSE,detections_classification
 130,-2,FALSE,detections_classification
 131,-2,FALSE,detections_classification
+132,-2,TRUE,detections_classification
 134,-2,FALSE,detections_classification
 135,-2,FALSE,detections_classification
 136,-2,FALSE,detections_classification
@@ -18419,6 +18591,8 @@ lon_bin,lat_bin,offshore_pixel,model
 155,57,TRUE,detections_classification
 156,57,FALSE,detections_classification
 157,57,FALSE,detections_classification
+158,57,FALSE,detections_classification
+161,57,FALSE,detections_classification
 162,57,FALSE,detections_classification
 163,57,FALSE,detections_classification
 164,57,TRUE,detections_classification
@@ -18549,6 +18723,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -12,67,TRUE,detections_classification
 -138,68,TRUE,detections_classification
 -137,68,TRUE,detections_classification
+-136,68,FALSE,detections_classification
 -15,68,TRUE,detections_classification
 -142,69,TRUE,detections_classification
 -141,69,TRUE,detections_classification
@@ -19825,6 +20000,7 @@ lon_bin,lat_bin,offshore_pixel,model
 14,78,FALSE,detections_classification
 15,78,FALSE,detections_classification
 16,78,FALSE,detections_classification
+17,78,FALSE,detections_classification
 18,78,FALSE,detections_classification
 19,78,FALSE,detections_classification
 20,78,FALSE,detections_classification
@@ -23870,6 +24046,125 @@ lon_bin,lat_bin,offshore_pixel,model
 -172,-12,TRUE,detections_classification
 -171,-12,TRUE,detections_classification
 83,8,TRUE,detections_classification
+-99,-12,TRUE,detections_classification
+-98,-12,TRUE,detections_classification
+-100,-11,TRUE,detections_classification
+-99,-11,TRUE,detections_classification
+-98,-11,TRUE,detections_classification
+-97,-11,TRUE,detections_classification
+-92,-11,TRUE,detections_classification
+-91,-11,TRUE,detections_classification
+-100,-10,TRUE,detections_classification
+-99,-10,TRUE,detections_classification
+-98,-10,TRUE,detections_classification
+-97,-10,TRUE,detections_classification
+-92,-10,TRUE,detections_classification
+-91,-10,TRUE,detections_classification
+-100,-9,TRUE,detections_classification
+-99,-9,TRUE,detections_classification
+-98,-9,TRUE,detections_classification
+-97,-9,TRUE,detections_classification
+-99,-8,TRUE,detections_classification
+-98,-8,TRUE,detections_classification
+-97,-8,TRUE,detections_classification
+-99,-7,TRUE,detections_classification
+-98,-7,TRUE,detections_classification
+-97,-7,TRUE,detections_classification
+-99,-6,TRUE,detections_classification
+-98,-6,TRUE,detections_classification
+-99,-5,TRUE,detections_classification
+-98,-5,TRUE,detections_classification
+-98,-4,TRUE,detections_classification
+-97,-4,TRUE,detections_classification
+-96,-4,TRUE,detections_classification
+-98,-3,TRUE,detections_classification
+-97,-3,TRUE,detections_classification
+-96,-3,TRUE,detections_classification
+-98,-2,TRUE,detections_classification
+-97,-2,TRUE,detections_classification
+-96,-2,TRUE,detections_classification
+-95,-2,TRUE,detections_classification
+-98,-1,TRUE,detections_classification
+-97,-1,TRUE,detections_classification
+-96,-1,TRUE,detections_classification
+-95,-1,TRUE,detections_classification
+-98,0,TRUE,detections_classification
+-97,0,TRUE,detections_classification
+-96,0,TRUE,detections_classification
+-95,0,TRUE,detections_classification
+-95,1,TRUE,detections_classification
+-95,2,TRUE,detections_classification
+-95,3,TRUE,detections_classification
+-94,3,TRUE,detections_classification
+-95,4,TRUE,detections_classification
+-94,4,TRUE,detections_classification
+-95,5,TRUE,detections_classification
+-94,5,TRUE,detections_classification
+-95,6,TRUE,detections_classification
+-94,6,TRUE,detections_classification
+-95,7,TRUE,detections_classification
+-94,7,TRUE,detections_classification
+-95,8,TRUE,detections_classification
+-94,8,TRUE,detections_classification
+-93,8,TRUE,detections_classification
+-96,9,TRUE,detections_classification
+-95,9,TRUE,detections_classification
+-22,77,TRUE,detections_classification
+-21,77,TRUE,detections_classification
+-22,78,TRUE,detections_classification
+-21,78,TRUE,detections_classification
+-20,78,TRUE,detections_classification
+-45,-79,TRUE,detections_classification
+-44,-79,TRUE,detections_classification
+-43,-79,TRUE,detections_classification
+-51,-78,TRUE,detections_classification
+-50,-78,TRUE,detections_classification
+-49,-78,TRUE,detections_classification
+-48,-78,TRUE,detections_classification
+-47,-78,TRUE,detections_classification
+-46,-78,TRUE,detections_classification
+-45,-78,TRUE,detections_classification
+-44,-78,TRUE,detections_classification
+-43,-78,TRUE,detections_classification
+-53,-77,TRUE,detections_classification
+-52,-77,TRUE,detections_classification
+-51,-77,TRUE,detections_classification
+-50,-77,TRUE,detections_classification
+-49,-77,TRUE,detections_classification
+-48,-77,TRUE,detections_classification
+-47,-77,TRUE,detections_classification
+-46,-77,TRUE,detections_classification
+-45,-77,TRUE,detections_classification
+-44,-77,TRUE,detections_classification
+91,15,TRUE,detections_classification
+91,16,TRUE,detections_classification
+-27,64,TRUE,detections_classification
+-27,65,FALSE,detections_classification
+-26,65,FALSE,detections_classification
+117,-37,TRUE,detections_classification
+118,-37,TRUE,detections_classification
+-147,-18,FALSE,detections_classification
+-148,-17,FALSE,detections_classification
+-147,-17,FALSE,detections_classification
+-146,-17,FALSE,detections_classification
+-145,-17,FALSE,detections_classification
+-148,-16,FALSE,detections_classification
+-147,-16,FALSE,detections_classification
+-146,-16,FALSE,detections_classification
+-145,-16,FALSE,detections_classification
+-148,-15,FALSE,detections_classification
+-147,-15,FALSE,detections_classification
+-146,-15,FALSE,detections_classification
+-148,-14,FALSE,detections_classification
+-147,-14,FALSE,detections_classification
+-146,-14,FALSE,detections_classification
+-151,-16,FALSE,detections_classification
+-150,-16,FALSE,detections_classification
+-149,-16,FALSE,detections_classification
+-150,-15,FALSE,detections_classification
+-149,-15,FALSE,detections_classification
+-150,-14,TRUE,detections_classification
+-149,-14,TRUE,detections_classification
 -72,-56,TRUE,detections_regression
 -71,-56,FALSE,detections_regression
 -70,-56,FALSE,detections_regression
@@ -23888,6 +24183,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -60,-53,FALSE,detections_regression
 -76,-52,TRUE,detections_regression
 -75,-52,TRUE,detections_regression
+-74,-52,FALSE,detections_regression
 -73,-52,FALSE,detections_regression
 -58,-52,FALSE,detections_regression
 -75,-51,FALSE,detections_regression
@@ -23907,6 +24203,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -76,-46,FALSE,detections_regression
 -75,-46,FALSE,detections_regression
 -74,-46,FALSE,detections_regression
+-73,-46,FALSE,detections_regression
 -68,-46,FALSE,detections_regression
 -67,-46,FALSE,detections_regression
 -66,-46,FALSE,detections_regression
@@ -24000,6 +24297,7 @@ lon_bin,lat_bin,offshore_pixel,model
 20,-38,TRUE,detections_regression
 139,-38,FALSE,detections_regression
 140,-38,FALSE,detections_regression
+147,-38,FALSE,detections_regression
 148,-38,FALSE,detections_regression
 150,-38,FALSE,detections_regression
 173,-38,FALSE,detections_regression
@@ -24105,12 +24403,14 @@ lon_bin,lat_bin,offshore_pixel,model
 133,-34,FALSE,detections_regression
 134,-34,FALSE,detections_regression
 137,-34,FALSE,detections_regression
+138,-34,FALSE,detections_regression
 151,-34,FALSE,detections_regression
 152,-34,FALSE,detections_regression
 -73,-33,FALSE,detections_regression
 -72,-33,FALSE,detections_regression
 -53,-33,FALSE,detections_regression
 -52,-33,FALSE,detections_regression
+15,-33,TRUE,detections_regression
 16,-33,FALSE,detections_regression
 17,-33,FALSE,detections_regression
 18,-33,FALSE,detections_regression
@@ -24380,6 +24680,7 @@ lon_bin,lat_bin,offshore_pixel,model
 57,-16,TRUE,detections_regression
 123,-16,FALSE,detections_regression
 124,-16,FALSE,detections_regression
+128,-16,FALSE,detections_regression
 136,-16,FALSE,detections_regression
 137,-16,FALSE,detections_regression
 140,-16,TRUE,detections_regression
@@ -24463,6 +24764,7 @@ lon_bin,lat_bin,offshore_pixel,model
 121,-10,FALSE,detections_regression
 142,-10,FALSE,detections_regression
 143,-10,TRUE,detections_regression
+157,-10,FALSE,detections_regression
 158,-10,FALSE,detections_regression
 159,-10,FALSE,detections_regression
 160,-10,FALSE,detections_regression
@@ -24581,6 +24883,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -41,-3,TRUE,detections_regression
 -40,-3,FALSE,detections_regression
 -39,-3,FALSE,detections_regression
+-38,-3,FALSE,detections_regression
 7,-3,TRUE,detections_regression
 8,-3,FALSE,detections_regression
 9,-3,FALSE,detections_regression
@@ -24929,6 +25232,7 @@ lon_bin,lat_bin,offshore_pixel,model
 102,9,FALSE,detections_regression
 103,9,FALSE,detections_regression
 104,9,FALSE,detections_regression
+105,9,FALSE,detections_regression
 106,9,FALSE,detections_regression
 107,9,FALSE,detections_regression
 108,9,TRUE,detections_regression
@@ -24983,6 +25287,7 @@ lon_bin,lat_bin,offshore_pixel,model
 102,10,FALSE,detections_regression
 103,10,FALSE,detections_regression
 104,10,FALSE,detections_regression
+106,10,FALSE,detections_regression
 107,10,FALSE,detections_regression
 108,10,FALSE,detections_regression
 117,10,FALSE,detections_regression
@@ -25120,6 +25425,7 @@ lon_bin,lat_bin,offshore_pixel,model
 96,13,FALSE,detections_regression
 97,13,FALSE,detections_regression
 98,13,TRUE,detections_regression
+99,13,FALSE,detections_regression
 100,13,FALSE,detections_regression
 109,13,FALSE,detections_regression
 119,13,FALSE,detections_regression
@@ -25414,6 +25720,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -87,21,FALSE,detections_regression
 -86,21,FALSE,detections_regression
 -85,21,TRUE,detections_regression
+-64,21,TRUE,detections_regression
 -19,21,FALSE,detections_regression
 -18,21,FALSE,detections_regression
 -17,21,FALSE,detections_regression
@@ -25578,6 +25885,7 @@ lon_bin,lat_bin,offshore_pixel,model
 56,25,FALSE,detections_regression
 57,25,FALSE,detections_regression
 58,25,FALSE,detections_regression
+118,25,FALSE,detections_regression
 119,25,FALSE,detections_regression
 120,25,FALSE,detections_regression
 121,25,FALSE,detections_regression
@@ -25635,6 +25943,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -16,27,FALSE,detections_regression
 -15,27,FALSE,detections_regression
 -14,27,FALSE,detections_regression
+-13,27,FALSE,detections_regression
 33,27,FALSE,detections_regression
 34,27,FALSE,detections_regression
 35,27,FALSE,detections_regression
@@ -25702,6 +26011,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -94,29,FALSE,detections_regression
 -93,29,FALSE,detections_regression
 -92,29,FALSE,detections_regression
+-91,29,FALSE,detections_regression
 -90,29,FALSE,detections_regression
 -89,29,FALSE,detections_regression
 -87,29,FALSE,detections_regression
@@ -25761,7 +26071,10 @@ lon_bin,lat_bin,offshore_pixel,model
 18,30,FALSE,detections_regression
 19,30,FALSE,detections_regression
 20,30,FALSE,detections_regression
+28,30,FALSE,detections_regression
 29,30,FALSE,detections_regression
+32,30,FALSE,detections_regression
+48,30,FALSE,detections_regression
 49,30,FALSE,detections_regression
 121,30,FALSE,detections_regression
 122,30,FALSE,detections_regression
@@ -25816,6 +26129,7 @@ lon_bin,lat_bin,offshore_pixel,model
 131,31,FALSE,detections_regression
 132,31,FALSE,detections_regression
 133,31,TRUE,detections_regression
+-122,32,TRUE,detections_regression
 -120,32,FALSE,detections_regression
 -119,32,FALSE,detections_regression
 -118,32,FALSE,detections_regression
@@ -25854,6 +26168,7 @@ lon_bin,lat_bin,offshore_pixel,model
 32,32,FALSE,detections_regression
 33,32,FALSE,detections_regression
 34,32,FALSE,detections_regression
+35,32,FALSE,detections_regression
 120,32,FALSE,detections_regression
 121,32,FALSE,detections_regression
 122,32,FALSE,detections_regression
@@ -26161,8 +26476,10 @@ lon_bin,lat_bin,offshore_pixel,model
 -64,37,TRUE,detections_regression
 -63,37,TRUE,detections_regression
 -62,37,TRUE,detections_regression
+-29,37,FALSE,detections_regression
 -28,37,FALSE,detections_regression
 -16,37,TRUE,detections_regression
+-15,37,TRUE,detections_regression
 -14,37,TRUE,detections_regression
 -13,37,TRUE,detections_regression
 -12,37,TRUE,detections_regression
@@ -26211,6 +26528,7 @@ lon_bin,lat_bin,offshore_pixel,model
 131,37,FALSE,detections_regression
 137,37,FALSE,detections_regression
 138,37,FALSE,detections_regression
+139,37,FALSE,detections_regression
 140,37,FALSE,detections_regression
 141,37,FALSE,detections_regression
 142,37,FALSE,detections_regression
@@ -26226,6 +26544,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -29,38,FALSE,detections_regression
 -28,38,FALSE,detections_regression
 -27,38,FALSE,detections_regression
+-15,38,TRUE,detections_regression
 -13,38,TRUE,detections_regression
 -12,38,TRUE,detections_regression
 -11,38,FALSE,detections_regression
@@ -26688,6 +27007,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -3,47,FALSE,detections_regression
 37,47,FALSE,detections_regression
 38,47,FALSE,detections_regression
+39,47,FALSE,detections_regression
 152,47,TRUE,detections_regression
 153,47,TRUE,detections_regression
 154,47,TRUE,detections_regression
@@ -26773,6 +27093,7 @@ lon_bin,lat_bin,offshore_pixel,model
 1,51,FALSE,detections_regression
 2,51,FALSE,detections_regression
 3,51,FALSE,detections_regression
+4,51,FALSE,detections_regression
 157,51,FALSE,detections_regression
 -175,52,FALSE,detections_regression
 -171,52,TRUE,detections_regression
@@ -26792,6 +27113,7 @@ lon_bin,lat_bin,offshore_pixel,model
 2,52,FALSE,detections_regression
 3,52,FALSE,detections_regression
 4,52,FALSE,detections_regression
+5,52,FALSE,detections_regression
 -169,53,FALSE,detections_regression
 -167,53,FALSE,detections_regression
 -134,53,FALSE,detections_regression
@@ -26816,6 +27138,7 @@ lon_bin,lat_bin,offshore_pixel,model
 7,53,FALSE,detections_regression
 8,53,FALSE,detections_regression
 9,53,FALSE,detections_regression
+10,53,FALSE,detections_regression
 11,53,FALSE,detections_regression
 -167,54,FALSE,detections_regression
 -166,54,FALSE,detections_regression
@@ -26947,6 +27270,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -8,57,FALSE,detections_regression
 -7,57,FALSE,detections_regression
 -6,57,FALSE,detections_regression
+-5,57,FALSE,detections_regression
 -4,57,FALSE,detections_regression
 -3,57,FALSE,detections_regression
 -2,57,FALSE,detections_regression
@@ -27031,6 +27355,7 @@ lon_bin,lat_bin,offshore_pixel,model
 3,59,FALSE,detections_regression
 4,59,FALSE,detections_regression
 5,59,FALSE,detections_regression
+6,59,FALSE,detections_regression
 10,59,FALSE,detections_regression
 19,59,FALSE,detections_regression
 20,59,FALSE,detections_regression
@@ -27169,6 +27494,7 @@ lon_bin,lat_bin,offshore_pixel,model
 13,67,FALSE,detections_regression
 14,67,FALSE,detections_regression
 15,67,FALSE,detections_regression
+16,67,FALSE,detections_regression
 3,68,TRUE,detections_regression
 5,68,TRUE,detections_regression
 8,68,TRUE,detections_regression
@@ -27307,6 +27633,8 @@ lon_bin,lat_bin,offshore_pixel,model
 -72,-53,FALSE,detections_regression
 -70,-53,FALSE,detections_regression
 -69,-53,FALSE,detections_regression
+-68,-53,FALSE,detections_regression
+-77,-52,TRUE,detections_regression
 -70,-52,FALSE,detections_regression
 -69,-52,FALSE,detections_regression
 -76,-51,TRUE,detections_regression
@@ -27409,7 +27737,6 @@ lon_bin,lat_bin,offshore_pixel,model
 121,-34,FALSE,detections_regression
 136,-34,FALSE,detections_regression
 171,-34,TRUE,detections_regression
-15,-33,TRUE,detections_regression
 132,-33,FALSE,detections_regression
 18,-32,FALSE,detections_regression
 128,-32,TRUE,detections_regression
@@ -27423,6 +27750,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -45,-27,FALSE,detections_regression
 -43,-27,FALSE,detections_regression
 15,-27,FALSE,detections_regression
+33,-27,FALSE,detections_regression
 113,-27,FALSE,detections_regression
 34,-26,TRUE,detections_regression
 35,-26,TRUE,detections_regression
@@ -27437,6 +27765,7 @@ lon_bin,lat_bin,offshore_pixel,model
 53,-24,TRUE,detections_regression
 55,-24,TRUE,detections_regression
 153,-24,FALSE,detections_regression
+-45,-23,FALSE,detections_regression
 56,-23,FALSE,detections_regression
 149,-23,FALSE,detections_regression
 -72,-22,FALSE,detections_regression
@@ -27546,6 +27875,7 @@ lon_bin,lat_bin,offshore_pixel,model
 135,-12,FALSE,detections_regression
 143,-12,FALSE,detections_regression
 -78,-11,FALSE,detections_regression
+-35,-11,FALSE,detections_regression
 12,-11,FALSE,detections_regression
 119,-11,FALSE,detections_regression
 120,-11,FALSE,detections_regression
@@ -27580,6 +27910,7 @@ lon_bin,lat_bin,offshore_pixel,model
 149,-10,FALSE,detections_regression
 150,-10,FALSE,detections_regression
 151,-10,FALSE,detections_regression
+161,-10,FALSE,detections_regression
 -81,-9,FALSE,detections_regression
 -34,-9,FALSE,detections_regression
 39,-9,TRUE,detections_regression
@@ -27633,6 +27964,7 @@ lon_bin,lat_bin,offshore_pixel,model
 136,-8,TRUE,detections_regression
 137,-8,FALSE,detections_regression
 138,-8,FALSE,detections_regression
+139,-8,FALSE,detections_regression
 143,-8,FALSE,detections_regression
 144,-8,FALSE,detections_regression
 145,-8,FALSE,detections_regression
@@ -27942,6 +28274,7 @@ lon_bin,lat_bin,offshore_pixel,model
 3,2,TRUE,detections_regression
 4,2,FALSE,detections_regression
 5,2,FALSE,detections_regression
+6,2,FALSE,detections_regression
 7,2,FALSE,detections_regression
 45,2,FALSE,detections_regression
 50,2,TRUE,detections_regression
@@ -28055,6 +28388,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -78,9,FALSE,detections_regression
 -60,9,FALSE,detections_regression
 -58,9,TRUE,detections_regression
+-55,9,TRUE,detections_regression
 -54,9,TRUE,detections_regression
 -53,9,TRUE,detections_regression
 -52,9,TRUE,detections_regression
@@ -28073,6 +28407,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -19,10,TRUE,detections_regression
 45,10,FALSE,detections_regression
 81,10,TRUE,detections_regression
+105,10,FALSE,detections_regression
 116,10,FALSE,detections_regression
 127,10,TRUE,detections_regression
 -94,11,TRUE,detections_regression
@@ -28387,7 +28722,6 @@ lon_bin,lat_bin,offshore_pixel,model
 -69,21,TRUE,detections_regression
 -68,21,TRUE,detections_regression
 -67,21,TRUE,detections_regression
--64,21,TRUE,detections_regression
 -62,21,TRUE,detections_regression
 -21,21,TRUE,detections_regression
 37,21,FALSE,detections_regression
@@ -28422,6 +28756,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -70,22,TRUE,detections_regression
 -68,22,TRUE,detections_regression
 -21,22,TRUE,detections_regression
+89,22,FALSE,detections_regression
 -164,23,TRUE,detections_regression
 -157,23,TRUE,detections_regression
 -155,23,TRUE,detections_regression
@@ -28630,6 +28965,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -30,35,TRUE,detections_regression
 121,35,FALSE,detections_regression
 122,35,FALSE,detections_regression
+136,35,FALSE,detections_regression
 -75,36,FALSE,detections_regression
 -63,36,TRUE,detections_regression
 -62,36,TRUE,detections_regression
@@ -28640,8 +28976,6 @@ lon_bin,lat_bin,offshore_pixel,model
 -15,36,TRUE,detections_regression
 -69,37,TRUE,detections_regression
 -30,37,FALSE,detections_regression
--29,37,FALSE,detections_regression
--15,37,TRUE,detections_regression
 14,37,FALSE,detections_regression
 28,37,FALSE,detections_regression
 126,37,FALSE,detections_regression
@@ -28721,6 +29055,7 @@ lon_bin,lat_bin,offshore_pixel,model
 151,47,TRUE,detections_regression
 -127,48,FALSE,detections_regression
 -17,48,TRUE,detections_regression
+-16,48,TRUE,detections_regression
 -15,48,TRUE,detections_regression
 -14,48,TRUE,detections_regression
 153,48,TRUE,detections_regression
@@ -28805,6 +29140,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -18,60,TRUE,detections_regression
 -14,60,TRUE,detections_regression
 -149,61,FALSE,detections_regression
+-148,61,FALSE,detections_regression
 -17,61,TRUE,detections_regression
 -16,61,TRUE,detections_regression
 6,61,FALSE,detections_regression
@@ -28818,6 +29154,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -2,62,TRUE,detections_regression
 -1,62,FALSE,detections_regression
 2,62,FALSE,detections_regression
+8,62,FALSE,detections_regression
 -24,63,FALSE,detections_regression
 -20,63,FALSE,detections_regression
 -19,63,FALSE,detections_regression
@@ -28851,6 +29188,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -13,66,FALSE,detections_regression
 -10,66,TRUE,detections_regression
 -15,67,FALSE,detections_regression
+33,68,FALSE,detections_regression
 8,69,TRUE,detections_regression
 10,69,TRUE,detections_regression
 11,69,TRUE,detections_regression
@@ -28860,6 +29198,7 @@ lon_bin,lat_bin,offshore_pixel,model
 11,70,TRUE,detections_regression
 12,70,TRUE,detections_regression
 14,70,FALSE,detections_regression
+37,70,TRUE,detections_regression
 10,71,TRUE,detections_regression
 12,71,TRUE,detections_regression
 36,71,TRUE,detections_regression
@@ -28893,7 +29232,6 @@ lon_bin,lat_bin,offshore_pixel,model
 -64,-55,TRUE,detections_regression
 -67,-54,FALSE,detections_regression
 -65,-54,TRUE,detections_regression
--68,-53,FALSE,detections_regression
 -61,-53,TRUE,detections_regression
 -59,-53,FALSE,detections_regression
 -68,-52,FALSE,detections_regression
@@ -28903,6 +29241,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -60,-52,FALSE,detections_regression
 -59,-52,FALSE,detections_regression
 -77,-51,TRUE,detections_regression
+-66,-51,TRUE,detections_regression
 -65,-51,TRUE,detections_regression
 -61,-51,TRUE,detections_regression
 -60,-51,FALSE,detections_regression
@@ -28971,6 +29310,7 @@ lon_bin,lat_bin,offshore_pixel,model
 151,-21,TRUE,detections_regression
 48,-20,TRUE,detections_regression
 49,-20,FALSE,detections_regression
+56,-20,FALSE,detections_regression
 -174,-19,FALSE,detections_regression
 -37,-19,TRUE,detections_regression
 12,-19,TRUE,detections_regression
@@ -29035,7 +29375,6 @@ lon_bin,lat_bin,offshore_pixel,model
 141,-12,FALSE,detections_regression
 148,-12,TRUE,detections_regression
 149,-12,FALSE,detections_regression
--35,-11,FALSE,detections_regression
 -34,-11,TRUE,detections_regression
 10,-11,TRUE,detections_regression
 113,-11,TRUE,detections_regression
@@ -29043,6 +29382,7 @@ lon_bin,lat_bin,offshore_pixel,model
 126,-11,FALSE,detections_regression
 127,-11,FALSE,detections_regression
 128,-11,TRUE,detections_regression
+129,-11,TRUE,detections_regression
 130,-11,TRUE,detections_regression
 132,-11,TRUE,detections_regression
 135,-11,TRUE,detections_regression
@@ -29067,8 +29407,6 @@ lon_bin,lat_bin,offshore_pixel,model
 137,-10,TRUE,detections_regression
 138,-10,TRUE,detections_regression
 152,-10,TRUE,detections_regression
-157,-10,FALSE,detections_regression
-161,-10,FALSE,detections_regression
 -36,-9,FALSE,detections_regression
 127,-9,TRUE,detections_regression
 128,-9,TRUE,detections_regression
@@ -29108,8 +29446,8 @@ lon_bin,lat_bin,offshore_pixel,model
 -34,-4,FALSE,detections_regression
 41,-4,TRUE,detections_regression
 153,-4,FALSE,detections_regression
--38,-3,FALSE,detections_regression
 5,-3,TRUE,detections_regression
+10,-3,FALSE,detections_regression
 145,-3,FALSE,detections_regression
 147,-3,FALSE,detections_regression
 149,-3,FALSE,detections_regression
@@ -29173,7 +29511,6 @@ lon_bin,lat_bin,offshore_pixel,model
 -8,2,TRUE,detections_regression
 -5,2,TRUE,detections_regression
 1,2,TRUE,detections_regression
-6,2,FALSE,detections_regression
 47,2,TRUE,detections_regression
 94,2,TRUE,detections_regression
 95,2,TRUE,detections_regression
@@ -29235,7 +29572,6 @@ lon_bin,lat_bin,offshore_pixel,model
 97,8,FALSE,detections_regression
 127,8,TRUE,detections_regression
 -84,9,FALSE,detections_regression
--55,9,TRUE,detections_regression
 -51,9,TRUE,detections_regression
 -19,9,TRUE,detections_regression
 51,9,TRUE,detections_regression
@@ -29279,6 +29615,7 @@ lon_bin,lat_bin,offshore_pixel,model
 125,13,TRUE,detections_regression
 -98,14,TRUE,detections_regression
 -97,14,FALSE,detections_regression
+-95,14,TRUE,detections_regression
 -80,14,TRUE,detections_regression
 -79,14,TRUE,detections_regression
 -78,14,TRUE,detections_regression
@@ -29450,11 +29787,11 @@ lon_bin,lat_bin,offshore_pixel,model
 -68,37,TRUE,detections_regression
 -18,37,TRUE,detections_regression
 -17,37,TRUE,detections_regression
+118,37,FALSE,detections_regression
 119,37,FALSE,detections_regression
 -69,38,TRUE,detections_regression
 -61,38,TRUE,detections_regression
 -60,38,TRUE,detections_regression
--15,38,TRUE,detections_regression
 -14,38,TRUE,detections_regression
 117,38,FALSE,detections_regression
 118,38,FALSE,detections_regression
@@ -29474,6 +29811,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -66,40,TRUE,detections_regression
 -15,40,TRUE,detections_regression
 39,40,FALSE,detections_regression
+119,40,FALSE,detections_regression
 120,40,FALSE,detections_regression
 131,40,TRUE,detections_regression
 -126,41,FALSE,detections_regression
@@ -29611,15 +29949,16 @@ lon_bin,lat_bin,offshore_pixel,model
 8,74,TRUE,detections_regression
 9,74,TRUE,detections_regression
 25,74,TRUE,detections_regression
+34,74,TRUE,detections_regression
 37,74,TRUE,detections_regression
 -72,-57,TRUE,detections_regression
 -70,-55,FALSE,detections_regression
 -69,-55,FALSE,detections_regression
 -69,-54,FALSE,detections_regression
 -74,-51,TRUE,detections_regression
--66,-51,TRUE,detections_regression
 -76,-49,FALSE,detections_regression
 -64,-46,TRUE,detections_regression
+-66,-41,FALSE,detections_regression
 -61,-41,FALSE,detections_regression
 19,-40,TRUE,detections_regression
 18,-39,TRUE,detections_regression
@@ -29637,7 +29976,6 @@ lon_bin,lat_bin,offshore_pixel,model
 -71,-28,FALSE,detections_regression
 -43,-28,TRUE,detections_regression
 114,-28,FALSE,detections_regression
-33,-27,FALSE,detections_regression
 47,-26,FALSE,detections_regression
 152,-26,FALSE,detections_regression
 -72,-25,FALSE,detections_regression
@@ -29759,6 +30097,7 @@ lon_bin,lat_bin,offshore_pixel,model
 93,1,TRUE,detections_regression
 130,1,FALSE,detections_regression
 -7,2,TRUE,detections_regression
+99,2,FALSE,detections_regression
 120,2,TRUE,detections_regression
 121,2,TRUE,detections_regression
 129,2,TRUE,detections_regression
@@ -29798,6 +30137,7 @@ lon_bin,lat_bin,offshore_pixel,model
 89,13,TRUE,detections_regression
 110,13,FALSE,detections_regression
 -106,14,TRUE,detections_regression
+40,14,TRUE,detections_regression
 -105,15,TRUE,detections_regression
 -101,15,FALSE,detections_regression
 -75,15,TRUE,detections_regression
@@ -29842,11 +30182,11 @@ lon_bin,lat_bin,offshore_pixel,model
 -122,30,TRUE,detections_regression
 -18,30,TRUE,detections_regression
 -75,31,TRUE,detections_regression
--122,32,TRUE,detections_regression
 -121,32,TRUE,detections_regression
 -74,32,TRUE,detections_regression
 -72,32,TRUE,detections_regression
 -71,33,TRUE,detections_regression
+-126,35,TRUE,detections_regression
 -74,36,TRUE,detections_regression
 -127,37,TRUE,detections_regression
 -66,37,TRUE,detections_regression
@@ -29856,9 +30196,9 @@ lon_bin,lat_bin,offshore_pixel,model
 142,38,FALSE,detections_regression
 125,39,FALSE,detections_regression
 -127,40,TRUE,detections_regression
-119,40,FALSE,detections_regression
 121,40,FALSE,detections_regression
 122,40,FALSE,detections_regression
+127,40,TRUE,detections_regression
 132,40,TRUE,detections_regression
 -61,41,TRUE,detections_regression
 -57,41,TRUE,detections_regression
@@ -29960,7 +30300,6 @@ lon_bin,lat_bin,offshore_pixel,model
 1,66,TRUE,detections_regression
 6,68,TRUE,detections_regression
 7,68,TRUE,detections_regression
-37,70,TRUE,detections_regression
 38,70,TRUE,detections_regression
 9,71,TRUE,detections_regression
 11,72,TRUE,detections_regression
@@ -29968,9 +30307,9 @@ lon_bin,lat_bin,offshore_pixel,model
 6,73,TRUE,detections_regression
 40,73,TRUE,detections_regression
 13,74,TRUE,detections_regression
+35,74,TRUE,detections_regression
 -66,-54,TRUE,detections_regression
 -64,-54,TRUE,detections_regression
--77,-52,TRUE,detections_regression
 -77,-49,TRUE,detections_regression
 -77,-48,TRUE,detections_regression
 -65,-46,FALSE,detections_regression
@@ -29999,6 +30338,7 @@ lon_bin,lat_bin,offshore_pixel,model
 49,-25,TRUE,detections_regression
 41,-24,TRUE,detections_regression
 58,-24,TRUE,detections_regression
+-39,-23,FALSE,detections_regression
 36,-23,TRUE,detections_regression
 41,-23,TRUE,detections_regression
 49,-23,TRUE,detections_regression
@@ -30042,7 +30382,6 @@ lon_bin,lat_bin,offshore_pixel,model
 150,-12,FALSE,detections_regression
 167,-12,TRUE,detections_regression
 112,-11,TRUE,detections_regression
-129,-11,TRUE,detections_regression
 134,-11,TRUE,detections_regression
 140,-11,TRUE,detections_regression
 158,-11,TRUE,detections_regression
@@ -30128,6 +30467,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -21,17,TRUE,detections_regression
 -155,18,FALSE,detections_regression
 -110,18,TRUE,detections_regression
+73,18,FALSE,detections_regression
 88,18,TRUE,detections_regression
 89,18,TRUE,detections_regression
 -154,19,TRUE,detections_regression
@@ -30141,6 +30481,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -70,24,TRUE,detections_regression
 -164,25,TRUE,detections_regression
 -75,25,TRUE,detections_regression
+-114,27,FALSE,detections_regression
 -19,31,TRUE,detections_regression
 -19,32,FALSE,detections_regression
 -29,33,TRUE,detections_regression
@@ -30185,6 +30526,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -64,45,FALSE,detections_regression
 -63,45,FALSE,detections_regression
 -29,45,TRUE,detections_regression
+38,45,FALSE,detections_regression
 143,45,FALSE,detections_regression
 144,45,FALSE,detections_regression
 147,45,FALSE,detections_regression
@@ -30244,6 +30586,7 @@ lon_bin,lat_bin,offshore_pixel,model
 172,53,TRUE,detections_regression
 174,53,TRUE,detections_regression
 -169,54,FALSE,detections_regression
+-130,54,FALSE,detections_regression
 155,54,TRUE,detections_regression
 160,54,FALSE,detections_regression
 161,54,TRUE,detections_regression
@@ -30318,6 +30661,7 @@ lon_bin,lat_bin,offshore_pixel,model
 10,74,TRUE,detections_regression
 26,74,TRUE,detections_regression
 -77,-53,TRUE,detections_regression
+-69,-50,FALSE,detections_regression
 -74,-49,FALSE,detections_regression
 164,-45,TRUE,detections_regression
 -76,-43,TRUE,detections_regression
@@ -30353,7 +30697,6 @@ lon_bin,lat_bin,offshore_pixel,model
 152,-21,TRUE,detections_regression
 163,-21,FALSE,detections_regression
 166,-21,FALSE,detections_regression
-56,-20,FALSE,detections_regression
 -176,-19,FALSE,detections_regression
 39,-19,TRUE,detections_regression
 54,-19,TRUE,detections_regression
@@ -30362,9 +30705,11 @@ lon_bin,lat_bin,offshore_pixel,model
 41,-18,TRUE,detections_regression
 42,-18,TRUE,detections_regression
 54,-18,TRUE,detections_regression
+166,-18,FALSE,detections_regression
 55,-17,TRUE,detections_regression
 58,-17,TRUE,detections_regression
 59,-17,TRUE,detections_regression
+170,-17,TRUE,detections_regression
 44,-16,TRUE,detections_regression
 138,-16,TRUE,detections_regression
 57,-15,TRUE,detections_regression
@@ -30383,6 +30728,7 @@ lon_bin,lat_bin,offshore_pixel,model
 153,-9,TRUE,detections_regression
 155,-9,FALSE,detections_regression
 40,-7,FALSE,detections_regression
+-33,-6,TRUE,detections_regression
 38,-6,FALSE,detections_regression
 5,-4,TRUE,detections_regression
 154,-4,TRUE,detections_regression
@@ -30495,6 +30841,7 @@ lon_bin,lat_bin,offshore_pixel,model
 153,46,TRUE,detections_regression
 -70,47,FALSE,detections_regression
 142,47,FALSE,detections_regression
+-129,48,TRUE,detections_regression
 -70,48,FALSE,detections_regression
 -66,48,FALSE,detections_regression
 -54,48,FALSE,detections_regression
@@ -30572,6 +30919,7 @@ lon_bin,lat_bin,offshore_pixel,model
 163,56,FALSE,detections_regression
 -163,57,TRUE,detections_regression
 -161,57,FALSE,detections_regression
+-17,57,TRUE,detections_regression
 153,57,TRUE,detections_regression
 157,57,FALSE,detections_regression
 -170,58,FALSE,detections_regression
@@ -30698,8 +31046,10 @@ lon_bin,lat_bin,offshore_pixel,model
 14,74,TRUE,detections_regression
 20,74,FALSE,detections_regression
 23,74,TRUE,detections_regression
+24,74,TRUE,detections_regression
+31,74,TRUE,detections_regression
 33,74,TRUE,detections_regression
-34,74,TRUE,detections_regression
+28,75,TRUE,detections_regression
 29,75,TRUE,detections_regression
 -65,-56,TRUE,detections_regression
 23,-38,TRUE,detections_regression
@@ -30736,7 +31086,6 @@ lon_bin,lat_bin,offshore_pixel,model
 11,-11,TRUE,detections_regression
 144,-11,TRUE,detections_regression
 101,-7,TRUE,detections_regression
--33,-6,TRUE,detections_regression
 42,-5,TRUE,detections_regression
 43,-4,TRUE,detections_regression
 149,-2,FALSE,detections_regression
@@ -30765,6 +31114,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -152,18,TRUE,detections_regression
 91,18,FALSE,detections_regression
 -153,20,TRUE,detections_regression
+93,20,FALSE,detections_regression
 -69,23,TRUE,detections_regression
 63,23,TRUE,detections_regression
 -115,24,TRUE,detections_regression
@@ -30806,7 +31156,6 @@ lon_bin,lat_bin,offshore_pixel,model
 143,47,FALSE,detections_regression
 144,47,FALSE,detections_regression
 -134,48,TRUE,detections_regression
--129,48,TRUE,detections_regression
 139,48,FALSE,detections_regression
 145,48,TRUE,detections_regression
 -130,49,FALSE,detections_regression
@@ -30859,7 +31208,6 @@ lon_bin,lat_bin,offshore_pixel,model
 -58,56,TRUE,detections_regression
 -160,57,FALSE,detections_regression
 -158,57,FALSE,detections_regression
--17,57,TRUE,detections_regression
 139,57,TRUE,detections_regression
 155,57,TRUE,detections_regression
 162,57,FALSE,detections_regression
@@ -30904,6 +31252,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -161,63,TRUE,detections_regression
 -14,63,FALSE,detections_regression
 36,63,FALSE,detections_regression
+38,63,FALSE,detections_regression
 -177,64,TRUE,detections_regression
 -176,64,FALSE,detections_regression
 -175,64,FALSE,detections_regression
@@ -30934,6 +31283,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -163,66,FALSE,detections_regression
 -14,66,FALSE,detections_regression
 -2,66,TRUE,detections_regression
+-1,66,TRUE,detections_regression
 0,66,TRUE,detections_regression
 38,66,TRUE,detections_regression
 39,66,TRUE,detections_regression
@@ -30970,7 +31320,6 @@ lon_bin,lat_bin,offshore_pixel,model
 3,72,TRUE,detections_regression
 4,72,TRUE,detections_regression
 38,72,TRUE,detections_regression
-24,74,TRUE,detections_regression
 17,75,FALSE,detections_regression
 22,75,FALSE,detections_regression
 27,75,TRUE,detections_regression
@@ -30980,12 +31329,14 @@ lon_bin,lat_bin,offshore_pixel,model
 144,-43,FALSE,detections_regression
 30,-36,TRUE,detections_regression
 134,-36,FALSE,detections_regression
+155,-29,TRUE,detections_regression
 155,-27,TRUE,detections_regression
 36,-26,TRUE,detections_regression
 -73,-25,TRUE,detections_regression
 56,-25,TRUE,detections_regression
 57,-25,TRUE,detections_regression
 57,-23,TRUE,detections_regression
+58,-23,TRUE,detections_regression
 37,-22,TRUE,detections_regression
 38,-22,TRUE,detections_regression
 43,-22,TRUE,detections_regression
@@ -30995,6 +31346,7 @@ lon_bin,lat_bin,offshore_pixel,model
 40,-19,TRUE,detections_regression
 53,-19,TRUE,detections_regression
 56,-19,TRUE,detections_regression
+58,-19,TRUE,detections_regression
 170,-18,TRUE,detections_regression
 -151,-17,FALSE,detections_regression
 52,-16,TRUE,detections_regression
@@ -31032,6 +31384,7 @@ lon_bin,lat_bin,offshore_pixel,model
 122,20,TRUE,detections_regression
 123,20,TRUE,detections_regression
 -118,22,TRUE,detections_regression
+88,22,FALSE,detections_regression
 -22,23,TRUE,detections_regression
 -21,24,TRUE,detections_regression
 -116,25,TRUE,detections_regression
@@ -31068,6 +31421,7 @@ lon_bin,lat_bin,offshore_pixel,model
 150,47,TRUE,detections_regression
 -133,48,TRUE,detections_regression
 -131,48,TRUE,detections_regression
+-130,48,TRUE,detections_regression
 -180,50,TRUE,detections_regression
 -179,50,TRUE,detections_regression
 -133,50,TRUE,detections_regression
@@ -31231,6 +31585,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -75,64,TRUE,detections_regression
 176,64,FALSE,detections_regression
 179,64,FALSE,detections_regression
+-90,65,FALSE,detections_regression
 -89,65,TRUE,detections_regression
 -87,65,TRUE,detections_regression
 -168,66,TRUE,detections_regression
@@ -31308,7 +31663,6 @@ lon_bin,lat_bin,offshore_pixel,model
 131,73,TRUE,detections_regression
 29,74,TRUE,detections_regression
 32,74,TRUE,detections_regression
-35,74,TRUE,detections_regression
 84,74,TRUE,detections_regression
 18,75,FALSE,detections_regression
 -78,-51,TRUE,detections_regression
@@ -31322,12 +31676,13 @@ lon_bin,lat_bin,offshore_pixel,model
 37,-25,TRUE,detections_regression
 58,-22,TRUE,detections_regression
 145,-18,FALSE,detections_regression
-166,-18,FALSE,detections_regression
 -172,-17,TRUE,detections_regression
 51,-17,TRUE,detections_regression
 165,-17,TRUE,detections_regression
 -77,-16,FALSE,detections_regression
 45,-12,FALSE,detections_regression
+160,-12,FALSE,detections_regression
+161,-12,FALSE,detections_regression
 160,-11,FALSE,detections_regression
 156,-6,FALSE,detections_regression
 -32,-4,FALSE,detections_regression
@@ -31336,7 +31691,6 @@ lon_bin,lat_bin,offshore_pixel,model
 50,3,TRUE,detections_regression
 -47,4,TRUE,detections_regression
 127,12,TRUE,detections_regression
--95,14,TRUE,detections_regression
 48,14,FALSE,detections_regression
 -107,16,TRUE,detections_regression
 -106,16,TRUE,detections_regression
@@ -31370,11 +31724,11 @@ lon_bin,lat_bin,offshore_pixel,model
 -24,44,TRUE,detections_regression
 -17,44,TRUE,detections_regression
 -68,45,FALSE,detections_regression
+-31,45,TRUE,detections_regression
 137,46,FALSE,detections_regression
 148,46,FALSE,detections_regression
 -133,47,TRUE,detections_regression
 -130,47,TRUE,detections_regression
--130,48,TRUE,detections_regression
 155,48,TRUE,detections_regression
 -132,49,TRUE,detections_regression
 -58,49,FALSE,detections_regression
@@ -31530,6 +31884,7 @@ lon_bin,lat_bin,offshore_pixel,model
 137,74,TRUE,detections_regression
 138,74,TRUE,detections_regression
 77,75,TRUE,detections_regression
+86,75,TRUE,detections_regression
 89,75,TRUE,detections_regression
 135,75,TRUE,detections_regression
 136,75,TRUE,detections_regression
@@ -31554,16 +31909,13 @@ lon_bin,lat_bin,offshore_pixel,model
 119,-35,FALSE,detections_regression
 154,-31,FALSE,detections_regression
 17,-30,TRUE,detections_regression
-155,-29,TRUE,detections_regression
 156,-27,TRUE,detections_regression
--39,-23,FALSE,detections_regression
 42,-23,FALSE,detections_regression
-58,-23,TRUE,detections_regression
 164,-22,FALSE,detections_regression
 13,-21,TRUE,detections_regression
-58,-19,TRUE,detections_regression
 57,-18,TRUE,detections_regression
 167,-18,FALSE,detections_regression
+176,-17,FALSE,detections_regression
 -172,-16,FALSE,detections_regression
 53,-16,TRUE,detections_regression
 124,-14,FALSE,detections_regression
@@ -31623,6 +31975,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -137,52,TRUE,detections_regression
 -153,53,TRUE,detections_regression
 -152,53,TRUE,detections_regression
+-61,53,FALSE,detections_regression
 -143,55,TRUE,detections_regression
 154,55,TRUE,detections_regression
 -86,56,TRUE,detections_regression
@@ -31649,7 +32002,6 @@ lon_bin,lat_bin,offshore_pixel,model
 20,64,FALSE,detections_regression
 -83,66,TRUE,detections_regression
 -26,66,FALSE,detections_regression
--1,66,TRUE,detections_regression
 -172,67,TRUE,detections_regression
 -171,67,TRUE,detections_regression
 -169,67,TRUE,detections_regression
@@ -31660,8 +32012,8 @@ lon_bin,lat_bin,offshore_pixel,model
 48,68,TRUE,detections_regression
 0,69,TRUE,detections_regression
 1,69,TRUE,detections_regression
+23,69,FALSE,detections_regression
 52,69,TRUE,detections_regression
-31,74,TRUE,detections_regression
 25,75,TRUE,detections_regression
 32,75,TRUE,detections_regression
 19,-39,TRUE,detections_regression
@@ -31679,14 +32031,13 @@ lon_bin,lat_bin,offshore_pixel,model
 -36,-17,TRUE,detections_regression
 52,-15,TRUE,detections_regression
 53,-15,TRUE,detections_regression
-161,-12,FALSE,detections_regression
 159,-11,FALSE,detections_regression
 162,-10,FALSE,detections_regression
 -33,-8,TRUE,detections_regression
 -32,-3,TRUE,detections_regression
-10,-3,FALSE,detections_regression
 -41,-2,TRUE,detections_regression
 140,-2,FALSE,detections_regression
+-3,0,TRUE,detections_regression
 0,0,FALSE,detections_regression
 -92,2,FALSE,detections_regression
 -84,6,TRUE,detections_regression
@@ -31719,7 +32070,6 @@ lon_bin,lat_bin,offshore_pixel,model
 0,68,TRUE,detections_regression
 2,69,TRUE,detections_regression
 15,74,FALSE,detections_regression
-28,75,TRUE,detections_regression
 -67,-53,FALSE,detections_regression
 18,-40,TRUE,detections_regression
 17,-38,TRUE,detections_regression
@@ -31727,20 +32077,18 @@ lon_bin,lat_bin,offshore_pixel,model
 27,-33,FALSE,detections_regression
 49,-26,TRUE,detections_regression
 112,-25,FALSE,detections_regression
+57,-24,TRUE,detections_regression
 39,-22,TRUE,detections_regression
 169,-22,FALSE,detections_regression
 -72,-21,FALSE,detections_regression
 40,-20,TRUE,detections_regression
 120,-18,TRUE,detections_regression
-170,-17,TRUE,detections_regression
-176,-17,FALSE,detections_regression
 44,-15,TRUE,detections_regression
 42,-14,TRUE,detections_regression
 153,-13,TRUE,detections_regression
 42,-12,FALSE,detections_regression
 -5,-1,TRUE,detections_regression
 -4,0,TRUE,detections_regression
--3,0,TRUE,detections_regression
 -1,0,FALSE,detections_regression
 -97,13,TRUE,detections_regression
 91,17,TRUE,detections_regression
@@ -31763,6 +32111,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -141,55,TRUE,detections_regression
 168,55,TRUE,detections_regression
 164,56,FALSE,detections_regression
+-140,60,FALSE,detections_regression
 -26,63,TRUE,detections_regression
 -11,64,TRUE,detections_regression
 1,71,TRUE,detections_regression
@@ -31835,10 +32184,10 @@ lon_bin,lat_bin,offshore_pixel,model
 -78,-16,TRUE,detections_regression
 42,-16,TRUE,detections_regression
 43,-16,TRUE,detections_regression
-160,-12,FALSE,detections_regression
 153,-10,TRUE,detections_regression
 162,-9,FALSE,detections_regression
 -79,4,FALSE,detections_regression
+94,19,FALSE,detections_regression
 -164,20,TRUE,detections_regression
 -25,31,TRUE,detections_regression
 -29,32,TRUE,detections_regression
@@ -31850,7 +32199,6 @@ lon_bin,lat_bin,offshore_pixel,model
 -130,40,TRUE,detections_regression
 -129,41,TRUE,detections_regression
 -22,42,TRUE,detections_regression
--16,48,TRUE,detections_regression
 -131,49,TRUE,detections_regression
 -139,54,TRUE,detections_regression
 -139,55,TRUE,detections_regression
@@ -31897,9 +32245,9 @@ lon_bin,lat_bin,offshore_pixel,model
 -60,40,TRUE,detections_regression
 -130,42,TRUE,detections_regression
 -52,44,TRUE,detections_regression
--31,45,TRUE,detections_regression
 157,49,FALSE,detections_regression
 -135,50,TRUE,detections_regression
+40,74,TRUE,detections_regression
 165,-47,TRUE,detections_regression
 -77,-46,TRUE,detections_regression
 -77,-45,TRUE,detections_regression
@@ -31925,7 +32273,6 @@ lon_bin,lat_bin,offshore_pixel,model
 -162,23,TRUE,detections_regression
 -118,24,TRUE,detections_regression
 -121,26,TRUE,detections_regression
--126,35,TRUE,detections_regression
 -51,45,TRUE,detections_regression
 -137,50,TRUE,detections_regression
 177,50,TRUE,detections_regression
@@ -31934,7 +32281,6 @@ lon_bin,lat_bin,offshore_pixel,model
 167,-44,TRUE,detections_regression
 -74,-34,TRUE,detections_regression
 114,-26,FALSE,detections_regression
-57,-24,TRUE,detections_regression
 54,-17,TRUE,detections_regression
 43,-15,TRUE,detections_regression
 4,-6,TRUE,detections_regression
@@ -31986,6 +32332,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -141,57,TRUE,detections_regression
 -164,58,FALSE,detections_regression
 170,59,TRUE,detections_regression
+7,60,FALSE,detections_regression
 -15,68,TRUE,detections_regression
 36,74,TRUE,detections_regression
 38,74,TRUE,detections_regression
@@ -32155,6 +32502,7 @@ lon_bin,lat_bin,offshore_pixel,model
 88,-9,TRUE,detections_regression
 -92,-3,FALSE,detections_regression
 -14,1,TRUE,detections_regression
+147,1,TRUE,detections_regression
 95,7,TRUE,detections_regression
 -53,11,TRUE,detections_regression
 -52,11,TRUE,detections_regression
@@ -32368,6 +32716,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -75,-19,TRUE,detections_regression
 -74,-19,TRUE,detections_regression
 166,-15,FALSE,detections_regression
+154,-12,TRUE,detections_regression
 164,-12,TRUE,detections_regression
 165,-9,TRUE,detections_regression
 156,-5,TRUE,detections_regression
@@ -32389,6 +32738,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -77,-43,TRUE,detections_regression
 -76,-32,TRUE,detections_regression
 -75,-32,TRUE,detections_regression
+-74,-31,TRUE,detections_regression
 -75,-30,TRUE,detections_regression
 -74,-27,TRUE,detections_regression
 -74,-26,TRUE,detections_regression
@@ -32414,7 +32764,6 @@ lon_bin,lat_bin,offshore_pixel,model
 153,51,TRUE,detections_regression
 -140,54,TRUE,detections_regression
 12,76,FALSE,detections_regression
--74,-31,TRUE,detections_regression
 -74,-28,TRUE,detections_regression
 -75,-27,TRUE,detections_regression
 -173,-21,TRUE,detections_regression
@@ -32445,7 +32794,6 @@ lon_bin,lat_bin,offshore_pixel,model
 121,-16,TRUE,detections_regression
 123,-15,FALSE,detections_regression
 123,-14,FALSE,detections_regression
-154,-12,TRUE,detections_regression
 138,-1,TRUE,detections_regression
 74,9,FALSE,detections_regression
 113,13,TRUE,detections_regression
@@ -32482,6 +32830,7 @@ lon_bin,lat_bin,offshore_pixel,model
 75,-49,TRUE,detections_regression
 76,-49,TRUE,detections_regression
 77,-49,TRUE,detections_regression
+67,-48,TRUE,detections_regression
 73,-48,TRUE,detections_regression
 74,-48,TRUE,detections_regression
 76,-48,TRUE,detections_regression
@@ -32504,6 +32853,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -2,-17,TRUE,detections_regression
 52,-17,TRUE,detections_regression
 8,-16,TRUE,detections_regression
+179,-16,FALSE,detections_regression
 55,-11,TRUE,detections_regression
 67,-9,TRUE,detections_regression
 -4,-6,TRUE,detections_regression
@@ -32532,10 +32882,12 @@ lon_bin,lat_bin,offshore_pixel,model
 73,9,FALSE,detections_regression
 -107,15,TRUE,detections_regression
 -152,22,TRUE,detections_regression
+-129,42,TRUE,detections_regression
 150,44,TRUE,detections_regression
 -47,47,TRUE,detections_regression
 -46,47,TRUE,detections_regression
 -46,48,TRUE,detections_regression
+-74,-50,FALSE,detections_regression
 175,-44,TRUE,detections_regression
 -77,-41,TRUE,detections_regression
 -75,-31,TRUE,detections_regression
@@ -32556,6 +32908,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -58,21,TRUE,detections_regression
 -57,21,TRUE,detections_regression
 -60,22,TRUE,detections_regression
+-59,22,TRUE,detections_regression
 -59,23,TRUE,detections_regression
 -26,29,TRUE,detections_regression
 156,47,TRUE,detections_regression
@@ -32592,10 +32945,10 @@ lon_bin,lat_bin,offshore_pixel,model
 82,12,TRUE,detections_regression
 81,13,FALSE,detections_regression
 -56,17,TRUE,detections_regression
--59,22,TRUE,detections_regression
 -58,22,TRUE,detections_regression
 -58,23,TRUE,detections_regression
 -58,24,TRUE,detections_regression
+-57,24,TRUE,detections_regression
 144,39,TRUE,detections_regression
 -2,67,TRUE,detections_regression
 152,-36,TRUE,detections_regression
@@ -32685,6 +33038,7 @@ lon_bin,lat_bin,offshore_pixel,model
 176,62,TRUE,detections_regression
 -178,64,TRUE,detections_regression
 -88,65,TRUE,detections_regression
+-3,66,TRUE,detections_regression
 -116,67,TRUE,detections_regression
 -168,69,TRUE,detections_regression
 56,70,TRUE,detections_regression
@@ -32700,6 +33054,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -177,-17,TRUE,detections_regression
 -177,-15,FALSE,detections_regression
 -4,-1,TRUE,detections_regression
+116,5,FALSE,detections_regression
 82,13,TRUE,detections_regression
 95,13,FALSE,detections_regression
 -68,26,TRUE,detections_regression
@@ -32752,6 +33107,7 @@ lon_bin,lat_bin,offshore_pixel,model
 21,75,FALSE,detections_regression
 88,75,TRUE,detections_regression
 150,75,TRUE,detections_regression
+101,76,TRUE,detections_regression
 112,76,TRUE,detections_regression
 84,77,TRUE,detections_regression
 89,78,TRUE,detections_regression
@@ -32828,9 +33184,11 @@ lon_bin,lat_bin,offshore_pixel,model
 -34,-18,TRUE,detections_regression
 -27,-18,TRUE,detections_regression
 -32,-17,TRUE,detections_regression
+-28,-17,TRUE,detections_regression
 -27,-17,TRUE,detections_regression
 -24,-17,TRUE,detections_regression
 -32,-16,TRUE,detections_regression
+-30,-16,TRUE,detections_regression
 -34,-15,TRUE,detections_regression
 -27,-15,TRUE,detections_regression
 -22,-15,TRUE,detections_regression
@@ -32876,6 +33234,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -31,-6,TRUE,detections_regression
 -30,-6,TRUE,detections_regression
 -29,-6,TRUE,detections_regression
+-28,-6,TRUE,detections_regression
 -25,-6,TRUE,detections_regression
 -24,-6,TRUE,detections_regression
 -22,-6,TRUE,detections_regression
@@ -32914,9 +33273,7 @@ lon_bin,lat_bin,offshore_pixel,model
 151,-39,TRUE,detections_regression
 -79,-33,FALSE,detections_regression
 44,-10,TRUE,detections_regression
-116,5,FALSE,detections_regression
 -102,13,TRUE,detections_regression
--57,24,TRUE,detections_regression
 -62,34,TRUE,detections_regression
 -129,39,TRUE,detections_regression
 -142,53,TRUE,detections_regression
@@ -32944,6 +33301,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -61,22,TRUE,detections_regression
 151,44,TRUE,detections_regression
 -18,53,TRUE,detections_regression
+-134,58,FALSE,detections_regression
 179,-38,TRUE,detections_regression
 119,-34,TRUE,detections_regression
 125,-34,TRUE,detections_regression
@@ -32953,8 +33311,8 @@ lon_bin,lat_bin,offshore_pixel,model
 -176,-16,TRUE,detections_regression
 53,8,TRUE,detections_regression
 72,22,FALSE,detections_regression
+-8,54,FALSE,detections_regression
 23,56,FALSE,detections_regression
-40,74,TRUE,detections_regression
 30,75,TRUE,detections_regression
 -81,-34,TRUE,detections_regression
 31,-29,FALSE,detections_regression
@@ -32964,30 +33322,30 @@ lon_bin,lat_bin,offshore_pixel,model
 -90,8,TRUE,detections_regression
 124,15,TRUE,detections_regression
 124,19,TRUE,detections_regression
--3,66,TRUE,detections_regression
 169,-42,TRUE,detections_regression
 172,-34,FALSE,detections_regression
 -123,29,TRUE,detections_regression
 166,56,TRUE,detections_regression
+-138,59,FALSE,detections_regression
 26,75,TRUE,detections_regression
 -58,20,TRUE,detections_regression
 -153,23,TRUE,detections_regression
 -127,35,TRUE,detections_regression
 150,48,TRUE,detections_regression
 -136,50,TRUE,detections_regression
--61,53,FALSE,detections_regression
 -53,55,TRUE,detections_regression
 -4,66,TRUE,detections_regression
 -3,67,TRUE,detections_regression
 -78,-45,TRUE,detections_regression
 113,-3,FALSE,detections_regression
 -113,18,TRUE,detections_regression
--129,42,TRUE,detections_regression
 -83,52,TRUE,detections_regression
 -94,59,FALSE,detections_regression
 -114,67,TRUE,detections_regression
 -137,68,TRUE,detections_regression
+-136,68,FALSE,detections_regression
 -115,68,TRUE,detections_regression
+-1,68,TRUE,detections_regression
 -115,69,TRUE,detections_regression
 160,69,FALSE,detections_regression
 74,70,FALSE,detections_regression
@@ -33041,7 +33399,6 @@ lon_bin,lat_bin,offshore_pixel,model
 140,29,TRUE,detections_regression
 137,30,TRUE,detections_regression
 137,31,TRUE,detections_regression
--1,68,TRUE,detections_regression
 11,74,TRUE,detections_regression
 -66,-42,FALSE,detections_regression
 127,-34,TRUE,detections_regression
@@ -33055,8 +33412,10 @@ lon_bin,lat_bin,offshore_pixel,model
 178,-16,FALSE,detections_regression
 176,-15,TRUE,detections_regression
 77,6,TRUE,detections_regression
+-137,59,FALSE,detections_regression
 -78,-47,TRUE,detections_regression
 152,-38,TRUE,detections_regression
+-82,-35,TRUE,detections_regression
 43,-27,TRUE,detections_regression
 147,-14,TRUE,detections_regression
 -24,14,FALSE,detections_regression
@@ -33064,6 +33423,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -24,15,FALSE,detections_regression
 -25,17,FALSE,detections_regression
 -73,-56,TRUE,detections_regression
+-92,9,TRUE,detections_regression
 -27,15,TRUE,detections_regression
 -113,19,TRUE,detections_regression
 165,-20,FALSE,detections_regression
@@ -33074,10 +33434,12 @@ lon_bin,lat_bin,offshore_pixel,model
 -17,68,TRUE,detections_regression
 -76,-55,TRUE,detections_regression
 163,-20,FALSE,detections_regression
+-45,0,TRUE,detections_regression
 -45,1,TRUE,detections_regression
 -40,1,TRUE,detections_regression
 -41,3,TRUE,detections_regression
 -40,3,TRUE,detections_regression
+-43,4,TRUE,detections_regression
 -26,14,FALSE,detections_regression
 -108,17,TRUE,detections_regression
 -139,50,TRUE,detections_regression
@@ -33095,7 +33457,6 @@ lon_bin,lat_bin,offshore_pixel,model
 -46,4,TRUE,detections_regression
 -45,4,TRUE,detections_regression
 -44,4,TRUE,detections_regression
--43,4,TRUE,detections_regression
 -41,4,TRUE,detections_regression
 -40,4,TRUE,detections_regression
 -39,4,TRUE,detections_regression
@@ -33112,10 +33473,10 @@ lon_bin,lat_bin,offshore_pixel,model
 -106,13,TRUE,detections_regression
 -25,15,FALSE,detections_regression
 -24,16,FALSE,detections_regression
+-68,34,TRUE,detections_regression
 146,58,TRUE,detections_regression
 -58,-53,FALSE,detections_regression
 152,-39,TRUE,detections_regression
--45,0,TRUE,detections_regression
 -41,0,TRUE,detections_regression
 -44,1,TRUE,detections_regression
 -41,1,TRUE,detections_regression
@@ -33129,7 +33490,9 @@ lon_bin,lat_bin,offshore_pixel,model
 124,21,TRUE,detections_regression
 132,27,TRUE,detections_regression
 -168,58,TRUE,detections_regression
+17,59,FALSE,detections_regression
 164,61,TRUE,detections_regression
+-76,-39,TRUE,detections_regression
 -43,1,TRUE,detections_regression
 -46,2,TRUE,detections_regression
 -45,3,TRUE,detections_regression
@@ -33138,6 +33501,7 @@ lon_bin,lat_bin,offshore_pixel,model
 -163,63,FALSE,detections_regression
 -91,65,TRUE,detections_regression
 -169,70,TRUE,detections_regression
+150,71,TRUE,detections_regression
 77,72,FALSE,detections_regression
 81,74,FALSE,detections_regression
 79,75,TRUE,detections_regression
@@ -33193,14 +33557,17 @@ lon_bin,lat_bin,offshore_pixel,model
 87,79,TRUE,detections_regression
 88,79,TRUE,detections_regression
 30,-30,FALSE,detections_regression
+-61,23,TRUE,detections_regression
 -60,24,TRUE,detections_regression
 -22,41,TRUE,detections_regression
 -56,42,TRUE,detections_regression
 -82,61,TRUE,detections_regression
 -82,62,TRUE,detections_regression
 -176,65,TRUE,detections_regression
+-42,-22,FALSE,detections_regression
 39,-11,FALSE,detections_regression
 -44,2,TRUE,detections_regression
+-55,48,FALSE,detections_regression
 143,55,TRUE,detections_regression
 171,-20,TRUE,detections_regression
 -82,1,TRUE,detections_regression
@@ -33212,6 +33579,7 @@ lon_bin,lat_bin,offshore_pixel,model
 128,7,TRUE,detections_regression
 129,7,TRUE,detections_regression
 151,7,FALSE,detections_regression
+153,7,TRUE,detections_regression
 157,7,FALSE,detections_regression
 110,8,TRUE,detections_regression
 111,8,TRUE,detections_regression
@@ -33239,6 +33607,7 @@ lon_bin,lat_bin,offshore_pixel,model
 113,11,TRUE,detections_regression
 111,12,TRUE,detections_regression
 112,12,TRUE,detections_regression
+113,12,TRUE,detections_regression
 131,12,TRUE,detections_regression
 112,14,TRUE,detections_regression
 111,15,TRUE,detections_regression
@@ -33249,7 +33618,6 @@ lon_bin,lat_bin,offshore_pixel,model
 112,18,TRUE,detections_regression
 113,18,TRUE,detections_regression
 123,22,TRUE,detections_regression
--61,23,TRUE,detections_regression
 150,50,TRUE,detections_regression
 153,-36,TRUE,detections_regression
 -176,-24,TRUE,detections_regression
@@ -33257,7 +33625,6 @@ lon_bin,lat_bin,offshore_pixel,model
 -42,4,TRUE,detections_regression
 -40,5,TRUE,detections_regression
 -13,8,FALSE,detections_regression
--92,9,TRUE,detections_regression
 70,-50,TRUE,detections_regression
 -59,-44,TRUE,detections_regression
 -57,-42,TRUE,detections_regression
@@ -33306,9 +33673,12 @@ lon_bin,lat_bin,offshore_pixel,model
 40,72,TRUE,detections_regression
 154,-10,TRUE,detections_regression
 134,7,FALSE,detections_regression
+48,-15,FALSE,detections_regression
+133,6,FALSE,detections_regression
 134,6,FALSE,detections_regression
 133,7,FALSE,detections_regression
 133,8,FALSE,detections_regression
+129,-16,TRUE,detections_regression
 73,1,FALSE,detections_regression
 73,2,TRUE,detections_regression
 73,3,FALSE,detections_regression
@@ -33335,14 +33705,12 @@ lon_bin,lat_bin,offshore_pixel,model
 72,2,TRUE,detections_regression
 72,3,FALSE,detections_regression
 71,6,TRUE,detections_regression
--76,-39,TRUE,detections_regression
 147,-16,TRUE,detections_regression
 53,-14,TRUE,detections_regression
 170,-14,TRUE,detections_regression
 170,-13,TRUE,detections_regression
 170,-11,TRUE,detections_regression
 74,1,FALSE,detections_regression
-133,6,FALSE,detections_regression
 113,-35,TRUE,detections_regression
 44,-2,TRUE,detections_regression
 175,-40,TRUE,detections_regression
@@ -33357,7 +33725,6 @@ lon_bin,lat_bin,offshore_pixel,model
 74,7,TRUE,detections_regression
 132,7,TRUE,detections_regression
 47,10,TRUE,detections_regression
--68,34,TRUE,detections_regression
 -152,-18,FALSE,detections_regression
 -83,-7,TRUE,detections_regression
 -83,-8,TRUE,detections_regression
@@ -33385,3 +33752,34 @@ lon_bin,lat_bin,offshore_pixel,model
 121,-14,TRUE,detections_regression
 -151,-19,FALSE,detections_regression
 -170,-14,FALSE,detections_regression
+173,-34,FALSE,detections_regression
+-176,-23,FALSE,detections_regression
+-20,9,TRUE,detections_regression
+-98,-4,TRUE,detections_regression
+-98,-3,TRUE,detections_regression
+-97,1,TRUE,detections_regression
+-96,2,TRUE,detections_regression
+-95,3,TRUE,detections_regression
+-95,4,TRUE,detections_regression
+48,6,TRUE,detections_regression
+-95,7,TRUE,detections_regression
+-107,13,TRUE,detections_regression
+-120,25,TRUE,detections_regression
+-78,-50,TRUE,detections_regression
+-146,-17,FALSE,detections_regression
+-145,-17,FALSE,detections_regression
+-147,-16,FALSE,detections_regression
+-152,55,TRUE,detections_regression
+-149,-16,FALSE,detections_regression
+148,-16,TRUE,detections_regression
+-150,-15,FALSE,detections_regression
+-149,-15,FALSE,detections_regression
+97,-2,TRUE,detections_regression
+-165,66,FALSE,detections_regression
+-118,68,TRUE,detections_regression
+-128,70,TRUE,detections_regression
+-116,70,TRUE,detections_regression
+-153,-18,FALSE,detections_regression
+-116,69,TRUE,detections_regression
+145,71,TRUE,detections_regression
+91,15,TRUE,detections_regression
