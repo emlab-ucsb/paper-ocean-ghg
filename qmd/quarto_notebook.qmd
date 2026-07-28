@@ -851,8 +851,8 @@ emissions_by_ocean_summary_tbl <- annual_emissions_by_ocean_normalized |>
 
 - Climate change mitigation requires accurate accounting across sectors; while the transportation sector as a whole was responsible for `r fraction_co2_from_transportation` of all global CO$_{2}$ emissions in `r edgar_comparison_year`, fundamental gaps remain in understanding the contribution by marine vessels. 
 
-- For over  `r scales::comma(signif(n_unique_vessels$n_unique_vessels, 2))` AIS-broadcasting vessels, we quantify emissions for
-each vessel using precise latitude/longitude/timestamp information for over `r scales::comma(signif(n_ais_messages$n_billion_ais_messages, 3))` billion individual AIS messages.
+- For over  `r scales::comma(floor(n_unique_vessels$n_unique_vessels / 1e4) * 1e4)` AIS-broadcasting vessels, we quantify emissions for
+each vessel using precise latitude/longitude/timestamp information for over `r scales::comma(floor(n_ais_messages$n_billion_ais_messages))` billion individual AIS messages.
 
 ## Results
 
@@ -878,8 +878,9 @@ each vessel using precise latitude/longitude/timestamp information for over `r s
     `r dark_emissions_by_fishing |> dplyr::filter(!fishing) |> dplyr::pull(percent_dark)`
     of CO$_{2}$ emissions from non-fishing vessels were from
     non-broadcasting vessels. For both types of vessels, this fraction
-    of emissions from non-broadcasting vessels has been declining
-    steadily since 2020.
+    of emissions from non-broadcasting vessels has generally been
+    declining since 2021, although it ticked up slightly for fishing
+    vessels in 2025.
 
 
 - Across the entire `r analysis_start_year` to `r analysis_end_year` time series, almost all non-broadcasting emissions (`r dark_emissions_by_area |> dplyr::filter(inside_footprint,s1_imaged) |> dplyr::pull(percent_total)`) occurred inside the S1 footprint and in pixel-months that were imaged by S1. 
@@ -922,7 +923,7 @@ may be more susceptible to AIS adoption biases.
     transportation-related CO$_{2}$ emissions. Marine vessel CO$_{2}$
     emissions increased by
     `r percent_increase_to_edgar_year |>   dplyr::filter(data_source == "Marine vessels (AIS + S1)") |>   dplyr::pull(emissions_co2_mt_normalized_percent)`
-    between `r analysis_start_year` and 2024,
+    between `r analysis_start_year` and `r edgar_comparison_year`,
     `r round(   (percent_increase_to_edgar_year |>     dplyr::filter(data_source == "Marine vessels (AIS + S1)") |>     dplyr::pull(emissions_co2_mt_normalized)) /     (percent_increase_to_edgar_year |>       dplyr::filter(data_source == "Other transportation sectors (EDGAR)") |>       dplyr::pull(emissions_co2_mt_normalized)) )`
     times faster than the growth rate of other transportation
     emissions, and `r round(   (percent_increase_to_edgar_year |>     dplyr::filter(data_source == "Marine vessels (AIS + S1)") |>     dplyr::pull(emissions_co2_mt_normalized)) /     (percent_increase_to_edgar_year |>       dplyr::filter(data_source == "All sectors (EDGAR)") |>       dplyr::pull(emissions_co2_mt_normalized)) )` faster than the growth rate of total global emissions across all sectors.
@@ -938,7 +939,7 @@ may be more susceptible to AIS adoption biases.
 
 - The time between pings is typically small (the mean value is `r signif(ping_level_hours_distribution$mean_hours,3)` hours and the median value is `r signif(ping_level_hours_distribution$median_hours,3)` hours, or about `r round(ping_level_hours_distribution$mean_hours*60)` minutes and `r round(ping_level_hours_distribution$median_hours*60)` minutes respectively), while the maximum value for this across our dataset is `r round(ping_level_hours_distribution$max_hours)` hours (meaning this is the most amount of time over which we will estimate emissions for a single message).
 
-- In all, we analyze AIS data for over `r scales::comma(signif(n_unique_vessels$n_unique_vessels, 2))` AIS-broadcasting vessels, across  `r scales::comma(signif(n_ais_messages$n_billion_ais_messages, 3))`  billion individual timestamped AIS messages which are assigned to `r signif((trip_co2_emissions_by_from_to_countries |> dplyr::filter(from_country_iso3!=to_country_iso3) |> dplyr::pull(n_unique_trips) |> sum())/1e6,3)` million international trips, `r signif((trip_co2_emissions_by_from_to_countries |> dplyr::filter(from_country_iso3==to_country_iso3) |> dplyr::pull(n_unique_trips) |> sum())/1e6,3)` million domestic trips, and `r signif((port_visit_co2_emissions_by_country |> dplyr::pull(n_unique_port_vists) |> sum())/1e6,3)` million port visits that occurred between `r analysis_start_year` and `r analysis_end_year`.
+- In all, we analyze AIS data for over `r scales::comma(floor(n_unique_vessels$n_unique_vessels / 1e4) * 1e4)` AIS-broadcasting vessels, across  `r scales::comma(signif(n_ais_messages$n_billion_ais_messages, 3))`  billion individual timestamped AIS messages which are assigned to `r signif((trip_co2_emissions_by_from_to_countries |> dplyr::filter(from_country_iso3!=to_country_iso3) |> dplyr::pull(n_unique_trips) |> sum())/1e6,3)` million international trips, `r signif((trip_co2_emissions_by_from_to_countries |> dplyr::filter(from_country_iso3==to_country_iso3) |> dplyr::pull(n_unique_trips) |> sum())/1e6,3)` million domestic trips, and `r signif((port_visit_co2_emissions_by_country |> dplyr::pull(n_unique_port_vists) |> sum())/1e6,3)` million port visits that occurred between `r analysis_start_year` and `r analysis_end_year`.
 
 - As a result, we used a dataset containing `r signif(n_s1_detections$n_million_s1_detections,3)` million vessel detections from `r analysis_start_year` to `r analysis_end_year`, of which `r signif(n_s1_detections$n_million_s1_detections_unmatched,3)` million detections were not matched to a broadcasting vessel ('unmatched'). These detections come from across more than `r prettyNum(floor(n_s1_detections$n_thousand_s1_scenes)*1000,big.mark = ",")` individual S1 scenes.
 
@@ -1372,7 +1373,7 @@ cowplot::plot_grid(
 
 ```{r}
 #| label: fig-ais-data-richness
-#| fig-cap: !expr 'paste0("Richness of AIS-broadcasting vessel emissions data, showing: (A) CO$_{2}$ emissions by vessel type for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in ", analysis_end_year, ". (B) CO$_{2}$ emissions by country for AIS-broadcasting vessels during  during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in ", analysis_end_year, ". For both panels, emissions for each international trip are partitioned equally to its departure and arrival country). Countries with no values are shown in black.")'
+#| fig-cap: !expr 'paste0("Richness of AIS-broadcasting vessel emissions data, showing: (A) CO$_{2}$ emissions by vessel type for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in ", analysis_end_year, ". (B) CO$_{2}$ emissions by country for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in ", analysis_end_year, ". For both panels, emissions for each international trip are partitioned equally to its departure and arrival country). Countries with no values are shown in black.")'
 #| fig-width: 9
 #| fig-height: 8
 
@@ -1471,7 +1472,7 @@ cowplot::plot_grid(
 
 ```{r}
 #| label: fig-emissions-marine-ocean-other
-#| fig-cap: !expr 'paste0("(A) Trend in CO$_{2}$ emissions by ocean (normalized to ", analysis_start_year, " baseline), use our fused AIS+S1 marine vessel data. (B) Comparison in trend of CO$_{2}$ emissions data (normalized to ", analysis_start_year, " baseline) between marine transportation emissions from GFW, other transportation emissions from EDGAR, and all sector emissions from EDGAR. On the right-hand side of the figure, absolute values are shown as text and color-coded for each line, for the last year of available data for that series (", analysis_end_year, " for the GFW marine vessel series in panel A and B; ", edgar_comparison_year, " for the EDGAR series in panel B).")'
+#| fig-cap: !expr 'paste0("(A) Trend in CO$_{2}$ emissions by ocean (normalized to ", analysis_start_year, " baseline), using our fused AIS+S1 marine vessel data. (B) Comparison in trend of CO$_{2}$ emissions data (normalized to ", analysis_start_year, " baseline) between marine transportation emissions from GFW, other transportation emissions from EDGAR, and all sector emissions from EDGAR. On the right-hand side of the figure, absolute values are shown as text and color-coded for each line, for the last year of available data for that series (", analysis_end_year, " for the GFW marine vessel series in panel A and B; ", edgar_comparison_year, " for the EDGAR series in panel B).")'
 #| fig-width: 7.5
 #| fig-height: 7
 
@@ -1626,7 +1627,7 @@ cowplot::plot_grid(
 
 ```{r}
 #| label: fig-registered-data-performance
-#| fig-cap: Comparison of daily vessel-level CO$_{2}$ emissions estimated using our model with registered emissions from a proprietary vessel database (based on main engine fuel consumption over 24 hours). Estimates are shown using main engine power and design speed from IMO (left), our machine learning random forest models (center), and the same registered dataset (right). The solid red line shows a linear regression fit, while the dashed line represents the 1:1 line. Performance values for traditional R$^{2}$ are shown for each set of vessel characteristics. Over 15,000 vessels are represented in the figure, and blue shading indicates point density. All data are rule-of-three compliant, meaning each cell (20x20 mt) displayed contains at least three vessels.
+#| fig-cap: !expr 'paste0("Comparison of daily vessel-level CO$_{2}$ emissions estimated using our model with registered emissions from a proprietary vessel database (based on main engine fuel consumption over 24 hours). Estimates are shown using main engine power and design speed from IMO (left), our machine learning random forest models (center), and the same registered dataset (right). The solid red line shows a linear regression fit, while the dashed line represents the 1:1 line. Performance values for traditional R$^{2}$ are shown for each set of vessel characteristics. Over ", prettyNum(floor(nrow(registered_validation_data) / 1e3) * 1e3, big.mark = ","), " vessels are represented in the figure, and blue shading indicates point density. All data are rule-of-three compliant, meaning each cell (20x20 mt) displayed contains at least three vessels.")'
 #| fig-width: 8
 #| fig-height: 4
 model_levels <- c(
@@ -1849,7 +1850,7 @@ performance_results <- purrr::map_df(
 best_performance <- performance_results |>
   dplyr::slice_max(order_by = rsq_trad, n = 1)
 
-# Select data with threshold of 0.15 the one showing best performance
+# Select data using the tolerance threshold showing best performance
 filtered_hours_df <- subset(merged_df, diff / max < best_performance$threshold)
 filtered_df <- filtered_hours_df |>
   dplyr::select(co2_trip_emissions_eu, co2_trip_emissions_gfw)
@@ -1866,7 +1867,7 @@ mrv_performance_results_tbl <- performance_results |>
   ) |>
   dplyr::select(
     Tolerance = threshold,
-    `Number of vessels` = n_observations,
+    `Number of observations` = n_observations,
     "R$^{2}$" = rsq,
     "Traditional R$^{2}$" = rsq_trad
   ) |>
@@ -1890,7 +1891,7 @@ mrv_performance_results_tbl |>
 
 ```{r}
 #| label: fig-mrv-performance
-#| fig-cap: Comparison of annual vessel-level CO$_{2}$ emissions estimated using our model with published emissions from the EU MRV database. The sample includes 2,276 observations from yearly aggregated vessel trips where hours at sea differ by no more than 15\% between our data and the MRV dataset. The solid red line shows the linear regression fit, and the dashed line represents the 1:1 line.
+#| fig-cap: !expr 'paste0("Comparison of annual vessel-level CO$_{2}$ emissions estimated using our model with published emissions from the EU MRV database. The sample includes ", prettyNum(nrow(filtered_df), big.mark = ","), " observations from yearly aggregated vessel trips where hours at sea differ by no more than ", scales::percent(best_performance$threshold), " between our data and the MRV dataset. The solid red line shows the linear regression fit, and the dashed line represents the 1:1 line.")'
 #| fig-width: 8
 #| fig-height: 5
 
@@ -2045,7 +2046,7 @@ length_size_bin_distributions |>
 
 ```{r}
 #| label: fig-ais-length-power-relationship
-#| fig-cap: Relationship between main engine power (killowatts) and length (meters) for all AIS-broadcasting vessels, disaggregated by non-fishing and fishing vessels.
+#| fig-cap: Relationship between main engine power (kilowatts) and length (meters) for all AIS-broadcasting vessels, disaggregated by non-fishing and fishing vessels.
 #| fig-height: 7
 #| fig-width: 6
 vessel_size_info |>
@@ -2294,6 +2295,7 @@ all_performance_metrics_table <- all_performance_metrics |>
       Metric == "pr_auc" ~ "Precision-recall AUC",
       Metric == "roc_auc" ~ "ROC AUC",
       Metric == "precision" ~ "Precision",
+      Metric == "recall" ~ "Recall",
       Metric == "sensitivity" ~ "Sensitivity",
       Metric == "specificity" ~ "Specificity",
       Metric ==
@@ -2330,7 +2332,22 @@ writeLines(
 #| results: 'asis'
 
 lm_other_gases_tidy_fit_stats_tbl <- lm_other_gases_tidy_fit_stats |>
-  dplyr::mutate(term = stringr::str_remove_all(term, "_")) |>
+  # Compact labels for the model terms, so the table fits on the page
+  dplyr::mutate(
+    term = dplyr::case_when(
+      stringr::str_detect(term, "log\\(mean_distance_from_shore_m") ~
+        "CO2 : log(distance from shore + 1)",
+      stringr::str_detect(term, "post_2020FALSE:fishingFALSE") ~
+        "CO2 : pre-2020 : non-fishing",
+      stringr::str_detect(term, "post_2020TRUE:fishingFALSE") ~
+        "CO2 : post-2020 : non-fishing",
+      stringr::str_detect(term, "post_2020FALSE:fishingTRUE") ~
+        "CO2 : pre-2020 : fishing",
+      stringr::str_detect(term, "post_2020TRUE:fishingTRUE") ~
+        "CO2 : post-2020 : fishing",
+      TRUE ~ term
+    )
+  ) |>
   dplyr::mutate(
     pollutant = stringr::str_to_upper(pollutant) |>
       stringr::str_replace_all("_", "."),
@@ -2341,18 +2358,23 @@ lm_other_gases_tidy_fit_stats_tbl <- lm_other_gases_tidy_fit_stats |>
   ) |>
   dplyr::select(-c(model, run_version_dark_fleet_rf)) |>
   dplyr::arrange(pollutant) |>
-  dplyr::mutate(std_error = scales::scientific(std_error)) |>
+  dplyr::mutate(
+    estimate = scales::scientific(estimate, digits = 3),
+    std_error = scales::scientific(std_error, digits = 3),
+    statistic = round(statistic, 1),
+    p_value = ifelse(p_value < 0.001, "<0.001", as.character(round(p_value, 3)))
+  ) |>
   dplyr::rename(
     Pollutant = pollutant,
     Term = term,
-    `Coefficient estimate` = estimate,
-    `Standard error` = std_error,
-    `T-statistic` = statistic,
-    `p.value` = p_value
+    Estimate = estimate,
+    SE = std_error,
+    `T-stat.` = statistic,
+    `p-value` = p_value
   ) |>
   knitr::kable(
     format = "latex",
-    caption = "Linear regression fit statistics for the final models trained to estimate emissions of non-CO$_2$ gases from CO$_2$ emissions. The model for each gas has 2 fit terms.",
+    caption = "Linear regression fit statistics for the final models trained to estimate emissions of non-CO$_2$ gases from CO$_2$ emissions. The model for each gas is a zero-intercept linear regression with 5 terms: CO$_2$ emissions interacted with each combination of period (pre/post-2020 IMO sulphur policy) and vessel type (fishing/non-fishing), plus CO$_2$ emissions interacted with the log of mean distance from shore.",
     label = "lm_other_gases_tidy_fit_stats",
     digits = 3
   ) |>
@@ -2427,7 +2449,7 @@ all_varimp_data |>
   )) +
   geom_bar(stat = "identity") +
   labs(
-    x = "Feature importance score (Gini impurtity corrected)",
+    x = "Feature importance score (Gini impurity corrected)",
     y = "",
   ) +
   theme_plot() +
@@ -2500,7 +2522,7 @@ total_spatial_co2_emissions_dark_by_footprint |>
 
 ```{r}
 #| label: fig-pollutant-maps-qlog10
-#| fig-cap: !expr 'paste0("Spatial maps ", analysis_end_year, " emissions for each GHG and pollutant, aggregated across AIS-broadcasting vessels and non-broadcasting vessels, and shown at a 1x1 degree spatial resolution. Emissions are area-normalized for each pixel (metric tonnes per square kilometer), and shown using a log-10 scale.")'
+#| fig-cap: !expr 'paste0("Spatial maps of ", analysis_end_year, " emissions for each GHG and pollutant, aggregated across AIS-broadcasting vessels and non-broadcasting vessels, and shown at a 1x1 degree spatial resolution. Emissions are area-normalized for each pixel (metric tonnes per square kilometer), and shown using a log-10 scale.")'
 #| fig-width: 8
 #| fig-height: 8
 
@@ -2935,7 +2957,7 @@ annual_sc_fishing_non_fishing_tbl <- annual_sc_fishing_non_fishing |>
   knitr::kable(
     format = "latex",
     label = "social_cost_summary_tbl",
-    caption = "For both non-fishing vessels and fishing vessels, we summarize: the total emissions (metric tonnes) of each GHG gas; the social cost associated with each GHG (USD/metric tonne); the social cost of each (USD); the total social cost summed across all three gasses (USD). We use 2021 for non-fishing vessels since it is the year for which we have the total value of all traded goods at sea. We use 2022 for fishing vessels since it is the year for which we have the total value of wild capture fisheries.",
+    caption = "For both non-fishing vessels and fishing vessels, we summarize: the total emissions (metric tonnes) of each GHG gas; the social cost associated with each GHG (USD/metric tonne); the social cost of each (USD); the total social cost summed across all three gases (USD). We use 2021 for non-fishing vessels since it is the year for which we have the total value of all traded goods at sea. We use 2022 for fishing vessels since it is the year for which we have the total value of wild capture fisheries.",
     digits = 3
   ) |>
   kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
