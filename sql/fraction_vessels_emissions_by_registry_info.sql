@@ -11,8 +11,8 @@ FROM `world-fishing-827.proj_ocean_ghg.vessel_info_{run_version_ais}`),
 vessel_emissions AS(
    SELECT ssvid, SUM(emissions_co2_mt) emissions_co2_mt
     FROM
-      `world-fishing-827.proj_ocean_ghg.annual_emissions_by_vessel_{run_version_ais}`
-    WHERE year BETWEEN {analysis_start_year} and {analysis_end_year}
+      `world-fishing-827.proj_ocean_ghg.daily_gridded_emissions_by_vessel_{run_version_ais}`
+    WHERE EXTRACT(YEAR FROM date) BETWEEN {analysis_start_year} and {analysis_end_year}
     GROUP BY ssvid
 )
 SELECT

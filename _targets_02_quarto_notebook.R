@@ -12,175 +12,143 @@ list(
   # Load all GFW CSVs generated in _targets_01_gfw_data_pull.R ----
   tar_file_read(
     name = n_unique_vessels,
-    command = here::here("data/gfw/n_unique_vessels.csv"),
+    command = file.path("data", "gfw", "n_unique_vessels.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
     name = n_ais_messages,
-    command = here::here("data/gfw/n_ais_messages.csv"),
+    command = file.path("data", "gfw", "n_ais_messages.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
     name = fraction_vessels_emissions_by_registry_info,
-    command = here::here(
-      "data/gfw/fraction_vessels_emissions_by_registry_info.csv"
-    ),
+    command = file.path("data", "gfw", "fraction_vessels_emissions_by_registry_info.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
     name = ping_level_hours_distribution,
-    command = here::here("data/gfw/ping_level_hours_distribution.csv"),
+    command = file.path("data", "gfw", "ping_level_hours_distribution.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
     name = n_s1_detections,
-    command = here::here("data/gfw/n_s1_detections.csv"),
+    command = file.path("data", "gfw", "n_s1_detections.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
     name = s1_time_series,
-    command = here::here("data/gfw/s1_time_series.csv"),
+    command = file.path("data", "gfw", "s1_time_series.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
     name = length_size_bin_distributions,
-    command = here::here("data/gfw/length_size_bin_distributions.csv"),
+    command = file.path("data", "gfw", "length_size_bin_distributions.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
     name = all_performance_metrics,
-    command = here::here("data/gfw/all_performance_metrics.csv"),
+    command = file.path("data", "gfw", "all_performance_metrics.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
     name = all_varimp_data,
-    command = here::here("data/gfw/all_varimp_data.csv"),
+    command = file.path("data", "gfw", "all_varimp_data.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
     name = performance_detections_cls_roc_pr_curves,
-    command = here::here(
-      "data/gfw/performance_detections_cls_roc_pr_curves.csv"
-    ),
+    command = file.path("data", "gfw", "performance_detections_cls_roc_pr_curves.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
     name = performance_detections_cls_conf_mat,
-    command = here::here("data/gfw/performance_detections_cls_conf_mat.csv"),
+    command = file.path("data", "gfw", "performance_detections_cls_conf_mat.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
     name = monthly_aggregated_time_series,
-    command = here::here("data/gfw/monthly_aggregated_time_series.csv"),
+    command = file.path("data", "gfw", "monthly_aggregated_time_series.csv"),
     read = readr::read_csv(!!.x)
   ),
 
   tar_file_read(
     name = annual_emissions_all_pollutants,
-    command = here::here("data/gfw/annual_emissions_all_pollutants.csv"),
+    command = file.path("data", "gfw", "annual_emissions_all_pollutants.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
     name = total_spatial_emissions_by_pollutant,
-    command = here::here(
-      "data/gfw/total_spatial_emissions_by_pollutant.csv"
-    ),
+    command = file.path("data", "gfw", "total_spatial_emissions_by_pollutant.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
     name = total_spatial_co2_emissions_by_ocean,
-    command = here::here(
-      "data/gfw/total_spatial_co2_emissions_by_ocean.csv"
-    ),
+    command = file.path("data", "gfw", "total_spatial_co2_emissions_by_ocean.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
     name = total_monthly_emissions_by_pollutant,
-    command = here::here(
-      "data/gfw/total_monthly_emissions_by_pollutant.csv"
-    ),
+    command = file.path("data", "gfw", "total_monthly_emissions_by_pollutant.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
     name = number_s1_imaged_months_by_pixel,
-    command = here::here(
-      "data/gfw/number_s1_imaged_months_by_pixel.csv"
-    ),
+    command = file.path("data", "gfw", "number_s1_imaged_months_by_pixel.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
     name = lm_other_gases_tidy_fit_stats,
-    command = here::here(
-      "data/gfw/lm_other_gases_tidy_fit_stats.csv"
-    ),
+    command = file.path("data", "gfw", "lm_other_gases_tidy_fit_stats.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
     name = port_visit_co2_emissions_by_country,
-    command = here::here(
-      "data/gfw/port_visit_co2_emissions_by_country.csv"
-    ),
+    command = file.path("data", "gfw", "port_visit_co2_emissions_by_country.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
     name = trip_co2_emissions_by_from_to_countries,
-    command = here::here(
-      "data/gfw/trip_co2_emissions_by_from_to_countries.csv"
-    ),
+    command = file.path("data", "gfw", "trip_co2_emissions_by_from_to_countries.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
     name = annual_global_emissions_by_receiver_type,
-    command = here::here(
-      "data/gfw/annual_global_emissions_by_receiver_type.csv"
-    ),
+    command = file.path("data", "gfw", "annual_global_emissions_by_receiver_type.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
     name = annual_global_emissions_by_receiver_type_and_flag,
-    command = here::here(
-      "data/gfw/annual_global_emissions_by_receiver_type_and_flag.csv"
-    ),
+    command = file.path("data", "gfw", "annual_global_emissions_by_receiver_type_and_flag.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
     name = annual_spatial_emissions_by_receiver_type,
-    command = here::here(
-      "data/gfw/annual_spatial_emissions_by_receiver_type.csv"
-    ),
+    command = file.path("data", "gfw", "annual_spatial_emissions_by_receiver_type.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
     name = annual_spatial_co2_emissions_ais_dark_by_fleet,
-    command = here::here(
-      "data/gfw/annual_spatial_co2_emissions_ais_dark_by_fleet.csv"
-    ),
+    command = file.path("data", "gfw", "annual_spatial_co2_emissions_ais_dark_by_fleet.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
     name = total_spatial_co2_emissions_dark_by_footprint,
-    command = here::here(
-      "data/gfw/total_spatial_co2_emissions_dark_by_footprint.csv"
-    ),
+    command = file.path("data", "gfw", "total_spatial_co2_emissions_dark_by_footprint.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
     name = vessel_size_info,
-    command = here::here(
-      "data/gfw/vessel_size_info.csv"
-    ),
+    command = file.path("data", "gfw", "vessel_size_info.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
     name = registered_validation_data,
-    command = here::here(
-      "data/registered_validation_data/registered_validation_data.csv"
-    ),
+    command = file.path("data", "registered_validation_data", "registered_validation_data.csv"),
     read = readr::read_csv(!!.x)
   ),
   tar_target(
     name = mrv_raw_files,
-    command = list.files(here::here("data/MRV/raw"), full.names = TRUE),
+    command = list.files(file.path("data", "MRV", "raw"), full.names = TRUE),
     format = "file"
   ),
   tar_target(
@@ -189,9 +157,7 @@ list(
   ),
   tar_file_read(
     name = trip_emissions_for_mrv_validation,
-    command = here::here(
-      "data/MRV/trip_emissions_for_mrv_validation.csv"
-    ),
+    command = file.path("data", "MRV", "trip_emissions_for_mrv_validation.csv"),
     read = readr::read_csv(!!.x)
   ),
   # Load other data ----
@@ -202,17 +168,13 @@ list(
   # For each substance emission time series (1970-2024) by sector and country are provided in an overview table (.xlsx). Emission country totals are expressed in kton substance / year. The IPCC 1996 and 2006 codes are used for specification of the sectors.
   tar_file_read(
     name = annual_edgar_emissions,
-    command = here::here(
-      "data/IEA_EDGAR_CO2_1970_2024/IEA_EDGAR_CO2_1970_2024.xlsx"
-    ),
+    command = file.path("data", "IEA_EDGAR_CO2_1970_2024", "IEA_EDGAR_CO2_1970_2024.xlsx"),
     read = readxl::read_excel(!!.x, sheet = "IPCC 2006", skip = 9)
   ),
   # Downloaded from here on August 27, 2025: https://data-explorer.oecd.org/vis?fs[0]=Topic%2C1%7CEnvironment%20and%20climate%20change%23ENV%23%7CAir%20and%20climate%23ENV_AC%23&pg=0&fc=Topic&bp=true&snb=17&df[ds]=dsDisseminateFinalDMZ&df[id]=DSD_MARITIME_TRANSPORT%40DF_MARITIME_TRANSPORT&df[ag]=OECD.SDD.NAD.SEEA&df[vs]=1.0&dq=W.A......ALL_VESSELS&pd=2019%2C2024&to[TIME_PERIOD]=false&vw=tb&isAvailabilityDisabled=false
   tar_file_read(
     name = oecd_data,
-    command = here::here(
-      "data/oecd/annual_oecd_experimental_data.csv"
-    ),
+    command = file.path("data", "oecd", "annual_oecd_experimental_data.csv"),
     read = readr::read_csv(!!.x) |>
       dplyr::select(year = TIME_PERIOD, emissions_co2_mt = OBS_VALUE) |>
       dplyr::mutate(data_source = "OECD")
@@ -220,17 +182,13 @@ list(
   # Data sources table, for model feature table in supplement
   tar_file_read(
     name = data_sources,
-    command = here::here(
-      "data/data_sources.csv"
-    ),
+    command = file.path("data", "data_sources.csv"),
     read = readr::read_csv(!!.x)
   ),
   # Data sources table, for model feature table in supplement
   tar_file_read(
     name = pixels_for_offshore_training_testing_split,
-    command = here::here(
-      "data/gfw/pixels_for_offshore_training_testing_split.csv"
-    ),
+    command = file.path("data", "gfw", "pixels_for_offshore_training_testing_split.csv"),
     read = readr::read_csv(!!.x)
   ),
   # Render quarto notebook -----

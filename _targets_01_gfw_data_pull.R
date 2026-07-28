@@ -21,12 +21,12 @@ list(
   tar_target(
     # Define the version of the AIS dataset to pull
     name = run_version_ais,
-    "v20250701"
+    "v20260714"
   ),
   # Define the version of the dark fleet dataset to pull
   tar_target(
     name = run_version_dark,
-    "v20260316"
+    "paper_v20260714"
   ),
   # Set analysis start year
   tar_target(
@@ -36,12 +36,12 @@ list(
   # Set analysis end year
   tar_target(
     name = analysis_end_year,
-    2024
+    2025
   ),
   # Number of unique vessels with emissions data during our time period
   tar_file_read(
     name = n_unique_vessels,
-    command = here::here("sql/n_unique_vessels.sql"),
+    command = file.path("sql", "n_unique_vessels.sql"),
     read = download_gfw_data(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
@@ -50,14 +50,14 @@ list(
           analysis_start_year = analysis_start_year,
           analysis_end_year = analysis_end_year
         ),
-      file_path = here::here("data/gfw/n_unique_vessels.csv"),
+      file_path = file.path("data", "gfw", "n_unique_vessels.csv"),
     ),
     format = "file"
   ),
   # Number of AIS messages with emissions data during our time period
   tar_file_read(
     name = n_ais_messages,
-    command = here::here("sql/n_ais_messages.sql"),
+    command = file.path("sql", "n_ais_messages.sql"),
     read = download_gfw_data(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
@@ -66,7 +66,7 @@ list(
           analysis_start_year = analysis_start_year,
           analysis_end_year = analysis_end_year
         ),
-      file_path = here::here("data/gfw/n_ais_messages.csv"),
+      file_path = file.path("data", "gfw", "n_ais_messages.csv"),
     ),
     format = "file"
   ),
@@ -74,7 +74,7 @@ list(
   # for vessels: on the IMO registry; on some other registry; and without any registry info
   tar_file_read(
     name = fraction_vessels_emissions_by_registry_info,
-    command = here::here("sql/fraction_vessels_emissions_by_registry_info.sql"),
+    command = file.path("sql", "fraction_vessels_emissions_by_registry_info.sql"),
     read = download_gfw_data(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
@@ -83,16 +83,14 @@ list(
           analysis_start_year = analysis_start_year,
           analysis_end_year = analysis_end_year
         ),
-      file_path = here::here(
-        "data/gfw/fraction_vessels_emissions_by_registry_info.csv"
-      ),
+      file_path = file.path("data", "gfw", "fraction_vessels_emissions_by_registry_info.csv"),
     ),
     format = "file"
   ),
   # Distribution of ping-level hours values (min, mean, max, median)
   tar_file_read(
     name = ping_level_hours_distribution,
-    command = here::here("sql/ping_level_hours_distribution.sql"),
+    command = file.path("sql", "ping_level_hours_distribution.sql"),
     read = download_gfw_data(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
@@ -101,14 +99,14 @@ list(
           analysis_start_year = analysis_start_year,
           analysis_end_year = analysis_end_year
         ),
-      file_path = here::here("data/gfw/ping_level_hours_distribution.csv"),
+      file_path = file.path("data", "gfw", "ping_level_hours_distribution.csv"),
     ),
     format = "file"
   ),
   # Number of S1 detections used during our time period
   tar_file_read(
     name = n_s1_detections,
-    command = here::here("sql/n_s1_detections.sql"),
+    command = file.path("sql", "n_s1_detections.sql"),
     read = download_gfw_data(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
@@ -117,7 +115,7 @@ list(
           analysis_start_year = analysis_start_year,
           analysis_end_year = analysis_end_year
         ),
-      file_path = here::here("data/gfw/n_s1_detections.csv"),
+      file_path = file.path("data", "gfw", "n_s1_detections.csv"),
     ),
     format = "file"
   ),
@@ -125,7 +123,7 @@ list(
   # by month, during our time period
   tar_file_read(
     name = s1_time_series,
-    command = here::here("sql/s1_time_series.sql"),
+    command = file.path("sql", "s1_time_series.sql"),
     read = download_gfw_data(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
@@ -134,21 +132,21 @@ list(
           analysis_start_year = analysis_start_year,
           analysis_end_year = analysis_end_year
         ),
-      file_path = here::here("data/gfw/s1_time_series.csv"),
+      file_path = file.path("data", "gfw", "s1_time_series.csv"),
     ),
     format = "file"
   ),
   # Get distributions of AIS vessels and S1 detections by length size bin and fishing/non-fishing
   tar_file_read(
     name = length_size_bin_distributions,
-    command = here::here("sql/length_size_bin_distributions.sql"),
+    command = file.path("sql", "length_size_bin_distributions.sql"),
     read = download_gfw_data(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
         stringr::str_glue(
           run_version_dark = run_version_dark
         ),
-      file_path = here::here("data/gfw/length_size_bin_distributions.csv"),
+      file_path = file.path("data", "gfw", "length_size_bin_distributions.csv"),
     ),
     format = "file"
   ),
@@ -162,7 +160,7 @@ list(
         stringr::str_glue(
           run_version_dark = run_version_dark
         ),
-      file_path = here::here("data/gfw/all_performance_metrics.csv"),
+      file_path = file.path("data", "gfw", "all_performance_metrics.csv"),
     )
   ),
   # Pull variable importance data for all final model fits
@@ -174,7 +172,7 @@ list(
         stringr::str_glue(
           run_version_dark = run_version_dark
         ),
-      file_path = here::here("data/gfw/all_varimp_data.csv"),
+      file_path = file.path("data", "gfw", "all_varimp_data.csv"),
     )
   ),
   # Pull ROC and PR curves for classification model performance assessment
@@ -186,9 +184,7 @@ list(
         stringr::str_glue(
           run_version_dark = run_version_dark
         ),
-      file_path = here::here(
-        "data/gfw/performance_detections_cls_roc_pr_curves.csv"
-      ),
+      file_path = file.path("data", "gfw", "performance_detections_cls_roc_pr_curves.csv"),
     )
   ),
   # Pull confusion matrices for classification model performance assessment
@@ -200,9 +196,7 @@ list(
         stringr::str_glue(
           run_version_dark = run_version_dark
         ),
-      file_path = here::here(
-        "data/gfw/performance_detections_cls_conf_mat.csv"
-      ),
+      file_path = file.path("data", "gfw", "performance_detections_cls_conf_mat.csv"),
     )
   ),
   # Monthly summary of Co2 emissions for AIS-broadcasting fleet and non-broadcasting vessels,
@@ -210,14 +204,14 @@ list(
   # inside and outside the S1 footprint; and imaged and not imaged in the S1 footprint
   tar_file_read(
     name = monthly_aggregated_time_series,
-    command = here::here("sql/monthly_aggregated_time_series.sql"),
+    command = file.path("sql", "monthly_aggregated_time_series.sql"),
     read = download_gfw_data(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
         stringr::str_glue(
           run_version_dark = run_version_dark
         ),
-      file_path = here::here("data/gfw/monthly_aggregated_time_series.csv"),
+      file_path = file.path("data", "gfw", "monthly_aggregated_time_series.csv"),
     ),
     format = "file"
   ),
@@ -226,7 +220,7 @@ list(
   # For all pollutants
   tar_file_read(
     name = annual_emissions_all_pollutants,
-    command = here::here("sql/annual_emissions_all_pollutants.sql"),
+    command = file.path("sql", "annual_emissions_all_pollutants.sql"),
     read = download_gfw_data(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
@@ -235,7 +229,7 @@ list(
           analysis_start_year = analysis_start_year,
           analysis_end_year = analysis_end_year
         ),
-      file_path = here::here("data/gfw/annual_emissions_all_pollutants.csv"),
+      file_path = file.path("data", "gfw", "annual_emissions_all_pollutants.csv"),
     ),
     format = "file"
   ),
@@ -243,7 +237,7 @@ list(
   # Aggregated across AIS-broadcasting and non-broadcasting fleets
   tar_file_read(
     name = total_spatial_emissions_by_pollutant,
-    command = here::here("sql/total_spatial_emissions_by_pollutant.sql"),
+    command = file.path("sql", "total_spatial_emissions_by_pollutant.sql"),
     read = download_gfw_data(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
@@ -252,18 +246,14 @@ list(
           analysis_start_year = analysis_start_year,
           analysis_end_year = analysis_end_year
         ),
-      file_path = here::here(
-        "data/gfw/total_spatial_emissions_by_pollutant.csv"
-      ),
+      file_path = file.path("data", "gfw", "total_spatial_emissions_by_pollutant.csv"),
     ),
     format = "file"
   ),
   # Disaggregated CO2 emissions between AIS-broadcasting and non-broadcasting fleets
   tar_file_read(
     name = total_spatial_co2_emissions_by_ocean,
-    command = here::here(
-      "sql/total_spatial_co2_emissions_by_ocean.sql"
-    ),
+    command = file.path("sql", "total_spatial_co2_emissions_by_ocean.sql"),
     read = download_gfw_data(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
@@ -272,18 +262,14 @@ list(
           analysis_start_year = analysis_start_year,
           analysis_end_year = analysis_end_year
         ),
-      file_path = here::here(
-        "data/gfw/total_spatial_co2_emissions_by_ocean.csv"
-      ),
+      file_path = file.path("data", "gfw", "total_spatial_co2_emissions_by_ocean.csv"),
     ),
     format = "file"
   ),
   # Disaggregated CO2 emissions between AIS-broadcasting and non-broadcasting fleets
   tar_file_read(
     name = annual_spatial_co2_emissions_ais_dark_by_fleet,
-    command = here::here(
-      "sql/annual_spatial_co2_emissions_ais_dark_by_fleet.sql"
-    ),
+    command = file.path("sql", "annual_spatial_co2_emissions_ais_dark_by_fleet.sql"),
     read = download_gfw_data(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
@@ -292,18 +278,14 @@ list(
           analysis_start_year = analysis_start_year,
           analysis_end_year = analysis_end_year
         ),
-      file_path = here::here(
-        "data/gfw/annual_spatial_co2_emissions_ais_dark_by_fleet.csv"
-      ),
+      file_path = file.path("data", "gfw", "annual_spatial_co2_emissions_ais_dark_by_fleet.csv"),
     ),
     format = "file"
   ),
   # Disaggregated dark CO2 emissions falling within and outside the S1 footprint
   tar_file_read(
     name = total_spatial_co2_emissions_dark_by_footprint,
-    command = here::here(
-      "sql/total_spatial_co2_emissions_dark_by_footprint.sql"
-    ),
+    command = file.path("sql", "total_spatial_co2_emissions_dark_by_footprint.sql"),
     read = download_gfw_data(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
@@ -312,16 +294,14 @@ list(
           analysis_start_year = analysis_start_year,
           analysis_end_year = analysis_end_year
         ),
-      file_path = here::here(
-        "data/gfw/total_spatial_co2_emissions_dark_by_footprint.csv"
-      ),
+      file_path = file.path("data", "gfw", "total_spatial_co2_emissions_dark_by_footprint.csv"),
     ),
     format = "file"
   ),
   # Download total monthly non-spatial emissions by pollutant
   tar_file_read(
     name = total_monthly_emissions_by_pollutant,
-    command = here::here("sql/total_monthly_emissions_by_pollutant.sql"),
+    command = file.path("sql", "total_monthly_emissions_by_pollutant.sql"),
     read = download_gfw_data(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
@@ -330,9 +310,7 @@ list(
           analysis_start_year = analysis_start_year,
           analysis_end_year = analysis_end_year
         ),
-      file_path = here::here(
-        "data/gfw/total_monthly_emissions_by_pollutant.csv"
-      )
+      file_path = file.path("data", "gfw", "total_monthly_emissions_by_pollutant.csv")
     ),
     format = "file"
   ),
@@ -346,24 +324,20 @@ list(
         stringr::str_glue(
           run_version_dark = run_version_dark
         ),
-      file_path = here::here(
-        "data/gfw/pixels_for_offshore_training_testing_split.csv"
-      )
+      file_path = file.path("data", "gfw", "pixels_for_offshore_training_testing_split.csv")
     )
   ),
   # For each pixel, count up number of months that are imaged by S1 and not imaged
   tar_file_read(
     name = number_s1_imaged_months_by_pixel,
-    command = here::here("sql/number_s1_imaged_months_by_pixel.sql"),
+    command = file.path("sql", "number_s1_imaged_months_by_pixel.sql"),
     read = download_gfw_data(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
         stringr::str_glue(
           run_version_dark = run_version_dark
         ),
-      file_path = here::here(
-        "data/gfw/number_s1_imaged_months_by_pixel.csv"
-      )
+      file_path = file.path("data", "gfw", "number_s1_imaged_months_by_pixel.csv")
     ),
     format = "file"
   ),
@@ -377,15 +351,13 @@ list(
         stringr::str_glue(
           run_version_dark = run_version_dark
         ),
-      file_path = here::here(
-        "data/gfw/lm_other_gases_tidy_fit_stats.csv"
-      )
+      file_path = file.path("data", "gfw", "lm_other_gases_tidy_fit_stats.csv")
     )
   ),
   # Total annual port visit CO2 emissions by country and vessel class
   tar_file_read(
     name = port_visit_co2_emissions_by_country,
-    command = here::here("sql/port_visit_co2_emissions_by_country.sql"),
+    command = file.path("sql", "port_visit_co2_emissions_by_country.sql"),
     read = download_gfw_data(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
@@ -394,16 +366,14 @@ list(
           analysis_start_year = analysis_start_year,
           analysis_end_year = analysis_end_year
         ),
-      file_path = here::here(
-        "data/gfw/port_visit_co2_emissions_by_country.csv"
-      )
+      file_path = file.path("data", "gfw", "port_visit_co2_emissions_by_country.csv")
     ),
     format = "file"
   ),
   # Total annual trip-level CO2 emissions by from- and to-country and vessel class
   tar_file_read(
     name = trip_co2_emissions_by_from_to_countries,
-    command = here::here("sql/trip_co2_emissions_by_from_to_countries.sql"),
+    command = file.path("sql", "trip_co2_emissions_by_from_to_countries.sql"),
     read = download_gfw_data(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
@@ -412,16 +382,14 @@ list(
           analysis_start_year = analysis_start_year,
           analysis_end_year = analysis_end_year
         ),
-      file_path = here::here(
-        "data/gfw/trip_co2_emissions_by_from_to_countries.csv"
-      )
+      file_path = file.path("data", "gfw", "trip_co2_emissions_by_from_to_countries.csv")
     ),
     format = "file"
   ),
   # Annual AIS-broadcasting emissions and unique vessels by receiver type
   tar_file_read(
     name = annual_global_emissions_by_receiver_type,
-    command = here::here("sql/annual_global_emissions_by_receiver_type.sql"),
+    command = file.path("sql", "annual_global_emissions_by_receiver_type.sql"),
     read = download_gfw_data(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
@@ -430,18 +398,14 @@ list(
           analysis_start_year = analysis_start_year,
           analysis_end_year = analysis_end_year
         ),
-      file_path = here::here(
-        "data/gfw/annual_global_emissions_by_receiver_type.csv"
-      )
+      file_path = file.path("data", "gfw", "annual_global_emissions_by_receiver_type.csv")
     ),
     format = "file"
   ),
   # Annual AIS-broadcasting emissions by receiver type and flag
   tar_file_read(
     name = annual_global_emissions_by_receiver_type_and_flag,
-    command = here::here(
-      "sql/annual_global_emissions_by_receiver_type_and_flag.sql"
-    ),
+    command = file.path("sql", "annual_global_emissions_by_receiver_type_and_flag.sql"),
     read = download_gfw_data(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
@@ -450,16 +414,14 @@ list(
           analysis_start_year = analysis_start_year,
           analysis_end_year = analysis_end_year
         ),
-      file_path = here::here(
-        "data/gfw/annual_global_emissions_by_receiver_type_and_flag.csv"
-      )
+      file_path = file.path("data", "gfw", "annual_global_emissions_by_receiver_type_and_flag.csv")
     ),
     format = "file"
   ),
   # Spatial AIS-broadcasting emissions by receiver type for starting and ending years
   tar_file_read(
     name = annual_spatial_emissions_by_receiver_type,
-    command = here::here("sql/annual_spatial_emissions_by_receiver_type.sql"),
+    command = file.path("sql", "annual_spatial_emissions_by_receiver_type.sql"),
     read = download_gfw_data(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
@@ -468,9 +430,7 @@ list(
           analysis_start_year = analysis_start_year,
           analysis_end_year = analysis_end_year
         ),
-      file_path = here::here(
-        "data/gfw/annual_spatial_emissions_by_receiver_type.csv"
-      )
+      file_path = file.path("data", "gfw", "annual_spatial_emissions_by_receiver_type.csv")
     ),
     format = "file"
   ),
@@ -478,45 +438,42 @@ list(
   # For plotting this relationship
   tar_file_read(
     name = vessel_size_info,
-    command = here::here("sql/vessel_size_info.sql"),
+    command = file.path("sql", "vessel_size_info.sql"),
     read = download_gfw_data(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
         stringr::str_glue(
           run_version_ais = run_version_ais
         ),
-      file_path = here::here(
-        "data/gfw/vessel_size_info.csv"
-      )
+      file_path = file.path("data", "gfw", "vessel_size_info.csv")
     ),
     format = "file"
   ),
   # Registered data validation
   tar_file_read(
     name = registered_validation_data,
-    command = here::here("sql/registered_data_validation.sql"),
-    read = download_gfw_data(
-      bq_billing_project,
-      sql = readr::read_file(!!.x),
-      file_path = here::here(
-        "data/registered_validation_data/registered_validation_data.csv"
-      )
-    ),
-    format = "file"
-  ),
-  # Trip emissions to validate using MRV data
-  tar_file_read(
-    name = trip_emissions_for_mrv_validation,
-    command = here::here("sql/trip_emissions_for_mrv_validation.sql"),
+    command = file.path("sql", "registered_data_validation.sql"),
     read = download_gfw_data(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
         stringr::str_glue(
           run_version_ais = run_version_ais
         ),
-      file_path = here::here(
-        "data/MRV/trip_emissions_for_mrv_validation.csv"
-      )
+      file_path = file.path("data", "registered_validation_data", "registered_validation_data.csv")
+    ),
+    format = "file"
+  ),
+  # Trip emissions to validate using MRV data
+  tar_file_read(
+    name = trip_emissions_for_mrv_validation,
+    command = file.path("sql", "trip_emissions_for_mrv_validation.sql"),
+    read = download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_ais = run_version_ais
+        ),
+      file_path = file.path("data", "MRV", "trip_emissions_for_mrv_validation.csv")
     ),
     format = "file"
   )
