@@ -51,8 +51,11 @@ trip_level_filtered AS (
 ),
 
 -- Get ssvid for vessels in EU dataset from IMO
+-- DISTINCT is required: the EU MRV table has one row per IMO per reporting
+-- period, so without it every trip row fans out several-fold before the
+-- SUMs below (ported from ocean-ghg, fixed there 2026-07-14; Bug 4)
 valid_ssvid AS (
-    SELECT 
+    SELECT DISTINCT
         ssvid,
         imo_number
     FROM 

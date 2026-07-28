@@ -25,7 +25,6 @@ s1_time_series_file|stem|e879caef3633dca4|4d63066934d47e96|2c530c1562a7fbd1|-210
 number_s1_imaged_months_by_pixel_file|stem|ee2a71e4fe30259a|7e6d220d999ca1d1|2c530c1562a7fbd1|-304449923|sql/number_s1_imaged_months_by_pixel.sql|t20662.7723107212s|s238b|238|file|local|vector|||0||
 annual_emissions_all_pollutants_file|stem|278311964bf573b1|032fd001bd6665fc|2c530c1562a7fbd1|1490773895|sql/annual_emissions_all_pollutants.sql|t20662.7723105708s|s1201b|1201|file|local|vector|||0||
 total_spatial_co2_emissions_dark_by_footprint_file|stem|388fa1557d848a3f|efacbff3e4ccd2a7|2c530c1562a7fbd1|1504915767|sql/total_spatial_co2_emissions_dark_by_footprint.sql|t20662.7723108254s|s408b|408|file|local|vector|||0||
-trip_emissions_for_mrv_validation_file|stem|80c226330c6d00b3|b0ba10bc9718a867|2c530c1562a7fbd1|-869772083|sql/trip_emissions_for_mrv_validation.sql|t20662.7723108601s|s4138b|4138|file|local|vector|||0||
 annual_global_emissions_by_receiver_type_file|stem|b1b1f63dda090fe8|b6d2e17690480f4f|2c530c1562a7fbd1|-1682798962|sql/annual_global_emissions_by_receiver_type.sql|t20662.7723105939s|s701b|701|file|local|vector|||0||
 n_s1_detections_file|stem|4416c90b7a2d6e7f|524f088a2929ef21|2c530c1562a7fbd1|-34664370|sql/n_s1_detections.sql|t20662.7723106981s|s416b|416|file|local|vector|||0||
 n_unique_vessels_file|stem|33f5e5f8c3212c84|8e828e1f65818e7b|2c530c1562a7fbd1|30567198|sql/n_unique_vessels.sql|t20662.7926030378s|s226b|226|file|local|vector|||0.001||
@@ -53,14 +52,15 @@ s1_time_series|stem|fff238d650dd6f53|f95207fa875c5c5e|66a0e58a5114fb42|147216384
 number_s1_imaged_months_by_pixel|stem|674eeec2496d6d54|63cd95c7c63080ac|363ca7287a8bc284|787452024|data/gfw/number_s1_imaged_months_by_pixel.csv|t20662.8086319007s|s631713b|631713|file|local|vector|||7.899||
 annual_emissions_all_pollutants|stem|11b864eb5427a570|7590d8eb14af3451|43617836ff96981d|1743342825|data/gfw/annual_emissions_all_pollutants.csv|t20662.8086609872s|s6442b|6442|file|local|vector|||2.505||
 total_spatial_co2_emissions_dark_by_footprint|stem|e244166738ac2eb8|47a395f06037cd99|06f5ca51eb36c382|-1663666381|data/gfw/total_spatial_co2_emissions_dark_by_footprint.csv|t20662.808717563s|s538024b|538024|file|local|vector|||4.884||
-trip_emissions_for_mrv_validation|stem|13cdf106196b3020|719beb356fcce2d1|143d2cc79f939cbf|1762988021|data/MRV/trip_emissions_for_mrv_validation.csv|t20662.8089325694s|s15679874b|15679874|file|local|vector|||18.57||
 annual_global_emissions_by_receiver_type|stem|58296c0450fa0095|24cee85d9f7e9a2f|1c9596343d95ee5a|-454120393|data/gfw/annual_global_emissions_by_receiver_type.csv|t20662.8095185243s|s1725b|1725|file|local|vector|||50.61||
 n_s1_detections|stem|fda1a02b6c59bc93|926b2fdfcde8dfdd|41a78d1b2d08aad8|-1220995872|data/gfw/n_s1_detections.csv|t20662.8095846952s|s107b|107|file|local|vector|||5.711||
 n_unique_vessels|stem|813b9c1fdd48f755|18f8608db1122d63|651d68d5b7ff7007|1556531303|data/gfw/n_unique_vessels.csv|t20662.8096511902s|s24b|24|file|local|vector|||5.738||
 n_ais_messages|stem|1c65015775eb1e49|c5bea9574a9190aa|0a80f1c5ca75965e|662157959|data/gfw/n_ais_messages.csv|t20662.8097444106s|s37b|37|file|local|vector|||8.046||
 vessel_size_info|stem|ae500f986ed249df|5b61c25cf3e61766|3bbdba3d38bcd87d|-1992877218|data/gfw/vessel_size_info.csv|t20662.8100351368s|s34621247b|34621247|file|local|vector|||25.113||
 ping_level_hours_distribution|stem|da36d1e9758e9091|b1190a11f493ea32|050fb60089d0ef07|901135014|data/gfw/ping_level_hours_distribution.csv|t20662.8102542405s|s124b|124|file|local|vector|||18.903||
-download_gfw_data|function|56ae83fa4e3ee8f3
-combine_EU_data|function|ad06f3aced59370c
 registered_validation_data_file|stem|44310d2ffb7f95c3|0663dd2c09f1cdce|2c530c1562a7fbd1|-307448036|sql/registered_data_validation.sql|t20662.811241133s|s6192b|6192|file|local|vector|||0||
 registered_validation_data|stem|e9a4c11ecd846ecd|260ab16a0102e463|a14467ae6c2bb0cc|-855102128|data/registered_validation_data/registered_validation_data.csv|t20662.8115076917s|s1056013b|1056013|file|local|vector|||8.442||
+download_gfw_data|function|56ae83fa4e3ee8f3
+combine_EU_data|function|ad06f3aced59370c
+trip_emissions_for_mrv_validation_file|stem|937d1c350709e265|b0ba10bc9718a867|2c530c1562a7fbd1|-869772083|sql/trip_emissions_for_mrv_validation.sql|t20662.8958731164s|s4364b|4364|file|local|vector|||0||
+trip_emissions_for_mrv_validation|stem|efc2fea48b4d7201|719beb356fcce2d1|6d1a8903cb3d511e|1762988021|data/MRV/trip_emissions_for_mrv_validation.csv|t20662.9001355635s|s15540019b|15540019|file|local|vector|||19.898||

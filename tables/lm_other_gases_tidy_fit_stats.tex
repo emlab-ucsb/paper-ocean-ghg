@@ -1,91 +1,91 @@
 \begin{table}[!h]
 \centering
-\caption{\label{tab:lm_other_gases_tidy_fit_stats}Linear regression fit statistics for the final models trained to estimate emissions of non-CO$_2$ gases from CO$_2$ emissions. The model for each gas has 2 fit terms.}
+\caption{\label{tab:lm_other_gases_tidy_fit_stats}Linear regression fit statistics for the final models trained to estimate emissions of non-CO$_2$ gases from CO$_2$ emissions. The model for each gas is a zero-intercept linear regression with 5 terms: CO$_2$ emissions interacted with each combination of period (pre/post-2020 IMO sulphur policy) and vessel type (fishing/non-fishing), plus CO$_2$ emissions interacted with the log of mean distance from shore.}
 \centering
 \fontsize{7}{9}\selectfont
-\begin{tabular}[t]{l|l|r|l|r|r}
+\begin{tabular}[t]{l|l|l|l|r|l}
 \hline
-Pollutant & Term & Coefficient estimate & Standard error & T-statistic & p.value\\
+Pollutant & Term & Estimate & SE & T-stat. & p-value\\
 \hline
-CH4 & emissionsco2mt:log(meandistancefromshorem + 1) & 0.000 & 3.29e-09 & 379.875 & 0\\
+CH4 & CO2 : log(distance from shore + 1) & 1.25e-06 & 3.29e-09 & 379.9 & <0.001\\
 \hline
-CH4 & emissionsco2mt:post2020FALSE:fishingFALSE & 0.000 & 3.17e-08 & -38.042 & 0\\
+CH4 & CO2 : pre-2020 : non-fishing & -1.21e-06 & 3.17e-08 & -38.0 & <0.001\\
 \hline
-CH4 & emissionsco2mt:post2020TRUE:fishingFALSE & 0.000 & 3.14e-08 & -61.349 & 0\\
+CH4 & CO2 : post-2020 : non-fishing & -1.92e-06 & 3.14e-08 & -61.3 & <0.001\\
 \hline
-CH4 & emissionsco2mt:post2020FALSE:fishingTRUE & 0.000 & 8.42e-08 & 43.904 & 0\\
+CH4 & CO2 : pre-2020 : fishing & 3.69e-06 & 8.42e-08 & 43.9 & <0.001\\
 \hline
-CH4 & emissionsco2mt:post2020TRUE:fishingTRUE & 0.000 & 4.52e-08 & 82.642 & 0\\
+CH4 & CO2 : post-2020 : fishing & 3.73e-06 & 4.52e-08 & 82.6 & <0.001\\
 \hline
-N2O & emissionsco2mt:log(meandistancefromshorem + 1) & 0.000 & 2.32e-09 & 307.957 & 0\\
+N2O & CO2 : log(distance from shore + 1) & 7.13e-07 & 2.32e-09 & 308.0 & <0.001\\
 \hline
-N2O & emissionsco2mt:post2020FALSE:fishingFALSE & 0.000 & 2.23e-08 & 1869.423 & 0\\
+N2O & CO2 : pre-2020 : non-fishing & 4.00e-05 & 2.23e-08 & 1869.4 & <0.001\\
 \hline
-N2O & emissionsco2mt:post2020TRUE:fishingFALSE & 0.000 & 2.21e-08 & 1865.728 & 0\\
+N2O & CO2 : post-2020 : non-fishing & 4.00e-05 & 2.21e-08 & 1865.7 & <0.001\\
 \hline
-N2O & emissionsco2mt:post2020FALSE:fishingTRUE & 0.000 & 5.92e-08 & 727.041 & 0\\
+N2O & CO2 : pre-2020 : fishing & 4.00e-05 & 5.92e-08 & 727.0 & <0.001\\
 \hline
-N2O & emissionsco2mt:post2020TRUE:fishingTRUE & 0.000 & 3.18e-08 & 1379.919 & 0\\
+N2O & CO2 : post-2020 : fishing & 4.00e-05 & 3.18e-08 & 1379.9 & <0.001\\
 \hline
-CO & emissionsco2mt:log(meandistancefromshorem + 1) & 0.000 & 1.57e-07 & 382.287 & 0\\
+CO & CO2 : log(distance from shore + 1) & 6.00e-05 & 1.57e-07 & 382.3 & <0.001\\
 \hline
-CO & emissionsco2mt:post2020FALSE:fishingFALSE & 0.000 & 1.51e-06 & 19.236 & 0\\
+CO & CO2 : pre-2020 : non-fishing & 3.00e-05 & 1.51e-06 & 19.2 & <0.001\\
 \hline
-CO & emissionsco2mt:post2020TRUE:fishingFALSE & 0.000 & 1.50e-06 & -3.662 & 0\\
+CO & CO2 : post-2020 : non-fishing & -5.49e-06 & 1.50e-06 & -3.7 & <0.001\\
 \hline
-CO & emissionsco2mt:post2020FALSE:fishingTRUE & 0.000 & 4.02e-06 & 67.869 & 0\\
+CO & CO2 : pre-2020 : fishing & 2.70e-04 & 4.02e-06 & 67.9 & <0.001\\
 \hline
-CO & emissionsco2mt:post2020TRUE:fishingTRUE & 0.000 & 2.16e-06 & 128.069 & 0\\
+CO & CO2 : post-2020 : fishing & 2.80e-04 & 2.16e-06 & 128.1 & <0.001\\
 \hline
-NOX & emissionsco2mt:log(meandistancefromshorem + 1) & 0.002 & 4.33e-06 & 466.681 & 0\\
+NOX & CO2 : log(distance from shore + 1) & 2.02e-03 & 4.33e-06 & 466.7 & <0.001\\
 \hline
-NOX & emissionsco2mt:post2020FALSE:fishingFALSE & -0.007 & 4.00e-05 & -176.274 & 0\\
+NOX & CO2 : pre-2020 : non-fishing & -7.34e-03 & 4.00e-05 & -176.3 & <0.001\\
 \hline
-NOX & emissionsco2mt:post2020TRUE:fishingFALSE & -0.008 & 4.00e-05 & -205.243 & 0\\
+NOX & CO2 : post-2020 : non-fishing & -8.45e-03 & 4.00e-05 & -205.2 & <0.001\\
 \hline
-NOX & emissionsco2mt:post2020FALSE:fishingTRUE & -0.001 & 1.10e-04 & -8.817 & 0\\
+NOX & CO2 : pre-2020 : fishing & -9.70e-04 & 1.10e-04 & -8.8 & <0.001\\
 \hline
-NOX & emissionsco2mt:post2020TRUE:fishingTRUE & -0.002 & 6.00e-05 & -36.129 & 0\\
+NOX & CO2 : post-2020 : fishing & -2.14e-03 & 6.00e-05 & -36.1 & <0.001\\
 \hline
-SOX & emissionsco2mt:log(meandistancefromshorem + 1) & 0.000 & 7.15e-08 & -173.062 & 0\\
+SOX & CO2 : log(distance from shore + 1) & -1.00e-05 & 7.15e-08 & -173.1 & <0.001\\
 \hline
-SOX & emissionsco2mt:post2020FALSE:fishingFALSE & 0.006 & 6.88e-07 & 9164.189 & 0\\
+SOX & CO2 : pre-2020 : non-fishing & 6.30e-03 & 6.88e-07 & 9164.2 & <0.001\\
 \hline
-SOX & emissionsco2mt:post2020TRUE:fishingFALSE & 0.002 & 6.81e-07 & 2441.103 & 0\\
+SOX & CO2 : post-2020 : non-fishing & 1.66e-03 & 6.81e-07 & 2441.1 & <0.001\\
 \hline
-SOX & emissionsco2mt:post2020FALSE:fishingTRUE & 0.006 & 1.83e-06 & 3486.129 & 0\\
+SOX & CO2 : pre-2020 : fishing & 6.37e-03 & 1.83e-06 & 3486.1 & <0.001\\
 \hline
-SOX & emissionsco2mt:post2020TRUE:fishingTRUE & 0.002 & 9.81e-07 & 1705.575 & 0\\
+SOX & CO2 : post-2020 : fishing & 1.67e-03 & 9.81e-07 & 1705.6 & <0.001\\
 \hline
-PM2.5 & emissionsco2mt:log(meandistancefromshorem + 1) & 0.000 & 9.11e-08 & 400.992 & 0\\
+PM2.5 & CO2 : log(distance from shore + 1) & 4.00e-05 & 9.11e-08 & 401.0 & <0.001\\
 \hline
-PM2.5 & emissionsco2mt:post2020FALSE:fishingFALSE & 0.000 & 8.76e-07 & 472.536 & 0\\
+PM2.5 & CO2 : pre-2020 : non-fishing & 4.10e-04 & 8.76e-07 & 472.5 & <0.001\\
 \hline
-PM2.5 & emissionsco2mt:post2020TRUE:fishingFALSE & 0.000 & 8.67e-07 & 58.147 & 0\\
+PM2.5 & CO2 : post-2020 : non-fishing & 5.00e-05 & 8.67e-07 & 58.1 & <0.001\\
 \hline
-PM2.5 & emissionsco2mt:post2020FALSE:fishingTRUE & 0.001 & 2.33e-06 & 228.924 & 0\\
+PM2.5 & CO2 : pre-2020 : fishing & 5.30e-04 & 2.33e-06 & 228.9 & <0.001\\
 \hline
-PM2.5 & emissionsco2mt:post2020TRUE:fishingTRUE & 0.000 & 1.25e-06 & 168.405 & 0\\
+PM2.5 & CO2 : post-2020 : fishing & 2.10e-04 & 1.25e-06 & 168.4 & <0.001\\
 \hline
-PM10 & emissionsco2mt:log(meandistancefromshorem + 1) & 0.000 & 9.90e-08 & 400.992 & 0\\
+PM10 & CO2 : log(distance from shore + 1) & 4.00e-05 & 9.90e-08 & 401.0 & <0.001\\
 \hline
-PM10 & emissionsco2mt:post2020FALSE:fishingFALSE & 0.000 & 9.52e-07 & 472.536 & 0\\
+PM10 & CO2 : pre-2020 : non-fishing & 4.50e-04 & 9.52e-07 & 472.5 & <0.001\\
 \hline
-PM10 & emissionsco2mt:post2020TRUE:fishingFALSE & 0.000 & 9.43e-07 & 58.147 & 0\\
+PM10 & CO2 : post-2020 : non-fishing & 5.00e-05 & 9.43e-07 & 58.1 & <0.001\\
 \hline
-PM10 & emissionsco2mt:post2020FALSE:fishingTRUE & 0.001 & 2.53e-06 & 228.924 & 0\\
+PM10 & CO2 : pre-2020 : fishing & 5.80e-04 & 2.53e-06 & 228.9 & <0.001\\
 \hline
-PM10 & emissionsco2mt:post2020TRUE:fishingTRUE & 0.000 & 1.36e-06 & 168.405 & 0\\
+PM10 & CO2 : post-2020 : fishing & 2.30e-04 & 1.36e-06 & 168.4 & <0.001\\
 \hline
-VOCs & emissionsco2mt:log(meandistancefromshorem + 1) & 0.000 & 2.02e-07 & 495.650 & 0\\
+VOCs & CO2 : log(distance from shore + 1) & 1.00e-04 & 2.02e-07 & 495.7 & <0.001\\
 \hline
-VOCs & emissionsco2mt:post2020FALSE:fishingFALSE & 0.000 & 1.94e-06 & -203.024 & 0\\
+VOCs & CO2 : pre-2020 : non-fishing & -3.90e-04 & 1.94e-06 & -203.0 & <0.001\\
 \hline
-VOCs & emissionsco2mt:post2020TRUE:fishingFALSE & 0.000 & 1.92e-06 & -227.991 & 0\\
+VOCs & CO2 : post-2020 : non-fishing & -4.40e-04 & 1.92e-06 & -228.0 & <0.001\\
 \hline
-VOCs & emissionsco2mt:post2020FALSE:fishingTRUE & 0.000 & 5.15e-06 & -39.044 & 0\\
+VOCs & CO2 : pre-2020 : fishing & -2.00e-04 & 5.15e-06 & -39.0 & <0.001\\
 \hline
-VOCs & emissionsco2mt:post2020TRUE:fishingTRUE & 0.000 & 2.77e-06 & -75.686 & 0\\
+VOCs & CO2 : post-2020 : fishing & -2.10e-04 & 2.77e-06 & -75.7 & <0.001\\
 \hline
 \end{tabular}
 \end{table}
