@@ -11,12 +11,44 @@ snp_fuel_consumption AS (
     `world-fishing-827.proj_ocean_ghg.snp_fuel_consumption_v20250607`
 ),
 
+-- The IMO Table 81 defaults (main engine power, design speed) used to be columns
+-- on vessel_info. As of v20260714 they live in their own lookup table, so we match
+-- them on vessel class and gross tonnage band here instead.
+-- Bump each band's lower bound up to the previous band's upper bound so no vessel
+-- falls through the bins. Same approach as the table 17 join in
+-- ocean-ghg/sql/ais/vessel_info.sql.
+imo_table_81 AS(
+  SELECT
+  vessel_class,
+  CASE
+    WHEN LAG(size_upper_gt) OVER (PARTITION BY vessel_class ORDER BY size_lower_gt) IS NOT NULL THEN LAG(size_upper_gt+1e-10) OVER (PARTITION BY vessel_class ORDER BY size_lower_gt)
+    ELSE CAST(size_lower_gt AS FLOAT64)
+    END
+  AS size_lower_gt,
+  size_upper_gt,
+  avg_main_engine_power_kw,
+  avg_design_speed_knots
+  FROM
+  `world-fishing-827.proj_ocean_ghg.main_engine_power_design_speed_by_vessel_type_imo`
+),
+
 vessel_info AS(
   SELECT
-  *,
-  `world-fishing-827.udfs.normalize_imo`(CAST(imo_ais AS STRING)) AS imo_ais_normalized
+  vessel_info.*,
+  `world-fishing-827.udfs.normalize_imo`(CAST(imo_ais AS STRING)) AS imo_ais_normalized,
+  imo_table_81.avg_main_engine_power_kw AS imo_table_81_avg_main_engine_power_kw,
+  imo_table_81.avg_design_speed_knots AS imo_table_81_avg_design_speed_knots
   FROM
-  `world-fishing-827.proj_ocean_ghg.vessel_info_v20250701`
+  `world-fishing-827.proj_ocean_ghg.vessel_info_{run_version_ais}` vessel_info
+  -- LEFT JOIN rather than the inner JOIN used upstream, so vessels whose class is
+  -- absent from table 81 keep a NULL IMO estimate instead of dropping out of the
+  -- validation sample entirely
+  LEFT JOIN
+  imo_table_81
+  ON vessel_info.vessel_class = imo_table_81.vessel_class
+  AND ROUND(vessel_info.tonnage_gt) >= imo_table_81.size_lower_gt
+  AND (ROUND(vessel_info.tonnage_gt) <= imo_table_81.size_upper_gt
+    OR imo_table_81.size_upper_gt IS NULL)
 ),
 
 -- Match vessels between datasets by mmsi/ssvid and imo number
@@ -44,7 +76,7 @@ load_factor_dataset AS (
         `world-fishing-827.proj_ocean_ghg.weather_correction_factor`(10000),  -- distance_from_shore_m (set to 10000m to define offshore navigation)
         `world-fishing-827.proj_ocean_ghg.draft_correction_factor`(),
         vessel_class,
-        on_fishing_list_best,
+        is_fishing_vessel_class,
         FALSE  -- fishing_activity
         ) AS main_engine_load_factor_imo,
 
@@ -56,7 +88,7 @@ load_factor_dataset AS (
         `world-fishing-827.proj_ocean_ghg.weather_correction_factor`(10000),  -- distance_from_shore_m (set to 10000m to define offshore navigation)
         `world-fishing-827.proj_ocean_ghg.draft_correction_factor`(),
         vessel_class,
-        on_fishing_list_best,
+        is_fishing_vessel_class,
         FALSE  -- fishing_activity
         ) AS main_engine_load_factor_rf,
 
@@ -68,7 +100,7 @@ load_factor_dataset AS (
         `world-fishing-827.proj_ocean_ghg.weather_correction_factor`(10000),  -- distance_from_shore_m (set to 10000m to define offshore navigation)
         `world-fishing-827.proj_ocean_ghg.draft_correction_factor`(),
         vessel_class,
-        on_fishing_list_best,
+        is_fishing_vessel_class,
         FALSE  -- fishing_activity
         ) AS main_engine_load_factor_registered,
     
