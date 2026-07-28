@@ -953,6 +953,15 @@ may be more susceptible to AIS adoption biases.
 
 ```{r}
 # Figure 1 A
+# Round the y-axis up to the next 0.25 billion MT. Don't hardcode the top: ggplot
+# drops points above the limit, so a fixed ceiling silently truncates a series once
+# emissions grow past it.
+co2_axis_max <- annual_emissions |>
+  dplyr::filter(pollutant == "co2") |>
+  dplyr::pull(emissions_mt) |>
+  max()
+co2_axis_max <- ceiling(co2_axis_max / 0.25e9) * 0.25e9
+
 total_annual_emissions_by_fleet_fig <- annual_emissions |>
   dplyr::filter(pollutant == "co2") |>
   dplyr::mutate(
@@ -966,8 +975,8 @@ total_annual_emissions_by_fleet_fig <- annual_emissions |>
   geom_line(linewidth = 1.1) +
   scale_y_continuous(
     labels = scales::unit_format(unit = "B", scale = 1e-9),
-    limits = c(0, 1.5e9),
-    breaks = seq(0, 1.5e9, 0.25e9)
+    limits = c(0, co2_axis_max),
+    breaks = seq(0, co2_axis_max, 0.25e9)
   ) +
   scale_x_continuous(
     breaks = unique(annual_emissions$year),
@@ -985,7 +994,8 @@ total_annual_emissions_by_fleet_fig <- annual_emissions |>
   theme(
     panel.grid.minor = element_blank(),
     legend.position = "inside",
-    legend.position.inside = c(0.75, 0.4),
+    # sits in the gap between the S1 and AIS lines, clear of where the series end
+    legend.position.inside = c(0.55, 0.28),
     legend.background = element_rect(fill = "white", color = "gray"),
     legend.title = element_blank()
   )
@@ -1017,7 +1027,7 @@ normalized_annual_emissions_by_fleet_fig <- annual_emissions |>
   geom_line(linewidth = 1.1) +
   scale_y_continuous(
     labels = scales::percent,
-    breaks = seq(0, 0.4, 0.1)
+    breaks = scales::breaks_width(0.1)
   ) +
   scale_x_continuous(
     breaks = unique(annual_emissions$year),
@@ -1461,7 +1471,7 @@ cowplot::plot_grid(
 
 ```{r}
 #| label: fig-emissions-marine-ocean-other
-#| fig-cap: !expr 'paste0("(A) Trend in CO$_{2}$ emissions by ocean (normalized to ", analysis_start_year, " baseline), use our fused AIS+S1 marine vessel data. (B) Comparison in trend of CO$_{2}$ emissions data (normalized to ", analysis_start_year, " baseline) between marine transportation emissions from GFW, other transportation emissions from EDGAR, and all sector emissions from EDGAR. On the right-hand side of the figure, ", analysis_end_year, " absolute values (in millions of metric tonnes) are shown as text and color-coded for each line.")'
+#| fig-cap: !expr 'paste0("(A) Trend in CO$_{2}$ emissions by ocean (normalized to ", analysis_start_year, " baseline), use our fused AIS+S1 marine vessel data. (B) Comparison in trend of CO$_{2}$ emissions data (normalized to ", analysis_start_year, " baseline) between marine transportation emissions from GFW, other transportation emissions from EDGAR, and all sector emissions from EDGAR. On the right-hand side of the figure, absolute values are shown as text and color-coded for each line, for the last year of available data for that series (", analysis_end_year, " for the GFW marine vessel series in panel A and B; ", edgar_comparison_year, " for the EDGAR series in panel B).")'
 #| fig-width: 7.5
 #| fig-height: 7
 
@@ -1508,7 +1518,7 @@ annual_ocean_emissions_normalized_fig <- annual_emissions_by_ocean_normalized |>
   ggrepel::geom_text_repel(
     data = ocean_data_ending,
     aes(
-      x = 2025,
+      x = analysis_end_year,
       y = emissions_co2_mt_normalized,
       label = emissions_co2_mt_ending,
       color = ocean
@@ -1524,7 +1534,12 @@ annual_ocean_emissions_normalized_fig <- annual_emissions_by_ocean_normalized |>
 # Summarize total emissions by data source for the EDGAR comparison year, for putting on figure
 
 all_edgar_gfw_data_ending <- all_edgar_gfw_data_normalized |>
-  dplyr::filter(year == edgar_comparison_year) |>
+  # The EDGAR series stop at edgar_comparison_year while our marine series runs to
+  # analysis_end_year, so label each line at its own last year rather than forcing
+  # them all onto one year (which left the marine label a year behind its line end)
+  dplyr::group_by(data_source) |>
+  dplyr::filter(year == max(year)) |>
+  dplyr::ungroup() |>
   dplyr::mutate(
     emissions_co2_mt_ending = paste0(
       prettyNum(signif(emissions_co2_mt / 1e9, 3), big.mark = ","),
@@ -1586,7 +1601,7 @@ emissions_comparison_figure_normalized <- all_edgar_gfw_data_normalized |>
   ggrepel::geom_text_repel(
     data = all_edgar_gfw_data_ending,
     aes(
-      x = 2025,
+      x = analysis_end_year,
       y = emissions_co2_mt_normalized,
       label = emissions_co2_mt_ending,
       color = data_source
@@ -2380,7 +2395,16 @@ all_varimp_data |>
       TRUE ~ model_feature_long
     )
   ) |>
-  dplyr::filter(!is.na(model_feature_long)) |>
+  # Fall back to the raw feature name when there is no entry in data_sources.csv.
+  # This used to drop the row instead, which silently hid any newly added model
+  # feature from the figure -- better that it shows up looking wrong.
+  dplyr::mutate(
+    model_feature_long = ifelse(
+      is.na(model_feature_long),
+      model_feature,
+      model_feature_long
+    )
+  ) |>
   dplyr::mutate(
     model = stringr::str_replace_all(model, "_", " ") |>
       stringr::str_to_sentence()
@@ -2865,14 +2889,23 @@ emissions_by_data_source_summary_tbl <- all_edgar_gfw_data_normalized |>
   ) |>
   dplyr::ungroup() |>
   dplyr::select(
-    `Data source` = data_source,
-    `2024 emissions, billion MT` = emissions_co2_bmt,
-    `Change in emissions, 2017 to 2024` = percent_emissions_co2_mt_normalized
+    data_source,
+    emissions_co2_bmt,
+    percent_emissions_co2_mt_normalized
   ) |>
   knitr::kable(
     format = "latex",
     label = "emissions_by_data_source_summary_tbl",
-    caption = glue::glue("For each data source, summary of: total {analysis_end_year} CO$_2$ emissions (metric tonnes); and percent change in CO$_2$ emissions from {analysis_start_year} to {analysis_end_year}."),
+    # this table is on the EDGAR comparison year, not analysis_end_year, since the
+    # EDGAR series it is compared against stops there
+    col.names = c(
+      "Data source",
+      glue::glue("{edgar_comparison_year} emissions, billion MT"),
+      glue::glue(
+        "Change in emissions, {analysis_start_year} to {edgar_comparison_year}"
+      )
+    ),
+    caption = glue::glue("For each data source, summary of: total {edgar_comparison_year} CO$_2$ emissions (metric tonnes); and percent change in CO$_2$ emissions from {analysis_start_year} to {edgar_comparison_year}."),
     digits = 3
   ) |>
   kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
@@ -2925,13 +2958,18 @@ writeLines(
 #| fig-width: 9
 #| fig-height: 6
 
+inventory_axis_max <- ceiling(
+  max(all_inventory_data$emissions_co2_mt) / 0.25e9
+) *
+  0.25e9
+
 all_inventory_data |>
   ggplot(aes(x = year, y = emissions_co2_mt, color = data_source)) +
   geom_line(linewidth = 1) +
   scale_y_continuous(
     labels = scales::unit_format(unit = "B", scale = 1e-9),
-    limits = c(0, 1.5e9),
-    breaks = seq(0, 1.5e9, 0.25e9)
+    limits = c(0, inventory_axis_max),
+    breaks = seq(0, inventory_axis_max, 0.25e9)
   ) +
   theme_plot() +
   scale_x_continuous(
@@ -2996,8 +3034,7 @@ annual_global_emissions_by_receiver_type <- annual_global_emissions_by_receiver_
     fill = list(emissions_co2_mt = 0, n_distinct_ssvid = 0, number_pings = 0)
   ) |>
   dplyr::mutate(receiver_type = stringr::str_to_sentence(receiver_type)) |>
-  # Don't use 2025 data, since the year is incomplete
-  dplyr::filter(year < 2025)
+  dplyr::filter(year <= analysis_end_year)
 
 annual_global_emissions_by_receiver_type |>
   dplyr::rename(
@@ -3097,7 +3134,6 @@ annual_spatial_emissions_by_receiver_type <- annual_spatial_emissions_by_receive
     receiver_type = stringr::str_to_sentence(receiver_type) |>
       forcats::fct_relevel("Satellite", "Terrestrial", "Dynamic")
   ) |>
-  # Don't use 2025 data, since the year is incomplete
   dplyr::filter(year <= analysis_end_year) |>
   dplyr::mutate(
     emissions_mt_per_km2 = emissions_co2_mt /
@@ -3124,9 +3160,9 @@ annual_spatial_emissions_by_receiver_type |>
   geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
   facet_wrap(receiver_type ~ ., ncol = 1) +
   scico::scale_fill_scico(
-    expression(atop(
+    bquote(atop(
       Change ~ of ~ CO[2] ~ emissions,
-      from ~ 2017 ~ to ~ 2024 ~ (MT / km^2)
+      from ~ .(analysis_start_year) ~ to ~ .(analysis_end_year) ~ (MT / km^2)
     )),
     palette = "vik",
     midpoint = 0,
@@ -3136,9 +3172,9 @@ annual_spatial_emissions_by_receiver_type |>
     labels = scales::comma
   ) +
   scico::scale_color_scico(
-    expression(atop(
+    bquote(atop(
       Change ~ of ~ CO[2] ~ emissions,
-      from ~ 2017 ~ to ~ 2024 ~ (MT / km^2)
+      from ~ .(analysis_start_year) ~ to ~ .(analysis_end_year) ~ (MT / km^2)
     )),
     palette = "vik",
     midpoint = 0,

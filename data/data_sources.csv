@@ -22,3 +22,11 @@ Positions reported by AIS type b,ais_reception_positions_per_day_class_B,AIS rec
 Mean wind speed,wind_speed_mean,Weather features,Yes,Yes,Yes,m/s,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
 Mean primary wave height,wave_height_mean,Weather features,Yes,Yes,Yes,m,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
 Mean primary wave period,wave_period_mean,Weather features,Yes,Yes,Yes,s,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
+Total pixel area imaged by S1 across all time,total_s1_pixel_area_imaged_km2_all_time,S1 detection features,Yes,Yes,No,km2,Numeric,Yes,No,GFW,\cite{paolo2024satellite}
+Pixel water fraction,water_fraction,Geographic features ,No,No,Yes,-,Numeric,Yes,No,GFW,\cite{paolo2024satellite}
+Unique AIS-broadcasting vessels in pixel,ais_unique_vessels,AIS reception quality,Yes,Yes,No,-,Numeric,Yes,Yes,GFW,\cite{kroodsma2018tracking}
+Unique AIS-broadcasting vessels globally,global_ais_unique_vessels,AIS reception quality,Yes,Yes,No,-,Numeric,No,Yes,GFW,\cite{kroodsma2018tracking}
+Month of year,month,Temporal features,Yes,Yes,Yes,-,Factor,No,Yes,GFW,-
+Mean sea surface temperature,sst_mean,Weather features,No,Yes,No,K,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
+Mean sea level pressure,mean_sea_level_pressure,Weather features,No,Yes,No,Pa,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
+Total precipitation,total_precipitation,Weather features,No,Yes,No,m,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
