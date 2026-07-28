@@ -1,6 +1,7 @@
 # Load packages required to define the pipeline:
 library(targets)
 library(tarchetypes) # Load other packages as needed.
+library(quarto) # tar_quarto() renders through this, so declare it for renv
 
 # Set the targets pipeline, since this repo has multiple targets pipelines
 Sys.setenv(TAR_PROJECT = "02_quarto_notebook")

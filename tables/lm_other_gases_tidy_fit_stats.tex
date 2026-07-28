@@ -7,37 +7,85 @@
 \hline
 Pollutant & Term & Coefficient estimate & Standard error & T-statistic & p.value\\
 \hline
-CH4 & emissionsco2mt:post2020FALSE & 0.000 & 8.65e-09 & 1993.619 & 0\\
+CH4 & emissionsco2mt:log(meandistancefromshorem + 1) & 0.000 & 3.29e-09 & 379.875 & 0\\
 \hline
-CH4 & emissionsco2mt:post2020TRUE & 0.000 & 6.16e-09 & 2857.130 & 0\\
+CH4 & emissionsco2mt:post2020FALSE:fishingFALSE & 0.000 & 3.17e-08 & -38.042 & 0\\
 \hline
-N2O & emissionsco2mt:post2020FALSE & 0.000 & 3.49e-09 & 14253.703 & 0\\
+CH4 & emissionsco2mt:post2020TRUE:fishingFALSE & 0.000 & 3.14e-08 & -61.349 & 0\\
 \hline
-N2O & emissionsco2mt:post2020TRUE & 0.000 & 2.48e-09 & 20123.201 & 0\\
+CH4 & emissionsco2mt:post2020FALSE:fishingTRUE & 0.000 & 8.42e-08 & 43.904 & 0\\
 \hline
-CO & emissionsco2mt:post2020FALSE & 0.001 & 3.35e-07 & 2455.044 & 0\\
+CH4 & emissionsco2mt:post2020TRUE:fishingTRUE & 0.000 & 4.52e-08 & 82.642 & 0\\
 \hline
-CO & emissionsco2mt:post2020TRUE & 0.001 & 2.38e-07 & 3471.338 & 0\\
+N2O & emissionsco2mt:log(meandistancefromshorem + 1) & 0.000 & 2.32e-09 & 307.957 & 0\\
 \hline
-NOX & emissionsco2mt:post2020FALSE & 0.017 & 8.33e-06 & 2026.457 & 0\\
+N2O & emissionsco2mt:post2020FALSE:fishingFALSE & 0.000 & 2.23e-08 & 1869.423 & 0\\
 \hline
-NOX & emissionsco2mt:post2020TRUE & 0.017 & 5.93e-06 & 2826.873 & 0\\
+N2O & emissionsco2mt:post2020TRUE:fishingFALSE & 0.000 & 2.21e-08 & 1865.728 & 0\\
 \hline
-SOX & emissionsco2mt:post2020FALSE & 0.006 & 3.63e-08 & 170143.414 & 0\\
+N2O & emissionsco2mt:post2020FALSE:fishingTRUE & 0.000 & 5.92e-08 & 727.041 & 0\\
 \hline
-SOX & emissionsco2mt:post2020TRUE & 0.001 & 2.59e-08 & 47783.674 & 0\\
+N2O & emissionsco2mt:post2020TRUE:fishingTRUE & 0.000 & 3.18e-08 & 1379.919 & 0\\
 \hline
-PM2.5 & emissionsco2mt:post2020FALSE & 0.002 & 1.13e-07 & 15453.046 & 0\\
+CO & emissionsco2mt:log(meandistancefromshorem + 1) & 0.000 & 1.57e-07 & 382.287 & 0\\
 \hline
-PM2.5 & emissionsco2mt:post2020TRUE & 0.000 & 8.06e-08 & 4512.650 & 0\\
+CO & emissionsco2mt:post2020FALSE:fishingFALSE & 0.000 & 1.51e-06 & 19.236 & 0\\
 \hline
-PM10 & emissionsco2mt:post2020FALSE & 0.002 & 1.23e-07 & 15453.046 & 0\\
+CO & emissionsco2mt:post2020TRUE:fishingFALSE & 0.000 & 1.50e-06 & -3.662 & 0\\
 \hline
-PM10 & emissionsco2mt:post2020TRUE & 0.000 & 8.76e-08 & 4512.650 & 0\\
+CO & emissionsco2mt:post2020FALSE:fishingTRUE & 0.000 & 4.02e-06 & 67.869 & 0\\
 \hline
-VOCs & emissionsco2mt:post2020FALSE & 0.001 & 3.57e-07 & 3405.442 & 0\\
+CO & emissionsco2mt:post2020TRUE:fishingTRUE & 0.000 & 2.16e-06 & 128.069 & 0\\
 \hline
-VOCs & emissionsco2mt:post2020TRUE & 0.001 & 2.54e-07 & 4902.133 & 0\\
+NOX & emissionsco2mt:log(meandistancefromshorem + 1) & 0.002 & 4.33e-06 & 466.681 & 0\\
+\hline
+NOX & emissionsco2mt:post2020FALSE:fishingFALSE & -0.007 & 4.00e-05 & -176.274 & 0\\
+\hline
+NOX & emissionsco2mt:post2020TRUE:fishingFALSE & -0.008 & 4.00e-05 & -205.243 & 0\\
+\hline
+NOX & emissionsco2mt:post2020FALSE:fishingTRUE & -0.001 & 1.10e-04 & -8.817 & 0\\
+\hline
+NOX & emissionsco2mt:post2020TRUE:fishingTRUE & -0.002 & 6.00e-05 & -36.129 & 0\\
+\hline
+SOX & emissionsco2mt:log(meandistancefromshorem + 1) & 0.000 & 7.15e-08 & -173.062 & 0\\
+\hline
+SOX & emissionsco2mt:post2020FALSE:fishingFALSE & 0.006 & 6.88e-07 & 9164.189 & 0\\
+\hline
+SOX & emissionsco2mt:post2020TRUE:fishingFALSE & 0.002 & 6.81e-07 & 2441.103 & 0\\
+\hline
+SOX & emissionsco2mt:post2020FALSE:fishingTRUE & 0.006 & 1.83e-06 & 3486.129 & 0\\
+\hline
+SOX & emissionsco2mt:post2020TRUE:fishingTRUE & 0.002 & 9.81e-07 & 1705.575 & 0\\
+\hline
+PM2.5 & emissionsco2mt:log(meandistancefromshorem + 1) & 0.000 & 9.11e-08 & 400.992 & 0\\
+\hline
+PM2.5 & emissionsco2mt:post2020FALSE:fishingFALSE & 0.000 & 8.76e-07 & 472.536 & 0\\
+\hline
+PM2.5 & emissionsco2mt:post2020TRUE:fishingFALSE & 0.000 & 8.67e-07 & 58.147 & 0\\
+\hline
+PM2.5 & emissionsco2mt:post2020FALSE:fishingTRUE & 0.001 & 2.33e-06 & 228.924 & 0\\
+\hline
+PM2.5 & emissionsco2mt:post2020TRUE:fishingTRUE & 0.000 & 1.25e-06 & 168.405 & 0\\
+\hline
+PM10 & emissionsco2mt:log(meandistancefromshorem + 1) & 0.000 & 9.90e-08 & 400.992 & 0\\
+\hline
+PM10 & emissionsco2mt:post2020FALSE:fishingFALSE & 0.000 & 9.52e-07 & 472.536 & 0\\
+\hline
+PM10 & emissionsco2mt:post2020TRUE:fishingFALSE & 0.000 & 9.43e-07 & 58.147 & 0\\
+\hline
+PM10 & emissionsco2mt:post2020FALSE:fishingTRUE & 0.001 & 2.53e-06 & 228.924 & 0\\
+\hline
+PM10 & emissionsco2mt:post2020TRUE:fishingTRUE & 0.000 & 1.36e-06 & 168.405 & 0\\
+\hline
+VOCs & emissionsco2mt:log(meandistancefromshorem + 1) & 0.000 & 2.02e-07 & 495.650 & 0\\
+\hline
+VOCs & emissionsco2mt:post2020FALSE:fishingFALSE & 0.000 & 1.94e-06 & -203.024 & 0\\
+\hline
+VOCs & emissionsco2mt:post2020TRUE:fishingFALSE & 0.000 & 1.92e-06 & -227.991 & 0\\
+\hline
+VOCs & emissionsco2mt:post2020FALSE:fishingTRUE & 0.000 & 5.15e-06 & -39.044 & 0\\
+\hline
+VOCs & emissionsco2mt:post2020TRUE:fishingTRUE & 0.000 & 2.77e-06 & -75.686 & 0\\
 \hline
 \end{tabular}
 \end{table}
