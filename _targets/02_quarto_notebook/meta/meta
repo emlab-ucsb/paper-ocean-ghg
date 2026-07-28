@@ -75,3 +75,6 @@ trip_emissions_for_mrv_validation_file|stem|efc2fea48b4d7201|0debb64a242a1343|2c
 data_sources|stem|e8f7a8cfcac70b5c|73c44d5b74410d9a|0c2ecaea2af55646|1456474924||t20662.9002343742s|s1603b|1603|rds|local|vector|||0.253||
 trip_emissions_for_mrv_validation|stem|a42487e6d53507a3|b64a32dabe8fb998|d9ee7b9722f245ad|1762988021||t20662.9002436453s|s5336594b|5336594|rds|local|vector|||0.206||
 quarto_notebook|stem|bc139458d708441d|c693c0dfce9dfdea|afbd6fd3552d3b2b|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20662.9130819452s|s12069466b|12069466|file|local|vector|||1108.158||
+download_gfw_data|function|56ae83fa4e3ee8f3
+combine_EU_data|function|ad06f3aced59370c
+.Random.seed|object|e457d0c4d07e11ba

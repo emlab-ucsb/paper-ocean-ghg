@@ -34,6 +34,16 @@ Proportion of messages, satellite AIS receivers & AIS reception quality & Yes & 
 Mean wind speed & Weather features & Yes & Yes & Yes & m/s & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
 Mean primary wave height & Weather features & Yes & Yes & Yes & m & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
 Mean primary wave period & Weather features & Yes & Yes & Yes & s & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
+Total pixel area imaged by S1 across all time & S1 detection features & Yes & Yes & No & km2 & Numeric & Yes & No & GFW & \cite{paolo2024satellite}\\
+Pixel water fraction & Geographic features & No & No & Yes & - & Numeric & Yes & No & GFW & \cite{paolo2024satellite}\\
+\addlinespace
+Unique AIS-broadcasting vessels in pixel & AIS reception quality & Yes & Yes & No & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
+Unique AIS-broadcasting vessels globally & AIS reception quality & Yes & Yes & No & - & Numeric & No & Yes & GFW & \cite{kroodsma2018tracking}\\
+Month of year & Temporal features & Yes & Yes & Yes & - & Factor & No & Yes & GFW & -\\
+Mean sea surface temperature & Weather features & No & Yes & No & K & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
+Mean sea level pressure & Weather features & No & Yes & No & Pa & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
+\addlinespace
+Total precipitation & Weather features & No & Yes & No & m & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
 \bottomrule
 \end{tabular}
 \end{table}

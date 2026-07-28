@@ -3230,3 +3230,4 @@ annual_spatial_emissions_by_receiver_type |>
   scale_y_continuous(expand = c(0, 1)) +
   coord_sf(crs = map_projection)
 ```
+

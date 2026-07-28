@@ -1,0 +1,96 @@
+→ de-duplicating _targets/02_quarto_notebook/meta/meta
+→ reading _targets/02_quarto_notebook/meta/meta
+→ parsing _targets/02_quarto_notebook/meta/meta
+→ noting builders and branches
+→ parsing _targets/02_quarto_notebook/meta/meta
+→ restricting metadata records
+→ querying 68 local files in _targets/02_quarto_notebook/objects
+→ reading _targets/02_quarto_notebook/meta/process
+→ parsing _targets/02_quarto_notebook/meta/process
++ quarto_notebook dispatched
+[31m
+
+processing file: quarto_notebook.qmd
+[39m1/107                                                         
+2/107 [document-setup]                                        
+[31mFailed to query server: Failed to activate service 'org.freedesktop.timedate1': timed out (service_start_timeout=25000ms)
+[39m3/107                                                         
+4/107 [load-data]                                             
+5/107                                                         
+6/107 [setup-graphics]                                        
+7/107                                                         
+8/107 [wrangle-edgar-data]                                    
+9/107                                                         
+10/107 [wrangle-gfw-time-series-emissions-data]                
+11/107                                                         
+12/107 [unnamed-chunk-1]                                       
+13/107                                                         
+14/107 [wrangel-edgar-data]                                    
+15/107                                                         
+16/107 [unnamed-chunk-2]                                       
+17/107                                                         
+18/107 [wrangle-gfw-spatials-emissions-data]                   
+19/107                                                         
+20/107 [unnamed-chunk-3]                                       
+21/107                                                         
+22/107 [social-cost-calculation]                               
+23/107                                                         
+24/107 [unnamed-chunk-4]                                       
+25/107                                                         
+26/107 [unnamed-chunk-5]                                       
+27/107                                                         
+28/107 [unnamed-chunk-6]                                       
+29/107                                                         
+30/107 [unnamed-chunk-7]                                       
+31/107                                                         
+32/107 [unnamed-chunk-8]                                       
+33/107                                                         
+34/107 [unnamed-chunk-9]                                       
+35/107                                                         
+36/107 [fig-emissions-by-data-source-and-maps]                 
+37/107                                                         
+38/107 [unnamed-chunk-10]                                      
+39/107                                                         
+40/107 [unnamed-chunk-11]                                      
+41/107                                                         
+42/107 [fig-spatial-temporal-richness-by-fleet-total-pseudolog]
+43/107                                                         
+44/107 [fig-ais-data-richness]                                 
+45/107                                                         
+46/107 [fig-emissions-marine-ocean-other]                      
+47/107                                                         
+48/107 [fig-registered-data-performance]                       
+49/107                                                         
+50/107 [unnamed-chunk-12]                                      
+51/107                                                         
+52/107 [unnamed-chunk-13]                                      
+53/107                                                         
+54/107 [fig-mrv-performance]                                   
+55/107                                                         
+56/107 [fig-map-fraction-months-imaged]                        
+57/107                                                         
+58/107 [fig-length-bin-distributions]                          
+59/107                                                         
+60/107 [fig-ais-length-power-relationship]                     
+61/107                                                         
+62/107 [unnamed-chunk-14]                                      
+63/107                                                         
+64/107 [fig-s1-coverage-time-series]                           
+65/107                                                         
+66/107 [fig-offshore-outside-footprint-training-testing-map]   
+67/107                                                         
+68/107 [fig-pr-curves]                                         
+69/107                                                         
+70/107 [fig-roc-curves]                                        
+71/107                                                         
+72/107 [fig-conf-mat]                                          
+73/107                                                         
+74/107 [unnamed-chunk-15]                                      
+75/107                                                         
+76/107 [unnamed-chunk-16]                                      
+77/107                                                         
+78/107 [fig-feature-importance]                                
+79/107                                                         
+80/107 [fig-spatial-coverage-footprint]                        
+81/107                                                         
+82/107 [fig-pollutant-maps-qlog10]                             
