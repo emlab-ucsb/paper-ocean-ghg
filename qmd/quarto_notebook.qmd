@@ -54,8 +54,14 @@ project_root <- if (dir.exists("_targets")) "." else ".."
 
 data_pull_store <- file.path(project_root, "_targets", "01_gfw_data_pull")
 notebook_store <- file.path(project_root, "_targets", "02_quarto_notebook")
-analysis_start_year <- targets::tar_read(analysis_start_year, store = data_pull_store)
-analysis_end_year <- targets::tar_read(analysis_end_year, store = data_pull_store)
+analysis_start_year <- targets::tar_read(
+  analysis_start_year,
+  store = data_pull_store
+)
+analysis_end_year <- targets::tar_read(
+  analysis_end_year,
+  store = data_pull_store
+)
 
 # pivot_wider names emissions columns after the actual years, so refer to them
 # through these rather than hard-coding a year
@@ -75,42 +81,45 @@ edgar_comparison_year <- 2024
 ```{r}
 #| label: load-data
 #| cache: FALSE
-targets::tar_load(c(
-  "n_unique_vessels",
-  "n_ais_messages",
-  "fraction_vessels_emissions_by_registry_info",
-  "n_s1_detections",
-  "annual_edgar_emissions",
-  "oecd_data",
-  "all_performance_metrics",
-  "monthly_aggregated_time_series",
-  "annual_emissions_all_pollutants",
-  "total_spatial_emissions_by_pollutant",
-  "total_monthly_emissions_by_pollutant",
-  "port_visit_co2_emissions_by_country",
-  "trip_co2_emissions_by_from_to_countries",
-  "annual_global_emissions_by_receiver_type",
-  "annual_global_emissions_by_receiver_type_and_flag",
-  "annual_spatial_emissions_by_receiver_type",
-  "vessel_size_info",
-  "registered_validation_data",
-  "mrv_data_validation",
-  "trip_emissions_for_mrv_validation",
-  "registered_validation_data",
-  "all_varimp_data",
-  "performance_detections_cls_roc_pr_curves",
-  "performance_detections_cls_conf_mat",
-  "annual_spatial_co2_emissions_ais_dark_by_fleet",
-  "total_spatial_co2_emissions_dark_by_footprint",
-  "data_sources",
-  "pixels_for_offshore_training_testing_split",
-  "total_spatial_co2_emissions_by_ocean",
-  "number_s1_imaged_months_by_pixel",
-  "lm_other_gases_tidy_fit_stats",
-  "s1_time_series",
-  "length_size_bin_distributions",
-  "ping_level_hours_distribution"
-), store = notebook_store)
+targets::tar_load(
+  c(
+    "n_unique_vessels",
+    "n_ais_messages",
+    "fraction_vessels_emissions_by_registry_info",
+    "n_s1_detections",
+    "annual_edgar_emissions",
+    "oecd_data",
+    "all_performance_metrics",
+    "monthly_aggregated_time_series",
+    "annual_emissions_all_pollutants",
+    "total_spatial_emissions_by_pollutant",
+    "total_monthly_emissions_by_pollutant",
+    "port_visit_co2_emissions_by_country",
+    "trip_co2_emissions_by_from_to_countries",
+    "annual_global_emissions_by_receiver_type",
+    "annual_global_emissions_by_receiver_type_and_flag",
+    "annual_spatial_emissions_by_receiver_type",
+    "vessel_size_info",
+    "registered_validation_data",
+    "mrv_data_validation",
+    "trip_emissions_for_mrv_validation",
+    "registered_validation_data",
+    "all_varimp_data",
+    "performance_detections_cls_roc_pr_curves",
+    "performance_detections_cls_conf_mat",
+    "annual_spatial_co2_emissions_ais_dark_by_fleet",
+    "total_spatial_co2_emissions_dark_by_footprint",
+    "data_sources",
+    "pixels_for_offshore_training_testing_split",
+    "total_spatial_co2_emissions_by_ocean",
+    "number_s1_imaged_months_by_pixel",
+    "lm_other_gases_tidy_fit_stats",
+    "s1_time_series",
+    "length_size_bin_distributions",
+    "ping_level_hours_distribution"
+  ),
+  store = notebook_store
+)
 ```
 
 ```{r}
@@ -195,7 +204,12 @@ world_bbox_sf <-
 # ESRI World Countries Generalized Shapefile
 # Downloaded from https://www.arcgis.com/home/item.html?id=fa510018bdd044b08fc64d2a16bc680a
 land <- sf::st_read(
-  file.path(project_root, "data", "World_Countries_Generalized_Shapefile", "World_Countries_Generalized.shp"),
+  file.path(
+    project_root,
+    "data",
+    "World_Countries_Generalized_Shapefile",
+    "World_Countries_Generalized.shp"
+  ),
   quiet = TRUE
 ) |>
   dplyr::mutate(
@@ -366,7 +380,10 @@ total_percent_change_by_fleet <- annual_emissions |>
 ais_scale_underestimation <- total_percent_change_by_fleet |>
   dplyr::filter(fleet != "S1 (non-broadcasting)") |>
   dplyr::select(fleet, pollutant, dplyr::all_of(end_col)) |>
-  tidyr::pivot_wider(names_from = "fleet", values_from = dplyr::all_of(end_col)) |>
+  tidyr::pivot_wider(
+    names_from = "fleet",
+    values_from = dplyr::all_of(end_col)
+  ) |>
   dplyr::mutate(
     ais_underestimation = (1 - `AIS (broadcasting)` / `AIS + S1`) |>
       scales::percent(accuracy = 1)
@@ -1031,10 +1048,21 @@ total_annual_emissions_by_fleet_fig <- annual_emissions |>
   theme(
     panel.grid.minor = element_blank(),
     legend.position = "inside",
-    # sits in the gap between the S1 and AIS lines, clear of where the series end
-    legend.position.inside = c(0.55, 0.28),
+    # Top-left corner, which is the only region of this panel no series passes
+    # through: the highest line (AIS + S1) starts at ~1.11B against a 1.75B
+    # axis. Floating it in the gap between the S1 and AIS lines meant the box
+    # struck through the S1 line. legend.justification.inside anchors the
+    # legend's own top-left corner at this point rather than its centre, so it
+    # cannot spill outside the panel. The 0.08 x inset keeps the box off the
+    # y-axis labels and the panel's left edge.
+    legend.position.inside = c(0.08, 0.99),
+    legend.justification.inside = c(0, 1),
     legend.background = element_rect(fill = "white", color = "gray"),
-    legend.title = element_blank()
+    legend.title = element_blank(),
+    # Tightened so all three keys clear the AIS + S1 line at its left end
+    legend.margin = margin(3, 5, 3, 3),
+    legend.key.spacing.y = unit(1, "pt"),
+    legend.key.size = unit(0.9, "lines")
   )
 ```
 
@@ -1113,7 +1141,9 @@ co2_map <- pollutant_map_data_co2 |>
   dplyr::mutate(
     name = ifelse(
       name == "emissions_mt_per_km2_delta_abs",
-      glue::glue("Change in emissions from {analysis_start_year} to {analysis_end_year}"),
+      glue::glue(
+        "Change in emissions from {analysis_start_year} to {analysis_end_year}"
+      ),
       glue::glue("{analysis_end_year} emissions")
     )
   ) |>
@@ -1324,7 +1354,9 @@ spatial_emissions_by_fleet_total_plot_pseudolog <- spatial_co2_emissions_ais_dar
   geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
   scico::scale_color_scico(
     name = bquote(
-      Cumulative ~ CO[2] ~ emissions ~ (MT / km^2) ~ from ~ .(analysis_start_year) ~ to ~ .(analysis_end_year)
+      Cumulative ~ CO[2] ~ emissions ~ (MT / km^2) ~ from ~ .(
+        analysis_start_year
+      ) ~ to ~ .(analysis_end_year)
     ),
     palette = "vik",
     begin = 0.5,
@@ -1337,7 +1369,9 @@ spatial_emissions_by_fleet_total_plot_pseudolog <- spatial_co2_emissions_ais_dar
   ) +
   scico::scale_fill_scico(
     name = bquote(
-      Cumulative ~ CO[2] ~ emissions ~ (MT / km^2) ~ from ~ .(analysis_start_year) ~ to ~ .(analysis_end_year)
+      Cumulative ~ CO[2] ~ emissions ~ (MT / km^2) ~ from ~ .(
+        analysis_start_year
+      ) ~ to ~ .(analysis_end_year)
     ),
     palette = "vik",
     begin = 0.5,
@@ -1514,7 +1548,18 @@ cowplot::plot_grid(
 
 annual_ocean_emissions_normalized_fig <- annual_emissions_by_ocean_normalized |>
   ggplot() +
-  geom_hline(yintercept = 0, linetype = 2) +
+  # A geom_hline here spans the full panel, including the gutter past
+  # analysis_end_year that geom_text_repel puts the value labels in, so the
+  # dashed line struck through them. A bounded segment stops at the last data
+  # year and leaves the label gutter clear.
+  annotate(
+    "segment",
+    x = analysis_start_year,
+    xend = analysis_end_year,
+    y = 0,
+    yend = 0,
+    linetype = 2
+  ) +
   geom_line(
     aes(x = year, y = emissions_co2_mt_normalized, color = ocean),
     linewidth = 1.1
@@ -1601,7 +1646,15 @@ emissions_comparison_figure_normalized <- all_edgar_gfw_data_normalized |>
       )
   ) |>
   ggplot() +
-  geom_hline(yintercept = 0, linetype = 2) +
+  # Bounded rather than a full-width geom_hline, for the same reason as panel A
+  annotate(
+    "segment",
+    x = analysis_start_year,
+    xend = analysis_end_year,
+    y = 0,
+    yend = 0,
+    linetype = 2
+  ) +
   geom_line(
     aes(x = year, y = emissions_co2_mt_normalized, color = data_source),
     linewidth = 1.1
@@ -1892,7 +1945,6 @@ best_performance <- performance_results |>
 filtered_hours_df <- subset(merged_df, diff / max < best_performance$threshold)
 filtered_df <- filtered_hours_df |>
   dplyr::select(co2_trip_emissions_eu, co2_trip_emissions_gfw)
-
 ```
 
 ```{r}
@@ -2013,12 +2065,16 @@ number_s1_imaged_months_by_pixel |>
   ) +
   geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
   scale_fill_viridis_c(
-    name = glue::glue("Percentage of months imaged by S1 between {analysis_start_year} and {analysis_end_year}"),
+    name = glue::glue(
+      "Percentage of months imaged by S1 between {analysis_start_year} and {analysis_end_year}"
+    ),
     labels = scales::percent,
     option = "magma"
   ) +
   scale_color_viridis_c(
-    name = glue::glue("Percentage of months imaged by S1 between {analysis_start_year} and {analysis_end_year}"),
+    name = glue::glue(
+      "Percentage of months imaged by S1 between {analysis_start_year} and {analysis_end_year}"
+    ),
     labels = scales::percent,
     option = "magma"
   ) +
@@ -2077,7 +2133,6 @@ length_size_bin_distributions |>
     axis.text.x = element_text(angle = 45, hjust = 1),
     strip.background = element_rect(fill = "transparent", color = NA)
   )
-
 ```
 
 ## Figure 10
@@ -2130,7 +2185,10 @@ data_sources_table <- data_sources |>
 
 data_sources_table
 
-writeLines(data_sources_table, file.path(project_root, "tables", "data_sources.tex"))
+writeLines(
+  data_sources_table,
+  file.path(project_root, "tables", "data_sources.tex")
+)
 ```
 
 
@@ -2402,7 +2460,11 @@ lm_other_gases_tidy_fit_stats_tbl <- lm_other_gases_tidy_fit_stats |>
     statistic = round(statistic, 1),
     # A bare "<" in LaTeX text mode prints as an upside-down exclamation mark,
     # so it has to go through math mode (with escape = FALSE on the kable call)
-    p_value = ifelse(p_value < 0.001, "$<$0.001", as.character(round(p_value, 3)))
+    p_value = ifelse(
+      p_value < 0.001,
+      "$<$0.001",
+      as.character(round(p_value, 3))
+    )
   ) |>
   dplyr::rename(
     Pollutant = pollutant,
@@ -2836,7 +2898,9 @@ total_percent_change_by_fleet_tbl <- total_percent_change_by_fleet |>
   knitr::kable(
     format = "latex",
     label = "total_percent_change_by_fleet",
-    caption = glue::glue("Summary of {analysis_start_year} and {analysis_end_year} emissions, data source and pollutant.")
+    caption = glue::glue(
+      "Summary of {analysis_start_year} and {analysis_end_year} emissions, data source and pollutant."
+    )
   ) |>
   kableExtra::kable_styling(font_size = 6, latex_options = "hold_position")
 
@@ -2870,7 +2934,9 @@ pollutant_ais_underestimation_overestimation_summary_tbl <- pollutant_ais_undere
   knitr::kable(
     format = "latex",
     label = "pollutant_ais_underestimation_overestimation_summary",
-    caption = glue::glue("Underestimation of {analysis_end_year} emissions using only AIS data, and overestimation of {analysis_start_year} to {analysis_end_year} emissions trend using only AIS data, by pollutant.")
+    caption = glue::glue(
+      "Underestimation of {analysis_end_year} emissions using only AIS data, and overestimation of {analysis_start_year} to {analysis_end_year} emissions trend using only AIS data, by pollutant."
+    )
   ) |>
   kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
 
@@ -2878,7 +2944,11 @@ pollutant_ais_underestimation_overestimation_summary_tbl
 
 writeLines(
   pollutant_ais_underestimation_overestimation_summary_tbl,
-  file.path(project_root, "tables", "pollutant_ais_underestimation_overestimation_summary.tex")
+  file.path(
+    project_root,
+    "tables",
+    "pollutant_ais_underestimation_overestimation_summary.tex"
+  )
 )
 ```
 
@@ -2913,7 +2983,9 @@ emissions_by_ocean_summary_tbl <- emissions_by_ocean_summary_tbl |>
   knitr::kable(
     format = "latex",
     label = "emissions_by_ocean_summary_tbl",
-    caption = glue::glue("For each ocean, summary of: {analysis_end_year} total (AIS+S1) CO$_2$ emissions (metric tonnes); percentage of global total (AIS+S1) {analysis_end_year} CO$_2$ emissions from across all oceans; percent of {analysis_end_year} total (AIS+S1) CO$_2$ emissions by non-broadcasting vessels; percent change in total (AIS+S1) CO$_2$ emissions from {analysis_start_year} to {analysis_end_year}; and the percentage of all observations in the dataset (pixel-months) from {analysis_start_year}-{analysis_end_year} that were imaged by S1."),
+    caption = glue::glue(
+      "For each ocean, summary of: {analysis_end_year} total (AIS+S1) CO$_2$ emissions (metric tonnes); percentage of global total (AIS+S1) {analysis_end_year} CO$_2$ emissions from across all oceans; percent of {analysis_end_year} total (AIS+S1) CO$_2$ emissions by non-broadcasting vessels; percent change in total (AIS+S1) CO$_2$ emissions from {analysis_start_year} to {analysis_end_year}; and the percentage of all observations in the dataset (pixel-months) from {analysis_start_year}-{analysis_end_year} that were imaged by S1."
+    ),
     digits = 3
   ) |>
   kableExtra::kable_styling(latex_options = "hold_position")
@@ -2968,7 +3040,9 @@ emissions_by_data_source_summary_tbl <- all_edgar_gfw_data_normalized |>
         "Change in emissions, {analysis_start_year} to {edgar_comparison_year}"
       )
     ),
-    caption = glue::glue("For each data source, summary of: total {edgar_comparison_year} CO$_2$ emissions (metric tonnes); and percent change in CO$_2$ emissions from {analysis_start_year} to {edgar_comparison_year}."),
+    caption = glue::glue(
+      "For each data source, summary of: total {edgar_comparison_year} CO$_2$ emissions (metric tonnes); and percent change in CO$_2$ emissions from {analysis_start_year} to {edgar_comparison_year}."
+    ),
     digits = 3
   ) |>
   kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
@@ -3179,7 +3253,6 @@ annual_global_emissions_by_receiver_type_and_flag |>
   theme(panel.grid.minor.x = element_blank()) +
   geom_vline(xintercept = 2022, linetype = 2) +
   paletteer::scale_color_paletteer_d(palette = "rcartocolor::Safe")
-
 ```
 
 ## Figure S7
@@ -3207,7 +3280,10 @@ annual_spatial_emissions_by_receiver_type <- annual_spatial_emissions_by_receive
 annual_spatial_emissions_by_receiver_type |>
   dplyr::filter(year %in% c(analysis_start_year, analysis_end_year)) |>
   tidyr::pivot_wider(names_from = year, values_from = emissions_mt_per_km2) |>
-  dplyr::mutate(across(dplyr::all_of(c(start_col, end_col)), ~ tidyr::replace_na(., 0))) |>
+  dplyr::mutate(across(
+    dplyr::all_of(c(start_col, end_col)),
+    ~ tidyr::replace_na(., 0)
+  )) |>
   dplyr::mutate(emissions_mt_per_km2 = .data[[end_col]] - .data[[start_col]]) |>
   ggplot() +
   geom_sf(

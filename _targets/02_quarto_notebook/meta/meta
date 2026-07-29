@@ -73,5 +73,5 @@ fraction_vessels_emissions_by_registry_info|stem|af8ba644d301ee42|05601326f6ec74
 trip_emissions_for_mrv_validation|stem|a42487e6d53507a3|b64a32dabe8fb998|d9ee7b9722f245ad|1762988021||t20662.956229787s|s5336594b|5336594|rds|local|vector|||0.206||
 download_gfw_data|function|56ae83fa4e3ee8f3
 combine_EU_data|function|ad06f3aced59370c
-.Random.seed|object|59e42742012420d2
-quarto_notebook|stem|dfb939836d72de33|c693c0dfce9dfdea|45513bd297e55c7b|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20663.8727935096s|s10467110b|10467110|file|local|vector|||600.559||
+.Random.seed|object|3d2f1bd408ad3c4a
+quarto_notebook|stem|ccf354d9b262401b|c693c0dfce9dfdea|45513bd297e55c7b|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20663.9041752382s|s10468519b|10468519|file|local|vector|||579.35||
