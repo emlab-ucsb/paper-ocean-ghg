@@ -106,7 +106,7 @@ Estimating emissions from non-broadcasting vessels not only offers new insights 
 
 Across the entire 2017 to 2025 time series, almost all non-broadcasting emissions (96.4\%) occurred inside the S1 footprint and in pixel-months that were imaged by S1 (Fig. \ref{fig:fig-spatial-coverage-footprint}). This makes sense because part of the Copernicus system's observation strategy for S1 is specifically focused on imaging coastal and shipping areas, where ship density is highest \cite{ESA2013S1Handbook}. Our machine learning model for predicting these emissions directly from observed S1 detection density achieves a high out-of-sample predictive performance (traditional R$^{2}$ = 0.94 and total percent error of -8.6\% for CO$_2$, Table \ref{tab:all_performance_metrics_table}). Only 3.5\% of non-broadcasting emissions occurred inside the S1 footprint but in pixel-months that weren't imaged by S1, requiring us to use a two-stage hurdle framework using both a classification model (F1 Score = 0.72) and a regression model (traditional R$^{2}$ = 0.73) to predict S1 detection density before predicting emissions (traditional R$^{2}$ = 0.93). Only 0.08\% of non-broadcasting emissions occurred outside the S1 footprint entirely, since most vessels operating in these open ocean areas use AIS.
 
-Our vessel-level AIS-broadcasting emissions data provide a detailed understanding of marine vessel emissions across vessel classes and activity types (Fig. \ref{fig:fig-ais-data-richness}). Chemical and oil tankers, some of which transport fossil fuels including crude oil, are themselves the largest emitters (Fig. \ref{fig:fig-ais-data-richness}A). Trawlers, which use an energy-intensive fishing technique in which nets are dragged through the water \cite{coello2015ais}, are the highest-emitting type of fishing vessel. Emissions from AIS-broadcasting vessels can be assigned to port stays in particular countries and port-to-port voyages within- and between-countries by analyzing the movement tracks of each individual vessel (Fig. \ref{fig:fig-ais-data-richness}A-B). Most emissions for non-fishing vessels occur during international trips, while most emissions for fishing vessels occur during domestic trips. China, Japan, and United States had the most CO$_{2}$ emissions during within-country domestic trips in 2025. China, Malaysia, and United States had the most CO$_{2}$ emissions during international trips that started or ended in these countries in 2025 (where the emissions from each trip are partitioned equally to its departure and arrival country). China, United States, and Indonesia had the most CO$_{2}$ emissions during port stays.
+Our vessel-level AIS-broadcasting emissions data provide a detailed understanding of marine vessel emissions across vessel classes and activity types (Fig. \ref{fig:fig-ais-data-richness}). Container cargo vessels are the largest emitters on aggregate, with most of that emissions occurring during international trips (Fig. \ref{fig:fig-ais-data-richness}A). Trawlers, which use an energy-intensive fishing technique in which nets are dragged through the water \cite{coello2015ais}, are the highest-emitting type of fishing vessel. Emissions from AIS-broadcasting vessels can be assigned to port stays in particular countries and port-to-port voyages within- and between-countries by analyzing the movement tracks of each individual vessel (Fig. \ref{fig:fig-ais-data-richness}A-B). Most emissions for non-fishing vessels occur during international trips, while most emissions for fishing vessels occur during domestic trips. China, Japan, and United States had the most CO$_{2}$ emissions during within-country domestic trips in 2025. China, Malaysia, and United States had the most CO$_{2}$ emissions during international trips that started or ended in these countries in 2025 (where the emissions from each trip are partitioned equally to its departure and arrival country). China, United States, and Indonesia had the most CO$_{2}$ emissions during port stays.
 
  \begin{figure}[H]
     \centering
@@ -603,5 +603,118 @@ Finally, in Fig. \ref{fig:fig-co2-emissions-change-map-by-receiver-type}, we see
     \caption{Spatial change in CO$_{2}$ emissions by AIS-broadcasting vessels between 2017 and 2024 (metric tonnes) by receiver type (satellite, terrestrial, and dynamic) and total across receiver types, at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale).}
     \label{fig:fig-co2-emissions-change-map-by-receiver-type}
 \end{figure}
+
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{Performance for every model.
+  Held-out values use the metric named in the \emph{Metric} column, so rows are comparable within a family but not across families.}
+  \label{tab:model-summary}
+  \begin{tabular}{@{}llrrcc@{}}
+    \toprule
+    Model & Target & $n$ train & $n$ test & Metric & Held-out \\
+    \midrule
+    \multicolumn{6}{@{}l}{\textit{Classification models}} \\
+    Vessel class        & [classes]  & [n]  & [n]  & macro-F1 & [0.00] \\
+    Engine type         & [classes]  & [n]  & [n]  & macro-F1 & [0.00] \\
+    Cargo sub-type      & 5 classes     & 11\,744 & 2\,939  & macro-F1 & 0.855     \\
+    Tanker sub-type     & 4 classes     & 5\,903  & 1\,477  & macro-F1 & 0.712     \\
+    \midrule
+    \multicolumn{6}{@{}l}{\textit{Regression models}} \\
+    Main engine power   & kW            & [n]  & [n]  & $R^2$    & [0.00] \\
+    Gross tonnage       & GT            & [n]  & [n]  & $R^2$    & [0.00] \\
+    Design speed        & knots         & [n]  & [n]  & $R^2$    & [0.00] \\
+    Engine speed        & rpm           & [n]  & [n]  & $R^2$    & [0.00] \\
+    Construction year   & year          & [n]  & [n]  & $R^2$    & [0.00] \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Cargo and tanker sub-type models}
+
+\paragraph{Approach} 
+
+Two gradient-boosted tree classifiers, learning rate 0.01, at most 10\,000 boosting iterations, early stopping on a 10\% stratified internal validation split), one per parent type.
+A sub-type is assigned only to vessels the upstream GFW vessel-class model has already classified as cargo or tanker.
+
+\paragraph{Labels} 
+
+S\&P Global Maritime records.
+StatCode5 levels 2--5 are mapped to the reported sub-types to align with the fourth IMO Greenhouse Gas Study vessel class types.
+Only records reporting a single MMSI are retained, so that each label attaches to one vessel identity.
+
+\paragraph{Features} 
+
+Models contain 114 features in four blocks.
+\textit{Port visit embeddings (50)}. Word2Vec (50 dimensions, window 10, minimum count 5) over each vessel's sequence of anchorage visits, from port visits with high confidence in the last 365 days up to 2025-06-01. A vessel's embedding is the visit-weighted mean of the anchorages it used.
+\textit{Vessel-class network scores (33)}. Per-class outputs of the upstream GFW vessel-class model.
+\textit{AIS self-reported ship type (14)}. Fraction of a vessel's AIS messages declaring each ship type category.
+\textit{Activity and inferred characteristics (17)}. Speed percentiles, depth, distance from shore, fraction of time in port, AIS class, and inferred length, tonnage, crew size and engine power.
+
+\paragraph{Evaluation} 
+
+An 80/20 split stratified by sub-type.
+
+\paragraph{Overfitting controls} 
+
+Early stop of boosting iterations on a held-out internal validation split rather than fixed in advance.
+
+\paragraph{Potential bias} 
+
+We identify three potential sources of bias.
+\textit{Label coverage.} Labels exist only for vessels in S\&P data reporting a single MMSI. Non-IMO registered and identity-switching vessels are absent from training by construction, and they form a substantial part of the population to which the models are applied.
+\textit{Upstream inheritance.} A sub-type is assigned only where the GFW vessel-class model returns cargo or tanker. A vessel misclassified upstream may be routed to the wrong sub-model and given a sub-type causing classification errors to compound.
+\textit{Feature availability tracks the same bias.} Anchorage embeddings derive from port visits, and 4.5\% of cargo and 5.6\% of tanker training vessels have no embedding at all. Vessels that avoid ports, or interrupt their AIS transmission are systematically degraded.
+
+\subsubsection{Tanker sub-type model}
+
+\paragraph{Target}
+
+One of four tanker sub-types (oil, chemical, liquefied gas, other liquids), for 43\,530 vessels the upstream GFW vessel class model classified as tanker.
+
+\paragraph{Training data} 
+
+5\,903 vessels with S\&P registry sub-types: oil 2\,664; chemical 2\,015; liquefied gas 1\,188; other liquids 36.
+
+\paragraph{Performance} 
+
+Accuracy 0.875; macro-F1 0.712; weighted F1 0.874. Per-class F1: liquefied gas 0.92, oil 0.89, chemical 0.84, other liquids 0.20.
+
+\paragraph{Key predictive features} 
+
+Using loss in held-out macro-F1 when permuted. Top speed (95th percentile): 0.169. Anchorage embeddings, 50 dimensions permuted together: 0.145. Vessel-class scores from upstream model, 33 permuted together: 0.061. Average distance traveled per trip: 0.029.
+
+\paragraph{Interpretability} 
+
+One feature, top speed, carries more importance than any other in either sub-type model. That makes the model easy to explain, but it also means it leans on a single behavioural signal that degrades wherever AIS coverage is patchy.
+
+\paragraph{Known deficiencies} 
+
+Performance for \emph{Other liquids} is poor: recall 0.111, with 89\% of those vessels predicted as oil. With 45 labelled vessels in total the class does not have enough signal to be separated. Oil and chemical tankers are often confused with each other: 13\% of chemical vessels are called oil and 10\% the reverse.
+
+\subsubsection{Cargo sub-type model}
+
+\paragraph{Target}
+
+One of five cargo sub-types (bulk carrier, container, general cargo, refrigerated cargo, ro-ro cargo), for 186\,689 vessels the upstream GFW vessel class model classified as cargo.
+
+\paragraph{Training data} 
+
+11\,744 vessels with S\&P registry sub-types: bulk carrier 5\,201; general cargo 3\,200; container 2\,166; ro-ro 1\,100; refrigerated 77.
+
+\paragraph{Performance.} Accuracy 0.905; macro-F1 0.855; weighted F1 0.905. Per-class F1: bulk carrier 0.94, container 0.94, general cargo 0.85, ro-ro 0.85, refrigerated 0.70.
+
+\paragraph{Key predictive features}
+
+Using loss in held-out macro-F1 when permuted. Anchorage embeddings, 50 dimensions permuted together: 0.220. Vessel-class scores from upstream model, 33 permuted together: 0.157. Top speed (95th percentile): 0.029. 
+
+\paragraph{Interpretability}
+
+Vessel-class scores from upstream model form a substantial part of this model's classification skill is inherited rather than learned from vessel behaviour.
+
+\paragraph{Known deficiencies}
+
+Refrigerated cargo has 77 training vessels; its F1 of 0.70 is indicative only. Ro-ro and general cargo are the main confusion pair among the well-populated classes. General cargo is 27\% of the training set but 66\% of predictions, so the model is likely extrapolating beyond its training mix.
 
 \end{document}
