@@ -1619,7 +1619,11 @@ annual_ocean_emissions_normalized_fig <- annual_emissions_by_ocean_normalized |>
     nudge_x = 0,
     xlim = c(analysis_end_year + 0.1, analysis_end_year + 0.6),
     min.segment.length = Inf,
-    fontface = "bold"
+    fontface = "bold",
+    # ggrepel's placement search is stochastic. Without a seed this figure comes
+    # out slightly different on every render even when nothing has changed,
+    # which shows up as a git diff that looks like a real change but is not.
+    seed = 42
   )
 
 # Summarize total emissions by data source for the EDGAR comparison year, for putting on figure
@@ -1709,7 +1713,9 @@ emissions_comparison_figure_normalized <- all_edgar_gfw_data_normalized |>
     nudge_x = 0,
     xlim = c(analysis_end_year + 0.1, analysis_end_year + 0.6),
     min.segment.length = Inf,
-    fontface = "bold"
+    fontface = "bold",
+    # Seeded for the same reason as panel A above
+    seed = 42
   )
 cowplot::plot_grid(
   annual_ocean_emissions_normalized_fig,
