@@ -1,0 +1,21 @@
+# The {targets} stores are committed so the pipeline stays in sync across
+# machines (macOS laptop / Linux HPC / collaborators). See README, "Working
+# across machines". These rules keep git from mangling or half-merging them.
+
+# Target objects are serialized R objects. Treat as opaque binary: no diff,
+# no line-ending conversion, no attempted merge.
+_targets/**/objects/** binary
+
+# Target metadata is line-oriented text (readable diffs are useful), but git
+# must never auto-merge it — a spliced-together metadata file silently
+# misrepresents which targets are current. Conflicts are surfaced instead.
+_targets/**/meta/meta text -merge
+
+# Large input data: keep line endings untouched across macOS/Linux/Windows.
+data/**/*.csv text eol=lf
+data/**/*.parquet binary
+data/**/*.xlsx binary
+
+# Generated outputs
+figures/**/*.png binary
+tables/**/*.tex text eol=lf

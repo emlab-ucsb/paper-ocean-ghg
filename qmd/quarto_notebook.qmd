@@ -23,6 +23,15 @@ cache: false
 ```{r, echo = FALSE, results = FALSE, message = FALSE, warning = FALSE, cache = FALSE}
 #| label: document-setup
 
+# Force the cairo PNG backend on every platform. grDevices::png() otherwise
+# picks its backend from getOption("bitmapType"), which is "quartz" on macOS and
+# "cairo" on Linux. Quartz writes RGBA and cairo writes RGB, so leaving this to
+# the default rewrites every figure in figures/ whenever the notebook is
+# rendered on a different machine, even when no data has changed.
+if (capabilities("cairo")) {
+  options(bitmapType = "cairo")
+}
+
 # Set default chunk options
 knitr::opts_chunk$set(
   message = FALSE,
