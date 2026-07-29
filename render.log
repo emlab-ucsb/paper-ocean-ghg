@@ -7,6 +7,17 @@
 → querying 68 local files in _targets/02_quarto_notebook/objects
 → reading _targets/02_quarto_notebook/meta/process
 → parsing _targets/02_quarto_notebook/meta/process
++ data_sources_file dispatched
+✔ data_sources_file completed [1ms, 4.07 kB]
++ data_sources dispatched
+Rows: 30 Columns: 12
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr (12): Model feature, Model feature shorthand, Category, M1, M2, M3, Unit...
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+✔ data_sources completed [290ms, 1.58 kB]
 + quarto_notebook dispatched
 [31m
 
@@ -94,3 +105,105 @@ processing file: quarto_notebook.qmd
 80/107 [fig-spatial-coverage-footprint]                        
 81/107                                                         
 82/107 [fig-pollutant-maps-qlog10]                             
+83/107                                                         
+84/107 [fig-pollutant-time-series]                             
+85/107                                                         
+86/107 [fig-annual-emissions-by-ocean-and-data-source]         
+87/107                                                         
+88/107 [unnamed-chunk-17]                                      
+89/107                                                         
+90/107 [unnamed-chunk-18]                                      
+91/107                                                         
+92/107 [unnamed-chunk-19]                                      
+93/107                                                         
+94/107 [unnamed-chunk-20]                                      
+95/107                                                         
+96/107 [unnamed-chunk-21]                                      
+97/107                                                         
+98/107 [fig-inventory-comparison]                              
+99/107                                                         
+100/107 [unnamed-chunk-22]                                      
+101/107                                                         
+102/107 [fig-annual-emissions-by-ais-receiver-type]             
+103/107                                                         
+104/107 [fig-annual-emissions-by-ais-receiver-type-top-flags]   
+105/107                                                         
+106/107 [fig-co2-emissions-change-map-by-receiver-type]         
+107/107                                                         
+[31moutput file: quarto_notebook.knit.md
+
+[39m[1mpandoc [22m
+  to: latex
+  output-file: quarto_notebook.tex
+  standalone: true
+  pdf-engine: lualatex
+  variables:
+    graphics: true
+    tables: true
+  default-image-extension: pdf
+  toc: true
+  number-sections: true
+  
+[1mmetadata[22m
+  documentclass: scrartcl
+  classoption:
+    - DIV=11
+    - numbers=noendperiod
+  papersize: letter
+  header-includes:
+    - \KOMAoption{captions}{tableheading}
+  block-headings: true
+  engines:
+    - path: /opt/positron-server/quarto/share/extension-subtrees/julia-engine/_extensions/julia-engine/julia-engine.js
+  title: Quantifying comprehensive marine vessel emissions using data fusion
+  author: emLab, UCSB and GFW
+  date: last-modified
+  date-format: '[Last Updated on] MMMM DD, YYYY'
+  editor_options:
+    chunk_output_type: console
+  editor:
+    markdown:
+      wrap: 72
+  colorlinks: true
+  
+[33mWARNING (/opt/positron-server/quarto/share/filters/main.lua:18344) Raw LaTeX table found with non-tbl label: tab:tab-performance-tolerance-table
+Won't be able to cross-reference this table using Quarto's native crossref system.
+[39m[33mWARNING (/opt/positron-server/quarto/share/filters/main.lua:18344) Raw LaTeX table found with non-tbl label: tab:data_sources
+Won't be able to cross-reference this table using Quarto's native crossref system.
+[39m[33mWARNING (/opt/positron-server/quarto/share/filters/main.lua:18344) Raw LaTeX table found with non-tbl label: tab:all_performance_metrics_table
+Won't be able to cross-reference this table using Quarto's native crossref system.
+[39m[33mWARNING (/opt/positron-server/quarto/share/filters/main.lua:18344) Raw LaTeX table found with non-tbl label: tab:lm_other_gases_tidy_fit_stats
+Won't be able to cross-reference this table using Quarto's native crossref system.
+[39m[33mWARNING (/opt/positron-server/quarto/share/filters/main.lua:18344) Raw LaTeX table found with non-tbl label: tab:total_percent_change_by_fleet
+Won't be able to cross-reference this table using Quarto's native crossref system.
+[39m[33mWARNING (/opt/positron-server/quarto/share/filters/main.lua:18344) Raw LaTeX table found with non-tbl label: tab:pollutant_ais_underestimation_overestimation_summary
+Won't be able to cross-reference this table using Quarto's native crossref system.
+[39m[33mWARNING (/opt/positron-server/quarto/share/filters/main.lua:18344) Raw LaTeX table found with non-tbl label: tab:emissions_by_ocean_summary_tbl
+Won't be able to cross-reference this table using Quarto's native crossref system.
+[39m[33mWARNING (/opt/positron-server/quarto/share/filters/main.lua:18344) Raw LaTeX table found with non-tbl label: tab:emissions_by_data_source_summary_tbl
+Won't be able to cross-reference this table using Quarto's native crossref system.
+[39m[33mWARNING (/opt/positron-server/quarto/share/filters/main.lua:18344) Raw LaTeX table found with non-tbl label: tab:social_cost_summary_tbl
+Won't be able to cross-reference this table using Quarto's native crossref system.
+[39m[33mWARNING (/opt/positron-server/quarto/share/filters/main.lua:18344) Raw LaTeX table found with non-tbl label: tab:inventory_comparison
+Won't be able to cross-reference this table using Quarto's native crossref system.
+[39m[1m[34m
+Rendering PDF[39m[22m
+[1m[34mrunning lualatex - 1[39m[22m
+  This is LuaHBTeX, Version 1.18.0 (TeX Live 2024) 
+   restricted system commands enabled.
+  
+[1m[34mrunning lualatex - 2[39m[22m
+  This is LuaHBTeX, Version 1.18.0 (TeX Live 2024) 
+   restricted system commands enabled.
+  
+[1m[34mrunning lualatex - 3[39m[22m
+  This is LuaHBTeX, Version 1.18.0 (TeX Live 2024) 
+   restricted system commands enabled.
+  
+
+Output created: quarto_notebook.pdf
+
+→ 67 targets ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  [19m 36.3s, 3+, 64-]
+✔ quarto_notebook completed [19m 34.3s, 12.08 MB]
+→ 67 targets ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  [19m 36.3s, 3+, 64-]→ de-duplicating _targets/02_quarto_notebook/meta/meta
+→ 67 targets ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  [19m 36.3s, 3+, 64-]✔ ended pipeline [19m 36.5s, 3 completed, 64 skipped]

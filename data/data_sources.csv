@@ -6,8 +6,7 @@ Vessel type (fishing or non-fishing),fishing,Dependent variable,Yes,Yes,Yes,-,Bo
 Lower threshold of vessel length bin,length_bin_min,S1 detection features,Yes,Yes,No,m,Numeric,No,No,GFW,\cite{paolo2024satellite}
 Vessel length bin (4 categories),length_size_bin,S1 detection features,Yes,Yes,No,-,Factor,Yes,Yes,GFW,\cite{paolo2024satellite}
 S1 detections per km² of area for each length bin,length_size_bin_{bin number},S1 detection features,No,No,Yes,detects/km2,Numeric,Yes,Yes,GFW,\cite{paolo2024satellite}
-Days since start of study,days_since_start,Temporal features,Yes,Yes,Yes,days,Numeric,No,Yes,GFW,\cite{kroodsma2018tracking}
-Post-2020 IMO Sulphur policy,post_2020,Temporal features,Yes,Yes,Yes,-,Boolean,No,Yes,IMO,\cite{imo_sulphur_2020}
+Post-2020 IMO Sulphur policy,post_2020,Temporal features,No,No,Yes,-,Boolean,No,Yes,IMO,\cite{imo_sulphur_2020}
 Ocean basin,ocean,Geographic features ,Yes,Yes,Yes,-,Factor,Yes,No,GFW,\cite{kroodsma2018tracking}
 Pixel water area,pixel_water_area_km2,Geographic features ,Yes,Yes,Yes,km2,Numeric,Yes,No,GFW,\cite{paolo2024satellite}
 Mean ocean depth,mean_elevation_m,Geographic features ,Yes,Yes,Yes,m,Numeric,Yes,No,GFW,\cite{kroodsma2018tracking}
@@ -19,9 +18,9 @@ Positions reported by AIS type b,ais_reception_positions_per_day_class_B,AIS rec
 "Proportion of messages, dynamic AIS receivers",dynamic_receiver_prop,AIS reception quality ,Yes,Yes,Yes,-,Numeric,Yes,Yes,GFW,\cite{kroodsma2018tracking}
 "Proportion of messages, terrestrial AIS receivers",terrestrial_receiver_prop,AIS reception quality,Yes,Yes,Yes,-,Numeric,Yes,Yes,GFW,\cite{kroodsma2018tracking}
 "Proportion of messages, satellite AIS receivers",satellite_receiver_prop,AIS reception quality,Yes,Yes,Yes,-,Numeric,Yes,Yes,GFW,\cite{kroodsma2018tracking}
-Mean wind speed,wind_speed_mean,Weather features,Yes,Yes,Yes,m/s,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
-Mean primary wave height,wave_height_mean,Weather features,Yes,Yes,Yes,m,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
-Mean primary wave period,wave_period_mean,Weather features,Yes,Yes,Yes,s,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
+Mean wind speed,wind_speed_mean,Weather features,No,Yes,No,m/s,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
+Mean primary wave height,wave_height_mean,Weather features,No,Yes,No,m,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
+Mean primary wave period,wave_period_mean,Weather features,No,Yes,No,s,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
 Total pixel area imaged by S1 across all time,total_s1_pixel_area_imaged_km2_all_time,S1 detection features,Yes,Yes,No,km2,Numeric,Yes,No,GFW,\cite{paolo2024satellite}
 Pixel water fraction,water_fraction,Geographic features ,No,No,Yes,-,Numeric,Yes,No,GFW,\cite{paolo2024satellite}
 Unique AIS-broadcasting vessels in pixel,ais_unique_vessels,AIS reception quality,Yes,Yes,No,-,Numeric,Yes,Yes,GFW,\cite{kroodsma2018tracking}

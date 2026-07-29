@@ -2405,7 +2405,7 @@ writeLines(
 ```{r}
 #| label: fig-feature-importance
 #| fig-cap: Feature importance plots for the 1) detections (presence/absence) classification model; 2) detections regression model; and 3) CO$_2$ emissions regression model.
-#| fig-height: 9
+#| fig-height: 10.5
 #| fig-width: 7.5
 
 all_varimp_data |>
