@@ -451,6 +451,36 @@ percent_transportation_emmissions_from_marine_edgar <- all_edgar_gfw_data |>
   ) |>
   dplyr::pull(percent)
 
+# Fraction of ALL global CO2 emissions (all sectors) represented by marine
+# vessels in the EDGAR comparison year. As with the transportation share above,
+# EDGAR's own Water-borne Navigation estimate is replaced by our marine estimate
+# in the denominator, so marine emissions are not double-counted
+edgar_marine_emissions_comparison_year <- annual_edgar_tranportation_emissions |>
+  dplyr::filter(
+    sector == "Water-borne Navigation",
+    year == edgar_comparison_year
+  ) |>
+  dplyr::pull(emissions_co2_mt) |>
+  sum(na.rm = TRUE)
+
+percent_global_emissions_from_marine_edgar <- all_edgar_gfw_data |>
+  dplyr::filter(year == edgar_comparison_year) |>
+  dplyr::select(-year) |>
+  tidyr::pivot_wider(
+    names_from = "data_source",
+    values_from = "emissions_co2_mt"
+  ) |>
+  dplyr::mutate(
+    percent = scales::percent(
+      `Marine vessels (AIS + S1)` /
+        (`All sectors (EDGAR)` -
+          edgar_marine_emissions_comparison_year +
+          `Marine vessels (AIS + S1)`),
+      accuracy = 0.1
+    )
+  ) |>
+  dplyr::pull(percent)
+
 percent_increase_to_edgar_year <- all_edgar_gfw_data_normalized |>
   dplyr::filter(year == edgar_comparison_year) |>
   dplyr::mutate(
@@ -846,7 +876,7 @@ emissions_by_ocean_summary_tbl <- annual_emissions_by_ocean_normalized |>
 
 ## Abstract
 
--  We found that vessels emitted approximately `r signif((total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS + S1", pollutant == "co2") |> dplyr::pull(end_col))/1e9,3)` billion metric tonnes of CO$_{2}$ in `r analysis_end_year`. In `r edgar_comparison_year`, the most recent year for which EDGAR data are available, marine vessels accounted for `r percent_transportation_emmissions_from_marine_edgar` of global fossil fuel emissions from the transportation sector. 
+-  We found that vessels emitted approximately `r signif((total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS + S1", pollutant == "co2") |> dplyr::pull(end_col))/1e9,3)` billion metric tonnes of CO$_{2}$ in `r analysis_end_year`. In `r edgar_comparison_year`, the most recent year for which EDGAR data are available, marine vessels accounted for `r percent_transportation_emmissions_from_marine_edgar` of global fossil fuel emissions from the transportation sector, and `r percent_global_emissions_from_marine_edgar` of global fossil fuel emissions across all sectors.
 
 - Current AIS-only approaches underestimate the magnitude of `r analysis_end_year` emissions by `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(ais_underestimation)`. Meanwhile, because AIS coverage has generally been increasing over time, current AIS-only approaches overestimate the increasing emissions trend by `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(trend_overestimation)` (from `r analysis_start_year` to `r analysis_end_year`).
 
@@ -857,22 +887,14 @@ emissions_by_ocean_summary_tbl <- annual_emissions_by_ocean_normalized |>
 - For over  `r scales::comma(floor(n_unique_vessels$n_unique_vessels / 1e4) * 1e4)` AIS-broadcasting vessels, we quantify emissions for
 each vessel using precise latitude/longitude/timestamp information for over `r scales::comma(floor(n_ais_messages$n_billion_ais_messages))` billion individual AIS messages.
 
+- To account for the vast missing emissions from non-broadcasting vessels (also sometimes known as 'dark vessels'), we develop a machine learning framework that leverages `r signif(n_s1_detections$n_million_s1_detections,3)` million vessel detections from across  more than `r prettyNum(floor(n_s1_detections$n_thousand_s1_scenes)*1000,big.mark = ",")` S1 scenes to estimate non-broadcasting emissions at a monthly global 1x1-degree gridded resolution, from `r analysis_start_year` through `r analysis_end_year`, and disaggregated by vessel type (fishing or non-fishing).
+
 ## Results
 
 -  Using this data fusion approach, we find that total global CO$_{2}$ emissions at sea in `r analysis_end_year` was `r signif((total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS + S1", pollutant == "co2") |> dplyr::pull(end_col))/1e9,3)` billion MT, with an increase of `r scales::percent(total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS + S1", pollutant == "co2") |> dplyr::pull(percent_change))` from `r analysis_start_year` to `r analysis_end_year`. If only considering emissions from vessels that broadcast AIS, in line with currently accepted state-of-the-art models, global CO$_{2}$ emissions in `r analysis_end_year` would be only `r signif((total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS (broadcasting)", pollutant == "co2") |> dplyr::pull(end_col))/1e9,3)` billion MT, with a more pronounced increase from `r analysis_start_year` to `r analysis_end_year` of `r scales::percent(total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS (broadcasting)", pollutant == "co2") |> dplyr::pull(percent_change))`.   
 
-- Thus using only AIS data from broadcasting vessels underestimates current global CO$_{2}$ emissions by  `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(ais_underestimation)`, and overestimates the increasing trend for `r analysis_start_year`--`r analysis_end_year` by `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(trend_overestimation)`
+- Thus using only AIS data from broadcasting vessels underestimates the magnitude of 2025 global CO$_{2}$ emissions by  `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(ais_underestimation)`, and overestimates the increasing trend for `r analysis_start_year`--`r analysis_end_year` by `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(trend_overestimation)`
 
--   Across the entire `r analysis_start_year` to `r analysis_end_year`
-    time series,
-    `r dark_emissions_by_area |>   dplyr::filter(inside_footprint & s1_imaged) |>   dplyr::pull(percent_total)`
-    of non-broadcasting emissions occurred inside the S1 footprint and
-    in pixel-months that were imaged;
-    `r dark_emissions_by_area |>   dplyr::filter(inside_footprint & !s1_imaged) |>   dplyr::pull(percent_total)`
-    occurred inside the S1 footprint but in pixel-months that weren't
-    imaged; and
-    `r dark_emissions_by_area |>   dplyr::filter(!inside_footprint) |>   dplyr::pull(percent_total)`
-    occurred outside the S1 footprint entirely.
 
 -   In `r analysis_end_year`,
     `r dark_emissions_by_fishing |> dplyr::filter(fishing) |> dplyr::pull(percent_dark)`
@@ -882,19 +904,21 @@ each vessel using precise latitude/longitude/timestamp information for over `r s
     of CO$_{2}$ emissions from non-fishing vessels were from
     non-broadcasting vessels. For both types of vessels, this fraction
     of emissions from non-broadcasting vessels has generally been
-    declining since 2021, although it ticked up slightly for fishing
+    declining since 2021, although it increased slightly for fishing
     vessels in 2025.
 
 
-- Across the entire `r analysis_start_year` to `r analysis_end_year` time series, almost all non-broadcasting emissions (`r dark_emissions_by_area |> dplyr::filter(inside_footprint,s1_imaged) |> dplyr::pull(percent_total)`) occurred inside the S1 footprint and in pixel-months that were imaged by S1. 
 
-- Our machine learning model for predicting these emissions directly from observed S1 detection density achieves a high out-of-sample predictive performance (traditional R2 = `r all_performance_metrics |> dplyr::filter(metric == "rsq_trad",pollutant == "co2",model=="emissions_regression",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)` and total percent error of `r all_performance_metrics |> dplyr::filter(metric == "aggregate_prediction_percent_error",pollutant == "co2",model=="emissions_regression",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)`% for CO$_2$). 
+-   Across the entire `r analysis_start_year` to `r analysis_end_year`
+    time series, almost all non-broadcasting emissions (
+    `r dark_emissions_by_area |>   dplyr::filter(inside_footprint & s1_imaged) |>   dplyr::pull(percent_total)`) occurred inside the S1 footprint and in pixel-months that were imaged
+    
+- Our machine learning model for predicting these emissions directly from observed S1 detection density achieves a high out-of-sample predictive performance (traditional R2 = `r all_performance_metrics |> dplyr::filter(metric == "rsq_trad",pollutant == "co2",model=="emissions_regression",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)` and total percent error of `r all_performance_metrics |> dplyr::filter(metric == "aggregate_prediction_percent_error",pollutant == "co2",model=="emissions_regression",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)`% for CO$_2$)    
 
-- Only `r dark_emissions_by_area |> dplyr::filter(inside_footprint,!s1_imaged) |> dplyr::pull(percent_total)` of non-broadcasting emissions occurred inside the S1 footprint but in pixel-months that weren't imaged by S1, requiring us to use a two-stage hurdle framework using both a classification model (F1 Score = `r all_performance_metrics |> dplyr::filter(metric == "f_meas",model=="detections_classification",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)`) and a regression model (traditional R2 = `r all_performance_metrics |> dplyr::filter(metric == "rsq_trad",model=="detections_regression",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)`) to predict S1 detection density before predicting emissions (traditional R$^{2}$ = `r all_performance_metrics |> dplyr::filter(metric == "rsq_trad",pollutant == "co2",model=="emissions_regression",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)`). 
+- Only `r dark_emissions_by_area |>   dplyr::filter(inside_footprint & !s1_imaged) |>   dplyr::pull(percent_total)` of non-broadcasting emissions occurred inside the S1 footprint but in pixel-months that weren’t imaged by S1, requiring us to use a two-stage hurdle framework using both a classification model (F1 Score = `r all_performance_metrics |> dplyr::filter(metric == "f_meas",model=="detections_classification",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)`) and a regression model (traditional
+R2 = `r all_performance_metrics |> dplyr::filter(metric == "rsq_trad",model=="detections_regression",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)`) to predict S1 detection density before predicting emissions (traditional R2 = `r all_performance_metrics |> dplyr::filter(metric == "rsq_trad",pollutant == "co2",model=="emissions_regression",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)`). 
 
 - Only `r dark_emissions_by_area |> dplyr::filter(!inside_footprint,!s1_imaged) |> dplyr::pull(percent_total)` of non-broadcasting emissions occurred outside the S1 footprint entirely, since most vessels operating in these open ocean areas use AIS.
-
-
 
 - Most emissions for non-fishing vessels occur during `r top_type_by_fishing_non_fishing |> dplyr::filter(fishing == "Non-fishing") |> dplyr::pull(type) |> stringr::str_to_lower()`, while most emissions for fishing vessels occur during `r top_type_by_fishing_non_fishing |> dplyr::filter(fishing == "Fishing") |> dplyr::pull(type) |> stringr::str_to_lower()`.
 
@@ -1153,7 +1177,7 @@ cowplot::plot_grid(
   co2_map,
   ncol = 2,
   labels = c("", "C"),
-  rel_widths = c(0.4, 0.6),
+  rel_widths = c(0.5, 0.5),
   align = "vh"
 )
 ```
