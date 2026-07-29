@@ -1211,7 +1211,14 @@ cowplot::plot_grid(
     total_annual_emissions_by_fleet_fig,
     normalized_annual_emissions_by_fleet_fig,
     ncol = 1,
-    labels = c("A", "B")
+    labels = c("A", "B"),
+    # Panels A and B have different y-axis label widths ("0.00 B" vs "0%"), so
+    # without this their panel regions start at different x offsets and the
+    # vertical gridlines do not line up. axis = "lr" pads the narrower plot's
+    # axis so both panel edges match exactly; matching the axis title text by
+    # hand does not work, because the margin is title width plus label width.
+    align = "v",
+    axis = "lr"
   ),
   co2_map,
   ncol = 2,
