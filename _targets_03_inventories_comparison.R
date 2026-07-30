@@ -193,7 +193,10 @@ list(
   ),
   # IMO and MariTEAM have no machine-readable source, so their values are
   # transcribed in r/functions.R rather than downloaded. IMO covers 2016-2018;
-  # MariTEAM reports a single year (2017, 943 Mt).
+  # MariTEAM reports a single year (2017, 943 Mt). IMO enters twice: the full
+  # total, and the Type 1/2+3 subset, which is the tracked fleet and so the
+  # closer comparison to our AIS series - see imo_ghg_study_type123_co2() for the
+  # approximations behind that second series.
   tar_target(
     name = all_inventory_data,
     command = combine_inventory_series(
@@ -204,7 +207,11 @@ list(
         oecd_ship_annual_emissions_file
       ),
       gfw_edgar_series = gfw_edgar_marine_emissions,
-      hardcoded_series = list(imo_ghg_study_co2(), mariteam_ship_co2())
+      hardcoded_series = list(
+        imo_ghg_study_co2(),
+        imo_ghg_study_type123_co2(),
+        mariteam_ship_co2()
+      )
     )
   ),
   tar_target(

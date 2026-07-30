@@ -711,9 +711,9 @@ write_inventory_csv <- function(data, file_path) {
 # AIS-derived, and neither attempts to include non-broadcasting vessels, which is
 # why this compares against GFW (AIS) rather than the fused AIS + S1 estimate.
 #
-# Compares four quantities, each with a percent difference (ours relative to
+# Compares five quantities, each with a percent difference (ours relative to
 # theirs): CO2 intensity in kg per nautical mile, absolute CO2, distance
-# travelled, and vessel count.
+# travelled, vessel count, and average CO2 per vessel.
 #
 # Two caveats travel with the table rather than being smoothed over:
 #
@@ -785,7 +785,16 @@ compare_icct_to_gfw_ais <- function(
       icct_n_vessels = .data$icct_n_vessels,
       icct_n_vessels_identified = .data$icct_n_vessels_identified,
       vessels_percent_difference = 100 *
-        (.data$gfw_n_vessels / .data$icct_n_vessels - 1)
+        (.data$gfw_n_vessels / .data$icct_n_vessels - 1),
+      # Average CO2 per vessel, tonnes. Each model's own total CO2 over its own
+      # vessel count; for ICCT that is the full count, including the Unknown
+      # class, because its CO2 total covers those ships too. The two are not
+      # like-for-like for the same reason the vessel counts are not: ours is
+      # distinct ssvid across the whole AIS fleet, theirs is merchant ships.
+      gfw_co2_per_vessel_t = .data$gfw_co2_mt / .data$gfw_n_vessels,
+      icct_co2_per_vessel_t = .data$icct_co2_mt / .data$icct_n_vessels,
+      co2_per_vessel_percent_difference = 100 *
+        (.data$gfw_co2_per_vessel_t / .data$icct_co2_per_vessel_t - 1)
     ) |>
     dplyr::arrange(.data$year)
 }
@@ -801,6 +810,44 @@ imo_ghg_study_co2 <- function() {
     year = c(2016L, 2017L, 2018L),
     emissions_co2_mt = c(1.026e9, 1.064e9, 1.056e9)
   )
+}
+
+# The Type 1/2+3 subset of the IMO series above.
+#
+# The IMO study assigns each ship a calculation method by how well its activity
+# is known: Types 1, 2 and 3 are the ships whose activity is tracked, while Type
+# 4 covers those whose activity is inferred rather than observed. Our AIS
+# estimate can only see the tracked population, so the full IMO total is not the
+# like-for-like comparison - this series is.
+#
+# Two approximations, neither of which the published tables let us avoid:
+#
+#   * The study reports no CO2 table split by type. The split is only published
+#     as the stacked bars of Figure 69, so the shares below are read off that
+#     figure - reliable to about a percentage point, no better. They land within
+#     half a point of each other across all three years, which is the main
+#     reason to trust them.
+#   * Figure 69 is CO2-equivalent, not CO2. We apply its shares to the CO2
+#     totals in imo_ghg_study_co2(), which assumes Types 1/2+3 have the same
+#     CO2-to-CO2e ratio as the fleet as a whole. Non-CO2 GHGs are a small part
+#     of the total, so the error this introduces is well inside the error
+#     already carried by reading the shares off a figure.
+#
+# Given both, treat this series as indicative of the level and trend, not as a
+# published IMO number.
+imo_ghg_study_type123_co2 <- function() {
+  imo_total <- imo_ghg_study_co2()
+
+  # Types 1/2+3 share of total CO2e, from Figure 69: top of the medium-blue
+  # Type 3 band over the labelled bar total (2016: ~985/1045, 2017: ~1020/1083,
+  # 2018: ~1012/1076). Only Type 4, the light-blue band above it, is excluded.
+  type123_share <- c(0.943, 0.942, 0.941)
+
+  imo_total |>
+    dplyr::mutate(
+      data_source = "IMO (Type 1/2+3)",
+      emissions_co2_mt = .data$emissions_co2_mt * type123_share
+    )
 }
 
 # MariTEAM model global shipping CO2. The published assessment reports a single
@@ -909,7 +956,11 @@ gfw_edgar_marine_co2 <- function(
 combine_inventory_series <- function(
   inventory_files,
   gfw_edgar_series,
-  hardcoded_series = list(imo_ghg_study_co2(), mariteam_ship_co2())
+  hardcoded_series = list(
+    imo_ghg_study_co2(),
+    imo_ghg_study_type123_co2(),
+    mariteam_ship_co2()
+  )
 ) {
   inventory_columns <- c("data_source", "year", "emissions_co2_mt")
 
@@ -989,7 +1040,8 @@ plot_inventory_relative_change <- function(
       ggplot2::aes(
         x = year,
         y = emissions_co2_mt_normalized,
-        color = data_source
+        color = data_source,
+        linetype = data_source
       ),
       linewidth = 1.1
     ) +
@@ -1000,6 +1052,10 @@ plot_inventory_relative_change <- function(
     ggplot2::scale_color_manual(
       name = "Emissions inventory",
       values = inventory_color_palette(included_sources)
+    ) +
+    ggplot2::scale_linetype_manual(
+      values = inventory_linetypes(included_sources),
+      guide = "none"
     ) +
     ggplot2::labs(
       x = "",
@@ -1043,9 +1099,24 @@ plot_inventory_levels <- function(
   ) +
     ggplot2::geom_line(
       data = plot_data |> dplyr::filter(n_years > 1),
+      ggplot2::aes(linetype = data_source),
       linewidth = 1
     ) +
     ggplot2::geom_point(size = 1.8) +
+    # The linetype guide is suppressed rather than merged with the color guide.
+    # geom_line only draws the multi-year series, so its levels never match the
+    # color scale's (MariTEAM is a lone point), and two guides that differ cannot
+    # merge - the figure would carry two "Emissions inventory" legends. Instead
+    # the color guide is the single key, with the dashed entry drawn in below.
+    ggplot2::scale_linetype_manual(
+      values = inventory_linetypes(source_order),
+      guide = "none"
+    ) +
+    ggplot2::guides(
+      color = ggplot2::guide_legend(
+        override.aes = list(linetype = inventory_linetypes(source_order))
+      )
+    ) +
     ggplot2::scale_y_continuous(
       labels = scales::unit_format(unit = "B", scale = 1e-9),
       limits = c(0, axis_max),
@@ -1179,6 +1250,18 @@ plot_inventory_comparison <- function(
 # figure keep their Okabe-Ito colors from all_data_source_color_palette so the
 # two figures stay readable side by side; the inventories added by this pipeline
 # take the remaining Okabe-Ito hues.
+# Line style per inventory. Everything is solid except the IMO Type 1/2+3
+# subset, which is dashed: it shares IMO's hue by design, and two similar greens
+# are hard to separate at line width, so the dash carries the distinction where
+# color alone would not - including for readers who cannot separate the hues at
+# all.
+inventory_linetypes <- function(data_sources) {
+  linetypes <- rep("solid", length(data_sources))
+  names(linetypes) <- data_sources
+  linetypes[names(linetypes) == "IMO (Type 1/2+3)"] <- "22"
+  linetypes
+}
+
 inventory_color_palette <- function(data_sources) {
   okabe_ito <- paletteer::paletteer_d("colorblindr::OkabeIto")
 
@@ -1188,6 +1271,9 @@ inventory_color_palette <- function(data_sources) {
     "EDGAR" = okabe_ito[[8]],
     "OECD" = okabe_ito[[6]],
     "IMO" = okabe_ito[[3]],
+    # The subset shares IMO's hue, darkened, so the two read as the same source
+    # at two scopes rather than as unrelated inventories
+    "IMO (Type 1/2+3)" = "#1B7837",
     # Keyed on the display label set in plot_inventory_comparison(), not the
     # longer name carried in the data
     "STEAM" = okabe_ito[[2]],
