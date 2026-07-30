@@ -1483,8 +1483,11 @@ make_pollutant_by_fleet_time_series_figure <- function(
 time_series_fig_co2 <- make_pollutant_by_fleet_time_series_figure(
   time_series_data_monthly_emissions,
   y_axis_label = expression(Monthly ~ CO[2] ~ emissions ~ (MT)),
-  legend_position_inside = c(0.08, 0.87)
+  legend_position_inside = c(0.02, 0.98)
 ) +
+  # Anchor the legend by its top-left corner instead of its centre, so it sits
+  # as high in the panel as it can without the box border clipping at the edge
+  theme(legend.justification.inside = c(0, 1)) +
   scale_y_continuous(
     labels = scales::unit_format(unit = "M", scale = 1e-6),
     limits = c(0, NA)
@@ -1566,8 +1569,16 @@ spatial_co2_emissions_ais_dark <- annual_spatial_co2_emissions_ais_dark_by_fleet
     emissions_co2_dark_mt = sum(emissions_co2_dark_mt, na.rm = TRUE)
   ) |>
   dplyr::ungroup() |>
+  # Third map in the panel: both fleets combined
+  dplyr::mutate(
+    emissions_co2_total_mt = emissions_co2_mt + emissions_co2_dark_mt
+  ) |>
   tidyr::pivot_longer(
-    cols = c(emissions_co2_mt, emissions_co2_dark_mt),
+    cols = c(
+      emissions_co2_mt,
+      emissions_co2_dark_mt,
+      emissions_co2_total_mt
+    ),
     names_to = "fleet",
     values_to = "emissions_co2_mt"
   ) |>
@@ -1581,8 +1592,12 @@ make_spatial_emissions_by_fleet_map <- function(spatial_emissions_data, facets) 
     dplyr::mutate(
       fleet = factor(
         fleet,
-        levels = c("emissions_co2_mt", "emissions_co2_dark_mt"),
-        labels = c("AIS", "S1")
+        levels = c(
+          "emissions_co2_mt",
+          "emissions_co2_dark_mt",
+          "emissions_co2_total_mt"
+        ),
+        labels = c("AIS", "S1", "AIS + S1")
       )
     ) |>
     dplyr::mutate(
@@ -1660,17 +1675,31 @@ make_spatial_emissions_by_fleet_map <- function(spatial_emissions_data, facets) 
     coord_sf(crs = map_projection)
 }
 
+# Stacked in a single column: panel C occupies the right half of the figure, so
+# each map gets that full half-width instead of a third of the page. The
+# colourbar comes in from 10 cm so it fits the narrower column.
 spatial_emissions_total_plot_pseudolog <- make_spatial_emissions_by_fleet_map(
   spatial_co2_emissions_ais_dark,
-  facets = facet_wrap(~fleet, nrow = 1)
-)
+  facets = facet_wrap(~fleet, ncol = 1)
+) +
+  guides(
+    fill = guide_colorbar(
+      title.position = "top",
+      title.hjust = 0.5,
+      frame.colour = "white",
+      ticks.colour = "white",
+      barwidth = unit(7, "cm"),
+      barheight = unit(0.4, "cm")
+    )
+  ) +
+  theme(legend.title = element_text(size = 9))
 ```
 
 ```{r}
 #| label: fig-emissions-time-series-and-maps
-#| fig-cap: !expr 'paste0("(A) Time series of monthly global CO$_2$ emissions, shown for both AIS-broadcasting and S1-detected non-broadcasting vessels. (B) Time series of the monthly share of global CO$_{2}$ emissions attributable to S1-detected non-broadcasting vessels. (C) Spatial distribution of cumulative ", analysis_start_year, "-", analysis_end_year, " CO$_{2}$ emissions from AIS-broadcasting vessels (left) and S1-detected non-broadcasting vessels (right), shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale).")'
+#| fig-cap: !expr 'paste0("(A) Time series of monthly global CO$_2$ emissions, shown for both AIS-broadcasting and S1-detected non-broadcasting vessels. (B) Time series of the monthly share of global CO$_{2}$ emissions attributable to S1-detected non-broadcasting vessels. (C) Spatial distribution of cumulative ", analysis_start_year, "-", analysis_end_year, " CO$_{2}$ emissions from AIS-broadcasting vessels (top), S1-detected non-broadcasting vessels (middle), and both fleets combined (bottom), shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale).")'
 #| fig-width: 8
-#| fig-height: 7
+#| fig-height: 6.5
 
 # Figure 2 combined
 # Panels A and B share the same monthly x-axis, so only panel B labels the
@@ -1678,14 +1707,38 @@ spatial_emissions_total_plot_pseudolog <- make_spatial_emissions_by_fleet_map(
 # panel regions (and their vertical gridlines) line up exactly. The left margin
 # reserves a strip for the cowplot "A"/"B" labels, which are drawn at x = 0 and
 # would otherwise sit on top of the rotated y-axis titles.
+#
+# cowplot lines the panels up by padding the outer edge of whichever plot has
+# the narrower y-axis labels ("30%" against "100 M"), which leaves the two
+# rotated y-axis titles at different x positions. Measuring that width
+# difference and adding it to the narrower plot's left margin instead makes both
+# [title | labels] stacks the same width, so the titles line up too. Both
+# figures that stack these panels use this, so it is defined here.
+y_axis_label_width <- function(plot) {
+  plot_table <- ggplotGrob(plot)
+  leftmost_axis <- min(
+    plot_table$layout$l[grepl("^axis-l", plot_table$layout$name)]
+  )
+  grid::convertWidth(plot_table$widths[leftmost_axis], "pt", valueOnly = TRUE)
+}
+
+y_axis_label_padding <- function(plots) {
+  label_widths <- vapply(plots, y_axis_label_width, numeric(1))
+  max(label_widths) - label_widths
+}
+
+axis_padding <- y_axis_label_padding(
+  list(time_series_fig_co2, percent_dark_time_series_fig)
+)
+
 time_series_panels <- cowplot::plot_grid(
   time_series_fig_co2 +
     theme(
       axis.text.x = element_blank(),
-      plot.margin = margin(b = -5, l = 24)
+      plot.margin = margin(b = -5, l = 24 + axis_padding[1])
     ),
   percent_dark_time_series_fig +
-    theme(plot.margin = margin(t = 0, b = -15, l = 24)),
+    theme(plot.margin = margin(t = 0, b = -15, l = 24 + axis_padding[2])),
   ncol = 1,
   labels = c("A", "B"),
   align = "v",
@@ -1695,8 +1748,8 @@ time_series_panels <- cowplot::plot_grid(
 cowplot::plot_grid(
   time_series_panels,
   spatial_emissions_total_plot_pseudolog,
-  ncol = 1,
-  rel_heights = c(0.55, 0.45),
+  ncol = 2,
+  rel_widths = c(0.52, 0.48),
   labels = c("", "C")
 )
 ```
@@ -2803,8 +2856,16 @@ spatial_co2_emissions_ais_dark_by_fleet <- annual_spatial_co2_emissions_ais_dark
     emissions_co2_dark_mt = sum(emissions_co2_dark_mt, na.rm = TRUE)
   ) |>
   dplyr::ungroup() |>
+  # Third map row in the panel: both fleets combined
+  dplyr::mutate(
+    emissions_co2_total_mt = emissions_co2_mt + emissions_co2_dark_mt
+  ) |>
   tidyr::pivot_longer(
-    cols = c(emissions_co2_mt, emissions_co2_dark_mt),
+    cols = c(
+      emissions_co2_mt,
+      emissions_co2_dark_mt,
+      emissions_co2_total_mt
+    ),
     names_to = "fleet",
     values_to = "emissions_co2_mt"
   ) |>
@@ -2823,19 +2884,23 @@ spatial_emissions_by_fleet_total_plot_pseudolog <- make_spatial_emissions_by_fle
 
 ```{r}
 #| label: fig-spatial-temporal-richness-by-fleet-total-pseudolog
-#| fig-cap: !expr 'paste0("(A) Time series of monthly global CO$_2$ emissions, shown for both AIS-broadcasting and S1-detected non-broadcasting vessels, and for both fishing and non-fishing vessels. (B) Time series of the monthly share of global CO$_{2}$ emissions attributable to S1-detected non-broadcasting vessels, for both fishing and non-fishing vessels. (C) Spatial distribution of cumulative ", analysis_start_year, "-", analysis_end_year, " CO$_{2}$ emissions from both AIS-broadcasting and S1-detected non-broadcasting vessels, for both fishing and non-fishing vessels, and shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale).")'
+#| fig-cap: !expr 'paste0("(A) Time series of monthly global CO$_2$ emissions, shown for both AIS-broadcasting and S1-detected non-broadcasting vessels, and for both fishing and non-fishing vessels. (B) Time series of the monthly share of global CO$_{2}$ emissions attributable to S1-detected non-broadcasting vessels, for both fishing and non-fishing vessels. (C) Spatial distribution of cumulative ", analysis_start_year, "-", analysis_end_year, " CO$_{2}$ emissions from AIS-broadcasting vessels, S1-detected non-broadcasting vessels, and both fleets combined (rows), for both fishing and non-fishing vessels (columns), and shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale).")'
 #| fig-width: 8
-#| fig-height: 9.5
+#| fig-height: 11
 
 # Figure S1 combined
+axis_padding_by_fishing <- y_axis_label_padding(
+  list(time_series_by_fleet_fig_co2, percent_dark_time_series_by_fishing_fig)
+)
+
 time_series_panels_by_fishing <- cowplot::plot_grid(
   time_series_by_fleet_fig_co2 +
     theme(
       axis.text.x = element_blank(),
-      plot.margin = margin(b = -5, l = 14)
+      plot.margin = margin(b = -5, l = 14 + axis_padding_by_fishing[1])
     ),
   percent_dark_time_series_by_fishing_fig +
-    theme(plot.margin = margin(t = 0, b = -15, l = 14)),
+    theme(plot.margin = margin(t = 0, b = -15, l = 14 + axis_padding_by_fishing[2])),
   ncol = 1,
   labels = c("A", "B"),
   align = "v",
@@ -2854,7 +2919,7 @@ cowplot::plot_grid(
   plot_constrained,
   spatial_emissions_by_fleet_total_plot_pseudolog,
   ncol = 1,
-  rel_heights = c(0.45, 0.55),
+  rel_heights = c(0.40, 0.60),
   labels = c("", "C")
 )
 ```
