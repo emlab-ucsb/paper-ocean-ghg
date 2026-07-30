@@ -635,9 +635,11 @@ Finally, in Fig. \ref{fig:fig-co2-emissions-change-map-by-receiver-type}, we see
 
 Two families of machine learning models are used to estimate vessel classes and properties. Vessel class is determined by a combination of a broad, primary vessel class model and focused cargo and tanker sub-type models. Vessel properties are determined by six separate models used to estimate the following vessel characteristics: gross tonnage (GT), main engine power (kW), design speed (kn), year-of-build (year), and engine type (class). Random forest classifiers are used for the primary vessel class and the engine subtype, random forest regression models are used to estimate gross tonnage, engine power, design speed, and year of build. Finally, gradient boosting classifiers are used for the cargo and tanker sub-type models. Details about each model can be found in the relevant subsections below.
 
-All models are trained on three categories of features derived from AIS information: inferred features (37), identity features (14), and activity features (13). The cargo and tanker sub-type models are trained on an additional 50 features derived from port visits. Inferred features consist of vessel class neural network scores and neural network estimates for length, tonnage, engine power, and crew size (https://www.science.org/doi/10.1126/science.aao5646). Identity features include identification data broadcast through a vessel's AIS, such as the first digit and the broadcast vessel class. Activity features describe patterns in a vessel's AIS activity over time, such as fraction of active hours, average speed, distance from shore, etc.
+All models are trained on three categories of features derived from AIS information: inferred features (37), identity features (14), and activity features (13). The cargo and tanker sub-type models are trained on an additional 50 features derived from port visits. These features were built with Word2Vec (50 dimensions, window 10, minimum count 5) over each vessel's sequence of anchorage visits, from high-confidence port visits in the 365 days to 2025-06-01; a vessel's vector is the visit-weighted mean of the anchorages it used. Inferred features consist of vessel class neural network scores and neural network estimates for length, tonnage, engine power, and crew size (https://www.science.org/doi/10.1126/science.aao5646). Identity features include identification data broadcast through a vessel's AIS, such as the first digit and the broadcast vessel class. Activity features describe patterns in a vessel's AIS activity over time, such as fraction of active hours, average speed, distance from shore, etc.
 
 Training/test data for all models has an 80/20 split, and is stratified by vessel class and the first digit of each MMSI to mitigate bias by vessel type or region. The number of training samples varied for each model as labeled data was available, with the primary GFW vessel class model having the maximum 500,000 total samples. Test sample sizes available for all models are provided in the metrics table \ref{tab:model-summary}. The primary GFW vessel class model, used to predict broad classes such as cargo, tanker, trawler, and gear, identifies the cargo and tanker vessels used in this analysis. Based on those classifications, the cargo and tanker sub-type models further refine those predictions into the more granular classes. Note that nearly half of AIS-broadcasting devices are likely associated with non-vessel objects (such as buoys, offshore structures, FADs, etc). These objects are identified as their own vessel class “gear” by the primary GFW vessel class model, and are excluded from the emissions estimates in this paper.
+
+Cargo and tanker sub-type labels are drawn from S\&P Global Maritime records, with StatCode5 levels 2--5 mapped to align with the fourth IMO Greenhouse Gas Study vessel class types, keeping only records that report a single MMSI so each label attaches to one vessel identity.
 
 \subsubsection{Primary GFW vessel class model}
 
@@ -670,90 +672,62 @@ Despite the training data stratification, high-volume classes such as gear and c
 As the vessel sub-types models rely on the output of the primary vessel classification model predictions, biases and errors are propagated from this model to the next. This effect similarly happens between the neural net scores and the primary GFW vessel class model.
 
 
-\subsubsection{Cargo and tanker sub-type models}
+\subsubsection{Cargo sub-type model}
 
-\paragraph{Approach} 
+\paragraph{Target}
 
-Two gradient-boosted tree classifiers, learning rate 0.01, at most 10\,000 boosting iterations, early stopping on a 10\% stratified internal validation split.
-A sub-type is assigned only to vessels the upstream GFW vessel-class model has already classified as cargo or tanker.
+One of five cargo sub-types (bulk carrier, container, general cargo, refrigerated cargo, ro-ro cargo), for 186\,689 vessels the primary vessel class model classified as cargo.
 
-\paragraph{Labels} 
+\paragraph{Training data}
 
-S\&P Global Maritime records.
-StatCode5 levels 2--5 are mapped to the reported sub-types to align with the fourth IMO Greenhouse Gas Study vessel class types.
-Only records reporting a single MMSI are retained, so that each label attaches to one vessel identity.
+11\,744 vessels with S\&P registry sub-types: bulk carrier 5\,201; general cargo 3\,200; container 2\,166; ro-ro 1\,100; refrigerated 77.
 
-\paragraph{Features} 
+\paragraph{Performance}
 
-Models contain 114 features in four blocks.
-\textit{Port visit embeddings (50)}. Word2Vec (50 dimensions, window 10, minimum count 5) over each vessel's sequence of anchorage visits, from port visits with high confidence in the last 365 days up to 2025-06-01. A vessel's embedding is the visit-weighted mean of the anchorages it used.
-\textit{Vessel-class network scores (33)}. Per-class outputs of the upstream GFW vessel-class model.
-\textit{AIS self-reported ship type (14)}. Fraction of a vessel's AIS messages declaring each ship type category.
-\textit{Activity and inferred characteristics (17)}. Speed percentiles, depth, distance from shore, fraction of time in port, AIS class, and inferred length, tonnage, crew size and engine power.
+Accuracy 90.5\%; macro-F1 85.5\%; weighted F1 90.5\%. Per-class F1: bulk carrier 94.3, container 93.9, general cargo 84.7, ro-ro 84.6, refrigerated 70.3.
 
-\paragraph{Evaluation} 
+\paragraph{Key predictive features}
 
-An 80/20 split stratified by sub-type.
+Importance is the loss in held-out macro-F1 when a feature is permuted, used in place of the Gini index, which is undefined for the gradient boosting models used here. Anchorage embeddings, 50 dimensions permuted together: 0.220. Vessel class neural network scores, 33 permuted together: 0.157. Top speed (95th percentile): 0.029.
 
-\paragraph{Overfitting controls} 
+\paragraph{Interpretability}
 
-Early stop of boosting iterations on a held-out internal validation split rather than fixed in advance.
+Vessel class neural network scores form a substantial part of this model's classification skill, indicating it is potentially inherited from the primary model rather than learned from vessel behaviour.
 
-\paragraph{Potential bias} 
+\paragraph{Overfitting controls and known weaknesses}
 
-We identify three potential sources of bias.
-\textit{Label coverage.} Labels exist only for vessels in S\&P data reporting a single MMSI. Non-IMO registered and identity-switching vessels are absent from training by construction, and they form a substantial part of the population to which the models are applied.
-\textit{Upstream inheritance.} A sub-type is assigned only where the GFW vessel-class model returns cargo or tanker. A vessel misclassified upstream may be routed to the wrong sub-model and given a sub-type causing classification errors to compound.
-\textit{Feature availability.} Anchorage embeddings derive from port visits, and 4.5\% of cargo and 5.6\% of tanker training vessels have no embedding at all. Vessels that avoid ports, or interrupt their AIS transmission are systematically degraded.
+Gradient boosting classifiers with early stopping on a held-out internal validation split, rather than a fixed number of boosting iterations. Unlike the primary model, the train/test split here is stratified by sub-type only rather than by MMSI region, with the split fixed by an MMSI hash so it is stable as data is added.
+
+Refrigerated cargo has 77 training vessels; its F1 of 70.3 is indicative only. Ro-ro and general cargo are the main confusion pair among the well-populated classes: 17\% of ro-ro vessels are predicted as general cargo. General cargo is 27\% of the training set but 66\% of predictions, so the model is likely extrapolating beyond its training mix.
+
+As with the primary model, errors are inherited from it: a vessel it misclassifies is refined against the wrong sub-type vocabulary. Labels exist only for S\&P-registered, single-MMSI vessels, and 4.5\% of training vessels have no port visit features at all.
 
 \subsubsection{Tanker sub-type model}
 
 \paragraph{Target}
 
-One of four tanker sub-types (oil, chemical, liquefied gas, other liquids), for 43\,530 vessels the upstream GFW vessel class model classified as tanker.
+One of four tanker sub-types (oil, chemical, liquefied gas, other liquids), for 43\,530 vessels the primary vessel class model classified as tanker.
 
-\paragraph{Training data} 
+\paragraph{Training data}
 
 5\,903 vessels with S\&P registry sub-types: oil 2\,664; chemical 2\,015; liquefied gas 1\,188; other liquids 36.
 
-\paragraph{Performance} 
+\paragraph{Performance}
 
-Accuracy 0.875; macro-F1 0.712; weighted F1 0.874. Per-class F1: liquefied gas 0.92, oil 0.89, chemical 0.84, other liquids 0.20.
-
-\paragraph{Key predictive features} 
-
-Using loss in held-out macro-F1 when permuted. Top speed (95th percentile): 0.169. Anchorage embeddings, 50 dimensions permuted together: 0.145. Vessel-class scores from upstream model, 33 permuted together: 0.061. Average distance traveled per trip: 0.029.
-
-\paragraph{Interpretability} 
-
-One feature, top speed, carries more importance than any other in either sub-type model. That makes the model easy to explain, but it also means it leans on a single behavioural signal that degrades wherever AIS coverage is patchy.
-
-\paragraph{Known deficiencies} 
-
-Performance for \emph{Other liquids} is poor: recall 0.111, with 89\% of those vessels predicted as oil. With 45 labelled vessels in total the class does not have enough signal to be separated. Oil and chemical tankers are often confused with each other: 13\% of chemical vessels are called oil and 10\% the reverse.
-
-\subsubsection{Cargo sub-type model}
-
-\paragraph{Target}
-
-One of five cargo sub-types (bulk carrier, container, general cargo, refrigerated cargo, ro-ro cargo), for 186\,689 vessels the upstream GFW vessel class model classified as cargo.
-
-\paragraph{Training data} 
-
-11\,744 vessels with S\&P registry sub-types: bulk carrier 5\,201; general cargo 3\,200; container 2\,166; ro-ro 1\,100; refrigerated 77.
-
-\paragraph{Performance.} Accuracy 0.905; macro-F1 0.855; weighted F1 0.905. Per-class F1: bulk carrier 0.94, container 0.94, general cargo 0.85, ro-ro 0.85, refrigerated 0.70.
+Accuracy 87.5\%; macro-F1 71.2\%; weighted F1 87.4\%. Per-class F1: liquefied gas 91.8, oil 88.6, chemical 84.3, other liquids 20.0.
 
 \paragraph{Key predictive features}
 
-Using loss in held-out macro-F1 when permuted. Anchorage embeddings, 50 dimensions permuted together: 0.220. Vessel-class scores from upstream model, 33 permuted together: 0.157. Top speed (95th percentile): 0.029. 
+Top speed (95th percentile): 0.169. Anchorage embeddings, 50 dimensions permuted together: 0.145. Vessel class neural network scores, 33 permuted together: 0.061. Average distance traveled per trip: 0.030.
 
 \paragraph{Interpretability}
 
-Vessel-class scores from upstream model form a substantial part of this model's classification skill, indicating it's potentially inherited rather than learned from vessel behaviour.
+One feature, top speed, carries more importance than any other in either sub-type model. That makes the model easy to explain, but it also means it leans on a single behavioural signal that degrades wherever AIS coverage is patchy.
 
-\paragraph{Known deficiencies}
+\paragraph{Overfitting controls and known weaknesses}
 
-Refrigerated cargo has 77 training vessels; its F1 of 0.70 is indicative only. Ro-ro and general cargo are the main confusion pair among the well-populated classes. General cargo is 27\% of the training set but 66\% of predictions, so the model is likely extrapolating beyond its training mix.
+Gradient boosting classifiers with early stopping on a held-out internal validation split. As with the cargo model, the train/test split is stratified by sub-type only, and the same label-coverage limits and inheritance of errors from the primary model apply.
+
+Performance for \emph{other liquids} is poor: recall 11.1\%, with 89\% of those vessels predicted as oil. With 45 labelled vessels in total the class does not have enough signal to be separated. Oil and chemical tankers are often confused with each other: 13\% of chemical vessels are called oil and 10\% the reverse. 5.6\% of training vessels have no port visit features at all.
 
 \end{document}
