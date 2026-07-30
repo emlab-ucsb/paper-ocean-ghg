@@ -476,5 +476,33 @@ list(
       file_path = file.path("data", "MRV", "trip_emissions_for_mrv_validation.csv")
     ),
     format = "file"
+  ),
+  # Annual AIS activity summary, for the inventory comparison ----
+  # Emissions alongside the activity behind them (distance, time, vessels, pings),
+  # so our estimates can be compared with published inventories on activity as
+  # well as on emissions.
+  #
+  # This series starts earlier than analysis_start_year to give the comparison a
+  # longer activity baseline. It has its own start year target rather than moving
+  # analysis_start_year, because that target feeds 17 other queries and changing
+  # it would invalidate and re-run all of them.
+  tar_target(
+    name = activity_summary_start_year,
+    command = 2015
+  ),
+  tar_file_read(
+    name = annual_ais_activity_summary,
+    command = file.path("sql", "annual_ais_activity_summary.sql"),
+    read = download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_ais = run_version_ais,
+          analysis_start_year = activity_summary_start_year,
+          analysis_end_year = analysis_end_year
+        ),
+      file_path = file.path("data", "gfw", "annual_ais_activity_summary.csv")
+    ),
+    format = "file"
   )
 )

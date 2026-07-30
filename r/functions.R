@@ -703,6 +703,93 @@ write_inventory_csv <- function(data, file_path) {
   return(file_path)
 }
 
+# Year-by-year comparison of the ICCT inventory against our AIS-based estimate.
+#
+# ICCT is the only published inventory here that reports vessel activity as well
+# as emissions, so it is the only one we can compare on more than a single
+# number. It is also the closest methodological match to our AIS series: both are
+# AIS-derived, and neither attempts to include non-broadcasting vessels, which is
+# why this compares against GFW (AIS) rather than the fused AIS + S1 estimate.
+#
+# Compares four quantities, each with a percent difference (ours relative to
+# theirs): CO2 intensity in kg per nautical mile, absolute CO2, distance
+# travelled, and vessel count.
+#
+# Two caveats travel with the table rather than being smoothed over:
+#
+#   * ICCT's "Unknown" ship class carries CO2 and a ship count but no distance,
+#     so its distance covers only identified vessels while its CO2 covers all of
+#     them. Both vessel counts are reported for that reason.
+#   * Our vessel count is distinct ssvid, a broadcast identifier rather than a
+#     hull identity, spanning the whole AIS fleet including small fishing
+#     vessels. It is not the same quantity as ICCT's count of merchant ships, so
+#     the ratio shows the gap rather than implying a like-for-like discrepancy.
+compare_icct_to_gfw_ais <- function(
+  gfw_activity_file = file.path("data", "gfw", "annual_ais_activity_summary.csv"),
+  icct_url = "https://theicct.org/wp-content/uploads/2025/04/supplemental_vf.xlsx"
+) {
+  download_dir <- file.path(tempdir(), "icct_comparison")
+  dir.create(download_dir, showWarnings = FALSE, recursive = TRUE)
+  on.exit(unlink(download_dir, recursive = TRUE), add = TRUE)
+
+  destination <- file.path(download_dir, basename(icct_url))
+  utils::download.file(icct_url, destfile = destination, mode = "wb", quiet = TRUE)
+
+  icct <- purrr::map_dfr(readxl::excel_sheets(destination), function(sheet) {
+    sheet_data <- readxl::read_excel(destination, sheet = sheet)
+    class_column <- names(sheet_data)[1]
+    classes <- !is.na(sheet_data[[class_column]]) &
+      !grepl("^Note", sheet_data[[class_column]])
+    identified <- classes & sheet_data[[class_column]] != "Unknown"
+    total <- function(column, rows) {
+      sum(suppressWarnings(as.numeric(sheet_data[[column]][rows])), na.rm = TRUE)
+    }
+
+    tibble::tibble(
+      year = as.integer(sheet),
+      icct_co2_mt = total("CO2 emissions (tonne)", classes),
+      icct_distance_nm = total("Distance travelled (nm)", classes),
+      icct_n_vessels = total("Number of ships", classes),
+      icct_n_vessels_identified = total("Number of ships", identified)
+    )
+  })
+
+  gfw <- readr::read_csv(gfw_activity_file, show_col_types = FALSE) |>
+    dplyr::select(
+      year,
+      gfw_co2_mt = emissions_co2_mt,
+      gfw_distance_nm = distance_travelled_nm,
+      gfw_n_vessels = n_unique_vessels
+    )
+
+  # inner_join keeps only the years both sources cover
+  dplyr::inner_join(gfw, icct, by = "year") |>
+    dplyr::transmute(
+      year = .data$year,
+      # Intensity, kg CO2 per nautical mile
+      gfw_intensity_kg_nm = .data$gfw_co2_mt * 1000 / .data$gfw_distance_nm,
+      icct_intensity_kg_nm = .data$icct_co2_mt * 1000 / .data$icct_distance_nm,
+      intensity_percent_difference = 100 *
+        (.data$gfw_intensity_kg_nm / .data$icct_intensity_kg_nm - 1),
+      # Absolute emissions, tonnes
+      gfw_co2_mt = .data$gfw_co2_mt,
+      icct_co2_mt = .data$icct_co2_mt,
+      co2_percent_difference = 100 * (.data$gfw_co2_mt / .data$icct_co2_mt - 1),
+      # Distance, nautical miles
+      gfw_distance_nm = .data$gfw_distance_nm,
+      icct_distance_nm = .data$icct_distance_nm,
+      distance_percent_difference = 100 *
+        (.data$gfw_distance_nm / .data$icct_distance_nm - 1),
+      # Vessels: ICCT reported both ways, since its Unknown class has no distance
+      gfw_n_vessels = .data$gfw_n_vessels,
+      icct_n_vessels = .data$icct_n_vessels,
+      icct_n_vessels_identified = .data$icct_n_vessels_identified,
+      vessels_percent_difference = 100 *
+        (.data$gfw_n_vessels / .data$icct_n_vessels - 1)
+    ) |>
+    dplyr::arrange(.data$year)
+}
+
 # The IMO's own global shipping CO2 totals, from the Fourth IMO GHG Study 2020
 # (voyage-based totals). The study covers 2012-2018 but we only carry the years
 # that overlap our analysis window, which is why this series stops at 2018.

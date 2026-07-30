@@ -222,6 +222,31 @@ list(
       file_path = file.path("figures", "inventory_comparison_all_sources.png")
     ),
     format = "file"
+  ),
+
+  # ICCT vs our AIS estimate ----
+  # ICCT is the only published inventory here that reports activity as well as
+  # emissions, so it is the only one we can compare on more than one number. This
+  # table pairs intensity, absolute emissions, distance and vessel count with a
+  # percent difference for each, year by year.
+  #
+  # Compared against GFW (AIS) rather than the fused AIS + S1 estimate, because
+  # ICCT is also AIS-derived and makes no attempt to include non-broadcasting
+  # vessels - so the AIS series is the like-for-like comparison.
+  #
+  # Needs data/gfw/annual_ais_activity_summary.csv from 01_gfw_data_pull, which
+  # carries the distance and vessel counts this comparison depends on.
+  tar_target(
+    name = icct_gfw_ais_comparison,
+    command = compare_icct_to_gfw_ais()
+  ),
+  tar_target(
+    name = icct_gfw_ais_comparison_file,
+    command = write_inventory_csv(
+      icct_gfw_ais_comparison,
+      file.path("data", "inventories", "icct_gfw_ais_comparison.csv")
+    ),
+    format = "file"
   )
 
   # Additional inventories ----
