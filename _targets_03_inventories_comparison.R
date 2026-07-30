@@ -254,6 +254,32 @@ list(
       file.path("data", "inventories", "icct_gfw_ais_comparison.csv")
     ),
     format = "file"
+  ),
+
+  # Fleet coverage ----
+  # How many vessels each inventory covers, where the inventory publishes it.
+  # IMO is transcribed from the Fourth IMO GHG Study's "Total included" column
+  # (2012-2018); ICCT is summed from the SAVE workbook (2016-2023). STEAM, SEIM
+  # and OECD publish no vessel counts at all, so they do not appear here.
+  tar_target(
+    name = inventory_vessel_counts_by_year,
+    command = inventory_vessel_counts(icct_years = as.integer(icct_ship_years))
+  ),
+  tar_target(
+    name = inventory_vessel_counts_file,
+    command = write_inventory_csv(
+      inventory_vessel_counts_by_year,
+      file.path("data", "inventories", "inventory_vessel_counts.csv")
+    ),
+    format = "file"
+  ),
+  tar_target(
+    name = inventory_vessel_counts_figure,
+    command = plot_inventory_vessel_counts(
+      inventory_vessel_counts_by_year,
+      file_path = file.path("figures", "inventory_vessel_counts.png")
+    ),
+    format = "file"
   )
 
   # Additional inventories ----
