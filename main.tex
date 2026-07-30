@@ -111,7 +111,7 @@ Our vessel-level AIS-broadcasting emissions data provide a detailed understandin
  \begin{figure}[H]
     \centering
     \includegraphics[width=\columnwidth]{figures/fig-ais-data-richness-1.png}
-    \caption{Richness of AIS-broadcasting vessel emissions data, showing: (A) CO$_{2}$ emissions by vessel type for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in 2025. (B) CO$_{2}$ emissions by country for AIS-broadcasting vessels during  during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in 2025. For both panels, emissions for each international trip are partitioned equally to its departure and arrival country). Countries with no values are shown in black.}
+    \caption{Richness of AIS-broadcasting vessel emissions data, showing: (A) CO$_{2}$ emissions by vessel type for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in 2025. (B) CO$_{2}$ emissions by country for AIS-broadcasting vessels during  during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in 2025. For both panels, emissions for each international trip are partitioned equally to its departure and arrival country). Countries with no values are shown in gray.}
     \label{fig:fig-ais-data-richness}
 \end{figure}
 
@@ -198,8 +198,8 @@ In all, we analyze AIS data for over 770,000 AIS-broadcasting vessels, across 11
 
 We use vessel characteristics data from GFW's vessel metadata tables. For each vessel, this includes: (1) official registry information when available \cite{park2023tracking}, or (2) when registry data are unavailable, algorithm-derived vessel characteristics including vessel class, main engine power, maximum design speed, and gross tonnage \cite{kroodsma2018tracking}. 
 
-For vessels classified as "cargo" or "tankers" in GFW's metadata tables, we implement a random forest classification sub-models that builds off the general vessel classification algorithm to differentiate sub-categories that better align with the Fourth IMO Greenhouse Gas Study vessel class types. The model is trained on port visit patterns from over 26,000 vessels with known IMO vessel class types. The models are trained using labels derived from S\&P Maritime StatCode5 categories. 
-Features include vessel characteristics and activity metrics such as engine power, tonnage, average speed, AIS broadcasted shiptypes and sequences of port visits. Sequences of port visits were converted into usable model features using a Word2Vec model (50-dimensional embeddings with a context window of 10 anchorages). The cargo sub-model classifies vessels into five categories: bulk carrier, container, general, refrigerated, and ro-ro (roll-on/roll-off for wheeled vehicle transport), achieving a weighted F1 score of 0.91. The tanker sub-model classifies vessels into three categories: chemical/oil, liquefied gas, and other liquids, achieving a weighted F1 score of 0.95. 
+For vessels classified as "cargo" or "tankers" in GFW's metadata tables, we implement gradient boosting sub-models that refine the general vessel classification into sub-categories aligned with the Fourth IMO Greenhouse Gas Study vessel class types: five cargo categories (bulk carrier, container, general, refrigerated, and ro-ro) and four tanker categories (oil, chemical, liquefied gas, and other liquids). The sub-models are trained on port visit history and vessel activity features, using labels derived from over 26,000 vessels with known IMO vessel class types (S\&P Maritime StatCode5 categories), and achieve weighted F1 scores of 0.91 (cargo) and 0.87 (tanker). Full details on training data, features, model performance, and known limitations are provided in the Supplementary Materials (Section~\ref{sec:cargo-submodel} and ~\ref{sec:tanker-submodel}).
+
 These refined cargo and tanker vessel class categories allows us to more accurately assign auxiliary engine power and boiler power to each vessel, which are based on lookup tables according to vessel class and size \cite{fourth2020greenhouse}. 
 
 For the main engine power, gross tonnage, and maximum design speed estimates, we develop separate random forest regression models. All models are trained using the same features: inferred vessel classification scores, AIS self-reported shiptype messages, activity and location features derived from AIS usage, and values inferred from prior regression models. All models were trained on datasets of around 360,000 labeled registry samples, with a holdout test set of 90,000 for an 80/20 train-test split. The main engine power, gross tonnage, and maximum design speed regression models achieved traditional R$^{2}$ values exceeding 0.88, 0.83, and 0.74, respectively.
@@ -624,16 +624,15 @@ Finally, in Fig. \ref{fig:fig-co2-emissions-change-map-by-receiver-type}, we see
     \midrule
     \multicolumn{6}{@{}l}{\textit{Classification models}} \\
     Vessel class        & [classes]  & 510\,486  & 127\,645  & macro-F1 & 0.878 \\
-    Engine type         & [classes]  & [n]  & [n]  & macro-F1 & [0.00] \\
+    Engine type         & [classes]  & 46\,108  & 11\,527  & macro-F1 & 0.550 \\
     Cargo sub-type      & 5 classes     & 11\,744 & 2\,939  & macro-F1 & 0.855     \\
     Tanker sub-type     & 4 classes     & 5\,903  & 1\,477  & macro-F1 & 0.712     \\
     \midrule
     \multicolumn{6}{@{}l}{\textit{Regression models}} \\
-    Main engine power   & kW            & 13\,842  & 3\,542  & $R^2$    & [0.00] \\
-    Gross tonnage       & GT            & 62,636  & 15\,687  & $R^2$    & [0.00] \\
-    Design speed        & knots         & [n]  & [n]  & $R^2$    & [0.00] \\
-    Engine speed        & rpm           & [n]  & [n]  & $R^2$    & [0.00] \\
-    Construction year   & year          & [n]  & [n]  & $R^2$    & [0.00] \\
+    Main engine power   & kW            & 13\,842  & 3\,542  & $R^2$    & 0.929 \\
+    Gross tonnage       & GT            & 62,636  & 15\,687  & $R^2$    & 0.944 \\
+    Design speed        & knots         & 8\,808  & 2\,241  & $R^2$    & 0.861 \\
+    Construction year   & year          & 45\,868  & 11\,467  & $R^2$    & 0.447 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -642,7 +641,7 @@ Finally, in Fig. \ref{fig:fig-co2-emissions-change-map-by-receiver-type}, we see
 
 Two families of machine learning models are used to estimate vessel classes and properties. Vessel class is determined by a combination of a broad, primary vessel class model and focused cargo and tanker sub-type models. Vessel properties are determined by six separate models used to estimate the following vessel characteristics: gross tonnage (GT), main engine power (kW), design speed (kn), year-of-build (year), and engine type (class). Random forest classifiers are used for the primary vessel class and the engine subtype, random forest regression models are used to estimate gross tonnage, engine power, design speed, and year of build. Finally, gradient boosting classifiers are used for the cargo and tanker sub-type models. Details about each model can be found in the relevant subsections below.
 
-All models are trained on three categories of features derived from AIS information: inferred features (37), identity features (14), and activity features (13). The cargo and tanker sub-type models are trained on an additional 50 features derived from port visits. These features were built with Word2Vec (50 dimensions, window 10, minimum count 5) over each vessel's sequence of anchorage visits, from high-confidence port visits in the 365 days to 2025-06-01; a vessel's vector is the visit-weighted mean of the anchorages it used. Inferred features consist of vessel class neural network scores and neural network estimates for length, tonnage, engine power, and crew size (https://www.science.org/doi/10.1126/science.aao5646). Identity features include identification data broadcast through a vessel's AIS, such as the first digit and the broadcast vessel class. Activity features describe patterns in a vessel's AIS activity over time, such as fraction of active hours, average speed, distance from shore, etc.
+All models are trained on three categories of features derived from AIS information: inferred features (37), identity features (14), and activity features (13). The cargo and tanker sub-type models are trained on an additional 50 features derived from port visits. These features were built with Word2Vec (50 dimensions, window 10, minimum count 5) over each vessel's sequence of anchorage visits, from high-confidence port visits in the 365 days to 2025-06-01; a vessel's vector is the visit-weighted mean of the anchorages it used. Inferred features consist of vessel class neural network scores and neural network estimates for vessel length, tonnage, engine power, and crew size (https://www.science.org/doi/10.1126/science.aao5646). Identity features include identification data broadcast through a vessel's AIS, such as the first digit and the broadcast vessel class. Activity features describe patterns in a vessel's AIS activity over time, such as fraction of active hours, average speed, distance from shore, etc.
 
 Training/test data for all models has an 80/20 split, and is stratified by vessel class and the first digit of each MMSI to mitigate bias by vessel type or region. The number of training samples varied for each model as labeled data was available, with the primary GFW vessel class model having the maximum 500,000 total samples. Test sample sizes available for all models are provided in the metrics table \ref{tab:model-summary}. The primary GFW vessel class model, used to predict broad classes such as cargo, tanker, trawler, and gear, identifies the cargo and tanker vessels used in this analysis. Based on those classifications, the cargo and tanker sub-type models further refine those predictions into the more granular classes. Note that nearly half of AIS-broadcasting devices are likely associated with non-vessel objects (such as buoys, offshore structures, FADs, etc). These objects are identified as their own vessel class “gear” by the primary GFW vessel class model, and are excluded from the emissions estimates in this paper.
 
@@ -680,6 +679,7 @@ As the vessel sub-types models rely on the output of the primary vessel classifi
 
 
 \subsubsection{Cargo sub-type model}
+\label{sec:cargo-submodel}
 
 \paragraph{Target}
 
@@ -710,6 +710,7 @@ Refrigerated cargo has 77 training vessels; its F1 of 70.3 is indicative only. R
 As with the primary model, errors are inherited from it: a vessel it misclassifies is refined against the wrong sub-type vocabulary. Labels exist only for S\&P-registered, single-MMSI vessels, and 4.5\% of training vessels have no port visit features at all.
 
 \subsubsection{Tanker sub-type model}
+\label{sec:tanker-submodel}
 
 \paragraph{Target}
 
@@ -736,5 +737,27 @@ One feature, top speed, carries more importance than any other in either sub-typ
 Gradient boosting classifiers with early stopping on a held-out internal validation split. As with the cargo model, the train/test split is stratified by sub-type only, and the same label-coverage limits and inheritance of errors from the primary model apply.
 
 Performance for \emph{other liquids} is poor: recall 11.1\%, with 89\% of those vessels predicted as oil. With 45 labelled vessels in total the class does not have enough signal to be separated. Oil and chemical tankers are often confused with each other: 13\% of chemical vessels are called oil and 10\% the reverse. 5.6\% of training vessels have no port visit features at all.
+
+
+\subsection{Vessel characteristics models}
+
+\paragraph{Targets}
+
+Continuous vessel characteristics - main engine power, gross tonnage, design speed, and construction year are estimated using random forest regression models, while the categorical engine type value is estimated using a random forest classifier. All models make predictions at the MMSI level for 1.8M active, AIS-broadcasting vessels.
+
+\paragraph{Training data}
+
+All models make use of the inferred, identity, and activity features described above. Labels are drawn from clean, aggregated registry data, ensuring that re-used MMSIs and MMSIs with conflating classes by registry are dropped from training.
+The engine power model had a training set of 13,000 samples, the gross tonnage model had a training set of 63,000 samples, the design speed model had a training set of $_$ samples, the 
+
+\paragraph{Performance}
+
+\paragraph{Key predictive features}
+
+\paragraph{Interpretability}
+
+
+\paragraph{Overfitting controls and known weaknesses}
+
 
 \end{document}
