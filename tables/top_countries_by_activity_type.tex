@@ -1,13 +1,14 @@
 \begin{table}[!h]
 \centering
-\caption{\label{tab:top_countries_by_activity_type}Top 20 countries by 2025 CO$_{2}$ emissions (millions of metric tonnes) from AIS-broadcasting vessels, shown separately for each activity type, with all remaining countries pooled into a single Other row. Emissions for each international trip are partitioned equally to its departure and arrival country. These are the totals mapped in Figure \ref{fig:fig-emissions-by-country-and-activity-type}.}
+\caption{\label{tab:top_countries_by_activity_type}Top 30 countries by 2025 CO$_{2}$ emissions (millions of metric tonnes) from AIS-broadcasting vessels, shown separately for each activity type, with all remaining countries pooled into a single Other row. Emissions for each international trip are partitioned equally to its departure and arrival country. These are the totals mapped in Figure \ref{fig:fig-emissions-by-country-and-activity-type}.}
 \centering
-\fontsize{8}{10}\selectfont
+\resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{
+\fontsize{7}{9}\selectfont
 \begin{tabular}[t]{lrlrlr}
 \toprule
 \multicolumn{2}{c}{International trips} & \multicolumn{2}{c}{Port stays} & \multicolumn{2}{c}{Domestic trips} \\
 \cmidrule(l{3pt}r{3pt}){1-2} \cmidrule(l{3pt}r{3pt}){3-4} \cmidrule(l{3pt}r{3pt}){5-6}
-Country & CO$_{2}$ (M MT) & Country & CO$_{2}$ (M MT) & Country & CO$_{2}$ (M MT)\\
+Country & CO$_{2}$ & Country & CO$_{2}$ & Country & CO$_{2}$\\
 \midrule
 China & 55.5 & China & 74.0 & China & 66.8\\
 Malaysia & 48.1 & United States & 27.8 & Japan & 13.1\\
@@ -33,7 +34,19 @@ Canada & 6.9 & Russia & 5.0 & United Arab Emirates & 2.2\\
 Mexico & 6.4 & India & 4.8 & Philippines & 2.2\\
 Turkey & 6.3 & Malaysia & 4.7 & Greece & 1.8\\
 \addlinespace
-Other & 161.0 & Other & 90.3 & Other & 32.8\\
+Taiwan & 6.1 & Canada & 4.5 & Taiwan & 1.8\\
+Belgium & 6.0 & Denmark & 4.4 & France & 1.7\\
+France & 5.6 & Belgium & 3.9 & Egypt & 1.7\\
+Saudi Arabia & 5.5 & Saudi Arabia & 3.3 & Saudi Arabia & 1.6\\
+South Africa & 5.5 & Mexico & 2.8 & Mexico & 1.3\\
+\addlinespace
+Vietnam & 5.4 & Thailand & 2.8 & Germany & 1.1\\
+Italy & 5.0 & Sweden & 2.5 & Chile & 1.1\\
+Germany & 5.0 & Philippines & 2.3 & Thailand & 1.1\\
+Sri Lanka & 4.9 & Taiwan & 2.2 & New Zealand & 1.0\\
+Morocco & 4.7 & Egypt & 2.2 & Argentina & 1.0\\
+\addlinespace
+Other & 107.2 & Other & 59.3 & Other & 19.5\\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}

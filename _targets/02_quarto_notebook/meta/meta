@@ -71,7 +71,14 @@ pixels_for_offshore_training_testing_split|stem|abdff970f4adff69|1e3d0e59adb9306
 data_sources|stem|bef060c58ef0d714|73c44d5b74410d9a|66284f9c0432a945|1456474924||t20663.9116864712s|s1581b|1581|rds|local|vector|||0.013||
 ping_level_hours_distribution|stem|9d9d7622f33539d2|9141f4b495c0e880|bfd3a6b4a2486daf|901135014||t20663.9116864918s|s338b|338|rds|local|vector|||0.015||
 fraction_vessels_emissions_by_registry_info|stem|af8ba644d301ee42|05601326f6ec7403|9f7914900b3eba13|-518675064||t20663.9116864741s|s392b|392|rds|local|vector|||0.012||
+annual_spatial_co2_emissions_by_vessel_class_family_file|stem|945cf5ddbc1afe36|376cd40276ddf255|2c530c1562a7fbd1|-589649576|data/gfw/annual_spatial_co2_emissions_by_vessel_class_family.csv|t20664.9624698293s|s5071081b|5071081|file|local|vector|||0||
+annual_spatial_co2_emissions_by_vessel_class_family|stem|5c015b7e980334f0|fff101b4de00c731|479b08b42616938e|547664468||t20664.9627969205s|s1417414b|1417414|rds|local|vector|||0.141||
+fishing_vessel_classes|function|9971df3aa5284378
 download_gfw_data|function|56ae83fa4e3ee8f3
 combine_EU_data|function|ad06f3aced59370c
-.Random.seed|object|b3c5230a5d098979
-quarto_notebook|stem|f653a1caff54e5bb|c693c0dfce9dfdea|45513bd297e55c7b|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20664.8220891702s|s11481262b|11481262|file|local|vector|||650.55||
+.Random.seed|object|d1f3d14d8dc910e4
+reefer_vessel_classes|function|3f594d3b2dffefa6
+vessel_class_family|function|06396670e8027f97
+vessel_class_family_sql|function|4f02f50eae07211a
+vessel_class_families|function|9ede3af2b3ba477b
+quarto_notebook|stem|bf3085b914efab33|053d5bce60d3e205|02f7b0763d739e97|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20664.9746067387s|s13094022b|13094022|file|local|vector|||812.28||

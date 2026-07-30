@@ -247,6 +247,15 @@ map_background_color <- scico::scico(
   begin = 0.5,
   end = 0.5
 )
+
+# The emissions maps use a dark ocean: magma (sequential) and berlin (diverging)
+# both bottom out at black, so pixels with little or no emissions - and pixels
+# with no change - sink into the background instead of washing the map out. Land
+# is a mid grey so continents still read against it, and colourbar frames are
+# grey because white ones disappear against the white page.
+emissions_map_ocean_color <- "black"
+emissions_map_land_color <- "grey30"
+emissions_map_frame_color <- "grey40"
 ```
 
 ```{r}
@@ -1408,7 +1417,7 @@ co2_map <- pollutant_map_data_co2 |>
   ggplot() +
   geom_sf(
     data = world_bbox_sf,
-    fill = map_background_color
+    fill = emissions_map_ocean_color
   ) +
   ggspatial::geom_spatial_tile(
     aes(
@@ -1419,22 +1428,26 @@ co2_map <- pollutant_map_data_co2 |>
     )
   ) +
   facet_wrap(name ~ ., ncol = 1) +
-  geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
+  geom_sf(
+    data = land,
+    color = emissions_map_land_color,
+    fill = emissions_map_land_color
+  ) +
   scico::scale_fill_scico(
     name = expression(CO[2] ~ emissions ~ (MT / km^2)),
-    palette = "vik",
+    palette = "berlin",
     midpoint = 0,
     trans = ggallin::pseudolog10_trans,
-    na.value = map_background_color,
+    na.value = emissions_map_ocean_color,
     breaks = c(-1e3, -1e2, -1e1, 0, 1e1, 1e2, 1e3),
     labels = scales::comma
   ) +
   scico::scale_color_scico(
     name = expression(CO[2] ~ emissions ~ (MT / km^2)),
-    palette = "vik",
+    palette = "berlin",
     midpoint = 0,
     trans = ggallin::pseudolog10_trans,
-    na.value = map_background_color,
+    na.value = emissions_map_ocean_color,
     breaks = c(-1e3, -1e2, -1e1, 0, 1e1, 1e2, 1e3),
     labels = scales::comma
   ) +
@@ -1444,8 +1457,8 @@ co2_map <- pollutant_map_data_co2 |>
     fill = guide_colorbar(
       title.position = "top",
       title.hjust = 0.5,
-      frame.colour = "black",
-      ticks.colour = "black"
+      frame.colour = emissions_map_frame_color,
+      ticks.colour = emissions_map_frame_color
     )
   ) +
   scale_x_continuous(expand = c(0, 1)) +
@@ -1691,7 +1704,7 @@ make_spatial_emissions_by_fleet_map <- function(
       emissions_mt_per_km2 = dplyr::na_if(emissions_mt_per_km2, 0)
     ) |>
     ggplot() +
-    geom_sf(data = world_bbox_sf, fill = "grey92") +
+    geom_sf(data = world_bbox_sf, fill = emissions_map_ocean_color) +
     ggspatial::geom_spatial_tile(aes(
       x = lon_bin + 0.5,
       y = lat_bin + 0.5,
@@ -1699,34 +1712,34 @@ make_spatial_emissions_by_fleet_map <- function(
       color = emissions_mt_per_km2
     )) +
     theme_void() +
-    geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
-    scico::scale_color_scico(
+    geom_sf(
+      data = land,
+      color = emissions_map_land_color,
+      fill = emissions_map_land_color
+    ) +
+    scale_color_viridis_c(
       name = bquote(
         Cumulative ~ CO[2] ~ emissions ~ (MT / km^2) ~ from ~ .(
           analysis_start_year
         ) ~ to ~ .(analysis_end_year)
       ),
-      palette = "vik",
-      begin = 0.5,
-      end = 1,
+      option = "magma",
       trans = ggallin::pseudolog10_trans,
       breaks = c(10, 100, 1000, 10000),
-      na.value = map_background_color,
+      na.value = emissions_map_ocean_color,
       labels = scales::comma,
       guide = "none"
     ) +
-    scico::scale_fill_scico(
+    scale_fill_viridis_c(
       name = bquote(
         Cumulative ~ CO[2] ~ emissions ~ (MT / km^2) ~ from ~ .(
           analysis_start_year
         ) ~ to ~ .(analysis_end_year)
       ),
-      palette = "vik",
-      begin = 0.5,
-      end = 1,
+      option = "magma",
       trans = ggallin::pseudolog10_trans,
       breaks = c(10, 100, 1000, 10000),
-      na.value = map_background_color,
+      na.value = emissions_map_ocean_color,
       labels = scales::comma
     ) +
     labs(x = "", y = "") +
@@ -1750,8 +1763,8 @@ make_spatial_emissions_by_fleet_map <- function(
       fill = guide_colorbar(
         title.position = "top",
         title.hjust = 0.5,
-        frame.colour = "white",
-        ticks.colour = "white",
+        frame.colour = emissions_map_frame_color,
+        ticks.colour = emissions_map_frame_color,
         barwidth = unit(10, "cm"),
         barheight = unit(0.5, "cm")
       )
@@ -1924,7 +1937,7 @@ spatial_co2_emissions_by_vessel_class_family <- annual_spatial_co2_emissions_by_
 vessel_class_family_maps <- ggplot(
   spatial_co2_emissions_by_vessel_class_family
 ) +
-  geom_sf(data = world_bbox_sf, fill = "grey92") +
+  geom_sf(data = world_bbox_sf, fill = emissions_map_ocean_color) +
   ggspatial::geom_spatial_tile(aes(
     x = lon_bin + 0.5,
     y = lat_bin + 0.5,
@@ -1932,27 +1945,27 @@ vessel_class_family_maps <- ggplot(
     color = emissions_mt_per_km2
   )) +
   theme_void() +
-  geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
-  scico::scale_color_scico(
-    palette = "vik",
-    begin = 0.5,
-    end = 1,
+  geom_sf(
+    data = land,
+    color = emissions_map_land_color,
+    fill = emissions_map_land_color
+  ) +
+  scale_color_viridis_c(
+    option = "magma",
     trans = ggallin::pseudolog10_trans,
     breaks = c(1, 10, 100, 1000),
-    na.value = map_background_color,
+    na.value = emissions_map_ocean_color,
     labels = scales::comma,
     guide = "none"
   ) +
-  scico::scale_fill_scico(
+  scale_fill_viridis_c(
     name = bquote(
       .(analysis_end_year) ~ CO[2] ~ emissions ~ (MT / km^2)
     ),
-    palette = "vik",
-    begin = 0.5,
-    end = 1,
+    option = "magma",
     trans = ggallin::pseudolog10_trans,
     breaks = c(1, 10, 100, 1000),
-    na.value = map_background_color,
+    na.value = emissions_map_ocean_color,
     labels = scales::comma
   ) +
   facet_wrap(~vessel_class_family, ncol = 1) +
@@ -1970,8 +1983,8 @@ vessel_class_family_maps <- ggplot(
     fill = guide_colorbar(
       title.position = "top",
       title.hjust = 0.5,
-      frame.colour = "white",
-      ticks.colour = "white",
+      frame.colour = emissions_map_frame_color,
+      ticks.colour = emissions_map_frame_color,
       barwidth = unit(7, "cm"),
       barheight = unit(0.4, "cm")
     )
@@ -3104,7 +3117,7 @@ pollutant_map_list <- purrr::map(
       ggplot() +
       geom_sf(
         data = world_bbox_sf,
-        fill = map_background_color
+        fill = emissions_map_ocean_color
       ) +
       ggspatial::geom_spatial_tile(
         aes(
@@ -3114,25 +3127,25 @@ pollutant_map_list <- purrr::map(
           fill = .data[[map_end_col]]
         )
       ) +
-      geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
-      scico::scale_fill_scico(
+      geom_sf(
+        data = land,
+        color = emissions_map_land_color,
+        fill = emissions_map_land_color
+      ) +
+      scale_fill_viridis_c(
         name = expression(Emissions ~ (MT / km^2)),
-        palette = "vik",
-        begin = 0.5,
-        end = 1,
+        option = "magma",
         limits = scale_limits,
         trans = "log10",
-        na.value = map_background_color,
+        na.value = emissions_map_ocean_color,
         labels = scales::scientific
       ) +
-      scico::scale_color_scico(
+      scale_color_viridis_c(
         name = expression(Emissions ~ (MT / km^2)),
-        palette = "vik",
-        begin = 0.5,
-        end = 1,
+        option = "magma",
         limits = scale_limits,
         trans = "log10",
-        na.value = map_background_color,
+        na.value = emissions_map_ocean_color,
         labels = scales::scientific
       ) +
       labs(x = "", y = "") +
@@ -3141,8 +3154,8 @@ pollutant_map_list <- purrr::map(
         fill = guide_colorbar(
           title.position = "top",
           title.hjust = 0.5,
-          frame.colour = "white",
-          ticks.colour = "white"
+          frame.colour = emissions_map_frame_color,
+          ticks.colour = emissions_map_frame_color
         )
       ) +
       scale_x_continuous(expand = c(0, 1)) +
@@ -3267,7 +3280,7 @@ all_countries_for_plot <- land |>
 port_trip_emissions_fig <- ggplot() +
   geom_sf(
     data = world_bbox_sf,
-    fill = map_background_color
+    fill = emissions_map_ocean_color
   ) +
   geom_sf(
     data = all_countries_for_plot |>
@@ -3284,10 +3297,11 @@ port_trip_emissions_fig <- ggplot() +
   facet_wrap(type ~ ., ncol = 1) +
   coord_sf(crs = map_projection) +
   theme_void() +
-  scale_fill_gradientn(
-    # Get the "Blues" palette with 9 colors, but keep only the darker 5 (indices 4-9)
-    colors = rev(RColorBrewer::brewer.pal(9, "Blues")[5:9]),
-    labels = scales::unit_format(unit = "M", scale = 1e-6)
+  scale_fill_viridis_c(
+    option = "magma",
+    labels = scales::unit_format(unit = "M", scale = 1e-6),
+    # countries with no emissions of a given type take the land colour
+    na.value = emissions_map_land_color
   ) +
   labs(
     x = "",
@@ -3297,8 +3311,8 @@ port_trip_emissions_fig <- ggplot() +
     fill = guide_colorbar(
       title.position = "top",
       title.hjust = 0.5,
-      frame.colour = "white",
-      ticks.colour = "white"
+      frame.colour = emissions_map_frame_color,
+      ticks.colour = emissions_map_frame_color
     )
   ) +
   theme(
@@ -3638,7 +3652,7 @@ all_inventory_data |>
 #| results: 'asis'
 # Companion to Figure S4: the leading countries behind each activity type, with
 # every country outside the top few pooled into a single "Other" row
-n_countries_shown <- 20
+n_countries_shown <- 30
 
 top_countries_by_activity_type <- all_port_and_trip_emissions_without_vessel_class |>
   dplyr::mutate(
@@ -3696,7 +3710,7 @@ top_countries_by_activity_type_kable <- top_countries_by_activity_type |>
     label = "top_countries_by_activity_type",
     booktabs = TRUE,
     align = c("l", "r", "l", "r", "l", "r"),
-    col.names = rep(c("Country", "CO$_{2}$ (M MT)"), 3),
+    col.names = rep(c("Country", "CO$_{2}$"), 3),
     escape = FALSE,
     caption = paste0(
       "Top ",
@@ -3714,8 +3728,8 @@ top_countries_by_activity_type_kable <- top_countries_by_activity_type |>
     )
   ) |>
   kableExtra::kable_styling(
-    font_size = 8,
-    latex_options = "hold_position"
+    font_size = 7,
+    latex_options = c("hold_position", "scale_down")
   )
 
 top_countries_by_activity_type_kable
@@ -3889,7 +3903,7 @@ annual_spatial_emissions_by_receiver_type |>
   ggplot() +
   geom_sf(
     data = world_bbox_sf,
-    fill = map_background_color
+    fill = emissions_map_ocean_color
   ) +
   ggspatial::geom_spatial_tile(aes(
     x = lon_bin + 0.5,
@@ -3897,17 +3911,21 @@ annual_spatial_emissions_by_receiver_type |>
     fill = emissions_mt_per_km2,
     color = emissions_mt_per_km2
   )) +
-  geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
+  geom_sf(
+    data = land,
+    color = emissions_map_land_color,
+    fill = emissions_map_land_color
+  ) +
   facet_wrap(receiver_type ~ ., ncol = 1) +
   scico::scale_fill_scico(
     bquote(atop(
       Change ~ of ~ CO[2] ~ emissions,
       from ~ .(analysis_start_year) ~ to ~ .(analysis_end_year) ~ (MT / km^2)
     )),
-    palette = "vik",
+    palette = "berlin",
     midpoint = 0,
     trans = ggallin::pseudolog10_trans,
-    na.value = map_background_color,
+    na.value = emissions_map_ocean_color,
     breaks = c(-1e3, -1e2, -1e1, 0, 1e1, 1e2, 1e3),
     labels = scales::comma
   ) +
@@ -3916,10 +3934,10 @@ annual_spatial_emissions_by_receiver_type |>
       Change ~ of ~ CO[2] ~ emissions,
       from ~ .(analysis_start_year) ~ to ~ .(analysis_end_year) ~ (MT / km^2)
     )),
-    palette = "vik",
+    palette = "berlin",
     midpoint = 0,
     trans = ggallin::pseudolog10_trans,
-    na.value = map_background_color,
+    na.value = emissions_map_ocean_color,
     breaks = c(-1e3, -1e2, -1e1, 0, 1e1, 1e2, 1e3),
     labels = scales::comma
   ) +
@@ -3930,8 +3948,8 @@ annual_spatial_emissions_by_receiver_type |>
     fill = guide_colorbar(
       title.position = "top",
       title.hjust = 0.5,
-      frame.colour = "black",
-      ticks.colour = "black",
+      frame.colour = emissions_map_frame_color,
+      ticks.colour = emissions_map_frame_color,
       barwidth = unit(1, "cm"),
       barheight = unit(5, "cm")
     )

@@ -5,13 +5,10 @@ run_gfw_query_and_save_table|function|076f052fc2a40190|||||||||||||||
 summarize_dark_fleet_model_results_emissions|function|9b954b9580149f8d|||||||||||||||
 summarize_dark_fleet_ratios_spatial|function|3ff490bad87fc0e5|||||||||||||||
 mrv_data_validation|stem|b8ca5fa8fe0d179b|836d749855d3c2b6|dabd1065fb3154a0|-1156835875||t20480.9244516803s||2727488|rds|local|vector|||0.218||ℹ In index: 1. Caused by error: ! Can't establish that the input is either xls or xlsx.
-analysis_end_year|stem|1df55a076ac50819|6a4506337c1e567e|2c530c1562a7fbd1|-671551259||t20662.8021514593s|s53b|53|rds|local|vector|||0||
 analysis_start_year|stem|d73c268acc31001d|55b89b6a4481acae|2c530c1562a7fbd1|-244010513||t20662.7722940773s|s53b|53|rds|local|vector|||0||
-bq_billing_project|stem|4ed17be6f5ce35b6|4f3b4d5b60daf68c|2c530c1562a7fbd1|210289396||t20662.7722941004s|s62b|62|rds|local|vector|||0||
 run_version_dark|stem|22d05c7f68552652|140266c9122f3709|2c530c1562a7fbd1|1946111252||t20662.8021517255s|s68b|68|rds|local|vector|||0||
 total_spatial_emissions_by_pollutant_file|stem|5c2e0249703c989c|4b682101b7402afd|2c530c1562a7fbd1|-1044535112|sql/total_spatial_emissions_by_pollutant.sql|t20662.772310837s|s961b|961|file|local|vector|||0.001||
 annual_spatial_co2_emissions_ais_dark_by_fleet_file|stem|a8185f936e58d983|46dead7f42d2006c|2c530c1562a7fbd1|1830654499|sql/annual_spatial_co2_emissions_ais_dark_by_fleet.sql|t20662.7723106171s|s410b|410|file|local|vector|||0||
-run_version_ais|stem|5c09c8f65f5a01f8|c30265bba11df979|2c530c1562a7fbd1|-965739729||t20662.8021522811s|s62b|62|rds|local|vector|||0||
 trip_co2_emissions_by_from_to_countries_file|stem|4e5bfdc5dc514d7f|1d41aa54466ed27b|2c530c1562a7fbd1|-603768744|sql/trip_co2_emissions_by_from_to_countries.sql|t20662.7723108486s|s1064b|1064|file|local|vector|||0.001||
 length_size_bin_distributions_file|stem|76cce2b34e2932b9|f6728d996e023fd7|2c530c1562a7fbd1|433865839|sql/length_size_bin_distributions.sql|t20662.7723106634s|s744b|744|file|local|vector|||0||
 total_monthly_emissions_by_pollutant_file|stem|76bbc26e18b3721e|f559ade916329aac|2c530c1562a7fbd1|-1354282208|sql/total_monthly_emissions_by_pollutant.sql|t20662.7723108023s|s894b|894|file|local|vector|||0||
@@ -60,7 +57,18 @@ vessel_size_info|stem|ae500f986ed249df|5b61c25cf3e61766|3bbdba3d38bcd87d|-199287
 ping_level_hours_distribution|stem|da36d1e9758e9091|b1190a11f493ea32|050fb60089d0ef07|901135014|data/gfw/ping_level_hours_distribution.csv|t20662.8102542405s|s124b|124|file|local|vector|||18.903||
 registered_validation_data_file|stem|44310d2ffb7f95c3|0663dd2c09f1cdce|2c530c1562a7fbd1|-307448036|sql/registered_data_validation.sql|t20662.811241133s|s6192b|6192|file|local|vector|||0||
 registered_validation_data|stem|e9a4c11ecd846ecd|260ab16a0102e463|a14467ae6c2bb0cc|-855102128|data/registered_validation_data/registered_validation_data.csv|t20662.8115076917s|s1056013b|1056013|file|local|vector|||8.442||
-download_gfw_data|function|56ae83fa4e3ee8f3
-combine_EU_data|function|ad06f3aced59370c
 trip_emissions_for_mrv_validation_file|stem|937d1c350709e265|b0ba10bc9718a867|2c530c1562a7fbd1|-869772083|sql/trip_emissions_for_mrv_validation.sql|t20662.8958731164s|s4364b|4364|file|local|vector|||0||
 trip_emissions_for_mrv_validation|stem|efc2fea48b4d7201|719beb356fcce2d1|6d1a8903cb3d511e|1762988021|data/MRV/trip_emissions_for_mrv_validation.csv|t20662.9001355635s|s15540019b|15540019|file|local|vector|||19.898||
+analysis_end_year|stem|1df55a076ac50819|6a4506337c1e567e|2c530c1562a7fbd1|-671551259||t20662.9562293415s|s53b|53|rds|local|vector|||0||
+bq_billing_project|stem|4ed17be6f5ce35b6|4f3b4d5b60daf68c|2c530c1562a7fbd1|210289396||t20480.924401756s|s62b|62|rds|local|vector|||0||
+run_version_ais|stem|5c09c8f65f5a01f8|c30265bba11df979|2c530c1562a7fbd1|-965739729||t20662.956229343s|s62b|62|rds|local|vector|||0||
+annual_spatial_co2_emissions_by_vessel_class_family_file|stem|0db878ada29ded15|0ccba2123ecde163|2c530c1562a7fbd1|-589649576|sql/annual_spatial_co2_emissions_by_vessel_class_family.sql|t20664.9618643701s|s1414b|1414|file|local|vector|||0||
+pixel_size_analysis|stem|696afb2c5d96399b|bb375a30fa348382|2c530c1562a7fbd1|747103723||t20664.9621871466s|s51b|51|rds|local|vector|||0||
+fishing_vessel_classes|function|9971df3aa5284378
+download_gfw_data|function|56ae83fa4e3ee8f3
+combine_EU_data|function|ad06f3aced59370c
+reefer_vessel_classes|function|3f594d3b2dffefa6
+vessel_class_family|function|06396670e8027f97
+vessel_class_family_sql|function|4f02f50eae07211a
+vessel_class_families|function|9ede3af2b3ba477b
+annual_spatial_co2_emissions_by_vessel_class_family|stem|945cf5ddbc1afe36|4ed1fb02695bc00f|5b6c423ba81d8e21|547664468|data/gfw/annual_spatial_co2_emissions_by_vessel_class_family.csv|t20664.9624698293s|s5071081b|5071081|file|local|vector|||6.721||
