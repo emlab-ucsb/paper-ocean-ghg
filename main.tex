@@ -94,7 +94,7 @@ To correctly estimate both the magnitude and trends of marine emissions, it is e
     \label{fig:fig-emissions-by-data-source-and-maps}
 \end{figure}
 
-Estimating emissions from non-broadcasting vessels offers new insights into the temporal trends of and spatial patterns of global emissions (Fig. \ref{fig:fig-emissions-time-series-and-maps}). Although total emissions has generally been increasing, the share of emissions from non-broadcasting vessels has generally been declining since 2021, consistent with a steady increase in AIS monitoring over the period. The time series data reveal strong seasonal trends and event-driven variations in marine GHG emissions. We see consistent dips during major holidays including Christmas, New Year’s Day, and Chinese New Year, as well as during the COVID-19 pandemic (Fig. \ref{fig:fig-emissions-time-series-and-maps}A and Fig. \ref{fig:fig-pollutant-time-series}). Being able to spatially quantify emissions from non-broadcasting vessels fills important gaps in our current understanding of where marine vessel emissions take place, particularly in southeast Asia, China, the Caribbean, and the Mediterranean (Fig. \ref{fig:fig-emissions-time-series-and-maps}C), crucial for targeting policy or private sector interventions. Our dataset also provides this sort of nuanced spatiotemporal information disaggregated by fishing and non-fishing vessels (Fig. \ref{fig:fig-spatial-temporal-richness-by-fleet-total-pseudolog}). In 2025, 36\% of CO$_{2}$ emissions from fishing vessels were from non-broadcasting vessels, and 21\% of CO$_{2}$ emissions from non-fishing vessels were from non-broadcasting vessels.
+Estimating emissions from non-broadcasting vessels offers new insights into the temporal trends of and spatial patterns of global emissions (Fig. \ref{fig:fig-emissions-time-series-and-maps}). Although total emissions has generally been increasing (Fig. \ref{fig:fig-emissions-time-series-and-maps}A), the share of emissions from non-broadcasting vessels has generally been declining since 2021 (Fig. \ref{fig:fig-emissions-time-series-and-maps}B), consistent with a steady increase in AIS monitoring over the period. The time series data reveal strong seasonal trends and event-driven variations in marine GHG emissions. We see consistent dips during major holidays including Christmas, New Year’s Day, and Chinese New Year, as well as during the COVID-19 pandemic (Fig. \ref{fig:fig-emissions-time-series-and-maps}A and Fig. \ref{fig:fig-pollutant-time-series}). Being able to spatially quantify emissions from non-broadcasting vessels fills important gaps in our current understanding of where marine vessel emissions take place, particularly in southeast Asia, China, the Caribbean, and the Mediterranean (Fig. \ref{fig:fig-emissions-time-series-and-maps}C), crucial for targeting policy or private sector interventions. Our dataset also provides this sort of nuanced spatiotemporal information disaggregated by fishing and non-fishing vessels (Fig. \ref{fig:fig-spatial-temporal-richness-by-fleet-total-pseudolog}). In 2025, 36\% of CO$_{2}$ emissions from fishing vessels were from non-broadcasting vessels, and 21\% of CO$_{2}$ emissions from non-fishing vessels were from non-broadcasting vessels.
 
 \begin{figure}[H]
     \centering
@@ -531,7 +531,7 @@ Tables S1 to S7\\
 \begin{figure}[H]
     \centering
     \includegraphics[width=\columnwidth]{figures/fig-spatial-temporal-richness-by-fleet-total-pseudolog-1.png}
-    \caption{(A) Time series of monthly global CO$_2$ emissions, shown for both AIS-broadcasting and S1-detected non-broadcasting vessels, and for both fishing and non-fishing vessels. (B) Time series of the monthly share of global CO$_{2}$ emissions attributable to S1-detected non-broadcasting vessels, for both fishing and non-fishing vessels. (C) Spatial distribution of cumulative 2017-2025 CO$_{2}$ emissions from AIS-broadcasting vessels, S1-detected non-broadcasting vessels, and both fleets combined (rows), for both fishing and non-fishing vessels (columns), and shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale).}
+    \caption{(A) Time series of monthly global CO$_2$ emissions, shown for both AIS-broadcasting and S1-detected non-broadcasting vessels, and for both fishing and non-fishing vessels. (B) Time series of the monthly share of global CO$_{2}$ emissions attributable to S1-detected non-broadcasting vessels, for both fishing and non-fishing vessels. (C) Spatial distribution of cumulative 2017-2025 CO$_{2}$ emissions from AIS-broadcasting vessels, S1-detected non-broadcasting vessels, and AIS-broadcasting and S1-detected vessels combined (rows), for both fishing and non-fishing vessels (columns), and shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale).}
     \label{fig:fig-spatial-temporal-richness-by-fleet-total-pseudolog}
 \end{figure}
 
@@ -762,17 +762,22 @@ The engine power model had a training set of 13,000 samples, the gross tonnage m
 \\
 \textit{Engine power model}
 \\
-The engine power (kW) model achieved an R$^2$ of 0.929 with a mean absolute error of 548.71 kW and a mean absolute percentage error of 43.8\%.
+The engine power model achieved an R$^2$ of 0.929 with a mean absolute error of 548.71 kW and a mean absolute percentage error of 43.8\%.
 \\
 \\
 \textit{Tonnage model}
 \\
-The tonnage (GT) model achieved an R$^2$ of 0.944 with a mean absolute error of 2,830.15 GT and a mean absolute percentage error of 209.6\%.
+The tonnage model achieved an R$^2$ of 0.944 with a mean absolute error of 2,830.15 GT and a mean absolute percentage error of 209.6\%.
 \\
 \\
 \textit{Design speed model}
 \\
-The design speed (kn) model achieved an R$^2$ of 0.861 with a mean absolute error of 0.82 kn and a mean absolute percentage error of 4.9\%.
+The design speed model achieved an R$^2$ of 0.861 with a mean absolute error of 0.82 kn and a mean absolute percentage error of 4.9\%.
+\\
+\textit{Year-of-build model}
+\\
+The year-of-build model achieved an R$^2$ of 0.447 with a mean absolute error of 6.68 and a mean absolute percentage error of \%.
+\\
 \\
 \textit{Engine type model}
 \\
@@ -784,32 +789,6 @@ Accuracy of 99.08\%; macro-F1 54.6\%; weighted F1 0.991\%. Per class F1: oil 99.
 \textit{Engine power model}
 \\
 Average engine power inferred by neural network: 0.535. Top speed (95th percentile): 0.149. Average tonnage inferred by neural network: 0.104.
-
-
-SPEED TOP 10 FEATURES
-                     feature  importance
-0            p95_speed_knots    0.608518
-1         median_speed_knots    0.053617
-2         nnet_supply_vessel    0.050699
-3  shiptype_High_speed_craft    0.021679
-4     avg_inferred_crew_size    0.021472
-5       avg_inferred_tonnage    0.020193
-6        avg_inferred_length    0.014965
-7  avg_inferred_engine_power    0.014144
-8         nnet_patrol_vessel    0.013575
-9                   nnet_tug    0.012346TONNAGE TOP 10 FEATURES
-                             feature  importance
-0               avg_inferred_tonnage    0.626036
-1                    frac_port_hours    0.096735
-2  avg_distance_traveled_km_per_trip    0.040660
-3                    p95_speed_knots    0.016631
-4          avg_inferred_engine_power    0.016544
-5             avg_inferred_crew_size    0.011359
-6                    avg_speed_knots    0.011208
-7          avg_distance_from_shore_m    0.010908
-8                 median_speed_knots    0.010642
-9                avg_inferred_length    0.008804
-
 \\
 \\
 \textit{Tonnage model}
@@ -819,11 +798,17 @@ Average tonnage inferred by neural network: 0.626. Fraction of hours spent at po
 \\
 \textit{Design speed model}
 \\
-
+Top speed (95th percentile): 0.609. Median speed: 0.054. Neural network supply vessel score: 0.051.
+\\
+\\
+\textit{Year-of-build model}
+\\
+Average engine power inferred by the neural network: 0.162. First digit of the MMSI code: 0.101. Average tonnage inferred by the neural network: 0.063.
+\\
 \\
 \textit{Engine type model}
 \\
-
+Top speed (95th percentile): 0.096. Neural network patrol vessel score: 0.080. Average engine power inferred by the neural network: 0.062.
 \\
 \\
 
