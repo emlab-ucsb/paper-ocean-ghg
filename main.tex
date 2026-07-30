@@ -105,12 +105,12 @@ Estimating emissions from non-broadcasting vessels offers new insights into the 
 
 Across the entire 2017 to 2025 time series, almost all non-broadcasting emissions (96.4\%) occurred inside the S1 footprint and in pixel-months that were imaged by S1 (Fig. \ref{fig:fig-spatial-coverage-footprint}). This makes sense because part of the Copernicus system's observation strategy for S1 is specifically focused on imaging coastal and shipping areas, where ship density is highest \cite{ESA2013S1Handbook}. Our machine learning model for predicting these emissions directly from observed S1 detection density achieves a high out-of-sample predictive performance (traditional R$^{2}$ = 0.94 and total percent error of -8.6\% for CO$_2$, Table \ref{tab:all_performance_metrics_table}). Only 3.5\% of non-broadcasting emissions occurred inside the S1 footprint but in pixel-months that weren't imaged by S1, requiring us to use a two-stage hurdle framework using both a classification model (F1 Score = 0.72) and a regression model (traditional R$^{2}$ = 0.73) to predict S1 detection density before predicting emissions (traditional R$^{2}$ = 0.94). Only 0.08\% of non-broadcasting emissions occurred outside the S1 footprint entirely, since most vessels operating in these open ocean areas use AIS.
 
-Our vessel-level AIS-broadcasting emissions data provide a detailed understanding of marine vessel emissions across vessel classes and activity types (Fig. \ref{fig:fig-ais-data-richness}). Container cargo vessels are the largest emitters on aggregate, with most of those emissions occurring during international trips (Fig. \ref{fig:fig-ais-data-richness}A). Trawlers, which use an energy-intensive fishing technique in which nets are dragged through the water \cite{coello2015ais}, are the highest-emitting type of fishing vessel. Emissions from AIS-broadcasting vessels can be assigned to port stays in particular countries and port-to-port voyages within- and between-countries by analyzing the movement tracks of each individual vessel (Fig. \ref{fig:fig-ais-data-richness}A-B). Most emissions for non-fishing vessels occur during international trips, while most emissions for fishing vessels occur during domestic trips. China, Japan, and United States had the most CO$_{2}$ emissions during within-country domestic trips in 2025. China, Malaysia, and United States had the most CO$_{2}$ emissions during international trips that started or ended in these countries in 2025 (where the emissions from each trip are partitioned equally to its departure and arrival country). China, United States, and Indonesia had the most CO$_{2}$ emissions during port stays.
+Our vessel-level AIS-broadcasting emissions data provide a detailed understanding of marine vessel emissions across vessel classes and activity types (Fig. \ref{fig:fig-ais-data-richness}). Container cargo vessels are the largest emitters on aggregate, with most of those emissions occurring during international trips (Fig. \ref{fig:fig-ais-data-richness}A). Trawlers, which use an energy-intensive fishing technique in which nets are dragged through the water \cite{coello2015ais}, are the highest-emitting type of fishing vessel. Emissions from AIS-broadcasting vessels can be assigned to port stays in particular countries and port-to-port voyages within- and between-countries by analyzing the movement tracks of each individual vessel (Fig. \ref{fig:fig-ais-data-richness}A and Fig. \ref{fig:fig-emissions-by-country-and-activity-type}). Most emissions for non-fishing vessels occur during international trips, while most emissions for fishing vessels occur during domestic trips. China, Japan, and United States had the most CO$_{2}$ emissions during within-country domestic trips in 2025. China, Malaysia, and United States had the most CO$_{2}$ emissions during international trips that started or ended in these countries in 2025 (where the emissions from each trip are partitioned equally to its departure and arrival country). China, United States, and Indonesia had the most CO$_{2}$ emissions during port stays. Country totals for every activity type are mapped in Fig. \ref{fig:fig-emissions-by-country-and-activity-type} and listed in Table \ref{tab:top_countries_by_activity_type}.
 
  \begin{figure}[H]
     \centering
     \includegraphics[width=\columnwidth]{figures/fig-ais-data-richness-1.png}
-    \caption{Richness of AIS-broadcasting vessel emissions data, showing: (A) CO$_{2}$ emissions by vessel class for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in 2025. Vessel classes are grouped into four families, with the total for each family shown at the top right of its panel; within a family the 5 highest-emitting classes are shown individually and any remaining classes are pooled into a single row. (B) CO$_{2}$ emissions by country for AIS-broadcasting vessels during  during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in 2025. For both panels, emissions for each international trip are partitioned equally to its departure and arrival country). Countries with no values are shown in gray.}
+    \caption{Richness of AIS-broadcasting vessel emissions data, showing: (A) CO$_{2}$ emissions by vessel class for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in 2025. Vessel classes are grouped into four families, with the total for each family shown at the top right of its panel; within a family the 5 highest-emitting classes are shown individually and any remaining classes are pooled into a single row. (B) Spatial distribution of 2025 CO$_{2}$ emissions from AIS-broadcasting vessels for each of those same vessel class families, shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale). Panels appear in the same order in both panels of the figure, though panel A covers only emissions assignable to trips and port stays while panel B covers all AIS-broadcasting emissions.}
     \label{fig:fig-ais-data-richness}
 \end{figure}
 
@@ -469,8 +469,8 @@ For pixel-months where S1 detections were unavailable, either because they were 
 % Fill out your numbers accordingly and delete any lines that aren't applicable.
 \subsection*{Supplementary materials}
 Supplementary Text and Figures\\
-Figures S1 to S8\\
-Tables S1 to S6\\
+Figures S1 to S9\\
+Tables S1 to S7\\
 
 
 %%%%%%%%%%%%%%%% END OF MAIN TEXT %%%%%%%%%%%%%%%
@@ -517,8 +517,8 @@ Tables S1 to S6\\
 % These are just example numbers that don't match the rest of this template.
 \subsubsection*{This PDF file includes:}
 Supplementary Figures, Tables, and Text\\
-Figures S1 to S8\\
-Tables S1 to S6\\
+Figures S1 to S9\\
+Tables S1 to S7\\
 
 \newpage
 \setcounter{section}{1}
@@ -551,6 +551,13 @@ Tables S1 to S6\\
 
 \begin{figure}[H]
     \centering
+    \includegraphics[width=\columnwidth]{figures/fig-emissions-by-country-and-activity-type-1.png}
+    \caption{CO$_{2}$ emissions by country for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in 2025. Emissions for each international trip are partitioned equally to its departure and arrival country. Countries with no values are shown in gray.}
+    \label{fig:fig-emissions-by-country-and-activity-type}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
     \includegraphics[width=\columnwidth]{figures/fig-annual-emissions-by-ocean-and-data-source-1.png}
     \caption{Annual total CO2 emissions by ocean, disaggregated by data source (AIS-broadcasting vessels, and non-broadcasting vessels detected by S1).}
     \label{fig:fig-annual-emissions-by-ocean-and-data-source}
@@ -567,6 +574,8 @@ Tables S1 to S6\\
 \input{tables/emissions_by_data_source_summary_tbl}
 
 \input{tables/annual_sc_fishing_non_fishing_tbl}
+
+\input{tables/top_countries_by_activity_type}
 
 \subsection{Comparing our emission estimates to other inventories}
 

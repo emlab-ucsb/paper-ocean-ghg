@@ -133,6 +133,11 @@ list(
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
+    name = annual_spatial_co2_emissions_by_vessel_class_family,
+    command = file.path("data", "gfw", "annual_spatial_co2_emissions_by_vessel_class_family.csv"),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
     name = total_spatial_co2_emissions_dark_by_footprint,
     command = file.path("data", "gfw", "total_spatial_co2_emissions_dark_by_footprint.csv"),
     read = readr::read_csv(!!.x)

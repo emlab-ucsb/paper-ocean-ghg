@@ -65,3 +65,93 @@ combine_EU_data <- function(mrv_raw_files) {
 
   combined
 }
+
+# Vessel class families --------------------------------------------------------
+# GFW vessel classes are rolled up into four families for Figure 3. These
+# definitions are the single source of truth for that roll-up: the notebook uses
+# them to group and label the bar chart, and _targets_01_gfw_data_pull.R glues
+# vessel_class_family_sql() into the spatial pull, so the maps and the bars are
+# always grouped the same way. All of them take raw GFW class names
+# ("cargo.container", "trawlers"), not the prettified labels.
+
+# The fishing gears, which the notebook also uses for its fishing / non-fishing
+# split
+fishing_vessel_classes <- function() {
+  c(
+    "trawlers",
+    "squid_jigger",
+    "tuna_purse_seines",
+    "set_longlines",
+    "pole_and_line",
+    "set_gillnets",
+    "pots_and_traps",
+    "dredge_fishing",
+    "other_seines",
+    "other_purse_seines",
+    "trollers",
+    "drifting_longlines",
+    "driftnets",
+    "fish_factory",
+    "other_fishing"
+  )
+}
+
+# Refrigerated cargo arrives under several class names, not all of which carry
+# the "cargo" prefix. They belong to the cargo family and read as one row.
+reefer_vessel_classes <- function() {
+  c("specialized_reefer", "container_reefer", "cargo.refrigerated")
+}
+
+# The four families, and the label each family's pooled "everything else" row
+# carries. Figures order the families by emissions rather than by this order.
+vessel_class_families <- function() {
+  tibble::tribble(
+    ~vessel_class_family,
+    ~pooled_label,
+    "Cargo",
+    "All other cargo",
+    "Tanker",
+    "All other tankers",
+    "Fishing",
+    "All other gears",
+    "Service and passenger",
+    "All other service"
+  )
+}
+
+# Assign raw GFW vessel classes to families
+vessel_class_family <- function(vessel_class) {
+  dplyr::case_when(
+    vessel_class %in% fishing_vessel_classes() ~ "Fishing",
+    vessel_class %in% reefer_vessel_classes() ~ "Cargo",
+    stringr::str_starts(vessel_class, "cargo") ~ "Cargo",
+    stringr::str_starts(vessel_class, "tanker") ~ "Tanker",
+    .default = "Service and passenger"
+  )
+}
+
+# The same assignment as a BigQuery CASE expression, so the spatial pull groups
+# classes exactly the way vessel_class_family() does
+vessel_class_family_sql <- function() {
+  sql_list <- function(classes) {
+    paste0("'", classes, "'", collapse = ", ")
+  }
+  paste(
+    "CASE",
+    paste0(
+      "    WHEN vessel_class IN (",
+      sql_list(fishing_vessel_classes()),
+      ") THEN 'Fishing'"
+    ),
+    paste0(
+      "    WHEN vessel_class IN (",
+      sql_list(reefer_vessel_classes()),
+      ") THEN 'Cargo'"
+    ),
+    "    WHEN STARTS_WITH(vessel_class, 'cargo') THEN 'Cargo'",
+    "    WHEN STARTS_WITH(vessel_class, 'tanker') THEN 'Tanker'",
+    "    ELSE 'Service and passenger'",
+    "  END",
+    sep = "\n"
+  )
+}

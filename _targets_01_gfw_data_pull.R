@@ -38,6 +38,13 @@ list(
     name = analysis_end_year,
     2025
   ),
+  # Spatial resolution, in degrees, that gridded pulls are aggregated to. The
+  # source tables are gridded more finely; anything spatial that gets committed
+  # to the repo is binned up to this.
+  tar_target(
+    name = pixel_size_analysis,
+    1
+  ),
   # Number of unique vessels with emissions data during our time period
   tar_file_read(
     name = n_unique_vessels,
@@ -279,6 +286,26 @@ list(
           analysis_end_year = analysis_end_year
         ),
       file_path = file.path("data", "gfw", "annual_spatial_co2_emissions_ais_dark_by_fleet.csv"),
+    ),
+    format = "file"
+  ),
+  # AIS-broadcasting CO2 emissions for the analysis end year, gridded and grouped
+  # into the vessel class families used in Figure 3. The family assignment comes
+  # from vessel_class_family_sql() in r/functions.R, which the notebook also uses
+  # for the bar chart, so the two panels are grouped identically.
+  tar_file_read(
+    name = annual_spatial_co2_emissions_by_vessel_class_family,
+    command = file.path("sql", "annual_spatial_co2_emissions_by_vessel_class_family.sql"),
+    read = download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_ais = run_version_ais,
+          analysis_end_year = analysis_end_year,
+          pixel_size_analysis = pixel_size_analysis,
+          vessel_class_family_case = vessel_class_family_sql()
+        ),
+      file_path = file.path("data", "gfw", "annual_spatial_co2_emissions_by_vessel_class_family.csv"),
     ),
     format = "file"
   ),

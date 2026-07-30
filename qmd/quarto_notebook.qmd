@@ -108,6 +108,7 @@ targets::tar_load(
     "performance_detections_cls_roc_pr_curves",
     "performance_detections_cls_conf_mat",
     "annual_spatial_co2_emissions_ais_dark_by_fleet",
+    "annual_spatial_co2_emissions_by_vessel_class_family",
     "total_spatial_co2_emissions_dark_by_footprint",
     "data_sources",
     "pixels_for_offshore_training_testing_split",
@@ -184,6 +185,11 @@ theme_plot <- function() {
       strip.text.y = element_text(angle = 0, face = "bold", size = 14)
     )
 }
+
+# Vessel class families, the fishing gear list, and the BigQuery CASE expression
+# that mirrors them all live in r/functions.R, so this notebook and the data
+# pulls in _targets_01_gfw_data_pull.R group vessel classes identically
+source(file.path(project_root, "r", "functions.R"))
 
 # Set map projection for all map figures
 map_projection <- "+proj=eqearth"
@@ -772,28 +778,24 @@ emissions_by_vessel_class_df <-
   dplyr::ungroup() |>
   dplyr::mutate(
     fishing = ifelse(
-      vessel_class %in%
-        c(
-          "trawlers",
-          "squid_jigger",
-          "tuna_purse_seines",
-          "set_longlines",
-          "pole_and_line",
-          "set_gillnets",
-          "pots_and_traps",
-          "dredge_fishing",
-          "other_seines",
-          "other_purse_seines",
-          "trollers",
-          "drifting_longlines",
-          "driftnets",
-          "fish_factory",
-          "other_fishing"
-        ),
+      vessel_class %in% fishing_vessel_classes(),
       "Fishing",
       "Non-fishing"
     ) |>
-      forcats::fct_rev()
+      forcats::fct_rev(),
+    # Family and axis label are derived from the raw class names, before the
+    # prettifying below rewrites them
+    vessel_class_family = vessel_class_family(vessel_class),
+    # The family is already the panel heading in Figure 3A, so the label drops
+    # the family prefix; the refrigerated cargo classes read as one row
+    vessel_label = dplyr::case_when(
+      vessel_class %in% reefer_vessel_classes() ~ "Reefer",
+      vessel_class == "tanker.other" ~ "Other tanker",
+      .default = stringr::str_remove(vessel_class, "^(cargo|tanker)\\.") |>
+        stringr::str_replace_all("_", " ") |>
+        stringr::str_to_sentence() |>
+        stringr::str_replace_all("chemical oil", "chemical or oil")
+    )
   ) |>
   dplyr::mutate(
     vessel_class = stringr::str_replace_all(
@@ -810,70 +812,31 @@ emissions_by_vessel_class_df <-
   )
 
 # Figure 3A: vessel class roll-up
-# Vessel classes are rolled up into four families, one panel each. Within a
-# family, classes are ranked by total emissions and everything below the top few
-# is pooled into a single row, so no panel carries a long tail of near-zero bars.
+# Each vessel class family becomes a panel. Within a family, classes are ranked
+# by total emissions and everything below the top few is pooled into a single
+# row, so no panel carries a long tail of near-zero bars. The families
+# themselves are defined in r/functions.R.
 
 # How many individual classes each family shows before pooling the remainder
 n_vessel_classes_shown <- 5
 
-# Refrigerated cargo arrives under three separate class names; they read as one
-# row in the figure
-reefer_vessel_classes <- c(
-  "Specialized reefer",
-  "Container reefer",
-  "Cargo: refrigerated"
-)
-
-# Panel order (top to bottom), and the label each family's pooled row carries
-vessel_families <- tibble::tribble(
-  ~family,
-  ~pooled_label,
-  "Cargo",
-  "All other cargo",
-  "Tanker",
-  "All other tankers",
-  "Fishing",
-  "All other gears",
-  "Service and passenger",
-  "All other service"
-)
-
-# Assign every class to a family and to the label shown on the axis. The
-# upstream `fishing` flag already identifies the fishing gears; cargo and tanker
-# classes carry a "Cargo: " / "Tanker: " prefix that the axis label drops.
 emissions_by_vessel_family <- emissions_by_vessel_class_df |>
-  dplyr::mutate(
-    family = dplyr::case_when(
-      fishing == "Fishing" ~ "Fishing",
-      stringr::str_starts(vessel_class, "Cargo: ") ~ "Cargo",
-      stringr::str_starts(vessel_class, "Tanker: ") ~ "Tanker",
-      vessel_class %in% reefer_vessel_classes ~ "Cargo",
-      .default = "Service and passenger"
-    ),
-    vessel_label = dplyr::case_when(
-      vessel_class %in% reefer_vessel_classes ~ "Reefer",
-      vessel_class == "Tanker: other" ~ "Other tanker",
-      .default = stringr::str_remove(vessel_class, "^(Cargo|Tanker): ") |>
-        stringr::str_to_sentence()
-    )
-  ) |>
   dplyr::summarise(
     emissions_co2_mt = sum(emissions_co2_mt),
-    .by = c(family, vessel_label, type)
+    .by = c(vessel_class_family, vessel_label, type)
   )
 
 # Rank the classes inside each family, then pool everything past the cut-off
 pooled_vessel_labels <- emissions_by_vessel_family |>
   dplyr::summarise(
     class_total = sum(emissions_co2_mt),
-    .by = c(family, vessel_label)
+    .by = c(vessel_class_family, vessel_label)
   ) |>
   dplyr::mutate(
     class_rank = dplyr::min_rank(dplyr::desc(class_total)),
-    .by = family
+    .by = vessel_class_family
   ) |>
-  dplyr::left_join(vessel_families, by = "family") |>
+  dplyr::left_join(vessel_class_families(), by = "vessel_class_family") |>
   dplyr::mutate(
     pooled = class_rank > n_vessel_classes_shown,
     plot_label = dplyr::if_else(pooled, pooled_label, vessel_label)
@@ -881,13 +844,36 @@ pooled_vessel_labels <- emissions_by_vessel_family |>
 
 emissions_by_vessel_class_plot_data <- emissions_by_vessel_family |>
   dplyr::left_join(
-    pooled_vessel_labels |> dplyr::select(family, vessel_label, plot_label, pooled),
-    by = c("family", "vessel_label")
+    pooled_vessel_labels |>
+      dplyr::select(vessel_class_family, vessel_label, plot_label, pooled),
+    by = c("vessel_class_family", "vessel_label")
   ) |>
   dplyr::summarise(
     emissions_co2_mt = sum(emissions_co2_mt),
-    .by = c(family, plot_label, pooled, type)
+    .by = c(vessel_class_family, plot_label, pooled, type)
   )
+
+# One row per panel: the family total shown at the right of the heading, and the
+# y position of the rule that sits under the heading
+vessel_family_totals <- emissions_by_vessel_class_plot_data |>
+  dplyr::summarise(
+    family_total = sum(emissions_co2_mt),
+    n_rows = dplyr::n_distinct(plot_label),
+    .by = vessel_class_family
+  ) |>
+  # panels run from the highest-emitting family down to the lowest
+  dplyr::arrange(dplyr::desc(family_total)) |>
+  dplyr::mutate(
+    total_label = scales::label_number(
+      scale = 1e-6,
+      accuracy = 1,
+      suffix = " M"
+    )(family_total),
+    vessel_class_family = forcats::fct_inorder(vessel_class_family)
+  )
+
+# Figure 3B stacks its maps in this same order, so the two panels line up
+vessel_family_order <- levels(vessel_family_totals$vessel_class_family)
 
 # Bars run largest at the top of each panel, with any pooled row pinned to the
 # bottom regardless of its total. Panels are drawn separately, so ordering the
@@ -902,24 +888,11 @@ vessel_label_order <- emissions_by_vessel_class_plot_data |>
 
 emissions_by_vessel_class_plot_data <- emissions_by_vessel_class_plot_data |>
   dplyr::mutate(
-    family = factor(family, levels = vessel_families$family),
+    vessel_class_family = factor(
+      vessel_class_family,
+      levels = vessel_family_order
+    ),
     plot_label = factor(plot_label, levels = vessel_label_order)
-  )
-
-# One row per panel: the family total shown at the right of the heading, and the
-# y position of the rule that sits under the heading
-vessel_family_totals <- emissions_by_vessel_class_plot_data |>
-  dplyr::summarise(
-    family_total = sum(emissions_co2_mt),
-    n_rows = dplyr::n_distinct(plot_label),
-    .by = family
-  ) |>
-  dplyr::mutate(
-    total_label = scales::label_number(
-      scale = 1e-6,
-      accuracy = 1,
-      suffix = " M"
-    )(family_total)
   )
 
 top_type_by_fishing_non_fishing <- emissions_by_vessel_class_df |>
@@ -1228,8 +1201,6 @@ each vessel using precise latitude/longitude/timestamp information for over `r s
 R2 = `r all_performance_metrics |> dplyr::filter(metric == "rsq_trad",model=="detections_regression",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)`) to predict S1 detection density before predicting emissions (traditional R2 = `r all_performance_metrics |> dplyr::filter(metric == "rsq_trad",pollutant == "co2",model=="emissions_regression",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)`). 
 
 - Only `r dark_emissions_by_area |> dplyr::filter(!inside_footprint,!s1_imaged) |> dplyr::pull(percent_total)` of non-broadcasting emissions occurred outside the S1 footprint entirely, since most vessels operating in these open ocean areas use AIS.
-
-- Most emissions for non-fishing vessels occur during `r top_type_by_fishing_non_fishing |> dplyr::filter(fishing == "Non-fishing") |> dplyr::pull(type) |> stringr::str_to_lower()`, while most emissions for fishing vessels occur during `r top_type_by_fishing_non_fishing |> dplyr::filter(fishing == "Fishing") |> dplyr::pull(type) |> stringr::str_to_lower()`.
 
 - `r all_port_and_trip_emissions_top_3 |> dplyr::filter(type == "Domestic trips") |> dplyr::pull(country) |> glue::glue_collapse(", ", last = ", and ")` had the most CO$_{2}$ emissions during within-country domestic trips in `r analysis_end_year`. 
 
@@ -1700,7 +1671,10 @@ spatial_co2_emissions_ais_dark <- annual_spatial_co2_emissions_ais_dark_by_fleet
       lat_to_area(lat_bin, pixel_size_analysis)
   )
 
-make_spatial_emissions_by_fleet_map <- function(spatial_emissions_data, facets) {
+make_spatial_emissions_by_fleet_map <- function(
+  spatial_emissions_data,
+  facets
+) {
   spatial_emissions_data |>
     dplyr::mutate(
       fleet = factor(
@@ -1871,9 +1845,9 @@ cowplot::plot_grid(
 
 ```{r}
 #| label: fig-ais-data-richness
-#| fig-cap: !expr 'paste0("Richness of AIS-broadcasting vessel emissions data, showing: (A) CO$_{2}$ emissions by vessel class for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in ", analysis_end_year, ". Vessel classes are grouped into four families, with the total for each family shown at the top right of its panel; within a family the ", n_vessel_classes_shown, " highest-emitting classes are shown individually and any remaining classes are pooled into a single row. (B) CO$_{2}$ emissions by country for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in ", analysis_end_year, ". For both panels, emissions for each international trip are partitioned equally to its departure and arrival country). Countries with no values are shown in black.")'
+#| fig-cap: !expr 'paste0("Richness of AIS-broadcasting vessel emissions data, showing: (A) CO$_{2}$ emissions by vessel class for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in ", analysis_end_year, ". Vessel classes are grouped into four families, with the total for each family shown at the top right of its panel; within a family the ", n_vessel_classes_shown, " highest-emitting classes are shown individually and any remaining classes are pooled into a single row. (B) Spatial distribution of ", analysis_end_year, " CO$_{2}$ emissions from AIS-broadcasting vessels for each of those same vessel class families, shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale). Panels appear in the same order in both halves of the figure, though panel A covers only emissions assignable to trips and port stays while panel B covers all AIS-broadcasting emissions.")'
 #| fig-width: 9
-#| fig-height: 8
+#| fig-height: 9.5
 
 emissions_by_vessel_class_barplot <- ggplot(
   emissions_by_vessel_class_plot_data,
@@ -1897,8 +1871,11 @@ emissions_by_vessel_class_barplot <- ggplot(
     inherit.aes = FALSE
   ) +
   geom_col(position = position_stack(reverse = TRUE), width = 0.7) +
-  # space = "free" gives each panel a height proportional to its number of bars
-  ggforce::facet_col(vars(family), scales = "free_y", space = "free") +
+  # Equal panel heights (i.e. no space = "free"), so the four family headings sit
+  # at the same heights as the four maps in panel B. Panel B's maps are all the
+  # same size, so sizing these panels by their number of bars instead would put
+  # the two sets of headings out of step no matter how wide panel B is drawn.
+  ggforce::facet_col(vars(vessel_class_family), scales = "free_y") +
   scale_x_continuous(
     labels = scales::label_number(scale = 1e-6, suffix = " M"),
     limits = c(0, NA),
@@ -1930,66 +1907,80 @@ emissions_by_vessel_class_barplot <- ggplot(
     legend.text = element_text(size = 9.5)
   )
 
-all_port_and_trip_emissions_without_vessel_class <- all_port_and_trip_emissions |>
-  dplyr::group_by(country_iso3, type) |>
-  dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt)) |>
-  dplyr::ungroup()
-
-
-all_countries_for_plot <- land |>
-  sf::st_drop_geometry() |>
-  dplyr::select(country_iso3) |>
-  tidyr::crossing(
-    all_port_and_trip_emissions_without_vessel_class |>
-      dplyr::distinct(type)
+# Figure 3B
+# 2025 AIS-broadcasting emissions for each vessel class family, stacked in the
+# order the families appear in panel A so the two panels read together
+spatial_co2_emissions_by_vessel_class_family <- annual_spatial_co2_emissions_by_vessel_class_family |>
+  dplyr::mutate(
+    emissions_mt_per_km2 = emissions_co2_mt /
+      lat_to_area(lat_bin, pixel_size_analysis),
+    emissions_mt_per_km2 = dplyr::na_if(emissions_mt_per_km2, 0),
+    vessel_class_family = factor(
+      vessel_class_family,
+      levels = vessel_family_order
+    )
   )
 
-port_trip_emissions_fig <- ggplot() +
-  geom_sf(
-    data = world_bbox_sf,
-    fill = map_background_color
-  ) +
-  geom_sf(
-    data = all_countries_for_plot |>
-      dplyr::left_join(land, by = "country_iso3") |>
-      dplyr::left_join(
-        all_port_and_trip_emissions_without_vessel_class,
-        by = c("country_iso3", "type")
-      ) |>
-      sf::st_as_sf(),
-    aes(fill = emissions_co2_mt),
-    color = "white",
-    linewidth = 0.01
-  ) +
-  facet_wrap(type ~ ., ncol = 1) +
-  coord_sf(crs = map_projection) +
+vessel_class_family_maps <- ggplot(
+  spatial_co2_emissions_by_vessel_class_family
+) +
+  geom_sf(data = world_bbox_sf, fill = "grey92") +
+  ggspatial::geom_spatial_tile(aes(
+    x = lon_bin + 0.5,
+    y = lat_bin + 0.5,
+    fill = emissions_mt_per_km2,
+    color = emissions_mt_per_km2
+  )) +
   theme_void() +
-  scale_fill_gradientn(
-    # Get the "Blues" palette with 9 colors, but keep only the darker 5 (indices 4-9)
-    colors = rev(RColorBrewer::brewer.pal(9, "Blues")[5:9]),
-    labels = scales::unit_format(unit = "M", scale = 1e-6)
+  geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
+  scico::scale_color_scico(
+    palette = "vik",
+    begin = 0.5,
+    end = 1,
+    trans = ggallin::pseudolog10_trans,
+    breaks = c(1, 10, 100, 1000),
+    na.value = map_background_color,
+    labels = scales::comma,
+    guide = "none"
   ) +
-  labs(
-    x = "",
-    fill = bquote(.(analysis_end_year) ~ CO[2] ~ emissions ~ (MT)),
+  scico::scale_fill_scico(
+    name = bquote(
+      .(analysis_end_year) ~ CO[2] ~ emissions ~ (MT / km^2)
+    ),
+    palette = "vik",
+    begin = 0.5,
+    end = 1,
+    trans = ggallin::pseudolog10_trans,
+    breaks = c(1, 10, 100, 1000),
+    na.value = map_background_color,
+    labels = scales::comma
+  ) +
+  facet_wrap(~vessel_class_family, ncol = 1) +
+  labs(x = "", y = "") +
+  scale_x_continuous(expand = c(0, 1)) +
+  scale_y_continuous(expand = c(0, 1)) +
+  theme(
+    legend.position = "bottom",
+    legend.title.align = 0.5,
+    strip.text.x = element_text(margin = margin(t = 6, b = 6), size = 11),
+    strip.background = element_rect(fill = "transparent", color = NA),
+    panel.spacing = unit(0.6, "lines")
   ) +
   guides(
     fill = guide_colorbar(
       title.position = "top",
       title.hjust = 0.5,
       frame.colour = "white",
-      ticks.colour = "white"
+      ticks.colour = "white",
+      barwidth = unit(7, "cm"),
+      barheight = unit(0.4, "cm")
     )
   ) +
-  theme(
-    legend.position = "bottom",
-    legend.direction = "horizontal",
-    legend.key.width = unit(1.75, "cm")
-  )
+  coord_sf(crs = map_projection)
 
 cowplot::plot_grid(
   emissions_by_vessel_class_barplot,
-  port_trip_emissions_fig,
+  vessel_class_family_maps,
   ncol = 2,
   labels = c("A", "B"),
   rel_widths = c(0.52, 0.48)
@@ -3043,7 +3034,9 @@ time_series_panels_by_fishing <- cowplot::plot_grid(
       plot.margin = margin(b = -5, l = 14 + axis_padding_by_fishing[1])
     ),
   percent_dark_time_series_by_fishing_fig +
-    theme(plot.margin = margin(t = 0, b = -15, l = 14 + axis_padding_by_fishing[2])),
+    theme(
+      plot.margin = margin(t = 0, b = -15, l = 14 + axis_padding_by_fishing[2])
+    ),
   ncol = 1,
   labels = c("A", "B"),
   align = "v",
@@ -3250,6 +3243,74 @@ make_pollutant_time_series_figure(
 ```
 
 ## Figure S4
+
+```{r}
+#| label: fig-emissions-by-country-and-activity-type
+#| fig-cap: !expr 'paste0("CO$_{2}$ emissions by country for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in ", analysis_end_year, ". Emissions for each international trip are partitioned equally to its departure and arrival country. Countries with no values are shown in gray.")'
+#| fig-width: 5
+#| fig-height: 8
+
+all_port_and_trip_emissions_without_vessel_class <- all_port_and_trip_emissions |>
+  dplyr::group_by(country_iso3, type) |>
+  dplyr::summarise(emissions_co2_mt = sum(emissions_co2_mt)) |>
+  dplyr::ungroup()
+
+
+all_countries_for_plot <- land |>
+  sf::st_drop_geometry() |>
+  dplyr::select(country_iso3) |>
+  tidyr::crossing(
+    all_port_and_trip_emissions_without_vessel_class |>
+      dplyr::distinct(type)
+  )
+
+port_trip_emissions_fig <- ggplot() +
+  geom_sf(
+    data = world_bbox_sf,
+    fill = map_background_color
+  ) +
+  geom_sf(
+    data = all_countries_for_plot |>
+      dplyr::left_join(land, by = "country_iso3") |>
+      dplyr::left_join(
+        all_port_and_trip_emissions_without_vessel_class,
+        by = c("country_iso3", "type")
+      ) |>
+      sf::st_as_sf(),
+    aes(fill = emissions_co2_mt),
+    color = "white",
+    linewidth = 0.01
+  ) +
+  facet_wrap(type ~ ., ncol = 1) +
+  coord_sf(crs = map_projection) +
+  theme_void() +
+  scale_fill_gradientn(
+    # Get the "Blues" palette with 9 colors, but keep only the darker 5 (indices 4-9)
+    colors = rev(RColorBrewer::brewer.pal(9, "Blues")[5:9]),
+    labels = scales::unit_format(unit = "M", scale = 1e-6)
+  ) +
+  labs(
+    x = "",
+    fill = bquote(.(analysis_end_year) ~ CO[2] ~ emissions ~ (MT)),
+  ) +
+  guides(
+    fill = guide_colorbar(
+      title.position = "top",
+      title.hjust = 0.5,
+      frame.colour = "white",
+      ticks.colour = "white"
+    )
+  ) +
+  theme(
+    legend.position = "bottom",
+    legend.direction = "horizontal",
+    legend.key.width = unit(1.75, "cm")
+  )
+
+port_trip_emissions_fig
+```
+
+## Figure S5
 
 ```{r}
 #| label: fig-annual-emissions-by-ocean-and-data-source
@@ -3533,7 +3594,7 @@ writeLines(
 
 # Supplementary materials: Supplementary figures: Comparing our emission estimates to other inventories
 
-## Figure S5
+## Figure S6
 
 ```{r}
 #| label: fig-inventory-comparison
@@ -3572,6 +3633,100 @@ all_inventory_data |>
 ```
 
 ## Table S6
+
+```{r}
+#| results: 'asis'
+# Companion to Figure S4: the leading countries behind each activity type, with
+# every country outside the top few pooled into a single "Other" row
+n_countries_shown <- 20
+
+top_countries_by_activity_type <- all_port_and_trip_emissions_without_vessel_class |>
+  dplyr::mutate(
+    country = countrycode::countrycode(
+      country_iso3,
+      "iso3c",
+      "country.name",
+      warn = FALSE
+    ),
+    # a handful of codes have no country name; keep the code itself for those
+    country = dplyr::coalesce(country, country_iso3)
+  ) |>
+  dplyr::summarise(
+    emissions_co2_mt = sum(emissions_co2_mt),
+    .by = c(type, country)
+  ) |>
+  dplyr::mutate(
+    country_rank = dplyr::min_rank(dplyr::desc(emissions_co2_mt)),
+    .by = type
+  ) |>
+  dplyr::mutate(
+    country = dplyr::if_else(
+      country_rank > n_countries_shown,
+      "Other",
+      country
+    )
+  ) |>
+  dplyr::summarise(
+    emissions_co2_mt = sum(emissions_co2_mt),
+    # the pooled row keeps the rank of its best member, which sorts it last
+    country_rank = min(country_rank),
+    .by = c(type, country)
+  ) |>
+  dplyr::arrange(type, country_rank)
+
+# One column pair per activity type, ranked down the page
+top_countries_by_activity_type_kable <- top_countries_by_activity_type |>
+  dplyr::mutate(
+    emissions_co2_mt = scales::label_number(
+      scale = 1e-6,
+      accuracy = 0.1
+    )(emissions_co2_mt),
+    table_row = dplyr::row_number(),
+    .by = type
+  ) |>
+  tidyr::pivot_wider(
+    id_cols = table_row,
+    names_from = type,
+    values_from = c(country, emissions_co2_mt),
+    names_vary = "slowest"
+  ) |>
+  dplyr::select(-table_row) |>
+  knitr::kable(
+    format = "latex",
+    label = "top_countries_by_activity_type",
+    booktabs = TRUE,
+    align = c("l", "r", "l", "r", "l", "r"),
+    col.names = rep(c("Country", "CO$_{2}$ (M MT)"), 3),
+    escape = FALSE,
+    caption = paste0(
+      "Top ",
+      n_countries_shown,
+      " countries by ",
+      analysis_end_year,
+      " CO$_{2}$ emissions (millions of metric tonnes) from AIS-broadcasting vessels, shown separately for each activity type, with all remaining countries pooled into a single Other row. Emissions for each international trip are partitioned equally to its departure and arrival country. These are the totals mapped in Figure \\ref{fig:fig-emissions-by-country-and-activity-type}."
+    )
+  ) |>
+  kableExtra::add_header_above(
+    c(
+      "International trips" = 2,
+      "Port stays" = 2,
+      "Domestic trips" = 2
+    )
+  ) |>
+  kableExtra::kable_styling(
+    font_size = 8,
+    latex_options = "hold_position"
+  )
+
+top_countries_by_activity_type_kable
+
+top_countries_by_activity_type_kable |>
+  writeLines(
+    file.path(project_root, "tables", "top_countries_by_activity_type.tex")
+  )
+```
+
+## Table S7
 ```{r}
 #| results: 'asis'
 all_inventory_data_kable <- all_inventory_data |>
@@ -3600,7 +3755,7 @@ all_inventory_data_kable |>
   )
 ```
 
-## Figure S6
+## Figure S7
 
 ```{r}
 #| label: fig-annual-emissions-by-ais-receiver-type
@@ -3647,7 +3802,7 @@ annual_global_emissions_by_receiver_type |>
   geom_vline(xintercept = 2022, linetype = 2)
 ```
 
-## Figure S7
+## Figure S8
 
 ```{r}
 #| label: fig-annual-emissions-by-ais-receiver-type-top-flags
@@ -3701,7 +3856,7 @@ annual_global_emissions_by_receiver_type_and_flag |>
   paletteer::scale_color_paletteer_d(palette = "rcartocolor::Safe")
 ```
 
-## Figure S8
+## Figure S9
 
 ```{r}
 #| label: fig-co2-emissions-change-map-by-receiver-type
