@@ -94,14 +94,14 @@ To correctly estimate both the magnitude and trends of marine emissions, it is e
     \label{fig:fig-emissions-by-data-source-and-maps}
 \end{figure}
 
-Estimating emissions from non-broadcasting vessels not only offers new insights on the overall magnitude and temporal trends of global emissions, but also provides nuanced spatial information and information disaggregated by fishing and non-fishing vessels (Fig. \ref{fig:fig-spatial-temporal-richness-by-fleet-total-pseudolog}). In 2025, 36\% of CO$_{2}$ emissions from fishing vessels were from non-broadcasting vessels, and 21\% of CO$_{2}$ emissions from non-fishing vessels were from non-broadcasting vessels (Fig. \ref{fig:fig-spatial-temporal-richness-by-fleet-total-pseudolog}A-B). For both types of vessels, this fraction of emissions from non-broadcasting vessels has generally been declining since 2021, consistent with a steady increase in AIS monitoring over the period, although it increased slightly for fishing vessels in
-2025. The time series data reveal strong seasonal trends and event-driven variations in marine GHG emissions. We see consistent dips during major holidays including Christmas, New Year’s Day, and Chinese New Year, as well as during the COVID-19 pandemic (Fig. \ref{fig:fig-spatial-temporal-richness-by-fleet-total-pseudolog}A and Fig. \ref{fig:fig-pollutant-time-series}). Being able to spatially quantify emissions from non-broadcasting vessels fills  important gaps in our current understanding of where marine vessel emissions take place, particularly in southeast Asia, China, the Caribbean, and the Mediterranean (Fig. \ref{fig:fig-spatial-temporal-richness-by-fleet-total-pseudolog}C), crucial for targeting policy or private sector interventions. 
+Estimating emissions from non-broadcasting vessels not only offers new insights on the overall magnitude and temporal trends of global emissions, but also provides nuanced spatial information and information disaggregated by fishing and non-fishing vessels (Fig. \ref{fig:fig-emissions-time-series-and-maps} and Fig. \ref{fig:fig-spatial-temporal-richness-by-fleet-total-pseudolog}). In 2025, 36\% of CO$_{2}$ emissions from fishing vessels were from non-broadcasting vessels, and 21\% of CO$_{2}$ emissions from non-fishing vessels were from non-broadcasting vessels (Fig. \ref{fig:fig-spatial-temporal-richness-by-fleet-total-pseudolog}A-B). For both types of vessels, this fraction of emissions from non-broadcasting vessels has generally been declining since 2021, consistent with a steady increase in AIS monitoring over the period, although it increased slightly for fishing vessels in
+2025. The time series data reveal strong seasonal trends and event-driven variations in marine GHG emissions. We see consistent dips during major holidays including Christmas, New Year’s Day, and Chinese New Year, as well as during the COVID-19 pandemic (Fig. \ref{fig:fig-emissions-time-series-and-maps}A and Fig. \ref{fig:fig-pollutant-time-series}). Being able to spatially quantify emissions from non-broadcasting vessels fills  important gaps in our current understanding of where marine vessel emissions take place, particularly in southeast Asia, China, the Caribbean, and the Mediterranean (Fig. \ref{fig:fig-emissions-time-series-and-maps}C), crucial for targeting policy or private sector interventions. 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{figures/fig-spatial-temporal-richness-by-fleet-total-pseudolog-1.png}
-    \caption{(A) Time series of monthly global CO$_2$ emissions, shown for both AIS-broadcasting and S1-detected non-broadcasting vessels, and for both fishing and non-fishing vessels. (B) Time series of the monthly share of global CO$_{2}$ emissions attributable to S1-detected non-broadcasting vessels, for both fishing and non-fishing vessels. (C) Spatial distribution of cumulative 2017-2025 CO$_{2}$ emissions from both AIS-broadcasting and S1-detected non-broadcasting vessels, for both fishing and non-fishing vessels, and shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale).}
-    \label{fig:fig-spatial-temporal-richness-by-fleet-total-pseudolog}
+    \includegraphics[width=\columnwidth]{figures/fig-emissions-time-series-and-maps-1.png}
+    \caption{(A) Time series of monthly global CO$_2$ emissions, shown for both AIS-broadcasting and S1-detected non-broadcasting vessels. (B) Time series of the monthly share of global CO$_{2}$ emissions attributable to S1-detected non-broadcasting vessels. (C) Spatial distribution of cumulative 2017-2025 CO$_{2}$ emissions from AIS-broadcasting vessels (left) and S1-detected non-broadcasting vessels (right), shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale).}
+    \label{fig:fig-emissions-time-series-and-maps}
 \end{figure}
 
 Across the entire 2017 to 2025 time series, almost all non-broadcasting emissions (96.4\%) occurred inside the S1 footprint and in pixel-months that were imaged by S1 (Fig. \ref{fig:fig-spatial-coverage-footprint}). This makes sense because part of the Copernicus system's observation strategy for S1 is specifically focused on imaging coastal and shipping areas, where ship density is highest \cite{ESA2013S1Handbook}. Our machine learning model for predicting these emissions directly from observed S1 detection density achieves a high out-of-sample predictive performance (traditional R$^{2}$ = 0.94 and total percent error of -8.6\% for CO$_2$, Table \ref{tab:all_performance_metrics_table}). Only 3.5\% of non-broadcasting emissions occurred inside the S1 footprint but in pixel-months that weren't imaged by S1, requiring us to use a two-stage hurdle framework using both a classification model (F1 Score = 0.72) and a regression model (traditional R$^{2}$ = 0.73) to predict S1 detection density before predicting emissions (traditional R$^{2}$ = 0.94). Only 0.08\% of non-broadcasting emissions occurred outside the S1 footprint entirely, since most vessels operating in these open ocean areas use AIS.
@@ -236,7 +236,7 @@ This comparison shows that the updated vessel metadata using random forest model
 \begin{figure}[H]
     \centering
     \includegraphics[width=\columnwidth]{figures/fig-registered-data-performance-1.png}
-    \caption{Comparison of daily vessel-level CO$_{2}$ emissions estimated using our model with registered emissions from a proprietary vessel database (based on main engine fuel consumption over 24 hours). Estimates are shown using main engine power and design speed from IMO (left), our machine learning random forest models (center), and the same registered dataset (right). The solid red line shows a linear regression fit, while the dashed line represents the 1:1 line. Performance values for traditional R$^{2}$ are shown for each set of vessel characteristics. Over 15,000 vessels are represented in the figure, and blue shading indicates point density. All data are rule-of-three compliant, meaning each cell (20×20 mt) displayed contains at least three vessels.}
+    \caption{Comparison of daily vessel-level CO$_{2}$ emissions estimated using our model with registered emissions from a proprietary vessel database (based on main engine fuel consumption over 24 hours). Estimates are shown using main engine power and design speed from IMO (left), our machine learning random forest models (center), and the same registered dataset (right). The dashed line represents the 1:1 line. Performance values for traditional R$^{2}$ are shown for each set of vessel characteristics. Over 15,000 vessels are represented in the figure, and blue shading indicates point density. All data are rule-of-three compliant, meaning each cell (20×20 mt) displayed contains at least three vessels.}
     \label{fig:fig-registered-data-performance}
 \end{figure}
 
@@ -248,13 +248,13 @@ Our AIS-derived emissions dataset does not contain detailed information on vesse
 
 \input{tables/mrv_performance_results}
 
-In Table \ref{tab:tab-performance-tolerance-table}, performance peaks at a traditional R$^{2}$ of 0.81 for vessels whose times at sea in our dataset are within 15\% of the MRV-reported values (validation sample of 2,276 vessel-year observations). Beyond this threshold, performance declines as discrepancies grow between our annual aggregated trip activity and that recorded in the MRV dataset.
+In Table \ref{tab:tab-performance-tolerance-table}, performance peaks at a traditional R$^{2}$ of 0.84 for vessels whose times at sea in our dataset are within 15\% of the MRV-reported values (validation sample of 27,657 vessel-year observations). Beyond this threshold, performance declines as discrepancies grow between our annual aggregated trip activity and that recorded in the MRV dataset.
 
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\columnwidth]{figures/fig-mrv-performance-1.png}
-    \caption{Comparison of annual vessel-level CO$_{2}$ emissions estimated using our model with published emissions from the EU MRV database. The sample includes 2,276 observations from yearly aggregated vessel trips where hours at sea differ by no more than 15\% between our data and the MRV dataset. The solid red line shows the linear regression fit, and the dashed line represents the 1:1 line.}
+    \caption{Comparison of annual vessel-level CO$_{2}$ emissions estimated using our model with published emissions from the EU MRV database. The sample includes 27,657 observations from yearly aggregated vessel trips where hours at sea differ by no more than 15\% between our data and the MRV dataset. The dashed line represents the 1:1 line.}
     \label{fig:fig-mrv-performance}
 \end{figure}
 
@@ -470,8 +470,8 @@ For pixel-months where S1 detections were unavailable, either because they were 
 % Fill out your numbers accordingly and delete any lines that aren't applicable.
 \subsection*{Supplementary materials}
 Supplementary Text and Figures\\
-Figures S1 to S7\\
-Table S1 to S5\\
+Figures S1 to S8\\
+Tables S1 to S6\\
 
 
 %%%%%%%%%%%%%%%% END OF MAIN TEXT %%%%%%%%%%%%%%%
@@ -518,8 +518,8 @@ Table S1 to S5\\
 % These are just example numbers that don't match the rest of this template.
 \subsubsection*{This PDF file includes:}
 Supplementary Figures, Tables, and Text\\
-Figures S1 to S7\\
-Table S1 to S5\\
+Figures S1 to S8\\
+Tables S1 to S6\\
 
 \newpage
 \setcounter{section}{1}
@@ -528,6 +528,13 @@ Table S1 to S5\\
 \section*{Supplementary Figures, Tables, and Text}
 
 \subsection{Supplementary Figures}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/fig-spatial-temporal-richness-by-fleet-total-pseudolog-1.png}
+    \caption{(A) Time series of monthly global CO$_2$ emissions, shown for both AIS-broadcasting and S1-detected non-broadcasting vessels, and for both fishing and non-fishing vessels. (B) Time series of the monthly share of global CO$_{2}$ emissions attributable to S1-detected non-broadcasting vessels, for both fishing and non-fishing vessels. (C) Spatial distribution of cumulative 2017-2025 CO$_{2}$ emissions from both AIS-broadcasting and S1-detected non-broadcasting vessels, for both fishing and non-fishing vessels, and shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale).}
+    \label{fig:fig-spatial-temporal-richness-by-fleet-total-pseudolog}
+\end{figure}
 
 \begin{figure}[H]
     \centering
