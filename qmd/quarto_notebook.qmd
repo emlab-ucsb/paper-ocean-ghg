@@ -3111,7 +3111,7 @@ cowplot::plot_grid(
 
 ```{r}
 #| label: fig-pollutant-maps-qlog10
-#| fig-cap: !expr 'paste0("Spatial maps of ", analysis_end_year, " emissions for each GHG and pollutant, aggregated across AIS-broadcasting vessels and non-broadcasting vessels, and shown at a 1x1 degree spatial resolution. Emissions are area-normalized for each pixel (metric tonnes per square kilometer), and shown using a log-10 scale.")'
+#| fig-cap: !expr 'paste0("Spatial maps of ", analysis_end_year, " emissions for each GHG and pollutant, aggregated across AIS-broadcasting vessels and non-broadcasting vessels, and shown at a 1x1 degree spatial resolution. Emissions are area-normalized for each pixel (metric tonnes per square kilometer) and shown using a log-10 scale. Each panel is scaled independently, spanning the ", scales::ordinal(pollutant_map_lower_quantile * 100), " percentile to the maximum of that pollutant, with lower values drawn in the darkest colour; colours are therefore not comparable between panels.")'
 #| fig-width: 8
 #| fig-height: 8
 
@@ -3132,6 +3132,22 @@ pollutant_map_data_all <- total_spatial_emissions_by_pollutant_formatted |>
     pollutant = forcats::fct_relevel(pollutant, pollutant_factor_levels)
   )
 
+# Where each pollutant's colour scale starts, as a quantile of its own pixels.
+# Nearly every pixel of these maps sits far below 1 MT/km2, so a scale running
+# from the bottom of the distribution spends almost all of its range on trace
+# values and washes the shipping lanes out. Starting high and squishing (rather
+# than dropping) everything below the cut puts the low-emission ocean at the dark
+# end of magma, the same way the other emissions maps read.
+pollutant_map_lower_quantile <- 0.75
+
+# scales::label_log() assumes breaks sit on decades. The default break algorithm
+# falls back to fractional exponents when a pollutant spans only a couple of
+# decades, which prints labels like 10^-2.523, so pick the decades directly.
+decade_breaks <- function(limits) {
+  breaks <- 10^seq(ceiling(log10(limits[1])), floor(log10(limits[2])))
+  if (length(breaks) < 2) scales::breaks_log()(limits) else breaks
+}
+
 pollutant_map_list <- purrr::map(
   unique(pollutant_map_data_all$pollutant),
   function(pollutant_tmp) {
@@ -3142,7 +3158,11 @@ pollutant_map_list <- purrr::map(
 
     scale_limits <- pollutant_map_data |>
       dplyr::summarize(
-        min = quantile(.data[[map_end_col]], 0.01, na.rm = TRUE),
+        min = quantile(
+          .data[[map_end_col]],
+          pollutant_map_lower_quantile,
+          na.rm = TRUE
+        ),
         max = max(.data[[map_end_col]], na.rm = TRUE)
       ) |>
       as.numeric()
@@ -3167,20 +3187,30 @@ pollutant_map_list <- purrr::map(
         fill = emissions_map_land_color
       ) +
       scale_fill_viridis_c(
-        name = expression(Emissions ~ (MT / km^2)),
+        # units are given once in the caption, so the nine panels do not repeat
+        # the same legend title
+        name = NULL,
         option = "magma",
         limits = scale_limits,
+        # clamp the low tail onto the darkest colour instead of censoring it
+        oob = scales::squish,
         trans = "log10",
+        breaks = decade_breaks,
         na.value = emissions_map_ocean_color,
-        labels = scales::scientific
+        labels = scales::label_log()
       ) +
       scale_color_viridis_c(
-        name = expression(Emissions ~ (MT / km^2)),
+        # units are given once in the caption, so the nine panels do not repeat
+        # the same legend title
+        name = NULL,
         option = "magma",
         limits = scale_limits,
+        # clamp the low tail onto the darkest colour instead of censoring it
+        oob = scales::squish,
         trans = "log10",
+        breaks = decade_breaks,
         na.value = emissions_map_ocean_color,
-        labels = scales::scientific
+        labels = scales::label_log()
       ) +
       labs(x = "", y = "") +
       theme_void() +
