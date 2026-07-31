@@ -24,6 +24,11 @@
 \usepackage{array}
 \usepackage{verbatim}
 \usepackage{url}
+% Keeps tables from floating past the text that follows them. The table
+% environment is a float, but sn-jnl.cls wraps its body in threeparttable, so
+% the [H] specifier used for every figure here errors out on tables. A
+% \FloatBarrier after each table gives the same in-source-order placement.
+\usepackage{placeins}
 
 % Make it so figures aren't forced to the bottom of pages
 \raggedbottom
@@ -246,6 +251,7 @@ We also validate our CO$_{2}$ emissions model results against public emissions d
 Our AIS-derived emissions dataset does not contain detailed information on vessel activity while in port (i.e., whether or not cargo is loaded/unloaded or passengers embark/disembark), making it difficult to determine the exact same trip start and end points as defined in the MRV data, as well as which trips are included in the MRV records for a given year and vessel. To align vessel yearly activity across datasets, we: (1) filter our trip-level emissions data to include only trips that begin and/or end in EEA countries; (2) aggregate these trip-level emissions to annual emissions for each vessel; (3) apply varying matching tolerance margins to the MRV-reported annual hours at sea and select vessels-year from our dataset within these limits, in order to ensure that the trips we use for comparison have a total hours at sea roughly equal to that reported in the MRV dataset; and (4) compare annual MRV emissions with the annual sum of our trip-level emissions for the same vessel and year to evaluate model performance.
 
 \input{tables/mrv_performance_results}
+\FloatBarrier
 
 In Table \ref{tab:tab-performance-tolerance-table}, performance peaks at a traditional R$^{2}$ of 0.84 for vessels whose times at sea in our dataset are within 15\% of the MRV-reported values (validation sample of 27,657 vessel-year observations, shown in Fig. \ref{fig:fig-mrv-performance}). Beyond this threshold, performance declines as discrepancies grow between our annual aggregated trip activity and that recorded in the MRV dataset.
 
@@ -315,6 +321,7 @@ We define a global spatial resolution of 1x1-degree which is used for all spatia
 \clearpage
 
 \input{tables/data_sources}
+\FloatBarrier
 
 \clearpage
 
@@ -417,6 +424,7 @@ For the CO$_2$ emissions regression random forest, we simply train the model on 
 
 
 \input{tables/all_performance_metrics_table}
+\FloatBarrier
 
 \subsubsection{Feature importance}
 
@@ -435,6 +443,7 @@ After assessing model performance, we perform a final fit using the entire datas
 Here we look at the linear regression fit statistics for the final models to convert CO$_2$ emissions to emissions of non-CO$_2$ gases (other GHGs and non-GHG pollutants), trained using the full dataset (Table \ref{tab:lm_other_gases_tidy_fit_stats}).
 
 \input{tables/lm_other_gases_tidy_fit_stats}
+\FloatBarrier
 
 \subsubsection{Predicting non-broadcasting emissions}
 
@@ -566,16 +575,22 @@ Tables S1 to S7\\
 \subsection{Supplementary Tables}
 
 \input{tables/total_percent_change_by_fleet}
+\FloatBarrier
 
 \input{tables/pollutant_ais_underestimation_overestimation_summary}
+\FloatBarrier
 
 \input{tables/emissions_by_ocean_summary_tbl}
+\FloatBarrier
 
 \input{tables/emissions_by_data_source_summary_tbl}
+\FloatBarrier
 
 \input{tables/annual_sc_fishing_non_fishing_tbl}
+\FloatBarrier
 
 \input{tables/top_countries_by_activity_type}
+\FloatBarrier
 
 \subsection{Comparing our emission estimates to other inventories}
 
@@ -589,6 +604,7 @@ Our total emissions estimates (summed across broadcasting and non-broadcasting v
 \end{figure}
 
 \input{tables/inventory_comparison}
+\FloatBarrier
 
 \subsection{Trends in AIS receiver types}
 
