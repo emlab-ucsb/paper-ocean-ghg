@@ -76,9 +76,9 @@ annual_spatial_co2_emissions_by_vessel_class_family|stem|5c015b7e980334f0|fff101
 fishing_vessel_classes|function|9971df3aa5284378
 download_gfw_data|function|56ae83fa4e3ee8f3
 combine_EU_data|function|ad06f3aced59370c
-.Random.seed|object|d123bd4ce56cc749
+.Random.seed|object|0e0974fe47414cd9
 reefer_vessel_classes|function|3f594d3b2dffefa6
 vessel_class_family|function|06396670e8027f97
 vessel_class_family_sql|function|4f02f50eae07211a
 vessel_class_families|function|9ede3af2b3ba477b
-quarto_notebook|stem|f06a74917c418bc6|053d5bce60d3e205|02f7b0763d739e97|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20665.0859139759s|s12405595b|12405595|file|local|vector|||778.1||
+quarto_notebook|stem|ad0d2f85e367a4fc|053d5bce60d3e205|02f7b0763d739e97|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20665.7529276452s|s12326982b|12326982|file|local|vector|||807.42||
