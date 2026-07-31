@@ -240,15 +240,7 @@ lat_to_area <- function(lat, pixel_size) {
 # We use a 1x1 degree pixel size for our spatial emissions data, so set pixel_size to 1 degree
 pixel_size_analysis <- 1
 
-# Set map background color as the midpoint value from scico::scico vik, which we use for
-map_background_color <- scico::scico(
-  n = 1,
-  palette = "vik",
-  begin = 0.5,
-  end = 0.5
-)
-
-# The emissions maps use a dark ocean: magma (sequential) and berlin (diverging)
+# Every map in the paper uses a dark ocean: magma (sequential) and berlin (diverging)
 # both bottom out at black, so pixels with little or no emissions - and pixels
 # with no change - sink into the background instead of washing the map out. Land
 # is a mid grey so continents still read against it, and colourbar frames are
@@ -805,9 +797,14 @@ emissions_by_vessel_class_df <-
     # prettifying below rewrites them
     vessel_class_family = vessel_class_family(vessel_class),
     # The family is already the panel heading in Figure 3A, so the label drops
-    # the family prefix; the refrigerated cargo classes read as one row
+    # the family prefix. The three refrigerated cargo classes get spelled-out
+    # labels rather than the derived ones: cargo.refrigerated would otherwise
+    # read as a bare "Refrigerated" next to "Container" and "General", and
+    # "Container reefer" has to stay distinguishable from "Container".
     vessel_label = dplyr::case_when(
-      vessel_class %in% reefer_vessel_classes() ~ "Reefer",
+      vessel_class == "specialized_reefer" ~ "Specialized reefer",
+      vessel_class == "container_reefer" ~ "Container reefer",
+      vessel_class == "cargo.refrigerated" ~ "Refrigerated cargo",
       vessel_class == "tanker.other" ~ "Other tanker",
       .default = stringr::str_remove(vessel_class, "^(cargo|tanker)\\.") |>
         stringr::str_replace_all("_", " ") |>
@@ -830,46 +827,17 @@ emissions_by_vessel_class_df <-
   )
 
 # Figure 3A: vessel class roll-up
-# Each vessel class family becomes a panel. Within a family, classes are ranked
-# by total emissions and everything below the top few is pooled into a single
-# row, so no panel carries a long tail of near-zero bars. The families
+# Each vessel class family becomes a panel, and every class in that family gets
+# its own bar - nothing is pooled into an "other" row, so the long tail of
+# small classes stays visible even where the bars are near zero. The families
 # themselves are defined in r/functions.R.
 
-# How many individual classes each family shows before pooling the remainder
-n_vessel_classes_shown <- 5
-
-emissions_by_vessel_family <- emissions_by_vessel_class_df |>
+emissions_by_vessel_class_plot_data <- emissions_by_vessel_class_df |>
   dplyr::summarise(
     emissions_co2_mt = sum(emissions_co2_mt),
     .by = c(vessel_class_family, vessel_label, type)
-  )
-
-# Rank the classes inside each family, then pool everything past the cut-off
-pooled_vessel_labels <- emissions_by_vessel_family |>
-  dplyr::summarise(
-    class_total = sum(emissions_co2_mt),
-    .by = c(vessel_class_family, vessel_label)
   ) |>
-  dplyr::mutate(
-    class_rank = dplyr::min_rank(dplyr::desc(class_total)),
-    .by = vessel_class_family
-  ) |>
-  dplyr::left_join(vessel_class_families(), by = "vessel_class_family") |>
-  dplyr::mutate(
-    pooled = class_rank > n_vessel_classes_shown,
-    plot_label = dplyr::if_else(pooled, pooled_label, vessel_label)
-  )
-
-emissions_by_vessel_class_plot_data <- emissions_by_vessel_family |>
-  dplyr::left_join(
-    pooled_vessel_labels |>
-      dplyr::select(vessel_class_family, vessel_label, plot_label, pooled),
-    by = c("vessel_class_family", "vessel_label")
-  ) |>
-  dplyr::summarise(
-    emissions_co2_mt = sum(emissions_co2_mt),
-    .by = c(vessel_class_family, plot_label, pooled, type)
-  )
+  dplyr::rename(plot_label = vessel_label)
 
 # One row per panel: the family total shown at the right of the heading, and the
 # y position of the rule that sits under the heading
@@ -893,15 +861,15 @@ vessel_family_totals <- emissions_by_vessel_class_plot_data |>
 # Figure 3B stacks its maps in this same order, so the two panels line up
 vessel_family_order <- levels(vessel_family_totals$vessel_class_family)
 
-# Bars run largest at the top of each panel, with any pooled row pinned to the
-# bottom regardless of its total. Panels are drawn separately, so ordering the
-# labels globally by total also orders them correctly within each panel.
+# Bars run largest at the top of each panel. Panels are drawn separately, so
+# ordering the labels globally by total also orders them correctly within each
+# panel - which only holds because no label is shared between two families.
 vessel_label_order <- emissions_by_vessel_class_plot_data |>
   dplyr::summarise(
     row_total = sum(emissions_co2_mt),
-    .by = c(plot_label, pooled)
+    .by = plot_label
   ) |>
-  dplyr::arrange(dplyr::desc(pooled), row_total) |>
+  dplyr::arrange(row_total) |>
   dplyr::pull(plot_label)
 
 emissions_by_vessel_class_plot_data <- emissions_by_vessel_class_plot_data |>
@@ -1901,7 +1869,7 @@ cowplot::plot_grid(
 
 ```{r}
 #| label: fig-ais-data-richness
-#| fig-cap: !expr 'paste0("Richness of AIS-broadcasting vessel emissions data, showing: (A) CO$_{2}$ emissions by vessel class for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in ", analysis_end_year, ". Vessel classes are grouped into four families, with the total for each family shown at the top right of its panel; within a family the ", n_vessel_classes_shown, " highest-emitting classes are shown individually and any remaining classes are pooled into a single row. (B) Spatial distribution of ", analysis_end_year, " CO$_{2}$ emissions from AIS-broadcasting vessels for each of those same vessel class families, shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale). Panels appear in the same order in both halves of the figure, though panel A covers only emissions assignable to trips and port stays while panel B covers all AIS-broadcasting emissions.")'
+#| fig-cap: !expr 'paste0("Richness of AIS-broadcasting vessel emissions data, showing: (A) CO$_{2}$ emissions by vessel class for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in ", analysis_end_year, ". Vessel classes are grouped into four families, with the total for each family shown at the top right of its panel; every class in a family is shown as its own bar, so panel heights differ with the number of classes. (B) Spatial distribution of ", analysis_end_year, " CO$_{2}$ emissions from AIS-broadcasting vessels for each of those same vessel class families, shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale). Panels appear in the same order in both halves of the figure, though panel A covers only emissions assignable to trips and port stays while panel B covers all AIS-broadcasting emissions.")'
 #| fig-width: 9
 #| fig-height: 9.5
 
@@ -1927,11 +1895,16 @@ emissions_by_vessel_class_barplot <- ggplot(
     inherit.aes = FALSE
   ) +
   geom_col(position = position_stack(reverse = TRUE), width = 0.7) +
-  # Equal panel heights (i.e. no space = "free"), so the four family headings sit
-  # at the same heights as the four maps in panel B. Panel B's maps are all the
-  # same size, so sizing these panels by their number of bars instead would put
-  # the two sets of headings out of step no matter how wide panel B is drawn.
-  ggforce::facet_col(vars(vessel_class_family), scales = "free_y") +
+  # Panel height tracks the number of bars, so every bar is the same thickness.
+  # These panels used to be equal height so the four family headings lined up
+  # with the four maps in panel B, but the families now carry 7, 4, 11 and 14
+  # bars; equal heights make Tanker's four bars over three times thicker than
+  # Fishing's fourteen. Uniform bars win over the cross-panel alignment.
+  ggforce::facet_col(
+    vars(vessel_class_family),
+    scales = "free_y",
+    space = "free"
+  ) +
   scale_x_continuous(
     labels = scales::label_number(scale = 1e-6, suffix = " M"),
     limits = c(0, NA),
@@ -2392,7 +2365,7 @@ number_s1_imaged_months_by_pixel |>
   ggplot() +
   geom_sf(
     data = world_bbox_sf,
-    fill = map_background_color
+    fill = emissions_map_ocean_color
   ) +
   ggspatial::geom_spatial_tile(
     aes(
@@ -2402,20 +2375,30 @@ number_s1_imaged_months_by_pixel |>
       fill = fraction_months_imaged
     )
   ) +
-  geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
+  geom_sf(
+    data = land,
+    color = emissions_map_land_color,
+    fill = emissions_map_land_color
+  ) +
+  # Same magma-on-black treatment as the gridded emissions maps. Magma bottoms
+  # out at black, so the ~31,000 pixels that S1 never imaged sink into the
+  # ocean behind them, which is the reading we want: no coverage looks the same
+  # as no data.
   scale_fill_viridis_c(
     name = glue::glue(
       "Percentage of months imaged by S1 between {analysis_start_year} and {analysis_end_year}"
     ),
     labels = scales::percent,
-    option = "magma"
+    option = "magma",
+    na.value = emissions_map_ocean_color
   ) +
   scale_color_viridis_c(
     name = glue::glue(
       "Percentage of months imaged by S1 between {analysis_start_year} and {analysis_end_year}"
     ),
     labels = scales::percent,
-    option = "magma"
+    option = "magma",
+    na.value = emissions_map_ocean_color
   ) +
   labs(x = "", y = "") +
   theme_void() +
@@ -2425,8 +2408,8 @@ number_s1_imaged_months_by_pixel |>
     fill = guide_colorbar(
       title.position = "top",
       title.hjust = 0.5,
-      frame.colour = "black",
-      ticks.colour = "white",
+      frame.colour = emissions_map_frame_color,
+      ticks.colour = emissions_map_frame_color,
       barwidth = unit(15, "cm"),
       barheight = unit(1, "cm")
     ),

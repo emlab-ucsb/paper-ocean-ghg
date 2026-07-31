@@ -97,26 +97,10 @@ fishing_vessel_classes <- function() {
 }
 
 # Refrigerated cargo arrives under several class names, not all of which carry
-# the "cargo" prefix. They belong to the cargo family and read as one row.
+# the "cargo" prefix. This is what puts them in the cargo family; Figure 3A
+# gives each of them its own bar rather than collapsing them into one row.
 reefer_vessel_classes <- function() {
   c("specialized_reefer", "container_reefer", "cargo.refrigerated")
-}
-
-# The four families, and the label each family's pooled "everything else" row
-# carries. Figures order the families by emissions rather than by this order.
-vessel_class_families <- function() {
-  tibble::tribble(
-    ~vessel_class_family,
-    ~pooled_label,
-    "Cargo",
-    "All other cargo",
-    "Tanker",
-    "All other tankers",
-    "Fishing",
-    "All other gears",
-    "Service and passenger",
-    "All other service"
-  )
 }
 
 # Assign raw GFW vessel classes to families
