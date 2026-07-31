@@ -1404,70 +1404,104 @@ pollutant_map_data_co2 <- total_spatial_emissions_by_pollutant_formatted |>
     cols = dplyr::all_of(c("emissions_mt_per_km2_delta_abs", map_end_col))
   )
 
-co2_map <- pollutant_map_data_co2 |>
+# The two maps carry different quantities, so they get their own scales and their
+# own legends: the level map uses the same magma ramp as every other emissions
+# map, while the change map needs a diverging scale about zero. A single ggplot
+# can only hold one fill scale, so they are built separately and stacked.
+make_co2_pollutant_map <- function(map_data, fill_scale, color_scale) {
+  map_data |>
+    ggplot() +
+    geom_sf(
+      data = world_bbox_sf,
+      fill = emissions_map_ocean_color
+    ) +
+    ggspatial::geom_spatial_tile(
+      aes(
+        x = lon_bin + 0.5,
+        y = lat_bin + 0.5,
+        color = value,
+        fill = value
+      )
+    ) +
+    # one facet level per map, which keeps the panel heading
+    facet_wrap(name ~ ., ncol = 1) +
+    geom_sf(
+      data = land,
+      color = emissions_map_land_color,
+      fill = emissions_map_land_color
+    ) +
+    fill_scale +
+    color_scale +
+    labs(x = "", y = "") +
+    theme_void() +
+    guides(
+      fill = guide_colorbar(
+        title.position = "top",
+        title.hjust = 0.5,
+        frame.colour = emissions_map_frame_color,
+        ticks.colour = emissions_map_frame_color
+      )
+    ) +
+    scale_x_continuous(expand = c(0, 1)) +
+    scale_y_continuous(expand = c(0, 1)) +
+    theme(
+      legend.position = "bottom",
+      legend.direction = "horizontal",
+      legend.key.width = unit(2, "cm")
+    )
+}
+
+co2_level_map <- pollutant_map_data_co2 |>
+  dplyr::filter(name == map_end_col) |>
+  dplyr::mutate(name = glue::glue("{analysis_end_year} emissions")) |>
+  make_co2_pollutant_map(
+    fill_scale = scale_fill_viridis_c(
+      name = bquote(.(analysis_end_year) ~ CO[2] ~ emissions ~ (MT / km^2)),
+      option = "magma",
+      trans = ggallin::pseudolog10_trans,
+      na.value = emissions_map_ocean_color,
+      breaks = c(1, 10, 100, 1000),
+      labels = scales::comma
+    ),
+    color_scale = scale_color_viridis_c(
+      option = "magma",
+      trans = ggallin::pseudolog10_trans,
+      na.value = emissions_map_ocean_color,
+      guide = "none"
+    )
+  )
+
+co2_change_map <- pollutant_map_data_co2 |>
+  dplyr::filter(name == "emissions_mt_per_km2_delta_abs") |>
   dplyr::mutate(
-    name = ifelse(
-      name == "emissions_mt_per_km2_delta_abs",
-      glue::glue(
-        "Change in emissions from {analysis_start_year} to {analysis_end_year}"
-      ),
-      glue::glue("{analysis_end_year} emissions")
+    name = glue::glue(
+      "Change in emissions from {analysis_start_year} to {analysis_end_year}"
     )
   ) |>
-  ggplot() +
-  geom_sf(
-    data = world_bbox_sf,
-    fill = emissions_map_ocean_color
-  ) +
-  ggspatial::geom_spatial_tile(
-    aes(
-      x = lon_bin + 0.5,
-      y = lat_bin + 0.5,
-      color = value,
-      fill = value
+  make_co2_pollutant_map(
+    fill_scale = scico::scale_fill_scico(
+      name = bquote(Change ~ "in" ~ CO[2] ~ emissions ~ (MT / km^2)),
+      palette = "berlin",
+      midpoint = 0,
+      trans = ggallin::pseudolog10_trans,
+      na.value = emissions_map_ocean_color,
+      breaks = c(-1e3, -1e2, -1e1, 0, 1e1, 1e2, 1e3),
+      labels = scales::comma
+    ),
+    color_scale = scico::scale_color_scico(
+      palette = "berlin",
+      midpoint = 0,
+      trans = ggallin::pseudolog10_trans,
+      na.value = emissions_map_ocean_color,
+      guide = "none"
     )
-  ) +
-  facet_wrap(name ~ ., ncol = 1) +
-  geom_sf(
-    data = land,
-    color = emissions_map_land_color,
-    fill = emissions_map_land_color
-  ) +
-  scico::scale_fill_scico(
-    name = expression(CO[2] ~ emissions ~ (MT / km^2)),
-    palette = "berlin",
-    midpoint = 0,
-    trans = ggallin::pseudolog10_trans,
-    na.value = emissions_map_ocean_color,
-    breaks = c(-1e3, -1e2, -1e1, 0, 1e1, 1e2, 1e3),
-    labels = scales::comma
-  ) +
-  scico::scale_color_scico(
-    name = expression(CO[2] ~ emissions ~ (MT / km^2)),
-    palette = "berlin",
-    midpoint = 0,
-    trans = ggallin::pseudolog10_trans,
-    na.value = emissions_map_ocean_color,
-    breaks = c(-1e3, -1e2, -1e1, 0, 1e1, 1e2, 1e3),
-    labels = scales::comma
-  ) +
-  labs(x = "", y = "") +
-  theme_void() +
-  guides(
-    fill = guide_colorbar(
-      title.position = "top",
-      title.hjust = 0.5,
-      frame.colour = emissions_map_frame_color,
-      ticks.colour = emissions_map_frame_color
-    )
-  ) +
-  scale_x_continuous(expand = c(0, 1)) +
-  scale_y_continuous(expand = c(0, 1)) +
-  theme(
-    legend.position = "bottom",
-    legend.direction = "horizontal",
-    legend.key.width = unit(2, "cm")
   )
+
+co2_map <- cowplot::plot_grid(
+  co2_level_map,
+  co2_change_map,
+  ncol = 1
+)
 ```
 
 ```{r}
@@ -3280,7 +3314,8 @@ all_countries_for_plot <- land |>
 port_trip_emissions_fig <- ggplot() +
   geom_sf(
     data = world_bbox_sf,
-    fill = emissions_map_ocean_color
+    fill = "white",
+    color = NA
   ) +
   geom_sf(
     data = all_countries_for_plot |>
@@ -3291,17 +3326,23 @@ port_trip_emissions_fig <- ggplot() +
       ) |>
       sf::st_as_sf(),
     aes(fill = emissions_co2_mt),
-    color = "white",
-    linewidth = 0.01
+    # enough weight to separate neighbouring countries and the coastline
+    color = "grey50",
+    linewidth = 0.15
   ) +
   facet_wrap(type ~ ., ncol = 1) +
   coord_sf(crs = map_projection) +
   theme_void() +
   scale_fill_viridis_c(
-    option = "magma",
+    # A different palette family from the gridded emissions maps on purpose: this
+    # is a choropleth of country totals, not a spatial field, and mako's cool
+    # blue-greens keep the two kinds of map from being read as the same thing.
+    # Reversed over a white ocean so that darker means more, in the usual
+    # choropleth convention, which keeps low-emitting countries visible.
+    option = "mako",
+    direction = -1,
     labels = scales::unit_format(unit = "M", scale = 1e-6),
-    # countries with no emissions of a given type take the land colour
-    na.value = emissions_map_land_color
+    na.value = "grey85"
   ) +
   labs(
     x = "",
