@@ -73,12 +73,12 @@ ping_level_hours_distribution|stem|9d9d7622f33539d2|9141f4b495c0e880|bfd3a6b4a24
 fraction_vessels_emissions_by_registry_info|stem|af8ba644d301ee42|05601326f6ec7403|9f7914900b3eba13|-518675064||t20663.9116864741s|s392b|392|rds|local|vector|||0.012||
 annual_spatial_co2_emissions_by_vessel_class_family_file|stem|945cf5ddbc1afe36|376cd40276ddf255|2c530c1562a7fbd1|-589649576|data/gfw/annual_spatial_co2_emissions_by_vessel_class_family.csv|t20664.9624698293s|s5071081b|5071081|file|local|vector|||0||
 annual_spatial_co2_emissions_by_vessel_class_family|stem|5c015b7e980334f0|fff101b4de00c731|479b08b42616938e|547664468||t20664.9627969205s|s1417414b|1417414|rds|local|vector|||0.141||
+vessel_class_families|function|9ede3af2b3ba477b|||||||||||||||
 fishing_vessel_classes|function|9971df3aa5284378
 download_gfw_data|function|56ae83fa4e3ee8f3
 combine_EU_data|function|ad06f3aced59370c
-.Random.seed|object|0e0974fe47414cd9
+.Random.seed|object|a32070dccb83d89d
 reefer_vessel_classes|function|3f594d3b2dffefa6
-vessel_class_family|function|06396670e8027f97
 vessel_class_family_sql|function|4f02f50eae07211a
-vessel_class_families|function|9ede3af2b3ba477b
-quarto_notebook|stem|ad0d2f85e367a4fc|053d5bce60d3e205|02f7b0763d739e97|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20665.7529276452s|s12326982b|12326982|file|local|vector|||807.42||
+vessel_class_family|function|06396670e8027f97
+quarto_notebook|stem|4a45aedc0dfc40e1|053d5bce60d3e205|02f7b0763d739e97|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20665.7832693798s|s12403533b|12403533|file|local|vector|||803.075||
