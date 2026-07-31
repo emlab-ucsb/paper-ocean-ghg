@@ -592,6 +592,41 @@ Tables S1 to S7\\
 \input{tables/top_countries_by_activity_type}
 \FloatBarrier
 
+
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{Availability of vessel characteristics used in emissions modeling, by source.
+  ``Inferred'' is the percentage of vessels for which the characteristic could not be matched to any registry and was therefore inferred by our machine-learning models. ``Public Sources'' is the percentage sourced from any publicly available registry, including that maintained by IMO's GISIS (Global Integrated Shipping Information System). ``Private Sources'' is the percentage sourced from proprietary vessel databases, chiefly S\&P Global Market Intelligence Ships Dataset and to a smaller extent non publicly available lists maintained by Global Fishing Watch.}\label{tab:characteristic-availability}
+  \begin{tabular}{@{}lrrr@{}}
+    \toprule
+    Characteristic & Inferred (\%) & Public Sources (\%) & Private Sources (\%) \\
+    \midrule
+    \multicolumn{4}{@{}l}{\textit{Matching by IMO}} \\
+    Main Engine Power & 86.3 & 3.1  & 10.6 \\
+    Vessel Class      & 82.5 & 17.5 & 0.0  \\  
+    Length            & 84.3 & 6.9  & 8.8  \\
+    Gross Tonnage     & 85.2 & 14.3 & 0.5  \\
+    Design Speed      & 95.5 & 0.0  & 4.5  \\
+    Year of Build     & 87.1 & 0.0  & 12.9 \\
+    Engine Type       & 87.2 & 0.0  & 12.8 \\
+    Engine RPM        & 89.1 & 0.0  & 10.9 \\
+    \midrule
+    \multicolumn{4}{@{}l}{\textit{Matching by IMO and MMSI}} \\
+    Main Engine Power & 92.5 & 3.1  & 4.4 \\
+    Vessel Class      & 82.5 & 17.5 & 0.0 \\
+    Length            & 89.8 & 6.9  & 3.3 \\
+    Gross Tonnage     & 85.4 & 14.3 & 0.2 \\
+    Design Speed      & 98.2 & 0.0  & 1.8 \\
+    Year of Build     & 94.0 & 0.0  & 6.0 \\
+    Engine Type       & 93.9 & 0.0  & 6.1 \\
+    Engine RPM        & 95.1 & 0.0  & 4.9 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+
+
 \subsection{Comparing our emission estimates to other inventories}
 
 Our total emissions estimates (summed across broadcasting and non-broadcasting vessels) are consistent with other well-known global inventories: the International Maritime Organization (IMO) \cite{fourth2020greenhouse}, the EU's Emissions Database for Global Atmospheric Research (EDGAR) \cite{JRC143227}, and the Organization for Economic Co-operation and Development (OECD) experimental shipping database \cite{clarke2023co2} (Fig. \ref{fig:fig-inventory-comparison} and Table \ref{tab:inventory_comparison}). For each inventory, we pull all available years of data from 2017 through 2025. Both the IMO and OECD inventories leverage AIS data, with IMO using an AIS-based model similar to ours, and OECD leveraging a machine learning model trained on the EU MRV database that uses AIS movement data to inform certain model features and which uses this model to make predictions for AIS-broadcasting vessels not contained in the EU MRV database. The EDGAR inventory uses national fuel use data and regional emissions factors to estimate emissions. Our approach combining AIS and S1 data yields the highest estimates, as expected. The level of general agreement for this complex estimate across multiple sources provides support for the reliability and utility of our methodology and results.
