@@ -256,6 +256,15 @@ map_background_color <- scico::scico(
 emissions_map_ocean_color <- "black"
 emissions_map_land_color <- "grey30"
 emissions_map_frame_color <- "grey40"
+
+# Categorical fills for the maps that mark areas rather than show a quantity
+# (the training/testing split and the S1 coverage map). These sit on the same
+# black ocean as the emissions maps, so they need high-luminance hues: Paul
+# Tol's bright cyan/red for the two-category map, and Okabe-Ito yellow for the
+# single-category coverage mask, whose smallest panel is only a few pixels
+# wide. Both schemes stay distinguishable under deuteranopia and protanopia.
+map_category_colors <- c(Training = "#66CCEE", Testing = "#EE6677")
+map_mask_color <- "#F0E442"
 ```
 
 ```{r}
@@ -2586,7 +2595,7 @@ pixels_for_offshore_training_testing_split |>
   ggplot() +
   geom_sf(
     data = world_bbox_sf,
-    fill = map_background_color
+    fill = emissions_map_ocean_color
   ) +
   ggspatial::geom_spatial_tile(
     aes(
@@ -2596,17 +2605,13 @@ pixels_for_offshore_training_testing_split |>
       fill = type
     )
   ) +
-  geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
-  paletteer::scale_color_paletteer_d(
-    name = "Dataset",
-    palette = "nbapalettes::pacers_classic",
-    direction = -1
+  geom_sf(
+    data = land,
+    color = emissions_map_land_color,
+    fill = emissions_map_land_color
   ) +
-  paletteer::scale_fill_paletteer_d(
-    name = "Dataset",
-    palette = "nbapalettes::pacers_classic",
-    direction = -1
-  ) +
+  scale_color_manual(name = "Dataset", values = map_category_colors) +
+  scale_fill_manual(name = "Dataset", values = map_category_colors) +
   labs(x = "", y = "") +
   theme_void() +
   theme_plot() +
@@ -2924,7 +2929,7 @@ total_spatial_co2_emissions_dark_by_footprint |>
   ggplot() +
   geom_sf(
     data = world_bbox_sf,
-    fill = map_background_color,
+    fill = emissions_map_ocean_color,
     color = NA
   ) +
   ggspatial::geom_spatial_tile(
@@ -2935,13 +2940,17 @@ total_spatial_co2_emissions_dark_by_footprint |>
     ),
     color = NA
   ) +
-  geom_sf(data = land, color = "#374a6d", fill = "#374a6d") +
+  geom_sf(
+    data = land,
+    color = emissions_map_land_color,
+    fill = emissions_map_land_color
+  ) +
   scale_fill_manual(
     name = "",
     values = c(
-      "Outside S1 footprint" = "#d90101ff",
-      "Inside S1 footprint imaged" = "#d90101ff",
-      "Inside S1 footprint not imaged" = "#d90101ff"
+      "Outside S1 footprint" = map_mask_color,
+      "Inside S1 footprint imaged" = map_mask_color,
+      "Inside S1 footprint not imaged" = map_mask_color
     )
   ) +
   theme_void() +
@@ -3323,7 +3332,7 @@ make_pollutant_time_series_figure(
 
 ```{r}
 #| label: fig-emissions-by-country-and-activity-type
-#| fig-cap: !expr 'paste0("CO$_{2}$ emissions by country for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in ", analysis_end_year, ". Emissions for each international trip are partitioned equally to its departure and arrival country. Countries with no values are shown in gray.")'
+#| fig-cap: !expr 'paste0("CO$_{2}$ emissions by country for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in ", analysis_end_year, ". Emissions for each international trip are partitioned equally to its departure and arrival country. The color scale is square-root transformed, so that lower-emitting countries remain distinguishable alongside the largest emitters. Countries with no values are shown in gray.")'
 #| fig-width: 5
 #| fig-height: 8
 
@@ -3344,7 +3353,7 @@ all_countries_for_plot <- land |>
 port_trip_emissions_fig <- ggplot() +
   geom_sf(
     data = world_bbox_sf,
-    fill = "white",
+    fill = emissions_map_ocean_color,
     color = NA
   ) +
   geom_sf(
@@ -3357,7 +3366,7 @@ port_trip_emissions_fig <- ggplot() +
       sf::st_as_sf(),
     aes(fill = emissions_co2_mt),
     # enough weight to separate neighbouring countries and the coastline
-    color = "grey50",
+    color = "grey55",
     linewidth = 0.15
   ) +
   facet_wrap(type ~ ., ncol = 1) +
@@ -3367,12 +3376,21 @@ port_trip_emissions_fig <- ggplot() +
     # A different palette family from the gridded emissions maps on purpose: this
     # is a choropleth of country totals, not a spatial field, and mako's cool
     # blue-greens keep the two kinds of map from being read as the same thing.
-    # Reversed over a white ocean so that darker means more, in the usual
-    # choropleth convention, which keeps low-emitting countries visible.
+    # Run bright-for-more over the same black ocean as those maps, and start
+    # above mako's black end so the lowest-emitting countries still separate
+    # from the ocean behind them.
+    #
+    # Square-root rather than linear: China emits an order of magnitude more
+    # than the median country, so a linear scale collapses everyone else into
+    # the bottom of the ramp. sqrt lifts the mid-tier countries clear while
+    # still leaving China visibly the maximum - pseudolog10, which the gridded
+    # pollutant maps use, over-corrects here and flattens the ranking.
     option = "mako",
-    direction = -1,
+    direction = 1,
+    begin = 0.2,
+    trans = "sqrt",
     labels = scales::unit_format(unit = "M", scale = 1e-6),
-    na.value = "grey85"
+    na.value = emissions_map_land_color
   ) +
   labs(
     x = "",
@@ -3799,8 +3817,15 @@ top_countries_by_activity_type_kable <- top_countries_by_activity_type |>
     )
   ) |>
   kableExtra::kable_styling(
+    # No "scale_down" here. It wraps the tabular in \resizebox, and sn-jnl.cls
+    # redefines the table environment to put its body inside threeparttable;
+    # the two together error out ("\begin{threeparttable} ... ended by
+    # \end{tabular}"), so LaTeX silently drops the whole float. The table then
+    # never appears in the PDF and \ref{tab:top_countries_by_activity_type}
+    # renders as ??. font_size 7 already fits the six columns in \linewidth
+    # with no overfull box, so the resizebox bought us nothing.
     font_size = 7,
-    latex_options = c("hold_position", "scale_down")
+    latex_options = "hold_position"
   )
 
 top_countries_by_activity_type_kable
