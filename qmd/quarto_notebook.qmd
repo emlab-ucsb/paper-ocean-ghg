@@ -259,27 +259,33 @@ emissions_map_frame_color <- "grey40"
 map_category_colors <- c(Training = "#66CCEE", Testing = "#EE6677")
 map_mask_color <- "#F0E442"
 
-# Fills for the three activity types in Figure 3C. Figure 3A draws its class
-# totals in black, so this scheme cannot contain a near-black step - which ruled
-# out the ltc::trio4 palette these bars used previously, whose dark slate also
-# sat at chroma 0.03 (reading as grey rather than a hue) and only 4.4 OKLab dE
-# from its wine under simulated protanopia.
+# Fills for the three activity types in Figure 3C: a muted blue / plum / teal
+# set that sits quietly next to the amber Figure 3A bars and the magma maps in
+# 3B rather than competing with them.
 #
-# These three were selected by generating one maximum-chroma swatch per 10 deg of
-# OKLCH hue inside the mid-lightness band, keeping the triads that pass all of:
-# OKLCH lightness band, chroma floor, pairwise OKLab dE under Machado
-# severity-1.0 protan/deutan simulation, unsimulated pairwise dE, and WCAG
-# contrast against white; then maximising distance from the qualitative hues
-# already used elsewhere in the paper (Okabe-Ito, Brewer Dark2, Brewer Set2),
-# which is what excludes the orange/blue/green region those occupy. The result
-# clears every threshold with room to spare: worst protan/deutan pair 13.8
-# (target 8), worst unsimulated pair 24.8 (floor 15), all three above 3:1 on
-# white. Every segment is also labelled with its percentage, so identity never
-# rests on colour alone.
+# The lightness spread is the load-bearing part, not a stylistic choice. Earlier
+# versions of this palette put all three steps at roughly one OKLCH lightness
+# (0.42-0.49) and let hue do all the separating, which reads fine in full colour
+# but collapses under colour vision deficiency: worst pair 3.1 OKLab dE under
+# Machado severity-1.0 protanopia and 4.6 under deuteranopia, against a target
+# of 8. Protanopia and deuteranopia are the loss of hue discrimination, so
+# muting a three-hue set removes exactly the channel it was relying on;
+# lightness is what survives. Holding these three hues and spreading lightness
+# instead (spanning 0.32 to 0.56) clears every gate:
+#
+#   worst CVD pair          13.0  (target 8)
+#   worst unsimulated pair  15.4  (floor 15)
+#   contrast on white       4.61:1 minimum, so the white percentage labels
+#                           still read on all three segments
+#   distance from AIS amber 31.3 OKLab dE, so panel C never reads as a
+#                           continuation of panel A
+#
+# Every segment also carries its own percentage label, so identity never rests
+# on colour alone even before the CVD margin.
 activity_type_colors <- c(
-  "International trips" = "#594FD7",
-  "Port stays" = "#BF124E",
-  "Domestic trips" = "#AB8704"
+  "International trips" = "#4679A7",
+  "Port stays" = "#581140",
+  "Domestic trips" = "#16634F"
 )
 activity_type_levels <- names(activity_type_colors)
 ```
@@ -1516,8 +1522,13 @@ co2_level_map <- pollutant_map_data_co2 |>
   dplyr::filter(name == map_end_col) |>
   dplyr::mutate(name = glue::glue("{analysis_end_year} emissions")) |>
   make_co2_pollutant_map(
+    # Both maps in this panel are the fused fleet (emissions_co2_total_mt), not
+    # AIS alone, so the legends name the fleet explicitly - a reviewer could not
+    # tell which figures were AIS, which were S1, and which were both.
     fill_scale = scale_fill_viridis_c(
-      name = bquote(.(analysis_end_year) ~ CO[2] ~ emissions ~ (MT / km^2)),
+      name = bquote(
+        .(analysis_end_year) ~ "AIS + S1" ~ CO[2] ~ emissions ~ (MT / km^2)
+      ),
       option = "magma",
       trans = ggallin::pseudolog10_trans,
       na.value = emissions_map_ocean_color,
@@ -1541,7 +1552,9 @@ co2_change_map <- pollutant_map_data_co2 |>
   ) |>
   make_co2_pollutant_map(
     fill_scale = scico::scale_fill_scico(
-      name = bquote(Change ~ "in" ~ CO[2] ~ emissions ~ (MT / km^2)),
+      name = bquote(
+        Change ~ "in" ~ "AIS + S1" ~ CO[2] ~ emissions ~ (MT / km^2)
+      ),
       palette = "berlin",
       midpoint = 0,
       trans = ggallin::pseudolog10_trans,
@@ -1953,10 +1966,13 @@ cowplot::plot_grid(
 
 ```{r}
 #| label: fig-ais-data-richness
-#| fig-cap: !expr 'paste0("Richness of AIS-broadcasting vessel emissions data, showing: (A) Total ", analysis_end_year, " CO$_{2}$ emissions by vessel class for AIS-broadcasting vessels. Vessel classes are grouped into four families, with the total for each family shown above its bars; every class in a family is shown as its own bar, so panel heights differ with the number of classes. These totals are aggregated from the same gridded emissions shown in panel B, so the two panels describe exactly the same emissions and the bars sum to the mapped total. (B) Spatial distribution of ", analysis_end_year, " CO$_{2}$ emissions from AIS-broadcasting vessels for each of those same vessel class families, shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale). Families appear in the same order in both panels. (C) For each family, the share of CO$_{2}$ emissions attributable to international trips, port stays, and domestic trips. Panel C is not a decomposition of panel A: it covers only emissions that could be assigned to a trip or port visit, and trips and port visits are counted in the year the activity ended, so a trip arriving in ", analysis_end_year, " may carry emissions produced in the previous year. Relative to the panel A totals, the assigned emissions represent 93% of Cargo, 89% of Tanker and 67% of Service and passenger, and 118% of Fishing, whose trips are long enough to routinely straddle the year boundary. Each family therefore sums to 100% of its own assigned emissions rather than to its panel A total.")'
+#| fig-cap: !expr 'paste0("Richness of AIS-broadcasting vessel emissions data, showing: (A) Total ", analysis_end_year, " CO$_{2}$ emissions by vessel class for AIS-broadcasting vessels. Vessel classes are grouped into four families, with the total for each family shown above its bars; every class in a family is shown as its own bar, so panel heights differ with the number of classes. These totals are aggregated from the same gridded emissions shown in panel B, so the two panels describe exactly the same emissions and the bars sum to the mapped total. (B) Spatial distribution of ", analysis_end_year, " CO$_{2}$ emissions from AIS-broadcasting vessels for each of those same vessel class families, shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale). Families appear in the same order in both panels. (C) For each family, the share of CO$_{2}$ emissions attributable to international trips, port stays, and domestic trips (note that Panel C is not a decomposition of panel A: it covers only emissions that could be assigned to a trip or port visit that ended in ", analysis_end_year, "; each family sums to 100% of its own assigned emissions).")'
 #| fig-width: 9
-#| fig-height: 11.5
+#| fig-height: 10
 
+# fig-height was 11.5. The figure and its caption share a page, and at 11.5 the
+# two together ran into the page number; 10 keeps every bar label legible while
+# clearing the footer.
 emissions_by_vessel_class_barplot <- ggplot(
   emissions_by_vessel_class_plot_data,
   aes(x = emissions_co2_mt, y = plot_label)
@@ -1978,9 +1994,12 @@ emissions_by_vessel_class_barplot <- ggplot(
     colour = "grey40",
     inherit.aes = FALSE
   ) +
-  # A single black bar per class: the panel carries one quantity on one axis, so
-  # nothing here competes with the emissions scale for interpretation
-  geom_col(width = 0.7, fill = "grey15") +
+  # One bar per class in the AIS fill used for every other AIS series in the
+  # paper, so the panel says "these are AIS-broadcasting emissions" through the
+  # same colour that carries that meaning in Figures 2, 4 and the supplement.
+  # The panel still carries one quantity on one axis, so nothing here competes
+  # with the emissions scale for interpretation.
+  geom_col(width = 0.7, fill = all_data_source_color_palette[["AIS"]]) +
   # Panel height tracks the number of bars, so every bar is the same thickness.
   # These panels used to be equal height so the four family headings lined up
   # with the four maps in panel B, but the families now carry 7, 4, 11 and 14
@@ -1997,8 +2016,10 @@ emissions_by_vessel_class_barplot <- ggplot(
     expand = expansion(mult = c(0, 0.02))
   ) +
   scale_y_discrete(expand = expansion(add = c(0.6, 1.7))) +
+  # Every panel of this figure is AIS-broadcasting only, so each axis says so
+  # rather than leaving it to the caption
   labs(
-    x = bquote(.(analysis_end_year) ~ CO[2] ~ emissions ~ (MT)),
+    x = bquote(.(analysis_end_year) ~ AIS ~ CO[2] ~ emissions ~ (MT)),
     y = NULL
   ) +
   theme_plot() +
@@ -2057,7 +2078,7 @@ vessel_class_family_maps <- ggplot(
   ) +
   scale_fill_viridis_c(
     name = bquote(
-      .(analysis_end_year) ~ CO[2] ~ emissions ~ (MT / km^2)
+      .(analysis_end_year) ~ AIS ~ CO[2] ~ emissions ~ (MT / km^2)
     ),
     option = "magma",
     trans = ggallin::pseudolog10_trans,
@@ -2125,25 +2146,15 @@ activity_type_composition_barplot <- ggplot(
     x = bquote(
       "Share of" ~
         .(analysis_end_year) ~
+        AIS ~
         CO[2] ~
         "emissions from trips and port stays"
     ),
-    y = NULL,
-    subtitle = paste(
-      "Covers only emissions that could be assigned to a trip or port visit,",
-      "counted in the year the activity ended;\neach family sums to 100% of its",
-      "own assigned emissions rather than to its panel A total"
-    )
+    y = NULL
   ) +
   theme_plot() +
   theme(
     axis.title.x = element_text(face = "plain", size = 10, colour = "grey30"),
-    plot.subtitle = element_text(
-      size = 8,
-      colour = "grey30",
-      hjust = 0,
-      margin = margin(b = 7)
-    ),
     axis.text.y = element_text(size = 10, colour = "grey15", hjust = 1),
     axis.text.x = element_text(size = 9, colour = "grey30"),
     axis.ticks = element_blank(),
@@ -2153,7 +2164,10 @@ activity_type_composition_barplot <- ggplot(
     legend.key.size = unit(0.4, "cm"),
     legend.text = element_text(size = 9.5),
     legend.margin = margin(t = -2, b = 0),
-    plot.margin = margin(t = 10, r = 10, b = 0, l = 4)
+    # The bars run flush to 100%, so the final axis label is centred on the
+    # panel's right edge and half of it hangs outside. r = 10 was not enough
+    # room and clipped the "%"; 22 clears it.
+    plot.margin = margin(t = 10, r = 22, b = 0, l = 4)
   )
 
 cowplot::plot_grid(
