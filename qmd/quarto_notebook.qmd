@@ -109,6 +109,7 @@ targets::tar_load(
     "performance_detections_cls_conf_mat",
     "annual_spatial_co2_emissions_ais_dark_by_fleet",
     "annual_spatial_co2_emissions_by_vessel_class_family",
+    "annual_co2_emissions_by_vessel_class",
     "total_spatial_co2_emissions_dark_by_footprint",
     "data_sources",
     "pixels_for_offshore_training_testing_split",
@@ -257,6 +258,30 @@ emissions_map_frame_color <- "grey40"
 # wide. Both schemes stay distinguishable under deuteranopia and protanopia.
 map_category_colors <- c(Training = "#66CCEE", Testing = "#EE6677")
 map_mask_color <- "#F0E442"
+
+# Fills for the three activity types in Figure 3C. Figure 3A draws its class
+# totals in black, so this scheme cannot contain a near-black step - which ruled
+# out the ltc::trio4 palette these bars used previously, whose dark slate also
+# sat at chroma 0.03 (reading as grey rather than a hue) and only 4.4 OKLab dE
+# from its wine under simulated protanopia.
+#
+# These three were selected by generating one maximum-chroma swatch per 10 deg of
+# OKLCH hue inside the mid-lightness band, keeping the triads that pass all of:
+# OKLCH lightness band, chroma floor, pairwise OKLab dE under Machado
+# severity-1.0 protan/deutan simulation, unsimulated pairwise dE, and WCAG
+# contrast against white; then maximising distance from the qualitative hues
+# already used elsewhere in the paper (Okabe-Ito, Brewer Dark2, Brewer Set2),
+# which is what excludes the orange/blue/green region those occupy. The result
+# clears every threshold with room to spare: worst protan/deutan pair 13.8
+# (target 8), worst unsimulated pair 24.8 (floor 15), all three above 3:1 on
+# white. Every segment is also labelled with its percentage, so identity never
+# rests on colour alone.
+activity_type_colors <- c(
+  "International trips" = "#594FD7",
+  "Port stays" = "#BF124E",
+  "Domestic trips" = "#AB8704"
+)
+activity_type_levels <- names(activity_type_colors)
 ```
 
 ```{r}
@@ -831,16 +856,38 @@ emissions_by_vessel_class_df <-
 # its own bar - nothing is pooled into an "other" row, so the long tail of
 # small classes stays visible even where the bars are near zero. The families
 # themselves are defined in r/functions.R.
+#
+# The bars are total end-year emissions, taken from annual_co2_emissions_by_
+# vessel_class: the same source table, join and year filter as the gridded pull
+# behind Figure 3B, summed over pixels rather than gridded. The two panels
+# therefore describe exactly the same emissions - the bars sum to the mapped
+# total to floating-point precision - and the totals reconcile with the
+# AIS-broadcasting figures quoted elsewhere in the paper. Activity type is no
+# longer split out here; it moved to Figure 3C, which is measured against a
+# different denominator (see below).
+emissions_by_vessel_class_plot_data <- annual_co2_emissions_by_vessel_class |>
+  dplyr::mutate(
+    vessel_class_family = vessel_class_family(vessel_class),
+    # The family is already the panel heading, so the label drops the family
+    # prefix. The refrigerated cargo classes get spelled-out labels rather than
+    # derived ones: cargo.refrigerated would otherwise read as a bare
+    # "Refrigerated" next to "Container" and "General", and "Container reefer"
+    # has to stay distinguishable from "Container".
+    plot_label = dplyr::case_when(
+      vessel_class == "specialized_reefer" ~ "Specialized reefer",
+      vessel_class == "container_reefer" ~ "Container reefer",
+      vessel_class == "cargo.refrigerated" ~ "Refrigerated cargo",
+      vessel_class == "tanker.other" ~ "Other tanker",
+      vessel_class == "cargo.ro_ro" ~ "Ro-ro",
+      .default = stringr::str_remove(vessel_class, "^(cargo|tanker)\\.") |>
+        stringr::str_replace_all("_", " ") |>
+        stringr::str_to_sentence() |>
+        stringr::str_replace_all("chemical oil", "chemical or oil")
+    )
+  )
 
-emissions_by_vessel_class_plot_data <- emissions_by_vessel_class_df |>
-  dplyr::summarise(
-    emissions_co2_mt = sum(emissions_co2_mt),
-    .by = c(vessel_class_family, vessel_label, type)
-  ) |>
-  dplyr::rename(plot_label = vessel_label)
-
-# One row per panel: the family total shown at the right of the heading, and the
-# y position of the rule that sits under the heading
+# One row per panel: the family total shown above the bars, and the y position
+# of the rule that sits under it
 vessel_family_totals <- emissions_by_vessel_class_plot_data |>
   dplyr::summarise(
     family_total = sum(emissions_co2_mt),
@@ -865,11 +912,7 @@ vessel_family_order <- levels(vessel_family_totals$vessel_class_family)
 # ordering the labels globally by total also orders them correctly within each
 # panel - which only holds because no label is shared between two families.
 vessel_label_order <- emissions_by_vessel_class_plot_data |>
-  dplyr::summarise(
-    row_total = sum(emissions_co2_mt),
-    .by = plot_label
-  ) |>
-  dplyr::arrange(row_total) |>
+  dplyr::arrange(emissions_co2_mt) |>
   dplyr::pull(plot_label)
 
 emissions_by_vessel_class_plot_data <- emissions_by_vessel_class_plot_data |>
@@ -880,6 +923,47 @@ emissions_by_vessel_class_plot_data <- emissions_by_vessel_class_plot_data |>
     ),
     plot_label = factor(plot_label, levels = vessel_label_order)
   )
+
+# Figure 3C: how each family's emissions split across the three activity types.
+#
+# This is deliberately NOT a decomposition of the Figure 3A bars, and cannot be
+# made into one. Trips and port visits are keyed to the year the activity ended
+# (trip_co2_emissions_by_from_to_countries uses arrival year, and
+# port_visit_co2_emissions_by_country uses the visit end year), so a 2025 trip
+# can carry emissions produced in 2024. Against the end-year totals in panel A
+# that lands at 93% for Cargo, 89% for Tanker, 67% for Service and passenger and
+# 118% for Fishing, whose trips are long enough to routinely straddle the year
+# boundary - so the assigned emissions overshoot rather than undershoot there.
+# Attributing emissions to the year they were produced would need trip and port
+# visit emissions apportioned by month; the trip_partial_emissions_monthly and
+# port_visit_partial_emissions_monthly tables carry no month key (arrival
+# timestamp is constant within a trip), so that is not available. Each family's
+# bar therefore sums to 100% of its own assigned emissions, and the panel says
+# so on its face.
+activity_type_composition <- all_port_and_trip_emissions |>
+  dplyr::mutate(vessel_class_family = vessel_class_family(vessel_class)) |>
+  dplyr::summarise(
+    emissions_co2_mt = sum(emissions_co2_mt),
+    .by = c(vessel_class_family, type)
+  ) |>
+  dplyr::mutate(
+    type = factor(as.character(type), levels = activity_type_levels),
+    # rows read top-to-bottom in the same order as the panels of Figure 3A
+    vessel_class_family = factor(
+      vessel_class_family,
+      levels = rev(vessel_family_order)
+    )
+  ) |>
+  dplyr::arrange(vessel_class_family, type) |>
+  dplyr::mutate(
+    share = emissions_co2_mt / sum(emissions_co2_mt),
+    .by = vessel_class_family
+  ) |>
+  dplyr::mutate(
+    label_x = cumsum(share) - share / 2,
+    .by = vessel_class_family
+  ) |>
+  dplyr::mutate(share_label = scales::percent(share, accuracy = 1))
 
 top_type_by_fishing_non_fishing <- emissions_by_vessel_class_df |>
   dplyr::group_by(fishing, type) |>
@@ -1869,16 +1953,16 @@ cowplot::plot_grid(
 
 ```{r}
 #| label: fig-ais-data-richness
-#| fig-cap: !expr 'paste0("Richness of AIS-broadcasting vessel emissions data, showing: (A) CO$_{2}$ emissions by vessel class for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in ", analysis_end_year, ". Vessel classes are grouped into four families, with the total for each family shown at the top right of its panel; every class in a family is shown as its own bar, so panel heights differ with the number of classes. (B) Spatial distribution of ", analysis_end_year, " CO$_{2}$ emissions from AIS-broadcasting vessels for each of those same vessel class families, shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale). Panels appear in the same order in both halves of the figure, though panel A covers only emissions assignable to trips and port stays while panel B covers all AIS-broadcasting emissions.")'
+#| fig-cap: !expr 'paste0("Richness of AIS-broadcasting vessel emissions data, showing: (A) Total ", analysis_end_year, " CO$_{2}$ emissions by vessel class for AIS-broadcasting vessels. Vessel classes are grouped into four families, with the total for each family shown above its bars; every class in a family is shown as its own bar, so panel heights differ with the number of classes. These totals are aggregated from the same gridded emissions shown in panel B, so the two panels describe exactly the same emissions and the bars sum to the mapped total. (B) Spatial distribution of ", analysis_end_year, " CO$_{2}$ emissions from AIS-broadcasting vessels for each of those same vessel class families, shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale). Families appear in the same order in both panels. (C) For each family, the share of CO$_{2}$ emissions attributable to international trips, port stays, and domestic trips. Panel C is not a decomposition of panel A: it covers only emissions that could be assigned to a trip or port visit, and trips and port visits are counted in the year the activity ended, so a trip arriving in ", analysis_end_year, " may carry emissions produced in the previous year. Relative to the panel A totals, the assigned emissions represent 93% of Cargo, 89% of Tanker and 67% of Service and passenger, and 118% of Fishing, whose trips are long enough to routinely straddle the year boundary. Each family therefore sums to 100% of its own assigned emissions rather than to its panel A total.")'
 #| fig-width: 9
-#| fig-height: 9.5
+#| fig-height: 11.5
 
 emissions_by_vessel_class_barplot <- ggplot(
   emissions_by_vessel_class_plot_data,
-  aes(x = emissions_co2_mt, y = plot_label, fill = type)
+  aes(x = emissions_co2_mt, y = plot_label)
 ) +
-  # Rule under each family heading, with the family total at its right end. Both
-  # sit in the space the y scale expands above the tallest bar.
+  # Rule above each family's bars, with the family total sitting above it. Both
+  # occupy the space the y scale expands above the tallest bar.
   geom_hline(
     data = vessel_family_totals,
     aes(yintercept = n_rows + 0.7),
@@ -1887,14 +1971,16 @@ emissions_by_vessel_class_barplot <- ggplot(
   ) +
   geom_text(
     data = vessel_family_totals,
-    aes(x = Inf, y = n_rows + 1.15, label = total_label),
-    hjust = 1,
+    aes(x = 0, y = n_rows + 1.2, label = total_label),
+    hjust = 0,
     vjust = 0.5,
     size = 3.1,
     colour = "grey40",
     inherit.aes = FALSE
   ) +
-  geom_col(position = position_stack(reverse = TRUE), width = 0.7) +
+  # A single black bar per class: the panel carries one quantity on one axis, so
+  # nothing here competes with the emissions scale for interpretation
+  geom_col(width = 0.7, fill = "grey15") +
   # Panel height tracks the number of bars, so every bar is the same thickness.
   # These panels used to be equal height so the four family headings lined up
   # with the four maps in panel B, but the families now carry 7, 4, 11 and 14
@@ -1910,12 +1996,10 @@ emissions_by_vessel_class_barplot <- ggplot(
     limits = c(0, NA),
     expand = expansion(mult = c(0, 0.02))
   ) +
-  scale_y_discrete(expand = expansion(add = c(0.6, 1.6))) +
-  paletteer::scale_fill_paletteer_d(palette = "ltc::trio4") +
+  scale_y_discrete(expand = expansion(add = c(0.6, 1.7))) +
   labs(
     x = bquote(.(analysis_end_year) ~ CO[2] ~ emissions ~ (MT)),
-    y = NULL,
-    fill = NULL
+    y = NULL
   ) +
   theme_plot() +
   theme(
@@ -1930,10 +2014,7 @@ emissions_by_vessel_class_barplot <- ggplot(
     panel.grid.major.y = element_blank(),
     panel.grid.minor = element_blank(),
     panel.spacing.y = unit(0.8, "lines"),
-    legend.position = "bottom",
-    legend.direction = "horizontal",
-    legend.key.size = unit(0.4, "cm"),
-    legend.text = element_text(size = 9.5)
+    legend.position = "none"
   )
 
 # Figure 3B
@@ -2007,12 +2088,86 @@ vessel_class_family_maps <- ggplot(
   ) +
   coord_sf(crs = map_projection)
 
+# Figure 3C
+# The activity split, on its own percentage axis across the bottom. Keeping it
+# off panel A's emissions axis is the point: a percentage bar sharing that axis
+# reads as a quantity in MT against the same gridlines.
+activity_type_composition_barplot <- ggplot(
+  activity_type_composition,
+  aes(x = share, y = vessel_class_family, fill = type)
+) +
+  # the white outline supplies the gap between stacked segments
+  geom_col(
+    width = 0.68,
+    position = position_stack(reverse = TRUE),
+    colour = "white",
+    linewidth = 0.8
+  ) +
+  geom_text(
+    data = dplyr::filter(activity_type_composition, share >= 0.04),
+    aes(x = label_x, label = share_label),
+    colour = "white",
+    fontface = "bold",
+    size = 3.1
+  ) +
+  # Deliberately no limits = c(0, 1): position_stack runs its own cumulative sum,
+  # which can land an ulp above 1, and a censoring scale then drops that segment
+  # silently rather than erroring. It ate Service and passenger's domestic share
+  # the first time round. Stacked shares span 0-1 on their own.
+  scale_x_continuous(
+    labels = scales::percent,
+    breaks = seq(0, 1, 0.25),
+    expand = c(0, 0)
+  ) +
+  scale_fill_manual(values = activity_type_colors, name = NULL) +
+  guides(fill = guide_legend(nrow = 1)) +
+  labs(
+    x = bquote(
+      "Share of" ~
+        .(analysis_end_year) ~
+        CO[2] ~
+        "emissions from trips and port stays"
+    ),
+    y = NULL,
+    subtitle = paste(
+      "Covers only emissions that could be assigned to a trip or port visit,",
+      "counted in the year the activity ended;\neach family sums to 100% of its",
+      "own assigned emissions rather than to its panel A total"
+    )
+  ) +
+  theme_plot() +
+  theme(
+    axis.title.x = element_text(face = "plain", size = 10, colour = "grey30"),
+    plot.subtitle = element_text(
+      size = 8,
+      colour = "grey30",
+      hjust = 0,
+      margin = margin(b = 7)
+    ),
+    axis.text.y = element_text(size = 10, colour = "grey15", hjust = 1),
+    axis.text.x = element_text(size = 9, colour = "grey30"),
+    axis.ticks = element_blank(),
+    panel.grid = element_blank(),
+    legend.position = "bottom",
+    legend.direction = "horizontal",
+    legend.key.size = unit(0.4, "cm"),
+    legend.text = element_text(size = 9.5),
+    legend.margin = margin(t = -2, b = 0),
+    plot.margin = margin(t = 10, r = 10, b = 0, l = 4)
+  )
+
 cowplot::plot_grid(
-  emissions_by_vessel_class_barplot,
-  vessel_class_family_maps,
-  ncol = 2,
-  labels = c("A", "B"),
-  rel_widths = c(0.52, 0.48)
+  cowplot::plot_grid(
+    emissions_by_vessel_class_barplot,
+    vessel_class_family_maps,
+    ncol = 2,
+    labels = c("A", "B"),
+    rel_widths = c(0.52, 0.48)
+  ),
+  activity_type_composition_barplot,
+  ncol = 1,
+  labels = c("", "C"),
+  rel_heights = c(1, 0.2)
 )
 ```
 

@@ -77,8 +77,10 @@ vessel_class_families|function|9ede3af2b3ba477b|||||||||||||||
 fishing_vessel_classes|function|9971df3aa5284378
 download_gfw_data|function|56ae83fa4e3ee8f3
 combine_EU_data|function|ad06f3aced59370c
-.Random.seed|object|a32070dccb83d89d
+.Random.seed|object|dba0ab5ed9b00105
 reefer_vessel_classes|function|3f594d3b2dffefa6
 vessel_class_family_sql|function|4f02f50eae07211a
 vessel_class_family|function|06396670e8027f97
-quarto_notebook|stem|4a45aedc0dfc40e1|053d5bce60d3e205|02f7b0763d739e97|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20665.7832693798s|s12403533b|12403533|file|local|vector|||803.075||
+annual_co2_emissions_by_vessel_class_file|stem|11a3958dd66cd401|ed42033568771ffc|2c530c1562a7fbd1|738374868|data/gfw/annual_co2_emissions_by_vessel_class.csv|t20665.9564472404s|s1193b|1193|file|local|vector|||0||
+annual_co2_emissions_by_vessel_class|stem|ee05ddbd14d78f9a|5312a03daa8419f3|c32c3f680138223a|-1932114642||t20666.0021993888s|s968b|968|rds|local|vector|||0.116||
+quarto_notebook|stem|4e4f03219d4b10e9|c58b6f4a41e41e51|043db441bbebad91|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20666.0111843468s|s12522383b|12522383|file|local|vector|||775.755||

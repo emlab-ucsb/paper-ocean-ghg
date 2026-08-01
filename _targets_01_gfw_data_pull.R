@@ -309,6 +309,24 @@ list(
     ),
     format = "file"
   ),
+  # The same AIS-broadcasting emissions as the pull above, totalled by vessel
+  # class instead of gridded by family. Figure 3A's bars come from here, so they
+  # sum to exactly the emissions Figure 3B maps. The family roll-up is applied in
+  # the notebook rather than here, via vessel_class_family().
+  tar_file_read(
+    name = annual_co2_emissions_by_vessel_class,
+    command = file.path("sql", "annual_co2_emissions_by_vessel_class.sql"),
+    read = download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_ais = run_version_ais,
+          analysis_end_year = analysis_end_year
+        ),
+      file_path = file.path("data", "gfw", "annual_co2_emissions_by_vessel_class.csv"),
+    ),
+    format = "file"
+  ),
   # Disaggregated dark CO2 emissions falling within and outside the S1 footprint
   tar_file_read(
     name = total_spatial_co2_emissions_dark_by_footprint,
