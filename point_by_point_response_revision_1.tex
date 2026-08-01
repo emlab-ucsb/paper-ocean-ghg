@@ -404,8 +404,12 @@ Line 160: the term ``S1 footprint'' should be clearly defined. Does it refer to
 the spatial coverage of a single S1 acquisition, the union of all acquisitions
 over a certain period, or something else?
 \end{refquote}
-\response
-\changes
+\response Thank you for this comment, and for the opportunity to clarify our methods. We now explicitly define the `S1 footprint' as the spatial union of all S1 scenes during our 2017 -- 2025 study period. We have also further clarified the text around the spatiotemporal hetreogeneity of S1 coverage and how we account for this explicitly in our modeling framework.
+\changes The text now reads (lines XX-YY):
+
+\begin{quote}
+ To estimate unmatched vessel detection density over space and time, we must first account for the fact that S1 coverage is spatiotemporally heterogeneous. The S1 footprint only ever covers certain regions of the globe, so there are some areas that are never imaged at all (here we define the `S1 footprint' as the spatial union of all S1 scenes during our 2017 -- 2025 study period). And even for those areas within the S1 footprint, different areas are imaged by S1 scenes at different frequencies over time, which means that not all areas within the S1 footprint are even imaged every month. To account for this heterogeniety, we build an additional set of machine learning models to predict unmatched vessel density for areas that are not imaged by S1 in a given month (either because this area is within the S1 footprint but did not receive S1 coverage in this particular month; or because this area falls completely outside the S1 footprint).
+\end{quote}
 
 \point{R3.10}
 % category: writing/analysis | assignee: Zihan and David
