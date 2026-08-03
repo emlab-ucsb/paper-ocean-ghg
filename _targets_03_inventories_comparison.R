@@ -280,6 +280,81 @@ list(
       file_path = file.path("figures", "inventory_vessel_counts.png")
     ),
     format = "file"
+  ),
+
+  # Fleet composition ----
+  # Each vessel class's share of the AIS-broadcasting fleet beside its share of
+  # that fleet's CO2 emissions, as one 100 % stacked column per year in each
+  # panel, with ribbons tying each class across the two. All fishing gear types
+  # are collapsed into one class, matching how figure 3 splits fishing from
+  # non-fishing.
+  #
+  # Both panels come from annual_ais_activity_summary.csv, which carries the
+  # emissions and the vessel count for the same class-year rows. That extract is
+  # grouped straight off the ping table, so these figures total to the same
+  # annual emissions the paper reports in figure 1A; the trip and port-visit
+  # extracts they previously used only count activity resolvable to a completed
+  # voyage or port visit, and run about 14% short.
+  #
+  # Read by path rather than as a target, the same way the ICCT comparison above
+  # reads it: it is written by a different pipeline with its own store, so there
+  # is no target to depend on from here.
+  tar_target(
+    name = fleet_shares_by_year,
+    command = fleet_emissions_and_size_by_year()
+  ),
+  tar_target(
+    name = fleet_shares_by_year_figure,
+    command = plot_fleet_shares_by_year(
+      fleet_shares_by_year,
+      file_path = file.path("figures", "fleet_shares_by_year.png")
+    ),
+    format = "file"
+  ),
+  # The same figure with the fleet-size years reversed, so the most recent year
+  # of each panel sits against the connector band. Shares the data target above;
+  # only the drawing differs.
+  tar_target(
+    name = fleet_shares_by_year_mirrored_figure,
+    command = plot_fleet_shares_by_year_mirrored(
+      fleet_shares_by_year,
+      file_path = file.path("figures", "fleet_shares_by_year_mirrored.png")
+    ),
+    format = "file"
+  ),
+  # The same comparison for a single year, drawn as a plain Sankey: with no
+  # series to carry, the two columns become the end nodes of the flows rather
+  # than charts in their own right.
+  tar_target(
+    name = fleet_sankey_year,
+    command = 2025L
+  ),
+  tar_target(
+    name = fleet_sankey_figure,
+    command = plot_fleet_sankey(
+      fleet_shares_by_year,
+      year = fleet_sankey_year,
+      file_path = file.path(
+        "figures",
+        paste0("fleet_sankey_", fleet_sankey_year, ".png")
+      )
+    ),
+    format = "file"
+  ),
+  # The Sankey and the two year-series columns as one figure: the single year
+  # down the left as panel A, the series it belongs to stacked on the right as
+  # B and C.
+  tar_target(
+    name = fleet_sankey_with_series_figure,
+    command = plot_fleet_sankey_with_series(
+      fleet_shares_by_year,
+      year = fleet_sankey_year,
+      file_path = file.path(
+        "figures",
+        paste0("fleet_sankey_with_series_", fleet_sankey_year, ".png")
+      )
+    ),
+    format = "file"
   )
 
   # Additional inventories ----

@@ -477,10 +477,18 @@ list(
     ),
     format = "file"
   ),
-  # Annual AIS activity summary, for the inventory comparison ----
-  # Emissions alongside the activity behind them (distance, time, vessels, pings),
-  # so our estimates can be compared with published inventories on activity as
-  # well as on emissions.
+  # Annual AIS activity summary by vessel class ----
+  # Emissions alongside the activity behind them (distance, time, vessels,
+  # pings), so our estimates can be compared with published inventories on
+  # activity as well as on emissions.
+  #
+  # Split by vessel class as well as year, which also makes this the source for
+  # the fleet-composition figures. It absorbed the former
+  # n_vessels_by_year_and_class extract: that read the same ping table for the
+  # class split of the vessel count alone, which meant no extract carried
+  # emissions per class on the same scoping as the paper's annual totals.
+  # Year-level consumers go through read_annual_ais_activity(), which collapses
+  # the class rows back to one row per year.
   #
   # This series starts earlier than analysis_start_year to give the comparison a
   # longer activity baseline. It has its own start year target rather than moving

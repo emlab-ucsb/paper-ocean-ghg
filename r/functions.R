@@ -89,7 +89,11 @@ combine_EU_data <- function(mrv_raw_files) {
 # by confirming the cell areas sum to the surface area of the Earth; the result
 # was then reproduced by an independent daily reconstruction (904.21 Mt for 2019
 # both ways). Returns a one-row tibble with emissions in metric tonnes.
-summarize_cams_ship_co2 <- function(year, version, dataset_short_name = "cams-global-emission-inventories") {
+summarize_cams_ship_co2 <- function(
+  year,
+  version,
+  dataset_short_name = "cams-global-emission-inventories"
+) {
   year <- as.character(year)
 
   download_dir <- file.path(tempdir(), paste0("cams_ship_", version, "_", year))
@@ -115,8 +119,14 @@ summarize_cams_ship_co2 <- function(year, version, dataset_short_name = "cams-gl
 
   # ADS may return the NetCDF directly or wrapped in an archive depending on the
   # request; handle both so the pipeline does not depend on which one we get.
-  if (any(grepl("\\.(zip|tar|tar\\.gz|tgz)$", downloaded, ignore.case = TRUE))) {
-    archive <- downloaded[grepl("\\.(zip|tar|tar\\.gz|tgz)$", downloaded, ignore.case = TRUE)][1]
+  if (
+    any(grepl("\\.(zip|tar|tar\\.gz|tgz)$", downloaded, ignore.case = TRUE))
+  ) {
+    archive <- downloaded[grepl(
+      "\\.(zip|tar|tar\\.gz|tgz)$",
+      downloaded,
+      ignore.case = TRUE
+    )][1]
     if (grepl("\\.zip$", archive, ignore.case = TRUE)) {
       utils::unzip(archive, exdir = download_dir)
     } else {
@@ -124,11 +134,20 @@ summarize_cams_ship_co2 <- function(year, version, dataset_short_name = "cams-gl
     }
   }
 
-  nc_files <- list.files(download_dir, pattern = "\\.nc$", full.names = TRUE, recursive = TRUE)
+  nc_files <- list.files(
+    download_dir,
+    pattern = "\\.nc$",
+    full.names = TRUE,
+    recursive = TRUE
+  )
   if (length(nc_files) == 0) {
     stop(
-      "No NetCDF found for CAMS-GLOB-SHIP ", version, " ", year,
-      ". Files returned: ", paste(basename(downloaded), collapse = ", ")
+      "No NetCDF found for CAMS-GLOB-SHIP ",
+      version,
+      " ",
+      year,
+      ". Files returned: ",
+      paste(basename(downloaded), collapse = ", ")
     )
   }
 
@@ -168,16 +187,29 @@ sum_cams_nc_to_tonnes <- function(nc_file, year) {
 
   # Dimension order varies between CAMS products, so locate each axis by name
   # rather than assuming a layout
-  dim_names <- vapply(nc$var[[emissions_variable]]$dim, function(d) d$name, character(1))
+  dim_names <- vapply(
+    nc$var[[emissions_variable]]$dim,
+    function(d) d$name,
+    character(1)
+  )
   time_axis <- which(dim_names == "time")
   lat_axis <- which(dim_names == lat_name)
   lon_axis <- which(dim_names == lon_name)
 
   if (length(lat_axis) != 1 || length(lon_axis) != 1) {
-    stop("Could not locate lat/lon axes of ", emissions_variable, " in ", basename(nc_file))
+    stop(
+      "Could not locate lat/lon axes of ",
+      emissions_variable,
+      " in ",
+      basename(nc_file)
+    )
   }
 
-  n_slices <- if (length(time_axis) == 1) nc$var[[emissions_variable]]$dim[[time_axis]]$len else 1L
+  n_slices <- if (length(time_axis) == 1) {
+    nc$var[[emissions_variable]]$dim[[time_axis]]$len
+  } else {
+    1L
+  }
   seconds_per_slice <- cams_seconds_per_slice(nc, year, n_slices)
 
   # Area is a lat x lon matrix here, matching the orientation of a single slice
@@ -218,8 +250,15 @@ cams_emissions_variable <- function(nc) {
   candidates <- setdiff(
     names(nc$var),
     c(
-      "lat", "latitude", "lon", "longitude", "time",
-      "lat_bnds", "lon_bnds", "time_bnds", "crs"
+      "lat",
+      "latitude",
+      "lon",
+      "longitude",
+      "time",
+      "lat_bnds",
+      "lon_bnds",
+      "time_bnds",
+      "crs"
     )
   )
   if (length(candidates) == 0) {
@@ -236,8 +275,10 @@ cams_axis_name <- function(nc, options) {
   found <- intersect(options, available)
   if (length(found) == 0) {
     stop(
-      "None of the expected axis names (", paste(options, collapse = ", "),
-      ") found in ", basename(nc$filename)
+      "None of the expected axis names (",
+      paste(options, collapse = ", "),
+      ") found in ",
+      basename(nc$filename)
     )
   }
   found[1]
@@ -247,7 +288,12 @@ cams_axis_name <- function(nc, options) {
 # zones, so area depends on latitude but not longitude. `lat_first` orients the
 # result to match the slice being multiplied: lat x lon when TRUE, lon x lat
 # otherwise.
-cams_cell_area_m2 <- function(lat, lon, lat_first = FALSE, earth_radius_m = 6371007.181) {
+cams_cell_area_m2 <- function(
+  lat,
+  lon,
+  lat_first = FALSE,
+  earth_radius_m = 6371007.181
+) {
   lat_step <- abs(stats::median(diff(lat)))
   lon_step <- abs(stats::median(diff(lon)))
 
@@ -353,11 +399,15 @@ cams_slice_times <- function(nc) {
 
   # The origin may or may not carry a clock time, e.g. "days since 2019-01-01 00:00"
   origin_text <- trimws(sub(".*since", "", time_units))
-  origin <- suppressWarnings(as.POSIXct(origin_text, tz = "UTC", tryFormats = c(
-    "%Y-%m-%d %H:%M:%S",
-    "%Y-%m-%d %H:%M",
-    "%Y-%m-%d"
-  )))
+  origin <- suppressWarnings(as.POSIXct(
+    origin_text,
+    tz = "UTC",
+    tryFormats = c(
+      "%Y-%m-%d %H:%M:%S",
+      "%Y-%m-%d %H:%M",
+      "%Y-%m-%d"
+    )
+  ))
 
   if (is.na(seconds_per_step) || is.na(origin)) {
     return(NULL)
@@ -375,8 +425,14 @@ inspect_cams_nc_metadata <- function(nc_file) {
 
   global_attributes <- ncdf4::ncatt_get(nc, 0)
   emissions_variable <- cams_emissions_variable(nc)
-  lat <- as.numeric(ncdf4::ncvar_get(nc, cams_axis_name(nc, c("lat", "latitude"))))
-  lon <- as.numeric(ncdf4::ncvar_get(nc, cams_axis_name(nc, c("lon", "longitude"))))
+  lat <- as.numeric(ncdf4::ncvar_get(
+    nc,
+    cams_axis_name(nc, c("lat", "latitude"))
+  ))
+  lon <- as.numeric(ncdf4::ncvar_get(
+    nc,
+    cams_axis_name(nc, c("lon", "longitude"))
+  ))
 
   list(
     file = basename(nc_file),
@@ -384,13 +440,21 @@ inspect_cams_nc_metadata <- function(nc_file) {
     variables = names(nc$var),
     emissions_variable = emissions_variable,
     emissions_units = ncdf4::ncatt_get(nc, emissions_variable, "units")$value,
-    emissions_long_name = ncdf4::ncatt_get(nc, emissions_variable, "long_name")$value,
+    emissions_long_name = ncdf4::ncatt_get(
+      nc,
+      emissions_variable,
+      "long_name"
+    )$value,
     grid_resolution_deg = c(
       lon = abs(stats::median(diff(lon))),
       lat = abs(stats::median(diff(lat)))
     ),
     grid_dim = c(lon = length(lon), lat = length(lat)),
-    n_time_slices = if ("time" %in% names(nc$dim)) nc$dim$time$len else NA_integer_
+    n_time_slices = if ("time" %in% names(nc$dim)) {
+      nc$dim$time$len
+    } else {
+      NA_integer_
+    }
   )
 }
 
@@ -481,7 +545,9 @@ summarize_seim_ship_co2 <- function(
   missing_years <- setdiff(years, summarized$year)
   if (length(missing_years) > 0) {
     stop(
-      "SEIM record ", record_id, " has no data for: ",
+      "SEIM record ",
+      record_id,
+      " has no data for: ",
       paste(sort(missing_years), collapse = ", "),
       ". The published time series covers 2016-2021."
     )
@@ -538,7 +604,10 @@ summarize_icct_ship_co2 <- function(
       "The ICCT workbook has no sheet for: ",
       paste(sort(missing_years), collapse = ", "),
       ". It covers ",
-      paste(range(suppressWarnings(as.integer(available_sheets)), na.rm = TRUE), collapse = "-"),
+      paste(
+        range(suppressWarnings(as.integer(available_sheets)), na.rm = TRUE),
+        collapse = "-"
+      ),
       "."
     )
   }
@@ -644,7 +713,12 @@ summarize_oecd_ship_co2 <- function(
   on.exit(unlink(download_dir, recursive = TRUE), add = TRUE)
 
   destination <- file.path(download_dir, "oecd_maritime_transport.csv")
-  utils::download.file(query_url, destfile = destination, mode = "wb", quiet = TRUE)
+  utils::download.file(
+    query_url,
+    destfile = destination,
+    mode = "wb",
+    quiet = TRUE
+  )
 
   raw <- readr::read_csv(destination, show_col_types = FALSE)
 
@@ -657,7 +731,8 @@ summarize_oecd_ship_co2 <- function(
   if (nrow(residence_total) == 0) {
     stop(
       "No EMISSIONS_SEEA / RES_TOTAL rows in the OECD response. The dataflow ",
-      "dimensions may have changed; check ", query_url
+      "dimensions may have changed; check ",
+      query_url
     )
   }
 
@@ -703,6 +778,42 @@ write_inventory_csv <- function(data, file_path) {
   return(file_path)
 }
 
+# Read the annual AIS activity summary collapsed back to one row per year.
+#
+# The extract is stored one row per year AND vessel class, so that the
+# fleet-composition figures can split emissions by class from the same source
+# that produces the paper's headline annual totals. Everything that wants only
+# the year-level series goes through here rather than reading the file directly,
+# so the class split cannot silently multiply rows in a caller that assumes one
+# row per year.
+#
+# The measure columns are additive over classes -- every ping belongs to exactly
+# one class -- so summing them reproduces the year totals exactly. The vessel
+# count is the exception: COUNT(DISTINCT ssvid) is computed per class, so summing
+# it would double count any ssvid that changed class mid-year. It does not on the
+# current run version, but summing is still the wrong operation for a distinct
+# count, so this returns the sum and the callers that care are documented as
+# treating it as an upper bound.
+read_annual_ais_activity <- function(
+  gfw_activity_file = file.path(
+    "data",
+    "gfw",
+    "annual_ais_activity_summary.csv"
+  )
+) {
+  readr::read_csv(gfw_activity_file, show_col_types = FALSE) |>
+    dplyr::group_by(.data$year) |>
+    dplyr::summarise(
+      emissions_co2_mt = sum(.data$emissions_co2_mt),
+      distance_travelled_nm = sum(.data$distance_travelled_nm),
+      vessel_hours = sum(.data$vessel_hours),
+      n_unique_vessels = sum(.data$n_unique_vessels),
+      n_pings = sum(.data$n_pings),
+      .groups = "drop"
+    )
+}
+
+
 # Year-by-year comparison of the ICCT inventory against our AIS-based estimate.
 #
 # ICCT is the only published inventory here that reports vessel activity as well
@@ -725,7 +836,11 @@ write_inventory_csv <- function(data, file_path) {
 #     vessels. It is not the same quantity as ICCT's count of merchant ships, so
 #     the ratio shows the gap rather than implying a like-for-like discrepancy.
 compare_icct_to_gfw_ais <- function(
-  gfw_activity_file = file.path("data", "gfw", "annual_ais_activity_summary.csv"),
+  gfw_activity_file = file.path(
+    "data",
+    "gfw",
+    "annual_ais_activity_summary.csv"
+  ),
   icct_url = "https://theicct.org/wp-content/uploads/2025/04/supplemental_vf.xlsx"
 ) {
   download_dir <- file.path(tempdir(), "icct_comparison")
@@ -733,7 +848,12 @@ compare_icct_to_gfw_ais <- function(
   on.exit(unlink(download_dir, recursive = TRUE), add = TRUE)
 
   destination <- file.path(download_dir, basename(icct_url))
-  utils::download.file(icct_url, destfile = destination, mode = "wb", quiet = TRUE)
+  utils::download.file(
+    icct_url,
+    destfile = destination,
+    mode = "wb",
+    quiet = TRUE
+  )
 
   icct <- purrr::map_dfr(readxl::excel_sheets(destination), function(sheet) {
     sheet_data <- readxl::read_excel(destination, sheet = sheet)
@@ -742,7 +862,10 @@ compare_icct_to_gfw_ais <- function(
       !grepl("^Note", sheet_data[[class_column]])
     identified <- classes & sheet_data[[class_column]] != "Unknown"
     total <- function(column, rows) {
-      sum(suppressWarnings(as.numeric(sheet_data[[column]][rows])), na.rm = TRUE)
+      sum(
+        suppressWarnings(as.numeric(sheet_data[[column]][rows])),
+        na.rm = TRUE
+      )
     }
 
     # An intensity needs its numerator and denominator to describe the same
@@ -766,7 +889,10 @@ compare_icct_to_gfw_ais <- function(
       icct_n_vessels = total("Number of ships", classes),
       icct_n_vessels_identified = total("Number of ships", identified),
       # Matched pair for the intensity: classes reporting both quantities
-      icct_co2_mt_with_distance = total("CO2 emissions (tonne)", reports_distance),
+      icct_co2_mt_with_distance = total(
+        "CO2 emissions (tonne)",
+        reports_distance
+      ),
       icct_distance_nm_with_distance = total(
         "Distance travelled (nm)",
         reports_distance
@@ -775,7 +901,7 @@ compare_icct_to_gfw_ais <- function(
     )
   })
 
-  gfw <- readr::read_csv(gfw_activity_file, show_col_types = FALSE) |>
+  gfw <- read_annual_ais_activity(gfw_activity_file) |>
     dplyr::select(
       year,
       gfw_co2_mt = emissions_co2_mt,
@@ -860,14 +986,18 @@ imo_ghg_study_co2 <- function() {
 inventory_vessel_counts <- function(
   icct_years = 2016:2023,
   icct_url = "https://theicct.org/wp-content/uploads/2025/04/supplemental_vf.xlsx",
-  gfw_activity_file = file.path("data", "gfw", "annual_ais_activity_summary.csv")
+  gfw_activity_file = file.path(
+    "data",
+    "gfw",
+    "annual_ais_activity_summary.csv"
+  )
 ) {
   # Our own count is distinct ssvid, a broadcast identifier rather than a hull
   # identity: it undercounts vessels that change ssvid and overcounts ssvids
   # shared between hulls. It also spans the whole AIS fleet including small
   # fishing vessels, which is why it runs well above the merchant-fleet counts
   # the other inventories report.
-  gfw <- readr::read_csv(gfw_activity_file, show_col_types = FALSE) |>
+  gfw <- read_annual_ais_activity(gfw_activity_file) |>
     dplyr::transmute(
       data_source = "GFW (AIS)",
       year = .data$year,
@@ -906,7 +1036,12 @@ inventory_vessel_counts <- function(
   on.exit(unlink(download_dir, recursive = TRUE), add = TRUE)
 
   destination <- file.path(download_dir, basename(icct_url))
-  utils::download.file(icct_url, destfile = destination, mode = "wb", quiet = TRUE)
+  utils::download.file(
+    icct_url,
+    destfile = destination,
+    mode = "wb",
+    quiet = TRUE
+  )
 
   wanted_sheets <- intersect(
     as.character(icct_years),
@@ -960,7 +1095,11 @@ plot_inventory_vessel_counts <- function(
   inventory_vessel_counts,
   baseline_year = 2019L,
   ping_baseline_year = 2017L,
-  gfw_activity_file = file.path("data", "gfw", "annual_ais_activity_summary.csv"),
+  gfw_activity_file = file.path(
+    "data",
+    "gfw",
+    "annual_ais_activity_summary.csv"
+  ),
   file_path = NULL,
   width = 8,
   height = 13
@@ -1031,7 +1170,9 @@ plot_inventory_vessel_counts <- function(
 # Panel A: vessel counts as published, on a zero baseline.
 plot_vessel_count_levels <- function(plot_data, source_order) {
   plot_data <- plot_data |>
-    dplyr::mutate(data_source = factor(.data$data_source, levels = source_order))
+    dplyr::mutate(
+      data_source = factor(.data$data_source, levels = source_order)
+    )
 
   ggplot2::ggplot(
     plot_data,
@@ -1075,10 +1216,14 @@ plot_vessel_count_levels <- function(plot_data, source_order) {
 # separate panel keeps that scale from flattening the vessel series in panel B,
 # and keeps the two quantities from being read as comparable trends.
 plot_gfw_ping_relative_change <- function(
-  gfw_activity_file = file.path("data", "gfw", "annual_ais_activity_summary.csv"),
+  gfw_activity_file = file.path(
+    "data",
+    "gfw",
+    "annual_ais_activity_summary.csv"
+  ),
   baseline_year = 2017L
 ) {
-  activity <- readr::read_csv(gfw_activity_file, show_col_types = FALSE)
+  activity <- read_annual_ais_activity(gfw_activity_file)
 
   baseline_pings <- activity$n_pings[activity$year == baseline_year]
   if (length(baseline_pings) != 1) {
@@ -1361,7 +1506,11 @@ combine_inventory_series <- function(
   dplyr::bind_rows(
     gfw_edgar_series |> dplyr::select(dplyr::all_of(inventory_columns)),
     from_files,
-    purrr::map_dfr(hardcoded_series, dplyr::select, dplyr::all_of(inventory_columns))
+    purrr::map_dfr(
+      hardcoded_series,
+      dplyr::select,
+      dplyr::all_of(inventory_columns)
+    )
   ) |>
     dplyr::mutate(year = as.integer(year)) |>
     dplyr::arrange(data_source, year)
@@ -1376,7 +1525,10 @@ combine_inventory_series <- function(
 # the earliest year most inventories share, and any series without a value that
 # year is dropped (OECD, which starts in 2019, and MariTEAM, which is a single
 # point and has no trend to show).
-normalize_inventory_series <- function(all_inventory_data, baseline_year = 2017L) {
+normalize_inventory_series <- function(
+  all_inventory_data,
+  baseline_year = 2017L
+) {
   baseline <- all_inventory_data |>
     dplyr::filter(year == baseline_year) |>
     dplyr::select(data_source, emissions_co2_mt_baseline = emissions_co2_mt)
@@ -1474,7 +1626,8 @@ plot_inventory_levels <- function(
   source_order
 ) {
   # Round the axis up to the next 0.25 Gt, as the notebook figure does
-  axis_max <- ceiling(max(all_inventory_data$emissions_co2_mt) / 0.25e9) * 0.25e9
+  axis_max <- ceiling(max(all_inventory_data$emissions_co2_mt) / 0.25e9) *
+    0.25e9
 
   plot_data <- all_inventory_data |>
     dplyr::mutate(data_source = factor(data_source, levels = source_order)) |>
@@ -1683,4 +1836,2199 @@ inventory_color_palette <- function(data_sources) {
   }
 
   known[data_sources]
+}
+
+# Fleet composition ----
+# Paired pies comparing each vessel class's share of CO2 emissions against its
+# share of the fleet by vessel count. Emissions come from the same trip and
+# port-visit extracts that feed figure 3, so the two panels describe the same
+# classes; note the counts are not year-filtered (vessel_info has no date
+# column) while the emissions are restricted to analysis_end_year.
+
+# The fishing classes collapsed into a single "Fishing" slice. Kept in one place
+# because the notebook hardcodes the same list when it facets figure 3.
+gfw_fishing_vessel_classes <- function() {
+  c(
+    "trawlers",
+    "squid_jigger",
+    "tuna_purse_seines",
+    "set_longlines",
+    "pole_and_line",
+    "set_gillnets",
+    "pots_and_traps",
+    "dredge_fishing",
+    "other_seines",
+    "other_purse_seines",
+    "trollers",
+    "drifting_longlines",
+    "driftnets",
+    "fish_factory",
+    "other_fishing"
+  )
+}
+
+# Turn a raw GFW vessel_class into the label used on the pies, folding every
+# fishing gear type into one slice.
+gfw_vessel_class_label <- function(vessel_class) {
+  ifelse(
+    vessel_class %in% gfw_fishing_vessel_classes(),
+    "Fishing",
+    # Same transform the notebook applies for figure 3, so the two figures label
+    # the same class identically. tanker.chemical stays "Tanker: chemical": it is
+    # a separate class from tanker.oil, so folding "or oil" into the name would
+    # imply a merge that has not happened.
+    stringr::str_replace_all(vessel_class, "\\.", ": ") |>
+      stringr::str_replace_all("_", " ") |>
+      stringr::str_to_sentence()
+  )
+}
+
+# The same composition, but resolved by year rather than collapsed into a single
+# total. Each year is normalised on its own, so a column answers "what did the
+# fleet / the emissions look like that year", not "how did the fleet grow".
+#
+# Vessel counts start in 2015 but the emissions extracts start in 2017, so the
+# series is intersected down to the years both cover; keeping the extra count
+# years would draw fleet columns with no emissions column beside them.
+fleet_emissions_and_size_by_year <- function(
+  gfw_activity_file = file.path(
+    "data",
+    "gfw",
+    "annual_ais_activity_summary.csv"
+  )
+) {
+  # Both columns come from the one extract, so no join, no year intersection and
+  # no NA filling: every class-year row carries its own emissions and its own
+  # vessel count, and the two are guaranteed to describe the same activity.
+  #
+  # This deliberately does NOT use the trip and port-visit extracts. Those
+  # attribute emissions to completed voyages and port visits, so they miss
+  # activity the ping table includes -- their 2025 total runs about 14% below the
+  # annual figure the paper reports in figure 1A. Reading the activity summary
+  # instead makes these figures agree with that headline number.
+  #
+  # No peak-over-years step: within a single year the counts are already a fleet
+  # size, so they only need summing over the sub-classes folding into each label.
+  readr::read_csv(gfw_activity_file, show_col_types = FALSE) |>
+    dplyr::mutate(vessel_class = gfw_vessel_class_label(.data$vessel_class)) |>
+    dplyr::group_by(vessel_class, .data$year) |>
+    dplyr::summarise(
+      emissions_co2_mt = sum(.data$emissions_co2_mt, na.rm = TRUE),
+      n_unique_vessels = sum(.data$n_unique_vessels, na.rm = TRUE),
+      .groups = "drop"
+    ) |>
+    # Shares are within-year, so each year's two columns each sum to 100 %.
+    dplyr::group_by(.data$year) |>
+    dplyr::mutate(
+      share_emissions = .data$emissions_co2_mt / sum(.data$emissions_co2_mt),
+      share_vessels = .data$n_unique_vessels / sum(.data$n_unique_vessels)
+    ) |>
+    dplyr::ungroup() |>
+    dplyr::arrange(.data$year, dplyr::desc(.data$emissions_co2_mt))
+}
+
+
+# Perceived brightness of a colour, on the WCAG relative-luminance definition:
+# sRGB channels linearised, then weighted for the eye's sensitivity to each.
+# Used to decide whether a fill needs dark or light text over it. A plain mean
+# of the RGB channels would call the palette's yellows and its blues equally
+# bright, when the yellows are far lighter to look at.
+relative_luminance <- function(colors) {
+  channels <- grDevices::col2rgb(colors) / 255
+  linear <- ifelse(
+    channels <= 0.03928,
+    channels / 12.92,
+    ((channels + 0.055) / 1.055)^2.4
+  )
+  as.numeric(
+    0.2126 * linear[1, ] + 0.7152 * linear[2, ] + 0.0722 * linear[3, ]
+  )
+}
+
+# Class ordering for the stacked columns: by fleet size in the most recent year,
+# with the catch-all classes pushed to the end. Ranked on the latest year rather
+# than on an average so the legend order matches the column a reader is most
+# likely to be looking at.
+#
+# Pulled out of the plotting function because it is needed twice: once for the
+# levels the figure actually draws, and once over the unfolded class list to fix
+# each class's colour (see the palette note in plot_fleet_shares_by_year).
+stacked_class_levels <- function(fleet_data) {
+  trailing <- c("Other", "Other not fishing")
+  latest <- max(fleet_data$year)
+  ordered <- fleet_data |>
+    dplyr::filter(
+      .data$year == latest,
+      !.data$vessel_class %in% trailing
+    ) |>
+    dplyr::arrange(
+      dplyr::desc(.data$n_unique_vessels),
+      dplyr::desc(.data$emissions_co2_mt)
+    ) |>
+    dplyr::pull(.data$vessel_class)
+  c(ordered, intersect(trailing, fleet_data$vessel_class))
+}
+
+# The pies again, but as a year series: one 100 % stacked column per year, fleet
+# size in panel A and CO2 in panel B. Same information as the pies for any single
+# year, with the years side by side so a shifting composition is visible.
+plot_fleet_shares_by_year <- function(
+  fleet_data,
+  file_path = NULL,
+  # A class is folded into "Other" only if it is small in both panels in every
+  # year, matching the pie version's rule; folding per year instead would let a
+  # class appear and disappear from the legend between columns.
+  min_share = 0.005,
+  # Segments below this are left unlabelled: the slabs are too thin for the text
+  # to sit inside them without overlapping their neighbours.
+  min_label_share = 0.04,
+  # The three refrigerated-cargo spellings, merged under one name. They are the
+  # same kind of vessel in three labels of the source vocabulary, so drawn apart
+  # each is a thin sliver that says less than the group does.
+  grouped_as_reefer = c(
+    "Specialized reefer",
+    "Container reefer",
+    "Cargo: refrigerated"
+  ),
+  reefer_label = "Reefer",
+  # Support and service classes folded into "Other" whatever their share. Named
+  # explicitly rather than caught by a share rule, because "is this a support
+  # vessel" is not something the shares can answer.
+  grouped_as_other = c(
+    "Supply vessel",
+    "Patrol vessel",
+    "Bunker",
+    "Dredge non fishing",
+    "Other not fishing"
+  ),
+  # Fills brighter than this get grey text instead of white. Sits between
+  # Cargo: container (~0.69) and the next fill down, Tanker: oil (~0.55), so it
+  # covers the pale yellows near the top of the emissions columns while leaving
+  # the saturated oranges and reds on white.
+  light_fill_luminance = 0.62,
+  width = 14,
+  height = 7,
+  # Near the full category width, so consecutive years read as a continuous
+  # series rather than as nine separate charts. Kept below 1 so a hairline of
+  # background still separates one year from the next.
+  bar_width = 0.92
+) {
+  small <- fleet_data |>
+    dplyr::group_by(vessel_class) |>
+    dplyr::summarise(
+      small = max(.data$share_emissions) < min_share &
+        max(.data$share_vessels) < min_share,
+      .groups = "drop"
+    )
+
+  # The class ordering as it stands before the support classes are folded away.
+  # The palette is built from this rather than from the surviving classes, so
+  # every class keeps the colour it had when the support vessels were still
+  # drawn separately: a ramp spread over a shorter list would hand each class a
+  # different colour and silently recolour the whole figure.
+  palette_levels <- fleet_data |>
+    dplyr::left_join(small, by = "vessel_class") |>
+    dplyr::mutate(
+      # Reefer is formed here too, so it takes the ramp position its members
+      # occupied rather than being appended as a new colour; the support classes
+      # are deliberately left unfolded so every other class keeps its original
+      # place in the ramp.
+      vessel_class = ifelse(
+        .data$vessel_class %in% grouped_as_reefer,
+        reefer_label,
+        .data$vessel_class
+      ),
+      vessel_class = ifelse(
+        .data$small & .data$vessel_class != reefer_label,
+        "Other",
+        .data$vessel_class
+      )
+    ) |>
+    # Re-aggregated before ranking: the size fold collapses several classes into
+    # "Other", and ranking the un-summed rows would order that group by whichever
+    # fragment happened to come first.
+    dplyr::group_by(vessel_class, .data$year) |>
+    dplyr::summarise(
+      emissions_co2_mt = sum(.data$emissions_co2_mt),
+      n_unique_vessels = sum(.data$n_unique_vessels),
+      .groups = "drop"
+    ) |>
+    stacked_class_levels()
+
+  full_palette <- grDevices::colorRampPalette(
+    RColorBrewer::brewer.pal(11, "Spectral")
+  )(length(palette_levels))
+  names(full_palette) <- palette_levels
+
+  fleet_data <- fleet_data |>
+    dplyr::left_join(small, by = "vessel_class") |>
+    dplyr::mutate(
+      # Reefers first, and before the size rule: each of the three spellings is
+      # individually small enough that the threshold would sweep them into
+      # "Other" before they ever became a group.
+      vessel_class = ifelse(
+        .data$vessel_class %in% grouped_as_reefer,
+        reefer_label,
+        .data$vessel_class
+      ),
+      # Folded regardless of size: these are service and support vessels rather
+      # than the cargo-carrying classes the figure is about, so they are grouped
+      # even where a share threshold would have kept them.
+      vessel_class = ifelse(
+        .data$vessel_class %in% grouped_as_other,
+        "Other",
+        .data$vessel_class
+      ),
+      # The size rule runs last and must not re-split the groups just formed:
+      # `small` was computed per original class, so a reefer spelling still
+      # carries small = TRUE even though the merged group may not be small.
+      vessel_class = ifelse(
+        .data$small & !.data$vessel_class %in% c(reefer_label, "Other"),
+        "Other",
+        .data$vessel_class
+      )
+    ) |>
+    dplyr::group_by(vessel_class, .data$year) |>
+    dplyr::summarise(
+      emissions_co2_mt = sum(.data$emissions_co2_mt),
+      n_unique_vessels = sum(.data$n_unique_vessels),
+      .groups = "drop"
+    ) |>
+    dplyr::group_by(.data$year) |>
+    dplyr::mutate(
+      share_emissions = .data$emissions_co2_mt / sum(.data$emissions_co2_mt),
+      share_vessels = .data$n_unique_vessels / sum(.data$n_unique_vessels)
+    ) |>
+    dplyr::ungroup()
+
+  latest <- max(fleet_data$year)
+  class_levels <- stacked_class_levels(fleet_data)
+
+  # Subset rather than regenerate, so each surviving class keeps exactly the
+  # colour it was assigned over the unfolded list.
+  palette <- full_palette[class_levels]
+
+  # The columns are normalised, so the year-to-year magnitude is invisible in the
+  # bars themselves. `total_col` is the raw quantity behind each column, summed
+  # per year and printed above it, so the composition and the level can be read
+  # off the same figure. `total_fmt` formats it: counts are plain integers, CO2
+  # is converted from tonnes to Mt because the raw figure runs to nine digits.
+  # `show_axis = FALSE` drops the percent axis on the right-hand panel: both
+  # panels run 0-100 % on the same scale, so the second copy is redundant and
+  # only widens the gap the connectors have to span.
+  share_panel <- function(share_col, total_col, total_fmt, title, show_axis) {
+    totals <- fleet_data |>
+      dplyr::group_by(.data$year) |>
+      dplyr::summarise(
+        total = sum(.data[[total_col]], na.rm = TRUE),
+        .groups = "drop"
+      ) |>
+      dplyr::mutate(label = total_fmt(.data$total))
+
+    panel_data <- fleet_data |>
+      dplyr::mutate(
+        vessel_class = factor(.data$vessel_class, levels = class_levels),
+        # geom_col stacks in reverse level order, so reversing here puts the
+        # first level at the top of the column, matching the legend read
+        # top-to-bottom and the pies read clockwise from twelve.
+        stack_order = forcats::fct_rev(.data$vessel_class),
+        share = .data[[share_col]],
+        label = ifelse(
+          .data$share >= min_label_share,
+          paste0(round(.data$share * 100), " %"),
+          ""
+        ),
+        # White text disappears on the pale end of the Spectral ramp, so the
+        # lightest fills get grey instead. Chosen by the fill's own luminance
+        # rather than by naming the classes: the ramp is generated from however
+        # many classes survive the "Other" folding, so which colours are pale
+        # depends on the data and would drift if hardcoded.
+        light_fill = relative_luminance(
+          palette[as.character(.data$vessel_class)]
+        ) >
+          light_fill_luminance,
+        label_color = ifelse(.data$light_fill, "grey45", "white"),
+        # Plain weight on the pale fills. Bold is there to hold white text
+        # against a saturated colour; grey on a light fill does not need the
+        # extra weight, and bolding it only makes the lighter tone look heavier
+        # than the white labels around it.
+        label_face = ifelse(.data$light_fill, "plain", "bold"),
+        # A shade smaller on the pale fills. Bold white text on a saturated
+        # colour tightens visually, so at one point size the plain grey reads
+        # as the larger of the two; trimming it evens them out optically.
+        label_size = ifelse(.data$light_fill, 3, 3.2)
+      )
+
+    ggplot2::ggplot(
+      panel_data,
+      ggplot2::aes(
+        x = factor(.data$year),
+        y = .data$share,
+        fill = .data$vessel_class,
+        group = .data$stack_order
+      )
+    ) +
+      ggplot2::geom_col(width = bar_width, color = "white", linewidth = 0.25) +
+      # Same position_stack as the bars, so a label always lands on its own
+      # segment rather than on a hand-computed cumulative position. Colour and
+      # weight are mapped, not set: both vary per segment (see label_color
+      # above), and constants would apply one style to every label.
+      ggplot2::geom_text(
+        ggplot2::aes(
+          label = .data$label,
+          color = .data$label_color,
+          fontface = .data$label_face,
+          size = .data$label_size
+        ),
+        position = ggplot2::position_stack(vjust = 0.5),
+        show.legend = FALSE
+      ) +
+      ggplot2::scale_color_identity() +
+      # identity, so label_size is taken as the literal text size in mm rather
+      # than as a value to be rescaled onto a size range.
+      ggplot2::scale_size_identity() +
+      # Its own data frame, one row per year: mapped through the stacked layer's
+      # data it would be drawn once per class and print the total on top of
+      # itself as many times as there are segments.
+      ggplot2::geom_text(
+        data = totals,
+        ggplot2::aes(x = factor(.data$year), y = 1, label = .data$label),
+        inherit.aes = FALSE,
+        vjust = -0.6,
+        size = 3,
+        color = "grey25"
+      ) +
+      ggplot2::scale_fill_manual(values = palette, drop = FALSE, name = NULL) +
+      # Padding is a fixed fraction of a category rather than half a bar width:
+      # tying it to bar_width would widen the outer margins every time the bars
+      # are widened, which is the opposite of what widening them is for.
+      ggplot2::scale_x_discrete(
+        expand = ggplot2::expansion(add = 0.375)
+      ) +
+      ggplot2::scale_y_continuous(
+        labels = scales::label_percent(),
+        # Headroom at the top for the totals; without it they are clipped at the
+        # panel edge.
+        expand = ggplot2::expansion(mult = c(0, 0.06))
+      ) +
+      ggplot2::labs(x = NULL, y = NULL, title = title) +
+      ggplot2::theme_minimal() +
+      ggplot2::theme(
+        plot.title = ggplot2::element_text(hjust = 0.5, size = 13),
+        axis.text.x = ggplot2::element_text(size = 9),
+        axis.text.y = if (show_axis) {
+          ggplot2::element_text()
+        } else {
+          ggplot2::element_blank()
+        },
+        # Ticks too, not just the text: leaving them reserves a strip of width
+        # between the connector band and panel B's first column, so the ribbons
+        # would stop short of the bars they point at.
+        axis.ticks.y = if (show_axis) {
+          ggplot2::element_line()
+        } else {
+          ggplot2::element_blank()
+        },
+        # The columns must reach the panel edges the band meets. The default
+        # margin leaves a gutter on each side that the ribbons cannot cross.
+        plot.margin = if (show_axis) {
+          ggplot2::margin(5.5, 0, 5.5, 5.5)
+        } else {
+          ggplot2::margin(5.5, 5.5, 5.5, 0)
+        },
+        panel.grid.major.x = ggplot2::element_blank(),
+        panel.grid.minor = ggplot2::element_blank()
+      )
+  }
+
+  size_panel <- share_panel(
+    "share_vessels",
+    "n_unique_vessels",
+    scales::label_comma(accuracy = 1),
+    "AIS-broadcasting fleet size",
+    show_axis = TRUE
+  )
+  # Tonnes to million tonnes: the source column is CO2 in tonnes despite the
+  # _mt suffix, as the ~1.4e9 container-class figure in the totals makes plain.
+  emissions_panel <- share_panel(
+    "share_emissions",
+    "emissions_co2_mt",
+    function(x) paste0(round(x / 1e6), " Mt"),
+    expression("AIS-broadcasting" ~ CO[2] ~ "emissions"),
+    show_axis = FALSE
+  )
+
+  # Ribbons across the gap, tying each of the largest classes to itself in the
+  # other panel. They anchor on the two columns that face the gap -- the last
+  # year of A and the first year of B -- because those are the only ones whose
+  # edges the band actually touches.
+  #
+  # The y extents must match where the panels actually draw each segment. Two
+  # reversals compose to none: geom_col stacks in reverse factor-level order,
+  # and the panels map `group` to fct_rev to undo that, so the drawn order is
+  # plain level order with the first level at the bottom. The cumulative sum
+  # therefore runs up the levels as given. Sorting descending instead flips the
+  # band against the columns and every ribbon lands on the wrong segment.
+  band_extent <- function(share_col, band_year) {
+    fleet_data |>
+      dplyr::filter(.data$year == band_year) |>
+      dplyr::mutate(
+        vessel_class = factor(.data$vessel_class, levels = class_levels)
+      ) |>
+      dplyr::arrange(as.integer(.data$vessel_class)) |>
+      dplyr::mutate(
+        upper = cumsum(.data[[share_col]]),
+        lower = .data$upper - .data[[share_col]]
+      ) |>
+      dplyr::select(vessel_class, lower, upper)
+  }
+
+  earliest <- min(fleet_data$year)
+  left_edge <- band_extent("share_vessels", latest)
+  right_edge <- band_extent("share_emissions", earliest)
+
+  # Every class gets a ribbon. Together they tile the band edge to edge, so the
+  # gap reads as the whole fleet flowing from one panel to the other rather than
+  # as a handful of selected classes over blank space.
+  connectors <- dplyr::inner_join(
+    left_edge,
+    right_edge,
+    by = "vessel_class",
+    suffix = c("_left", "_right")
+  )
+
+  # Sankey ribbons rather than straight-edged quadrilaterals. Each edge follows a
+  # logistic curve, so a ribbon leaves its column horizontally, turns through the
+  # middle of the band and arrives horizontally at the other side. A straight
+  # chord meets the columns at an angle instead, which reads as a wedge pointing
+  # away from the bar rather than as a band flowing out of it.
+  #
+  # Drawn as a filled polygon traced along the top edge and back along the
+  # bottom, so the ribbon's thickness varies smoothly between its two endpoint
+  # widths. geom_curve would give only a line, with no width to carry the share.
+  # The 0-1 curve is stretched over +/-`curve_steepness` because a logistic is
+  # visually flat by then; a narrower window leaves a visible kink where the
+  # ribbon meets the bars.
+  curve_steepness <- 6
+
+  sigmoid <- function(from, to, n = 80) {
+    t <- seq(-curve_steepness, curve_steepness, length.out = n)
+    from + (to - from) / (1 + exp(-t))
+  }
+
+  n_points <- 80
+
+  ribbons <- connectors |>
+    dplyr::rowwise() |>
+    dplyr::reframe(
+      vessel_class = .data$vessel_class,
+      x = c(seq(0, 1, length.out = n_points), seq(1, 0, length.out = n_points)),
+      y = c(
+        sigmoid(.data$upper_left, .data$upper_right, n_points),
+        rev(sigmoid(.data$lower_left, .data$lower_right, n_points))
+      )
+    )
+
+  # Named ribbons, each anchored to the panel where that class is prominent:
+  # the fleet-heavy classes read off panel A's edge, the emissions-heavy ones
+  # off panel B's. Only these are labelled -- the remaining ribbons are too thin
+  # to carry text, and the shared legend below still names every colour.
+  #
+  # The two lists are given explicitly rather than derived from which end of the
+  # ribbon is thicker: they are an editorial choice about which classes the
+  # figure calls out, and a derived rule would silently reassign a class the
+  # moment its shares shifted between refreshes.
+  left_labelled <- c("Passenger", "Fishing", "Cargo: general", "Tug")
+  right_labelled <- c(
+    "Cargo: bulk carrier",
+    "Tanker: oil",
+    "Cargo: container",
+    "Tanker: chemical",
+    "Cargo: ro ro",
+    "Tanker: liquefied gas"
+  )
+
+  # Shorter names for the band only. The legend and the underlying data keep the
+  # pipeline's own vocabulary, which is prefixed by group ("Cargo: ...") so the
+  # classes sort together; inside the band that prefix is redundant and eats the
+  # width the ribbons need.
+  band_label <- c(
+    # Wrapped: it is the longest of the left-hand names and the band is narrow
+    # there, so on one line it runs past the ribbon it belongs to.
+    "Cargo: general" = "General\ncargo",
+    "Cargo: bulk carrier" = "Bulk carrier",
+    "Tanker: oil" = "Oil tanker",
+    "Cargo: container" = "Container",
+    "Tanker: chemical" = "Chemical",
+    "Cargo: ro ro" = "Ro ro cargo",
+    "Tanker: liquefied gas" = "Liquified gas"
+  )
+
+  # `hjust` pins the text against the band's own edge, so a label sits just
+  # inside the gap next to its panel rather than floating in the middle. The
+  # small inset keeps it clear of the column border.
+  label_inset <- 0.04
+
+  # Each label sits on its own ribbon, at that ribbon's midpoint on the side it
+  # is anchored to. Where neighbouring ribbons are too thin to hold their names
+  # apart, the labels are pushed just far enough to stop overlapping and no
+  # further: spacing the group evenly instead detaches every name from the band
+  # it describes, which is worse than a little crowding.
+  #
+  # One upward pass: walk the labels in stacking order and lift any that falls
+  # within `min_gap` of the one below it. Working bottom-up means each label is
+  # only ever compared against a position already settled.
+  declutter <- function(data, min_gap = 0.045) {
+    n <- nrow(data)
+    if (n < 2) {
+      return(data)
+    }
+    data <- dplyr::arrange(data, .data$y)
+    y <- data$y
+    for (i in 2:n) {
+      y[i] <- max(y[i], y[i - 1] + min_gap)
+    }
+    # The pass can push the top label past the band; shifting the whole group
+    # down by the overshoot keeps the spacing while bringing it back inside.
+    overshoot <- max(y) - 1
+    if (overshoot > 0) {
+      y <- y - overshoot
+    }
+    dplyr::mutate(data, y = y)
+  }
+
+  # Nudged off the exact midpoint, the left group downward and the right group
+  # upward. Expressed as a fraction of each ribbon's own thickness rather than a
+  # flat distance, so a thin ribbon gets a proportionally small shift and the
+  # label stays on the band it names instead of drifting onto its neighbour.
+  label_nudge <- 0.08
+
+  connector_labels <- dplyr::bind_rows(
+    connectors |>
+      dplyr::filter(.data$vessel_class %in% left_labelled) |>
+      dplyr::mutate(
+        x = label_inset,
+        hjust = 0,
+        y = (.data$lower_left + .data$upper_left) /
+          2 -
+          label_nudge * (.data$upper_left - .data$lower_left)
+      ) |>
+      declutter(),
+    connectors |>
+      dplyr::filter(.data$vessel_class %in% right_labelled) |>
+      dplyr::mutate(
+        x = 1 - label_inset,
+        hjust = 1,
+        y = (.data$lower_right + .data$upper_right) /
+          2 +
+          label_nudge * (.data$upper_right - .data$lower_right)
+      ) |>
+      declutter()
+  ) |>
+    dplyr::mutate(
+      label = dplyr::coalesce(
+        band_label[as.character(.data$vessel_class)],
+        as.character(.data$vessel_class)
+      ),
+      # Same rule as the percentages inside the bars, against the same palette:
+      # white and bold on the saturated fills, plain grey on the pale ones. The
+      # labels sit directly on their ribbons, so they face exactly the contrast
+      # problem the bar labels do and should resolve it the same way.
+      light_fill = relative_luminance(
+        palette[as.character(.data$vessel_class)]
+      ) >
+        light_fill_luminance,
+      label_color = ifelse(.data$light_fill, "grey45", "white"),
+      label_face = ifelse(.data$light_fill, "plain", "bold"),
+      label_size = ifelse(.data$light_fill, 3, 3.2)
+    )
+
+  connector_band <- ggplot2::ggplot() +
+    ggplot2::geom_polygon(
+      data = ribbons,
+      ggplot2::aes(
+        x = .data$x,
+        y = .data$y,
+        group = .data$vessel_class,
+        fill = .data$vessel_class
+      ),
+      # Near-solid. The ribbons tile the whole gap, so a low alpha left the band
+      # washed out against the columns and the thinner classes faded into the
+      # background rather than tracking across. Held just below 1 so the band
+      # still reads as a link between the panels rather than as a third panel of
+      # its own. The hairline border is the same white separator the stacked
+      # columns use, which keeps neighbouring thin ribbons from merging.
+      alpha = 1,
+      color = "white",
+      linewidth = 0.2
+    ) +
+    # Placed outright rather than repelled: declutter has already resolved the
+    # overlaps in y, and a repel pass would drift the labels off the ribbons it
+    # deliberately kept them on.
+    ggplot2::geom_text(
+      data = connector_labels,
+      ggplot2::aes(
+        x = .data$x,
+        y = .data$y,
+        label = .data$label,
+        hjust = .data$hjust,
+        color = .data$label_color,
+        fontface = .data$label_face,
+        size = .data$label_size
+      ),
+      lineheight = 0.9
+    ) +
+    ggplot2::scale_color_identity() +
+    ggplot2::scale_size_identity() +
+    ggplot2::scale_fill_manual(values = palette, drop = FALSE, guide = "none") +
+    # A placeholder break so the invisible x-axis row is actually rendered and
+    # occupies the same height as the panels' year axis.
+    ggplot2::scale_x_continuous(
+      expand = ggplot2::expansion(0),
+      breaks = 0.5,
+      labels = " "
+    ) +
+    # Must match the panels' y expansion exactly, or the ribbons meet the
+    # columns at an offset and appear to point between two bands.
+    ggplot2::scale_y_continuous(
+      limits = c(0, 1),
+      expand = ggplot2::expansion(mult = c(0, 0.06))
+    ) +
+    # theme_minimal rather than theme_void, with everything drawn in blank: the
+    # band needs the same title row and x-axis row as the panels for cowplot to
+    # align their plotting regions. theme_void removes those rows entirely, so
+    # the band's 0-1 range would be stretched over the panels' full height --
+    # title and axis included -- and every ribbon would meet its column at an
+    # offset. Kept invisible so the structure costs nothing visually.
+    ggplot2::labs(x = NULL, y = NULL, title = " ") +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      plot.title = ggplot2::element_text(hjust = 0.5, size = 13),
+      axis.text.x = ggplot2::element_text(size = 9, color = NA),
+      axis.text.y = ggplot2::element_blank(),
+      axis.ticks = ggplot2::element_blank(),
+      panel.grid = ggplot2::element_blank(),
+      # No horizontal margin, so the ribbons run edge to edge and meet the
+      # columns rather than stopping short in the gutter.
+      plot.margin = ggplot2::margin(5.5, 0, 5.5, 0)
+    )
+
+  # A single horizontal key under both panels rather than one legend each: the
+  # two panels share a palette, so repeating it would suggest they don't.
+  legend <- cowplot::get_plot_component(
+    size_panel +
+      # One row: with the support classes folded away there are few enough
+      # entries to sit on a single line at this figure width, which reads as one
+      # ordered ramp from Passenger through to Other rather than as two lists.
+      ggplot2::guides(fill = ggplot2::guide_legend(nrow = 1, byrow = TRUE)) +
+      ggplot2::theme(
+        legend.position = "bottom",
+        legend.text = ggplot2::element_text(size = 9)
+      ),
+    "guide-box-bottom",
+    return_all = TRUE
+  )
+
+  # align = "h" makes cowplot match the panels' plotting regions rather than
+  # their outer boxes, so the band's 0-1 range lines up with the columns'
+  # despite the title above and the year axis below. The band carries no title
+  # or axis of its own, so without this it would float relative to the bars.
+  panels <- cowplot::plot_grid(
+    size_panel + ggplot2::theme(legend.position = "none"),
+    connector_band,
+    emissions_panel + ggplot2::theme(legend.position = "none"),
+    nrow = 1,
+    align = "h",
+    axis = "tb",
+    # Wider than when the ribbons were unlabelled: the band now has to hold a
+    # column of class names against each of its edges.
+    rel_widths = c(1, 0.52, 1),
+    labels = c("A", "", "B")
+  )
+
+  fleet_plot <- cowplot::plot_grid(
+    panels,
+    legend,
+    ncol = 1,
+    # Half the previous share: the key is one row now rather than two, so the
+    # old allowance left a band of empty space under the panels.
+    rel_heights = c(1, 0.08)
+  ) +
+    ggplot2::theme(
+      plot.background = ggplot2::element_rect(fill = "white", color = NA)
+    )
+
+  if (!is.null(file_path)) {
+    dir.create(dirname(file_path), showWarnings = FALSE, recursive = TRUE)
+    ggplot2::ggsave(
+      file_path,
+      fleet_plot,
+      width = width,
+      height = height,
+      dpi = 300,
+      bg = "white"
+    )
+    return(file_path)
+  }
+
+  fleet_plot
+}
+
+
+# The single-year Sankey and the two year-series columns in one figure: the
+# Sankey down the whole left side as panel A, and the fleet-size and CO2 series
+# stacked on the right as B and C.
+#
+# B and C are the same two charts that plot_fleet_shares_by_year() draws as its
+# panels, but standalone rather than facing each other across a connector band.
+# That changes what each needs: the band is gone, so neither has an edge to
+# reach and both carry their own percent axis, and stacking them vertically
+# means only the lower one needs the year labels.
+#
+# Built by re-running the panel construction here rather than by pulling the
+# panels out of the existing figure. Its share_panel() is a closure over that
+# function's own data prep and is shaped for a side-by-side pair -- margins
+# collapsed toward the band, one shared axis between them -- so reaching into it
+# would couple two published figures that should be free to diverge.
+plot_fleet_sankey_with_series <- function(
+  fleet_data,
+  file_path = NULL,
+  year = 2025L,
+  min_share = 0.005,
+  min_label_share = 0.04,
+  grouped_as_reefer = c(
+    "Specialized reefer",
+    "Container reefer",
+    "Cargo: refrigerated"
+  ),
+  reefer_label = "Reefer",
+  grouped_as_other = c(
+    "Supply vessel",
+    "Patrol vessel",
+    "Bunker",
+    "Dredge non fishing",
+    "Other not fishing"
+  ),
+  light_fill_luminance = 0.62,
+  width = 13,
+  height = 9.5,
+  bar_width = 0.92,
+  # The Sankey's share of the figure width. Panel A is the tall narrow element
+  # here, so it takes less width than the stacked pair beside it.
+  rel_width_sankey = 0.62,
+  # Blank space above and below panel A, as a fraction of its own height, so its
+  # diagram starts level with the top of B's columns and ends level with the foot
+  # of C's. Solved against the rendered PNG rather than derived: the levels being
+  # matched are set by ggplot's own text layout, so there is no closed form for
+  # them short of rendering. Panel A carries its own headings in the small
+  # y-expansion it keeps, which is why almost none of the allowance is at the
+  # top; the bottom clears C's year labels.
+  pad_top = 0,
+  pad_bottom = 0.024
+) {
+  small <- fleet_data |>
+    dplyr::group_by(vessel_class) |>
+    dplyr::summarise(
+      small = max(.data$share_emissions) < min_share &
+        max(.data$share_vessels) < min_share,
+      .groups = "drop"
+    )
+
+  # As in the year-series figure: the ramp is spread over the class list before
+  # the support classes are folded away, so every class keeps the colour it has
+  # in the other figures.
+  palette_levels <- fleet_data |>
+    dplyr::left_join(small, by = "vessel_class") |>
+    dplyr::mutate(
+      vessel_class = ifelse(
+        .data$vessel_class %in% grouped_as_reefer,
+        reefer_label,
+        .data$vessel_class
+      ),
+      vessel_class = ifelse(
+        .data$small & .data$vessel_class != reefer_label,
+        "Other",
+        .data$vessel_class
+      )
+    ) |>
+    dplyr::group_by(vessel_class, .data$year) |>
+    dplyr::summarise(
+      emissions_co2_mt = sum(.data$emissions_co2_mt),
+      n_unique_vessels = sum(.data$n_unique_vessels),
+      .groups = "drop"
+    ) |>
+    stacked_class_levels()
+
+  full_palette <- grDevices::colorRampPalette(
+    RColorBrewer::brewer.pal(11, "Spectral")
+  )(length(palette_levels))
+  names(full_palette) <- palette_levels
+
+  series_data <- fleet_data |>
+    dplyr::left_join(small, by = "vessel_class") |>
+    dplyr::mutate(
+      # Reefers go into the catch-all rather than standing as their own group,
+      # matching panel A. Every reefer spelling is below the size threshold, so
+      # separately they are slivers too thin to label or to pick out of the key.
+      # The group still exists in palette_levels above, which is what keeps the
+      # other classes on the colours they have in the year-series figures.
+      vessel_class = ifelse(
+        .data$vessel_class %in% c(grouped_as_reefer, grouped_as_other),
+        "Other",
+        .data$vessel_class
+      ),
+      vessel_class = ifelse(
+        .data$small & .data$vessel_class != "Other",
+        "Other",
+        .data$vessel_class
+      )
+    ) |>
+    dplyr::group_by(vessel_class, .data$year) |>
+    dplyr::summarise(
+      emissions_co2_mt = sum(.data$emissions_co2_mt),
+      n_unique_vessels = sum(.data$n_unique_vessels),
+      .groups = "drop"
+    ) |>
+    dplyr::group_by(.data$year) |>
+    dplyr::mutate(
+      share_emissions = .data$emissions_co2_mt / sum(.data$emissions_co2_mt),
+      share_vessels = .data$n_unique_vessels / sum(.data$n_unique_vessels)
+    ) |>
+    dplyr::ungroup()
+
+  class_levels <- stacked_class_levels(series_data)
+  palette <- full_palette[class_levels]
+
+  # `show_years` rather than `show_axis`: stacked one above the other, both
+  # panels keep their percent axis and only the lower one needs the year labels,
+  # which is the reverse of the side-by-side pair's sharing.
+  series_panel <- function(share_col, total_col, total_fmt, title, show_years) {
+    totals <- series_data |>
+      dplyr::group_by(.data$year) |>
+      dplyr::summarise(
+        total = sum(.data[[total_col]], na.rm = TRUE),
+        .groups = "drop"
+      ) |>
+      dplyr::mutate(label = total_fmt(.data$total))
+
+    panel_data <- series_data |>
+      dplyr::mutate(
+        vessel_class = factor(.data$vessel_class, levels = class_levels),
+        stack_order = forcats::fct_rev(.data$vessel_class),
+        share = .data[[share_col]],
+        label = ifelse(
+          .data$share >= min_label_share,
+          paste0(round(.data$share * 100), " %"),
+          ""
+        ),
+        light_fill = relative_luminance(
+          palette[as.character(.data$vessel_class)]
+        ) >
+          light_fill_luminance,
+        label_color = ifelse(.data$light_fill, "grey45", "white"),
+        label_face = ifelse(.data$light_fill, "plain", "bold"),
+        label_size = ifelse(.data$light_fill, 2.6, 2.8)
+      )
+
+    ggplot2::ggplot(
+      panel_data,
+      ggplot2::aes(
+        x = factor(.data$year),
+        y = .data$share,
+        fill = .data$vessel_class,
+        group = .data$stack_order
+      )
+    ) +
+      ggplot2::geom_col(width = bar_width, color = "white", linewidth = 0.25) +
+      ggplot2::geom_text(
+        ggplot2::aes(
+          label = .data$label,
+          color = .data$label_color,
+          fontface = .data$label_face,
+          size = .data$label_size
+        ),
+        position = ggplot2::position_stack(vjust = 0.5),
+        show.legend = FALSE
+      ) +
+      ggplot2::scale_color_identity() +
+      ggplot2::scale_size_identity() +
+      ggplot2::geom_text(
+        data = totals,
+        ggplot2::aes(x = factor(.data$year), y = 1, label = .data$label),
+        inherit.aes = FALSE,
+        vjust = -0.6,
+        size = 2.5,
+        color = "grey25"
+      ) +
+      ggplot2::scale_fill_manual(values = palette, drop = FALSE, name = NULL) +
+      ggplot2::scale_x_discrete(
+        expand = ggplot2::expansion(add = 0.375)
+      ) +
+      # Axis on the right: these panels sit to the right of the Sankey, so their
+      # scale reads on the figure's outer edge rather than in the gutter between
+      # the two halves.
+      ggplot2::scale_y_continuous(
+        labels = scales::label_percent(),
+        expand = ggplot2::expansion(mult = c(0, 0.08)),
+        position = "right"
+      ) +
+      ggplot2::labs(x = NULL, y = NULL, title = title) +
+      ggplot2::theme_minimal() +
+      ggplot2::theme(
+        plot.title = ggplot2::element_text(hjust = 0.5, size = 11),
+        axis.text.x = if (show_years) {
+          ggplot2::element_text(size = 8)
+        } else {
+          ggplot2::element_blank()
+        },
+        axis.text.y = ggplot2::element_text(size = 8),
+        # Nothing sits to the left of the bars now that the scale has moved to
+        # the right, so the default left margin is dead space between these
+        # panels and the Sankey.
+        plot.margin = ggplot2::margin(5.5, 5.5, 5.5, 0),
+        panel.grid.major.x = ggplot2::element_blank(),
+        panel.grid.minor = ggplot2::element_blank()
+      )
+  }
+
+  size_panel <- series_panel(
+    "share_vessels",
+    "n_unique_vessels",
+    scales::label_comma(accuracy = 1),
+    "AIS-broadcasting fleet size",
+    show_years = FALSE
+  )
+  emissions_panel <- series_panel(
+    "share_emissions",
+    "emissions_co2_mt",
+    function(x) paste0(round(x / 1e6), " Mt"),
+    expression("AIS-broadcasting" ~ CO[2] ~ "emissions"),
+    show_years = TRUE
+  )
+
+  # A tighter margin than the standalone figure uses. Panel A is drawn into a
+  # tall slot here, so the annotations keep their point size while the diagram
+  # gets taller -- at the standalone 0.42 they would sit in a band of empty
+  # space either side.
+  #
+  # The y-expansion is squeezed almost flat and the headings moved inside, so
+  # the diagram itself reaches the top and bottom of whatever slot it is given.
+  # That is what lets the padding below position its drawn edges: with the
+  # standalone 12 % headroom in place, the diagram floats inside its slot by
+  # more than the alignment needs to move it, and no amount of outer padding
+  # can pull it back out.
+  sankey <- plot_fleet_sankey(
+    fleet_data,
+    year = year,
+    x_margin = 0.22,
+    # Trimmed on the facing side, but not past what the heading needs: the
+    # widest thing on this edge is "2025 CO2 emissions" centred on the node, not
+    # the "(269 Mt)" value lines, and too small a value here cuts the heading off
+    # mid-word rather than overflowing visibly. 0.17 is about the floor.
+    x_margin_right = 0.17,
+    # The heading is what sets the floor above, so shrinking it is what actually
+    # buys space between the two halves -- the value labels below it are much
+    # narrower and are nowhere near the edge.
+    heading_size = 2.8,
+    y_expand_lower = 0.005,
+    y_expand_upper = 0.045,
+    heading_inside = FALSE,
+    plot_margin = ggplot2::margin(0, 0, 0, 10)
+  )
+
+  legend <- cowplot::get_plot_component(
+    size_panel +
+      ggplot2::guides(fill = ggplot2::guide_legend(nrow = 1, byrow = TRUE)) +
+      ggplot2::theme(
+        legend.position = "bottom",
+        legend.text = ggplot2::element_text(size = 8)
+      ),
+    "guide-box-bottom",
+    return_all = TRUE
+  )
+
+  # align = "v" so B and C share a plotting region width despite only C carrying
+  # the year labels; without it the upper panel's columns would be wider than the
+  # lower one's by exactly the height the axis text occupies.
+  series_column <- cowplot::plot_grid(
+    size_panel + ggplot2::theme(legend.position = "none"),
+    emissions_panel + ggplot2::theme(legend.position = "none"),
+    ncol = 1,
+    align = "v",
+    axis = "lr",
+    rel_heights = c(1, 1.08),
+    labels = c("B", "C")
+  )
+
+  # Panel A's drawn area is made to span exactly from C's baseline up to B's
+  # ceiling, rather than filling the slot the way a bare plot would.
+  #
+  # Those two levels are not the outer edge of the column: B carries a title
+  # above its bars and C a row of year labels below its own, so the columns
+  # themselves start and stop some way inside the block. The Sankey is padded by
+  # the same amounts -- title height at the top, axis-text height at the bottom
+  # -- so its diagram lines up with the bars and not with the block's border.
+  #
+  # Expressed in null units against the panel heights so the padding tracks any
+  # later change to rel_heights, instead of being an absolute size that would
+  # have to be re-tuned whenever the figure is resized.
+  sankey_padded <- cowplot::plot_grid(
+    NULL,
+    sankey,
+    NULL,
+    ncol = 1,
+    rel_heights = c(pad_top, 1, pad_bottom)
+  )
+
+  panels <- cowplot::plot_grid(
+    sankey_padded,
+    series_column,
+    nrow = 1,
+    rel_widths = c(rel_width_sankey, 1),
+    labels = c("A", "")
+  )
+
+  combined <- cowplot::plot_grid(
+    panels,
+    legend,
+    ncol = 1,
+    rel_heights = c(1, 0.07)
+  ) +
+    ggplot2::theme(
+      plot.background = ggplot2::element_rect(fill = "white", color = NA)
+    )
+
+  if (!is.null(file_path)) {
+    dir.create(dirname(file_path), showWarnings = FALSE, recursive = TRUE)
+    ggplot2::ggsave(
+      file_path,
+      combined,
+      width = width,
+      height = height,
+      dpi = 300,
+      bg = "white"
+    )
+    return(file_path)
+  }
+
+  combined
+}
+
+
+# Panel A mirrored: the fleet-size years run newest to oldest, so its most recent
+# column sits against the connector band. Otherwise identical to
+# plot_fleet_shares_by_year(), and kept as a separate function rather than a flag
+# on that one so the published figure cannot change by accident.
+plot_fleet_shares_by_year_mirrored <- function(
+  fleet_data,
+  file_path = NULL,
+  # A class is folded into "Other" only if it is small in both panels in every
+  # year, matching the pie version's rule; folding per year instead would let a
+  # class appear and disappear from the legend between columns.
+  min_share = 0.005,
+  # Segments below this are left unlabelled: the slabs are too thin for the text
+  # to sit inside them without overlapping their neighbours.
+  min_label_share = 0.04,
+  # The three refrigerated-cargo spellings, merged under one name. They are the
+  # same kind of vessel in three labels of the source vocabulary, so drawn apart
+  # each is a thin sliver that says less than the group does.
+  grouped_as_reefer = c(
+    "Specialized reefer",
+    "Container reefer",
+    "Cargo: refrigerated"
+  ),
+  reefer_label = "Reefer",
+  # Support and service classes folded into "Other" whatever their share. Named
+  # explicitly rather than caught by a share rule, because "is this a support
+  # vessel" is not something the shares can answer.
+  grouped_as_other = c(
+    "Supply vessel",
+    "Patrol vessel",
+    "Bunker",
+    "Dredge non fishing",
+    "Other not fishing"
+  ),
+  # Fills brighter than this get grey text instead of white. Sits between
+  # Cargo: container (~0.69) and the next fill down, Tanker: oil (~0.55), so it
+  # covers the pale yellows near the top of the emissions columns while leaving
+  # the saturated oranges and reds on white.
+  light_fill_luminance = 0.62,
+  width = 14,
+  height = 7,
+  # Near the full category width, so consecutive years read as a continuous
+  # series rather than as nine separate charts. Kept below 1 so a hairline of
+  # background still separates one year from the next.
+  bar_width = 0.92
+) {
+  small <- fleet_data |>
+    dplyr::group_by(vessel_class) |>
+    dplyr::summarise(
+      small = max(.data$share_emissions) < min_share &
+        max(.data$share_vessels) < min_share,
+      .groups = "drop"
+    )
+
+  # The class ordering as it stands before the support classes are folded away.
+  # The palette is built from this rather than from the surviving classes, so
+  # every class keeps the colour it had when the support vessels were still
+  # drawn separately: a ramp spread over a shorter list would hand each class a
+  # different colour and silently recolour the whole figure.
+  palette_levels <- fleet_data |>
+    dplyr::left_join(small, by = "vessel_class") |>
+    dplyr::mutate(
+      # Reefer is formed here too, so it takes the ramp position its members
+      # occupied rather than being appended as a new colour; the support classes
+      # are deliberately left unfolded so every other class keeps its original
+      # place in the ramp.
+      vessel_class = ifelse(
+        .data$vessel_class %in% grouped_as_reefer,
+        reefer_label,
+        .data$vessel_class
+      ),
+      vessel_class = ifelse(
+        .data$small & .data$vessel_class != reefer_label,
+        "Other",
+        .data$vessel_class
+      )
+    ) |>
+    # Re-aggregated before ranking: the size fold collapses several classes into
+    # "Other", and ranking the un-summed rows would order that group by whichever
+    # fragment happened to come first.
+    dplyr::group_by(vessel_class, .data$year) |>
+    dplyr::summarise(
+      emissions_co2_mt = sum(.data$emissions_co2_mt),
+      n_unique_vessels = sum(.data$n_unique_vessels),
+      .groups = "drop"
+    ) |>
+    stacked_class_levels()
+
+  full_palette <- grDevices::colorRampPalette(
+    RColorBrewer::brewer.pal(11, "Spectral")
+  )(length(palette_levels))
+  names(full_palette) <- palette_levels
+
+  fleet_data <- fleet_data |>
+    dplyr::left_join(small, by = "vessel_class") |>
+    dplyr::mutate(
+      # Reefers first, and before the size rule: each of the three spellings is
+      # individually small enough that the threshold would sweep them into
+      # "Other" before they ever became a group.
+      vessel_class = ifelse(
+        .data$vessel_class %in% grouped_as_reefer,
+        reefer_label,
+        .data$vessel_class
+      ),
+      # Folded regardless of size: these are service and support vessels rather
+      # than the cargo-carrying classes the figure is about, so they are grouped
+      # even where a share threshold would have kept them.
+      vessel_class = ifelse(
+        .data$vessel_class %in% grouped_as_other,
+        "Other",
+        .data$vessel_class
+      ),
+      # The size rule runs last and must not re-split the groups just formed:
+      # `small` was computed per original class, so a reefer spelling still
+      # carries small = TRUE even though the merged group may not be small.
+      vessel_class = ifelse(
+        .data$small & !.data$vessel_class %in% c(reefer_label, "Other"),
+        "Other",
+        .data$vessel_class
+      )
+    ) |>
+    dplyr::group_by(vessel_class, .data$year) |>
+    dplyr::summarise(
+      emissions_co2_mt = sum(.data$emissions_co2_mt),
+      n_unique_vessels = sum(.data$n_unique_vessels),
+      .groups = "drop"
+    ) |>
+    dplyr::group_by(.data$year) |>
+    dplyr::mutate(
+      share_emissions = .data$emissions_co2_mt / sum(.data$emissions_co2_mt),
+      share_vessels = .data$n_unique_vessels / sum(.data$n_unique_vessels)
+    ) |>
+    dplyr::ungroup()
+
+  class_levels <- stacked_class_levels(fleet_data)
+
+  # Subset rather than regenerate, so each surviving class keeps exactly the
+  # colour it was assigned over the unfolded list.
+  palette <- full_palette[class_levels]
+
+  # The columns are normalised, so the year-to-year magnitude is invisible in the
+  # bars themselves. `total_col` is the raw quantity behind each column, summed
+  # per year and printed above it, so the composition and the level can be read
+  # off the same figure. `total_fmt` formats it: counts are plain integers, CO2
+  # is converted from tonnes to Mt because the raw figure runs to nine digits.
+  # `show_axis = FALSE` drops the percent axis on the right-hand panel: both
+  # panels run 0-100 % on the same scale, so the second copy is redundant and
+  # only widens the gap the connectors have to span.
+  share_panel <- function(
+    share_col,
+    total_col,
+    total_fmt,
+    title,
+    show_axis,
+    # Panel A runs newest-to-oldest so its 2025 column sits against the
+    # connector band, facing panel B's 2025. The x scale is reversed rather
+    # than the data re-sorted: the year is a discrete axis, so the drawing
+    # order follows the factor levels and reversing them is the whole change.
+    reverse_years = FALSE
+  ) {
+    totals <- fleet_data |>
+      dplyr::group_by(.data$year) |>
+      dplyr::summarise(
+        total = sum(.data[[total_col]], na.rm = TRUE),
+        .groups = "drop"
+      ) |>
+      dplyr::mutate(label = total_fmt(.data$total))
+
+    panel_data <- fleet_data |>
+      dplyr::mutate(
+        vessel_class = factor(.data$vessel_class, levels = class_levels),
+        # geom_col stacks in reverse level order, so reversing here puts the
+        # first level at the top of the column, matching the legend read
+        # top-to-bottom and the pies read clockwise from twelve.
+        stack_order = forcats::fct_rev(.data$vessel_class),
+        share = .data[[share_col]],
+        label = ifelse(
+          .data$share >= min_label_share,
+          paste0(round(.data$share * 100), " %"),
+          ""
+        ),
+        # White text disappears on the pale end of the Spectral ramp, so the
+        # lightest fills get grey instead. Chosen by the fill's own luminance
+        # rather than by naming the classes: the ramp is generated from however
+        # many classes survive the "Other" folding, so which colours are pale
+        # depends on the data and would drift if hardcoded.
+        light_fill = relative_luminance(
+          palette[as.character(.data$vessel_class)]
+        ) >
+          light_fill_luminance,
+        label_color = ifelse(.data$light_fill, "grey45", "white"),
+        # Plain weight on the pale fills. Bold is there to hold white text
+        # against a saturated colour; grey on a light fill does not need the
+        # extra weight, and bolding it only makes the lighter tone look heavier
+        # than the white labels around it.
+        label_face = ifelse(.data$light_fill, "plain", "bold"),
+        # A shade smaller on the pale fills. Bold white text on a saturated
+        # colour tightens visually, so at one point size the plain grey reads
+        # as the larger of the two; trimming it evens them out optically.
+        label_size = ifelse(.data$light_fill, 3, 3.2)
+      )
+
+    ggplot2::ggplot(
+      panel_data,
+      ggplot2::aes(
+        x = factor(.data$year),
+        y = .data$share,
+        fill = .data$vessel_class,
+        group = .data$stack_order
+      )
+    ) +
+      ggplot2::geom_col(width = bar_width, color = "white", linewidth = 0.25) +
+      # Same position_stack as the bars, so a label always lands on its own
+      # segment rather than on a hand-computed cumulative position. Colour and
+      # weight are mapped, not set: both vary per segment (see label_color
+      # above), and constants would apply one style to every label.
+      ggplot2::geom_text(
+        ggplot2::aes(
+          label = .data$label,
+          color = .data$label_color,
+          fontface = .data$label_face,
+          size = .data$label_size
+        ),
+        position = ggplot2::position_stack(vjust = 0.5),
+        show.legend = FALSE
+      ) +
+      ggplot2::scale_color_identity() +
+      # identity, so label_size is taken as the literal text size in mm rather
+      # than as a value to be rescaled onto a size range.
+      ggplot2::scale_size_identity() +
+      # Its own data frame, one row per year: mapped through the stacked layer's
+      # data it would be drawn once per class and print the total on top of
+      # itself as many times as there are segments.
+      ggplot2::geom_text(
+        data = totals,
+        ggplot2::aes(x = factor(.data$year), y = 1, label = .data$label),
+        inherit.aes = FALSE,
+        vjust = -0.6,
+        size = 3,
+        color = "grey25"
+      ) +
+      ggplot2::scale_fill_manual(values = palette, drop = FALSE, name = NULL) +
+      # Padding is a fixed fraction of a category rather than half a bar width:
+      # tying it to bar_width would widen the outer margins every time the bars
+      # are widened, which is the opposite of what widening them is for.
+      ggplot2::scale_x_discrete(
+        limits = if (reverse_years) rev else identity,
+        expand = ggplot2::expansion(add = 0.375)
+      ) +
+      ggplot2::scale_y_continuous(
+        labels = scales::label_percent(),
+        # Headroom at the top for the totals; without it they are clipped at the
+        # panel edge.
+        expand = ggplot2::expansion(mult = c(0, 0.06))
+      ) +
+      ggplot2::labs(x = NULL, y = NULL, title = title) +
+      ggplot2::theme_minimal() +
+      ggplot2::theme(
+        plot.title = ggplot2::element_text(hjust = 0.5, size = 13),
+        axis.text.x = ggplot2::element_text(size = 9),
+        axis.text.y = if (show_axis) {
+          ggplot2::element_text()
+        } else {
+          ggplot2::element_blank()
+        },
+        # Ticks too, not just the text: leaving them reserves a strip of width
+        # between the connector band and panel B's first column, so the ribbons
+        # would stop short of the bars they point at.
+        axis.ticks.y = if (show_axis) {
+          ggplot2::element_line()
+        } else {
+          ggplot2::element_blank()
+        },
+        # The columns must reach the panel edges the band meets. The default
+        # margin leaves a gutter on each side that the ribbons cannot cross.
+        plot.margin = if (show_axis) {
+          ggplot2::margin(5.5, 0, 5.5, 5.5)
+        } else {
+          ggplot2::margin(5.5, 5.5, 5.5, 0)
+        },
+        panel.grid.major.x = ggplot2::element_blank(),
+        panel.grid.minor = ggplot2::element_blank()
+      )
+  }
+
+  size_panel <- share_panel(
+    "share_vessels",
+    "n_unique_vessels",
+    scales::label_comma(accuracy = 1),
+    "AIS-broadcasting fleet size",
+    show_axis = TRUE,
+    reverse_years = TRUE
+  )
+  # Tonnes to million tonnes: the source column is CO2 in tonnes despite the
+  # _mt suffix, as the ~1.4e9 container-class figure in the totals makes plain.
+  emissions_panel <- share_panel(
+    "share_emissions",
+    "emissions_co2_mt",
+    function(x) paste0(round(x / 1e6), " Mt"),
+    expression("AIS-broadcasting" ~ CO[2] ~ "emissions"),
+    show_axis = FALSE
+  )
+
+  # Ribbons across the gap, tying each of the largest classes to itself in the
+  # other panel. They anchor on the two columns that face the gap -- the last
+  # year of A and the first year of B -- because those are the only ones whose
+  # edges the band actually touches.
+  #
+  # The y extents must match where the panels actually draw each segment. Two
+  # reversals compose to none: geom_col stacks in reverse factor-level order,
+  # and the panels map `group` to fct_rev to undo that, so the drawn order is
+  # plain level order with the first level at the bottom. The cumulative sum
+  # therefore runs up the levels as given. Sorting descending instead flips the
+  # band against the columns and every ribbon lands on the wrong segment.
+  band_extent <- function(share_col, band_year) {
+    fleet_data |>
+      dplyr::filter(.data$year == band_year) |>
+      dplyr::mutate(
+        vessel_class = factor(.data$vessel_class, levels = class_levels)
+      ) |>
+      dplyr::arrange(as.integer(.data$vessel_class)) |>
+      dplyr::mutate(
+        upper = cumsum(.data[[share_col]]),
+        lower = .data$upper - .data[[share_col]]
+      ) |>
+      dplyr::select(vessel_class, lower, upper)
+  }
+
+  # Each anchor is the year of the column physically touching the band, so a
+  # ribbon always meets the bar it describes. Reversing panel A put its earliest
+  # year against the gap, where the unmirrored figure has its latest, so the
+  # left anchor moves with it; panel B is unchanged and still meets its earliest
+  # column. Both sides therefore read the earliest year here.
+  earliest <- min(fleet_data$year)
+  latest <- max(fleet_data$year)
+  left_edge <- band_extent("share_vessels", earliest)
+  right_edge <- band_extent("share_emissions", earliest)
+
+  # Every class gets a ribbon. Together they tile the band edge to edge, so the
+  # gap reads as the whole fleet flowing from one panel to the other rather than
+  # as a handful of selected classes over blank space.
+  connectors <- dplyr::inner_join(
+    left_edge,
+    right_edge,
+    by = "vessel_class",
+    suffix = c("_left", "_right")
+  )
+
+  # Sankey ribbons rather than straight-edged quadrilaterals. Each edge follows a
+  # logistic curve, so a ribbon leaves its column horizontally, turns through the
+  # middle of the band and arrives horizontally at the other side. A straight
+  # chord meets the columns at an angle instead, which reads as a wedge pointing
+  # away from the bar rather than as a band flowing out of it.
+  #
+  # Drawn as a filled polygon traced along the top edge and back along the
+  # bottom, so the ribbon's thickness varies smoothly between its two endpoint
+  # widths. geom_curve would give only a line, with no width to carry the share.
+  # The 0-1 curve is stretched over +/-`curve_steepness` because a logistic is
+  # visually flat by then; a narrower window leaves a visible kink where the
+  # ribbon meets the bars.
+  curve_steepness <- 6
+
+  sigmoid <- function(from, to, n = 80) {
+    t <- seq(-curve_steepness, curve_steepness, length.out = n)
+    from + (to - from) / (1 + exp(-t))
+  }
+
+  n_points <- 80
+
+  ribbons <- connectors |>
+    dplyr::rowwise() |>
+    dplyr::reframe(
+      vessel_class = .data$vessel_class,
+      x = c(seq(0, 1, length.out = n_points), seq(1, 0, length.out = n_points)),
+      y = c(
+        sigmoid(.data$upper_left, .data$upper_right, n_points),
+        rev(sigmoid(.data$lower_left, .data$lower_right, n_points))
+      )
+    )
+
+  # Named ribbons, each anchored to the panel where that class is prominent:
+  # the fleet-heavy classes read off panel A's edge, the emissions-heavy ones
+  # off panel B's. Only these are labelled -- the remaining ribbons are too thin
+  # to carry text, and the shared legend below still names every colour.
+  #
+  # The two lists are given explicitly rather than derived from which end of the
+  # ribbon is thicker: they are an editorial choice about which classes the
+  # figure calls out, and a derived rule would silently reassign a class the
+  # moment its shares shifted between refreshes.
+  left_labelled <- c("Passenger", "Fishing", "Cargo: general", "Tug")
+  right_labelled <- c(
+    "Cargo: bulk carrier",
+    "Tanker: oil",
+    "Cargo: container",
+    "Tanker: chemical",
+    "Cargo: ro ro",
+    "Tanker: liquefied gas"
+  )
+
+  # Shorter names for the band only. The legend and the underlying data keep the
+  # pipeline's own vocabulary, which is prefixed by group ("Cargo: ...") so the
+  # classes sort together; inside the band that prefix is redundant and eats the
+  # width the ribbons need.
+  band_label <- c(
+    # Wrapped: it is the longest of the left-hand names and the band is narrow
+    # there, so on one line it runs past the ribbon it belongs to.
+    "Cargo: general" = "General\ncargo",
+    "Cargo: bulk carrier" = "Bulk carrier",
+    "Tanker: oil" = "Oil tanker",
+    "Cargo: container" = "Container",
+    "Tanker: chemical" = "Chemical",
+    "Cargo: ro ro" = "Ro ro cargo",
+    "Tanker: liquefied gas" = "Liquified gas"
+  )
+
+  # `hjust` pins the text against the band's own edge, so a label sits just
+  # inside the gap next to its panel rather than floating in the middle. The
+  # small inset keeps it clear of the column border.
+  label_inset <- 0.04
+
+  # Each label sits on its own ribbon, at that ribbon's midpoint on the side it
+  # is anchored to. Where neighbouring ribbons are too thin to hold their names
+  # apart, the labels are pushed just far enough to stop overlapping and no
+  # further: spacing the group evenly instead detaches every name from the band
+  # it describes, which is worse than a little crowding.
+  #
+  # One upward pass: walk the labels in stacking order and lift any that falls
+  # within `min_gap` of the one below it. Working bottom-up means each label is
+  # only ever compared against a position already settled.
+  declutter <- function(data, min_gap = 0.045) {
+    n <- nrow(data)
+    if (n < 2) {
+      return(data)
+    }
+    data <- dplyr::arrange(data, .data$y)
+    y <- data$y
+    for (i in 2:n) {
+      y[i] <- max(y[i], y[i - 1] + min_gap)
+    }
+    # The pass can push the top label past the band; shifting the whole group
+    # down by the overshoot keeps the spacing while bringing it back inside.
+    overshoot <- max(y) - 1
+    if (overshoot > 0) {
+      y <- y - overshoot
+    }
+    dplyr::mutate(data, y = y)
+  }
+
+  # Nudged off the exact midpoint, the left group downward and the right group
+  # upward. Expressed as a fraction of each ribbon's own thickness rather than a
+  # flat distance, so a thin ribbon gets a proportionally small shift and the
+  # label stays on the band it names instead of drifting onto its neighbour.
+  label_nudge <- 0.08
+
+  connector_labels <- dplyr::bind_rows(
+    connectors |>
+      dplyr::filter(.data$vessel_class %in% left_labelled) |>
+      dplyr::mutate(
+        x = label_inset,
+        hjust = 0,
+        y = (.data$lower_left + .data$upper_left) /
+          2 -
+          label_nudge * (.data$upper_left - .data$lower_left)
+      ) |>
+      declutter(),
+    connectors |>
+      dplyr::filter(.data$vessel_class %in% right_labelled) |>
+      dplyr::mutate(
+        x = 1 - label_inset,
+        hjust = 1,
+        y = (.data$lower_right + .data$upper_right) /
+          2 +
+          label_nudge * (.data$upper_right - .data$lower_right)
+      ) |>
+      declutter()
+  ) |>
+    dplyr::mutate(
+      label = dplyr::coalesce(
+        band_label[as.character(.data$vessel_class)],
+        as.character(.data$vessel_class)
+      ),
+      # Same rule as the percentages inside the bars, against the same palette:
+      # white and bold on the saturated fills, plain grey on the pale ones. The
+      # labels sit directly on their ribbons, so they face exactly the contrast
+      # problem the bar labels do and should resolve it the same way.
+      light_fill = relative_luminance(
+        palette[as.character(.data$vessel_class)]
+      ) >
+        light_fill_luminance,
+      label_color = ifelse(.data$light_fill, "grey45", "white"),
+      label_face = ifelse(.data$light_fill, "plain", "bold"),
+      label_size = ifelse(.data$light_fill, 3, 3.2)
+    )
+
+  connector_band <- ggplot2::ggplot() +
+    ggplot2::geom_polygon(
+      data = ribbons,
+      ggplot2::aes(
+        x = .data$x,
+        y = .data$y,
+        group = .data$vessel_class,
+        fill = .data$vessel_class
+      ),
+      # Near-solid. The ribbons tile the whole gap, so a low alpha left the band
+      # washed out against the columns and the thinner classes faded into the
+      # background rather than tracking across. Held just below 1 so the band
+      # still reads as a link between the panels rather than as a third panel of
+      # its own. The hairline border is the same white separator the stacked
+      # columns use, which keeps neighbouring thin ribbons from merging.
+      alpha = 1,
+      color = "white",
+      linewidth = 0.2
+    ) +
+    # Placed outright rather than repelled: declutter has already resolved the
+    # overlaps in y, and a repel pass would drift the labels off the ribbons it
+    # deliberately kept them on.
+    ggplot2::geom_text(
+      data = connector_labels,
+      ggplot2::aes(
+        x = .data$x,
+        y = .data$y,
+        label = .data$label,
+        hjust = .data$hjust,
+        color = .data$label_color,
+        fontface = .data$label_face,
+        size = .data$label_size
+      ),
+      lineheight = 0.9
+    ) +
+    ggplot2::scale_color_identity() +
+    ggplot2::scale_size_identity() +
+    ggplot2::scale_fill_manual(values = palette, drop = FALSE, guide = "none") +
+    # A placeholder break so the invisible x-axis row is actually rendered and
+    # occupies the same height as the panels' year axis.
+    ggplot2::scale_x_continuous(
+      expand = ggplot2::expansion(0),
+      breaks = 0.5,
+      labels = " "
+    ) +
+    # Must match the panels' y expansion exactly, or the ribbons meet the
+    # columns at an offset and appear to point between two bands.
+    #
+    # No `limits` here. A scale limit FILTERS the data: the stacked shares sum
+    # to 1 through a cumsum, so the topmost ribbon's upper edge lands on
+    # 1.0000000000000002 rather than exactly 1, and every such vertex was being
+    # dropped before drawing. That silently decapitated the top polygon -- the
+    # "Other" ribbon lost its upper edge and rendered hanging below the 100 %
+    # line instead of filling to it. coord_cartesian clips the view without
+    # discarding rows, which is what a fixed range should do here.
+    ggplot2::scale_y_continuous(
+      expand = ggplot2::expansion(mult = c(0, 0.06))
+    ) +
+    ggplot2::coord_cartesian(ylim = c(0, 1), clip = "off") +
+    # theme_minimal rather than theme_void, with everything drawn in blank: the
+    # band needs the same title row and x-axis row as the panels for cowplot to
+    # align their plotting regions. theme_void removes those rows entirely, so
+    # the band's 0-1 range would be stretched over the panels' full height --
+    # title and axis included -- and every ribbon would meet its column at an
+    # offset. Kept invisible so the structure costs nothing visually.
+    ggplot2::labs(x = NULL, y = NULL, title = " ") +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      plot.title = ggplot2::element_text(hjust = 0.5, size = 13),
+      axis.text.x = ggplot2::element_text(size = 9, color = NA),
+      axis.text.y = ggplot2::element_blank(),
+      axis.ticks = ggplot2::element_blank(),
+      panel.grid = ggplot2::element_blank(),
+      # No horizontal margin, so the ribbons run edge to edge and meet the
+      # columns rather than stopping short in the gutter.
+      plot.margin = ggplot2::margin(5.5, 0, 5.5, 0)
+    )
+
+  # A single horizontal key under both panels rather than one legend each: the
+  # two panels share a palette, so repeating it would suggest they don't.
+  legend <- cowplot::get_plot_component(
+    size_panel +
+      # One row: with the support classes folded away there are few enough
+      # entries to sit on a single line at this figure width, which reads as one
+      # ordered ramp from Passenger through to Other rather than as two lists.
+      ggplot2::guides(fill = ggplot2::guide_legend(nrow = 1, byrow = TRUE)) +
+      ggplot2::theme(
+        legend.position = "bottom",
+        legend.text = ggplot2::element_text(size = 9)
+      ),
+    "guide-box-bottom",
+    return_all = TRUE
+  )
+
+  # align = "h" makes cowplot match the panels' plotting regions rather than
+  # their outer boxes, so the band's 0-1 range lines up with the columns'
+  # despite the title above and the year axis below. The band carries no title
+  # or axis of its own, so without this it would float relative to the bars.
+  panels <- cowplot::plot_grid(
+    size_panel + ggplot2::theme(legend.position = "none"),
+    connector_band,
+    emissions_panel + ggplot2::theme(legend.position = "none"),
+    nrow = 1,
+    align = "h",
+    axis = "tb",
+    # Wider than when the ribbons were unlabelled: the band now has to hold a
+    # column of class names against each of its edges.
+    rel_widths = c(1, 0.52, 1),
+    labels = c("A", "", "B")
+  )
+
+  fleet_plot <- cowplot::plot_grid(
+    panels,
+    legend,
+    ncol = 1,
+    # Half the previous share: the key is one row now rather than two, so the
+    # old allowance left a band of empty space under the panels.
+    rel_heights = c(1, 0.08)
+  ) +
+    ggplot2::theme(
+      plot.background = ggplot2::element_rect(fill = "white", color = NA)
+    )
+
+  if (!is.null(file_path)) {
+    dir.create(dirname(file_path), showWarnings = FALSE, recursive = TRUE)
+    ggplot2::ggsave(
+      file_path,
+      fleet_plot,
+      width = width,
+      height = height,
+      dpi = 300,
+      bg = "white"
+    )
+    return(file_path)
+  }
+
+  fleet_plot
+}
+
+# A single year as a plain Sankey: one stacked node for the fleet, one for CO2,
+# and a ribbon per class flowing between them. No axes and no legend -- each
+# class is named once, on whichever side its band is thicker, and its share is
+# printed outside the nodes on both sides.
+#
+# Shares the folding rules and the palette construction of the year-series
+# figure so the two stay comparable, but nothing else: with one year there is no
+# series to draw and the bars stop being charts, so this is written as a diagram
+# rather than assembled from two panels and a connector.
+plot_fleet_sankey <- function(
+  fleet_data,
+  file_path = NULL,
+  year = 2025L,
+  min_share = 0.005,
+  # Kept as its own group only for the palette: the ramp has to be spread over
+  # the same class list the year-series figures use, or the shared classes would
+  # come out a different colour here. In the diagram itself reefers are part of
+  # "Other" -- see the fold below.
+  grouped_as_reefer = c(
+    "Specialized reefer",
+    "Container reefer",
+    "Cargo: refrigerated"
+  ),
+  reefer_label = "Reefer",
+  grouped_as_other = c(
+    "Supply vessel",
+    "Patrol vessel",
+    "Bunker",
+    "Dredge non fishing",
+    "Other not fishing"
+  ),
+  # Shorter names for the diagram. The pipeline's vocabulary is prefixed by group
+  # so the classes sort together, which is redundant once each is labelled.
+  display_label = c(
+    "Cargo: general" = "General cargo",
+    "Cargo: bulk carrier" = "Bulk carrier",
+    "Tanker: oil" = "Oil tanker",
+    "Cargo: container" = "Container",
+    "Tanker: chemical" = "Chemical",
+    "Cargo: ro ro" = "Ro ro cargo",
+    "Tanker: liquefied gas" = "Liquified gas"
+  ),
+  # Below this a band gets no printed share or name: the slab is thinner than
+  # the text would be.
+  min_label_share = 0.02,
+  # Fills brighter than this take dark text; the same cutoff the year-series
+  # figure uses, so a class is labelled the same way in both.
+  light_fill_luminance = 0.62,
+  node_width = 0.028,
+  # Space outside the diagram, as a fraction of its 0-1 span, for the share
+  # annotations. Wide enough for the longest of them -- "(232,497)", the value
+  # line -- at the standalone width. These are fractions of the x-range, so a
+  # narrower canvas buys the text less room rather than the same room, and too
+  # small a value here silently clips the labels instead of overflowing
+  # visibly. Settable per side so a caller butting this against another panel
+  # can trim the facing margin: the emissions side needs less, its values being
+  # "(269 Mt)" rather than a six-digit count.
+  x_margin = 0.24,
+  x_margin_right = x_margin,
+  # Space above and below the diagram, as a fraction of its own height. The
+  # upper allowance holds the column headings. A caller aligning this against
+  # other panels can shrink both so the diagram reaches its slot's edges --
+  # the headings then need somewhere else to go, which is what heading_inside
+  # is for.
+  y_expand_lower = 0.02,
+  y_expand_upper = 0.12,
+  # Headings drawn just inside the top of the diagram rather than above it, for
+  # when the caller has squeezed the expansion out to align the plot area.
+  heading_inside = FALSE,
+  heading_size = 3.1,
+  plot_margin = ggplot2::margin(10, 10, 10, 10),
+  width = 6.5,
+  height = 7.5
+) {
+  fleet_data <- dplyr::filter(fleet_data, .data$year == .env$year)
+  if (nrow(fleet_data) == 0) {
+    stop("no rows for year ", year, call. = FALSE)
+  }
+
+  small <- fleet_data |>
+    dplyr::group_by(vessel_class) |>
+    dplyr::summarise(
+      small = max(.data$share_emissions) < min_share &
+        max(.data$share_vessels) < min_share,
+      .groups = "drop"
+    )
+
+  folded <- fleet_data |>
+    dplyr::left_join(small, by = "vessel_class") |>
+    dplyr::mutate(
+      # Reefers are folded in with the rest of the catch-all here. Every reefer
+      # spelling is below the size threshold anyway, so on its own it would be a
+      # band too thin to label; the group only survives in the palette, where it
+      # still occupies its slot on the ramp.
+      vessel_class = ifelse(
+        .data$vessel_class %in% c(grouped_as_reefer, grouped_as_other),
+        "Other",
+        .data$vessel_class
+      ),
+      vessel_class = ifelse(
+        .data$small & .data$vessel_class != "Other",
+        "Other",
+        .data$vessel_class
+      )
+    ) |>
+    dplyr::group_by(vessel_class) |>
+    dplyr::summarise(
+      emissions_co2_mt = sum(.data$emissions_co2_mt),
+      n_unique_vessels = sum(.data$n_unique_vessels),
+      .groups = "drop"
+    ) |>
+    dplyr::mutate(
+      share_emissions = .data$emissions_co2_mt / sum(.data$emissions_co2_mt),
+      share_vessels = .data$n_unique_vessels / sum(.data$n_unique_vessels)
+    )
+
+  # Column totals for the headings: the whole AIS-broadcasting fleet and its
+  # whole CO2 output for this year, which the percentages below are shares of.
+  total_vessels <- sum(folded$n_unique_vessels)
+  total_co2 <- sum(folded$emissions_co2_mt)
+
+  # Ordered by fleet size with the catch-all last, so the ramp runs top to
+  # bottom in the same sequence on both nodes.
+  trailing <- "Other"
+  ordered <- folded |>
+    dplyr::filter(!.data$vessel_class %in% trailing) |>
+    dplyr::arrange(dplyr::desc(.data$n_unique_vessels)) |>
+    dplyr::pull(.data$vessel_class)
+  class_levels <- c(ordered, intersect(trailing, folded$vessel_class))
+
+  # The ramp is spread over the class list as it stands BEFORE the support
+  # classes are folded into "Other", then subset to the classes actually drawn.
+  # Generating it over the folded list instead would spread the same Spectral
+  # ramp across four fewer classes and hand every one of them a different
+  # colour, so this diagram would not match the year-series figures.
+  palette_levels <- fleet_data |>
+    dplyr::left_join(small, by = "vessel_class") |>
+    dplyr::mutate(
+      vessel_class = ifelse(
+        .data$vessel_class %in% grouped_as_reefer,
+        reefer_label,
+        .data$vessel_class
+      ),
+      vessel_class = ifelse(
+        .data$small & .data$vessel_class != reefer_label,
+        "Other",
+        .data$vessel_class
+      )
+    ) |>
+    dplyr::group_by(vessel_class, .data$year) |>
+    dplyr::summarise(
+      emissions_co2_mt = sum(.data$emissions_co2_mt),
+      n_unique_vessels = sum(.data$n_unique_vessels),
+      .groups = "drop"
+    ) |>
+    stacked_class_levels()
+
+  full_palette <- grDevices::colorRampPalette(
+    RColorBrewer::brewer.pal(11, "Spectral")
+  )(length(palette_levels))
+  names(full_palette) <- palette_levels
+
+  palette <- full_palette[class_levels]
+
+  # The end nodes take a darker shade of each class's colour, so they read as
+  # solid anchors while the flows between them stay lighter. Mixing toward black
+  # in RGB rather than reaching for a colour-space package keeps this
+  # dependency-free; at this size the difference from a proper luminance
+  # darkening is not visible.
+  darken <- function(colors, amount) {
+    rgb <- grDevices::col2rgb(colors) / 255
+    grDevices::rgb(t((1 - amount) * rgb))
+  }
+  node_palette <- darken(palette, 0.38)
+  names(node_palette) <- class_levels
+
+  # Stacked extents per side, first level at the bottom and the catch-all on
+  # top, so the diagram stacks in the same direction as the year-series figures:
+  # Passenger against the axis, Other at the ceiling.
+  extent <- function(share_col, value_col) {
+    folded |>
+      dplyr::mutate(
+        vessel_class = factor(.data$vessel_class, levels = class_levels)
+      ) |>
+      dplyr::arrange(as.integer(.data$vessel_class)) |>
+      dplyr::mutate(
+        lower = cumsum(.data[[share_col]]) - .data[[share_col]],
+        upper = .data$lower + .data[[share_col]],
+        share = .data[[share_col]],
+        # The raw quantity behind the share, carried through so each class can
+        # be annotated with its own count or tonnage, not just its percentage.
+        value = .data[[value_col]]
+      ) |>
+      dplyr::select(vessel_class, lower, upper, share, value)
+  }
+
+  left <- extent("share_vessels", "n_unique_vessels")
+  right <- extent("share_emissions", "emissions_co2_mt")
+
+  nodes <- dplyr::bind_rows(
+    dplyr::mutate(left, side = "fleet", xmin = 0, xmax = node_width),
+    dplyr::mutate(right, side = "co2", xmin = 1 - node_width, xmax = 1)
+  )
+
+  flows <- dplyr::inner_join(
+    left |> dplyr::select(vessel_class, lower, upper),
+    right |> dplyr::select(vessel_class, lower, upper),
+    by = "vessel_class",
+    suffix = c("_left", "_right")
+  )
+
+  # Logistic edges, so a ribbon leaves and arrives horizontally rather than
+  # meeting the node at an angle. Stretched over +/-6 because the curve is
+  # visually flat by then; a narrower window leaves a kink at the nodes.
+  curve_steepness <- 6
+  n_points <- 80
+  sigmoid <- function(from, to) {
+    t <- seq(-curve_steepness, curve_steepness, length.out = n_points)
+    s <- 1 / (1 + exp(-t))
+    # Rescaled to span exactly 0-1. The raw logistic is only asymptotically flat:
+    # at +/-6 it still sits ~0.25 % short of its limits, so a ribbon would leave
+    # its node a fraction of a percent below the node's own edge. On the wide
+    # bands that is invisible, but the separator carries the same offset and
+    # reads as a slight tilt across the node face.
+    s <- (s - s[1]) / (s[length(s)] - s[1])
+    from + (to - from) * s
+  }
+
+  ribbons <- flows |>
+    dplyr::rowwise() |>
+    dplyr::reframe(
+      vessel_class = .data$vessel_class,
+      x = c(
+        seq(node_width, 1 - node_width, length.out = n_points),
+        seq(1 - node_width, node_width, length.out = n_points)
+      ),
+      y = c(
+        sigmoid(.data$upper_left, .data$upper_right),
+        rev(sigmoid(.data$lower_left, .data$lower_right))
+      )
+    )
+
+  # One separator per class boundary, run across the whole diagram: flat over
+  # the fleet node, curved along the ribbon's top edge, flat again over the CO2
+  # node. Drawing it in one pass is what makes the seam line up.
+  #
+  # Splitting it -- an outline on the node plus a line on the ribbon -- cannot be
+  # made to match: the node's rule is drawn *at* y = upper while the ribbon's is
+  # *centred* on it, so at the join the two land a pixel or two apart and the
+  # separator visibly steps. An outline on the polygon is worse still, since it
+  # also paints the ribbon's vertical ends onto the node face.
+  edges <- flows |>
+    # The top of the stack is the outer edge of the diagram, not a boundary
+    # between two classes; a rule there just thickens the silhouette. Dropped
+    # before the path is built, so a whole class goes rather than stray points.
+    dplyr::filter(.data$upper_left < 1 - 1e-9) |>
+    dplyr::rowwise() |>
+    dplyr::reframe(
+      vessel_class = .data$vessel_class,
+      x = c(
+        0,
+        seq(node_width, 1 - node_width, length.out = n_points),
+        1
+      ),
+      y = c(
+        .data$upper_left,
+        sigmoid(.data$upper_left, .data$upper_right),
+        .data$upper_right
+      )
+    )
+
+  # Shares sit outside the nodes -- left of the fleet node, right of the CO2
+  # node -- so no text is drawn over a fill and no contrast rule is needed.
+  # Only the bands with room for the text get one: below the threshold the slab
+  # is thinner than the line of type, and annotating those anyway forces a stack
+  # of displaced labels and leader lines down the side of the diagram.
+  # Two lines per band: the share, and the quantity behind it in brackets on the
+  # line below at a smaller size. Drawn as two layers rather than one "\n" label
+  # because a single geom_text can only carry one size, and the point of the
+  # pairing is that the percentage leads and the raw figure supports it.
+  pct <- nodes |>
+    dplyr::filter(.data$share >= min_label_share) |>
+    dplyr::mutate(
+      y = (.data$lower + .data$upper) / 2,
+      x = ifelse(.data$side == "fleet", -0.012, 1.012),
+      hjust = ifelse(.data$side == "fleet", 1, 0),
+      share_label = paste0(round(.data$share * 100), " %"),
+      # Vessels are counts; the emissions column is CO2 in tonnes despite its
+      # _mt name, so it is divided down to million tonnes to stay readable.
+      value_label = paste0(
+        "(",
+        ifelse(
+          .data$side == "fleet",
+          scales::label_comma(accuracy = 1)(.data$value),
+          paste0(round(.data$value / 1e6), " Mt")
+        ),
+        ")"
+      )
+    )
+
+  # Each class named once, on the side where its band is thicker: that is where
+  # there is vertical room for the text to sit inside the flow.
+  names_at <- flows |>
+    dplyr::mutate(
+      thick_left = .data$upper_left - .data$lower_left,
+      thick_right = .data$upper_right - .data$lower_right,
+      # The catch-all is pinned to the emissions side. Its two bands are nearly
+      # the same thickness, so the general rule picks the fleet side by a hair
+      # and drops the name right where the ordered classes above it are already
+      # crowded; on the right it has the corner to itself.
+      on_left = .data$thick_left >= .data$thick_right &
+        .data$vessel_class != "Other",
+      y = ifelse(
+        .data$on_left,
+        (.data$lower_left + .data$upper_left) / 2,
+        (.data$lower_right + .data$upper_right) / 2
+      ),
+      x = ifelse(.data$on_left, node_width + 0.025, 1 - node_width - 0.025),
+      hjust = ifelse(.data$on_left, 0, 1),
+      thickness = pmax(.data$thick_left, .data$thick_right),
+      label = dplyr::coalesce(
+        display_label[as.character(.data$vessel_class)],
+        as.character(.data$vessel_class)
+      ),
+      # Same rule, same threshold and same palette as the year-series figure:
+      # white and bold over the saturated fills, plain grey over the pale ones.
+      # The name sits on the flow, so the test is against the base colour rather
+      # than the darker node shade.
+      light_fill = relative_luminance(
+        palette[as.character(.data$vessel_class)]
+      ) >
+        light_fill_luminance,
+      label_color = ifelse(.data$light_fill, "grey45", "white"),
+      label_face = ifelse(.data$light_fill, "plain", "bold"),
+      label_size = ifelse(.data$light_fill, 3, 3.2)
+    ) |>
+    dplyr::filter(.data$thickness >= min_label_share)
+
+  # Just above the ceiling, or hanging just under it. Only the anchor and the
+  # direction the text grows differ between the two.
+  heading_y <- if (heading_inside) 0.995 else 1.03
+  heading_vjust <- if (heading_inside) 0 else 1
+
+  sankey <- ggplot2::ggplot() +
+    ggplot2::geom_polygon(
+      data = ribbons,
+      ggplot2::aes(
+        x = .data$x,
+        y = .data$y,
+        group = .data$vessel_class,
+        fill = .data$vessel_class
+      ),
+      # Full-strength fill: at a lower alpha the ribbons washed out against the
+      # nodes and the paler classes stopped being identifiable.
+      color = NA
+    ) +
+    ggplot2::geom_rect(
+      data = nodes,
+      # fill taken from the row, not mapped through the shared scale: the nodes
+      # use the darkened shade while the flows keep the base colour, and one
+      # discrete fill scale cannot serve both.
+      ggplot2::aes(
+        xmin = .data$xmin,
+        xmax = .data$xmax,
+        ymin = .data$lower,
+        ymax = .data$upper
+      ),
+      fill = node_palette[as.character(nodes$vessel_class)],
+      # No outline: an outlined node draws a white edge down the face where the
+      # flows arrive, which is the seam that made the ribbons look as though they
+      # stopped short of the column.
+      color = NA
+    ) +
+    # The separators go on last, over both the flows and the nodes, so each is a
+    # single unbroken white line from one edge of the diagram to the other.
+    ggplot2::geom_line(
+      data = edges,
+      ggplot2::aes(x = .data$x, y = .data$y, group = .data$vessel_class),
+      color = "white",
+      linewidth = 0.35,
+      lineend = "butt"
+    ) +
+    # The share sits just above the band's midpoint and its value just below, so
+    # the pair straddles the centre the single-line label used to sit on.
+    ggplot2::geom_text(
+      data = pct,
+      ggplot2::aes(
+        x = .data$x,
+        y = .data$y,
+        label = .data$share_label,
+        hjust = .data$hjust
+      ),
+      vjust = -0.1,
+      size = 3.1,
+      color = "grey25"
+    ) +
+    ggplot2::geom_text(
+      data = pct,
+      ggplot2::aes(
+        x = .data$x,
+        y = .data$y,
+        label = .data$value_label,
+        hjust = .data$hjust
+      ),
+      vjust = 1.2,
+      size = 2.5,
+      color = "grey45"
+    ) +
+    ggplot2::geom_text(
+      data = names_at,
+      ggplot2::aes(
+        x = .data$x,
+        y = .data$y,
+        label = .data$label,
+        hjust = .data$hjust,
+        color = .data$label_color,
+        fontface = .data$label_face,
+        size = .data$label_size
+      )
+    ) +
+    ggplot2::scale_color_identity() +
+    ggplot2::scale_size_identity() +
+    # Column headings: what each column is, and nothing else. The totals used to
+    # sit on a line below, but every band already carries its own value, so the
+    # column sum was the one number here that no one reads off the diagram.
+    # Placed above the diagram, or just below its ceiling when the caller has
+    # closed up the expansion to align this panel against others.
+    ggplot2::annotate(
+      "text",
+      x = node_width / 2,
+      y = heading_y,
+      label = paste(year, "fleet size"),
+      hjust = 0.5,
+      vjust = heading_vjust,
+      size = heading_size,
+      color = "grey15"
+    ) +
+    ggplot2::annotate(
+      "text",
+      x = 1 - node_width / 2,
+      y = heading_y,
+      label = paste0("'", year, "'~CO[2]~'emissions'"),
+      parse = TRUE,
+      hjust = 0.5,
+      vjust = heading_vjust,
+      size = heading_size,
+      color = "grey15"
+    ) +
+    ggplot2::scale_fill_manual(values = palette, guide = "none") +
+    # Room outside the nodes for the shares; the diagram itself spans 0-1. Both
+    # margins hold one line of the same text, so they are symmetric -- and wide
+    # enough that "44 %  (232,497)" fits at the narrowest width this is drawn
+    # at. These are fractions of the x-range, so a narrower canvas buys the
+    # annotations less room, not the same room: too tight a margin here silently
+    # clips the leading digits rather than overflowing visibly.
+    ggplot2::scale_x_continuous(
+      limits = c(-x_margin, 1 + x_margin_right),
+      expand = ggplot2::expansion(0)
+    ) +
+    ggplot2::scale_y_continuous(
+      # The upper margin clears the heading; the lower one is a hairline so the
+      # bottom band is not cut by the panel edge.
+      expand = ggplot2::expansion(mult = c(y_expand_lower, y_expand_upper))
+    ) +
+    ggplot2::theme_void() +
+    ggplot2::theme(
+      plot.background = ggplot2::element_rect(fill = "white", color = NA),
+      plot.margin = plot_margin
+    )
+
+  if (!is.null(file_path)) {
+    dir.create(dirname(file_path), showWarnings = FALSE, recursive = TRUE)
+    ggplot2::ggsave(
+      file_path,
+      sankey,
+      width = width,
+      height = height,
+      dpi = 300,
+      bg = "white"
+    )
+    return(file_path)
+  }
+
+  sankey
 }
