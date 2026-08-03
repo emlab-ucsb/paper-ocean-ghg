@@ -203,7 +203,7 @@ specifications and brief discussion of interpretability limitations.
 \end{refquote}
 \response Thank you for the feedback. We agree that our initial draft lacked sufficient detail on the models. For each of the characteristic models, we now cover: (i) methodology, model application and training data, (ii) performance metrics, variable importance, and interpretability, and (iii) overfitting controls, known weaknesses, and potential biases. 
 
-\changes We added a dedicated section in the supplementary materials that includes a summary table of performance metrics alongside detailed breakdowns for each model with the information above.
+\changes We added a dedicated section in the supplementary materials that includes a summary table of performance metrics alongside detailed breakdowns for each model with the information above. We also made minor adjustments to the main text to point readers towards the newly written section.
 
 \point{R2.4}
 % category: minor/writing | assignee: Zihan and David
@@ -298,8 +298,8 @@ to registry data, and another $\sim$6\% are matched via public ship databases
 (non-IMO registered). This seems to reflect limitations of the authors' specific
 implementation rather than an inherent flaw of AIS-based methods.
 \end{refquote}
-\response
-\changes
+\response We apologize for the lack of clarity in our original text. To clarify, we successfully matched virtually all IMO-registered vessels to registry data (not 10\% as suggested). What we meant to say is that only roughly 13\% of vessels analyzed are IMO registered (~113,000 out of ~865,000) and therefore we were able to find at least some characteristic information about them in S\&P Global Market's Ship Dataset or other open registries. We were able to find characteristic information for an additional ~48,000 vessels that were not IMO registered. 
+\changes We have rewritten the relevant text for clarity and added a supplementary table breaking down the registry coverage by characteristic. 
 
 \point{R3.3}
 % category: discussion/framing | assignee: David
@@ -346,8 +346,24 @@ authors should discuss the possible proportion of non-vessel AIS signals within
 the unmatched AIS data. If such information cannot be quantified, this should at
 least be explicitly acknowledged as a source of uncertainty.
 \end{refquote}
-\response [AFTER RESPONSE FOR NON-VESSEL AIS] In addition to removing non-vessel signals from AIS data, we have also removed possible non-vessel objects from SAR vessel detections by excluding detections around known infrastructures and repeated detections at fixed locations, as described in section 4.2.1. Fishing gears are too small to be detected from Sentinel-1 SAR imagery.
-\changes
+\response Thank you for raising this important point. Roughly 47\% of our AIS-enabled signals are attributable to buoys, FADs, navigation aids, offshore structures, fishing gear, and other objects that are not vessels. Our primary AIS vessel classification model labels these non-vessels as `gear', and we remove them completely from our analysis.  In addition to removing non-vessel signals from AIS data, we have also removed possible non-vessel objects from SAR vessel detections by excluding detections around known infrastructures and repeated detections at fixed locations, as described in Section 4.2.1. Fishing gears are too small to be detected from Sentinel-1 SAR imagery.
+\changes In the main results text when describing AIS-broadcasting emissions by different vessels classes, we have added the following (Lines XX-YY)
+
+\begin{quote}
+ We note that not all AIS messages are broadcast by vessels; we are therefore careful to exclude all non-vessel AIS messages from our emissions estimates. Roughly 47\% of AIS-enabled signals are attributable to buoys, FADs, navigation aids, offshore structures, fishing gear, and other objects. These are classified as a separate `gear' class by our vessel classification model, and are not included in this analysis. 
+\end{quote}
+
+In the supplementary section 1.7 (Lines XX-YY), we also now say:
+
+\begin{quote}
+Note that nearly half of AIS-broadcasting devices are likely associated with non-vessel objects (such as buoys, offshore structures, FADs, etc). These objects are identified as their own vessel class `gear' by the primary GFW vessel class model, and are excluded from the emissions estimates in this paper.
+\end{quote}
+
+In Section 4.2.1, when describing our S1 vessel detection processing procedure (Lines XX-YY), we say:
+
+\begin{quote}
+The data filtering involved in the GFW vessel detections include removing detections within a 1-km buffer from the shoreline to reduce false positives from land-based objects due to inaccurately defined and dynamic coastlines, repeated detections of potentially fixed objects such as offshore infrastructure, detections from icy areas, moving vehicles close to shore, and other radar ambiguities
+\end{quote}
 
 \point{R3.6}
 % category: MAJOR / analysis | assignee: Zihan
