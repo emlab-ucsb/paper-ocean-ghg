@@ -216,11 +216,11 @@ It should be noted that even when registries exist, vessel characteristics can b
 
 We adapted our AIS-based model from the methodologies described in the 2017 ICCT study on global shipping emissions \cite{olmer2017greenhouse} and the 2020 IMO Fourth Greenhouse Gas Study \cite{fourth2020greenhouse}, making modifications to better align with the structure and characteristics of our data sets. From a high-level, we: 1) determine the main engine energy use, auxiliary engine energy use, and boiler energy use for each individual AIS message based on dynamic vessel movement and static vessel characteristic data; 2) multiply the engine and boiler energy use numbers by pollutant- and engine-type-specific emissions factors in order to determine the amount of emissions for six pollutants associated with the engines and boiler for each ping; 3) add up the emissions for these six pollutants across the engines and boiler, to obtain the total emissions for each ping and each of these six pollutants; 4) estimate emissions for three additional pollutants that do not detailed information on emissions factors by simply multiplying the total CO$_{2}$ emissions for each ping by a conversion factor \cite{mayesshipping}. We should note that we focus our analysis on estimating emissions associated with fuel combustion in the main engine, auxiliary engine, and boiler; we do not include  methane slip on vessels that use liquefied natural gas, or other non-combustion fugitive emissions associated with refrigeration, cooling, or venting of VOCs from vessels that transport liquid cargo such as oil and chemicals.
 
-Main engine energy use is estimated based on the time between each AIS ping (hours), the main engine power from the vessel characteristics dataset, and a load factor used to adjust the estimate. The load factor is the product of four coefficients: (1) a weather correction factor (represented by distance to shore, a proxy that can be observed from AIS data - vessel operating beyond 5 nautical miles from shore receive a value of 1.15; vessels operating within 5 nautical miles receive a value of 1.1 \cite{fourth2020greenhouse}); (2) a hull fouling correction factor, which causes resistance in the water (set at 1.07 according to \cite{olmer2017greenhouse}); and (3) a vessel draft correction factor (set at 0.85, the emissions-weighted average draft correction factor from \cite{fourth2020greenhouse}; and (4) a cubic term of vessel speed divided by  the vessel's maximum design speed. To determine the vessel speed associated with each AIS message, we use either: 1) the transmitted instantaneous speed associated with the AIS message if less than an hour has passed since the last message was transmitted; or 2) the implied speed for messages for which more than an hour has passed since the previous message (calculated as the distance traveled divided by the elapsed time between the two messages). We apply this hierarchy since implied speed can be imprecise for short time intervals between pings due to signal latency; meanwhile, instantaneous speed can be unrepresentative of longer time intervals between pings, in which case implied speed is more representative. Following \cite{coello2015ais, sala2018economics}, for fishing vessels we adjust the main engine load factor so that it falls between 0.2 and 0.9, and assign a main engine load factor of 0.75 to trawlers and dredge fishing vessels that are actively fishing due to the energy intensive nature of their fishing operations. 
+Main engine energy use is estimated based on the time between each AIS ping (hours), the main engine power from the vessel characteristics dataset, and a load factor used to adjust the estimate. The load factor is the product of four coefficients: (1) a weather correction factor (represented by distance to shore, a proxy that can be observed from AIS data - vessel operating beyond 5 nautical miles from shore receive a value of 1.15; vessels operating within 5 nautical miles receive a value of 1.1 \cite{fourth2020greenhouse}); (2) a hull fouling correction factor, which causes resistance in the water (set at 1.07 according to \cite{olmer2017greenhouse}); and (3) a vessel draft correction factor (set at 0.85, the emissions-weighted average draft correction factor from \cite{fourth2020greenhouse}; and (4) a cubic term of vessel speed divided by  the vessel's maximum design speed. To determine the vessel speed associated with each AIS message, we use either: 1) the transmitted instantaneous speed associated with the AIS message if less than an hour has passed since the last message was transmitted; or 2) the implied speed for messages for which more than an hour has passed since the previous message (calculated as the distance traveled divided by the elapsed time between the two messages). We apply this hierarchy since implied speed can be imprecise for short time intervals between pings due to signal latency; meanwhile, instantaneous speed can be unrepresentative of longer time intervals between pings, in which case implied speed is more representative. Following \cite{coello2015ais, sala2018economics}, for fishing vessels we adjust the main engine load factor so that it falls between 0.2 and 0.9, and assign a main engine load factor of 0.75 to trawlers and dredge fishing vessels that are actively fishing due to the energy intensive nature of their fishing operations. We also apply main engine low-load correction factors since engines operating at loads below 20\% operate inefficiently and emit more of certain pollutants based on how low the engine is operating (CH$_{4}$, CO, N$_{2}$O, NO$_{x}$, VOCs, PM$_{2.5}$, and PM$_{10}$). We apply these correction factor on the main engine emissions for all AIS message with a main engine load below 20\%. 
 
 In accordance with \cite{fourth2020greenhouse}, our model also accounts for differences in auxiliary engine power energy use and boiler energy use depending on the vessel’s operational phase—whether it is at berth, at anchor, maneuvering, or at sea. These phases are identified using AIS speed, distance to port, and distance to the coast. Power outputs for auxiliary engines and boilers, based on vessel class and size, are extracted from \cite{fourth2020greenhouse} and are applied accordingly for each phase.
 
-After calculating energy use, we apply pollutant-specific emission factors to the main engine, auxiliary engine, and boiler for six GHGs and pollutants (CO$_{2}$, CH$_{4}$, CO, NO$_{x}$, SO$_{x}$, N$_{2}$O), following \cite{olmer2017greenhouse}. These factors are each averaged from across the relevant pollutant factors associated with SSD, MSD, and HSD engine types, which together represent approximately 98\% of vessels engines \cite{fourth2020greenhouse}. To get total emissions for each AIS message (i.e., emissions from the previous ping in a segment to the current one), we sum emissions from both engines and boilers. For VOCs, PM$_{2.5}$, and PM$_{10}$, which do not have as detailed information on emissions factors, we instead multiply the CO$_{2}$ emissions by pollutant-specific conversion factors \cite{mayesshipping}. We also apply main engine low-load correction factors since engines operating at loads below 20\% operate inefficiently and emit more of certain pollutants based on how low the engine is operating (CH$_{4}$, CO, N$_{2}$O, NO$_{x}$, VOCs, PM$_{2.5}$, and PM$_{10}$). We apply these correction factor on the main engine emissions for all AIS message with a main engine load below 20\%.
+After calculating energy use, we apply pollutant-specific emission factors to the main engine, auxiliary engine, and boiler for six GHGs and pollutants (CO$_{2}$, CH$_{4}$, CO, NO$_{x}$, SO$_{x}$, N$_{2}$O), following \cite{olmer2017greenhouse}. These factors are each averaged from across the relevant pollutant factors associated with SSD, MSD, and HSD engine types, which together represent approximately 98\% of vessels engines \cite{fourth2020greenhouse}. To get total emissions for each AIS message (i.e., emissions from the previous ping in a segment to the current one), we sum emissions from both engines and boilers. For VOCs, PM$_{2.5}$, and PM$_{10}$, which do not have as detailed information on emissions factors, we instead multiply the CO$_{2}$ emissions by pollutant-specific conversion factors \cite{mayesshipping}.
 
 Starting January 1, 2020, the IMO mandated a low sulfur fuel switch, reducing the allowable sulfur content from 3.5\% to 0.5\% \cite{imo_sulphur_2020}. To account for this, for data starting on January 1, 2020 we apply a correction factor to SO$_{x}$, as well as PM$_{2.5}$, and PM$_{10}$ which are partially produced by sulfur. The SO$_{x}$ emissions factor scales linearly with fuel sulfur percentage content \cite{fourth2020greenhouse}. For pre-2020 data, we use an emissions factor based on a global average sulfur content of 2.5\% \cite{olmer2017greenhouse}. Assuming the sulfur content drops from 2.5\% to 0.5\% starting in 2020, this would correspond to an 80\% drop in sulfur content and an 80\% drop in the sulfur emissions factor. Although this correction factor is assumed and does not explicitly account for non-compliance, scrubbers, or low sulfur areas, this 80\% drop is consistent with several studies that looked at the impact this new requirement had on global sulfur emissions \cite{yuan2024abrupt, yoshioka2024warming}. PM emissions factors are based on an equation that is non-linear to sulfur fuel content \cite{fourth2020greenhouse}. Using this equation and again assuming an 80\% drop in sulfur content we estimate a 79.6\% drop in the PM$_{2.5}$, and PM$_{10}$ emissions factors. We apply these adjusted emissions factors for all SO$_{x}$, PM$_{2.5}$, and PM$_{10}$ emissions starting in January 1, 2020.
 
@@ -329,7 +329,7 @@ We define a global spatial resolution of 1x1-degree which is used for all spatia
 
 For the emissions regression model, we include several model features that capture the vessel length frequency distribution of S1 detections that occurred in any given pixel-month for each vessel type (fishing or non-fishing).This prevents assigning emissions to vessels for which no emission estimates are available. S1 detections smaller than the minimum vessel size represented in the AIS-broadcasting dataset are excluded to avoid assigning emissions to vessel sizes not characterized by the AIS emissions model. We normalize the detections by the total km² imaged across all S1 scenes within each pixel-month to account for spatiotemporal variation in Sentinel-1 sampling effort and therefore create a measure of detection density (Fig. \ref{fig:fig-map-fraction-months-imaged} shows spatial variation of sampling effort; Fig. \ref{fig:fig-s1-coverage-time-series} shows temporal variation). The emissions regression model is trained with these features corresponding to matched detection density in order to predict AIS-broadcasting emissions; when it comes time for using the model to predict non-broadcasting emissions, the unmatched detection density is used for these features instead.
 
-For the detection classification and detection regression models, each unit of observation represents one of the vessel length bins for each pixel-month and vessel type. We also include two model features describing the length bin for each observation: the numeric lower threshold for the vessel length bin, and a categorical factor representing which of the length bins the observation belongs to.
+For the detection classification and detection regression models, each unit of observation represents one of the vessel length bins for each pixel-month and vessel type. We also include two model features describing the length bin for each observation: the numeric lower threshold for the vessel length bin, and a categorical factor representing which of the length bins the observation belongs to. We finally include for each pixel the total area imaged by S1 across the entire 2017-2025 time period in order to account for the general amount each pixel is imaged. 
 
 \begin{figure}[H]
     \centering    \includegraphics[width=\columnwidth]{figures/fig-s1-coverage-time-series-1.png}
@@ -339,11 +339,11 @@ For the detection classification and detection regression models, each unit of o
 
 \paragraph{Spatial features}
 
-For each pixel we extract spatial information, including depth, distance to shore, and distance to the nearest port, from a high-resolution GFW subproduct (0.01x0.01-degree) and aggregate it to our 1x1-degree grid resolution by computing the minimum value in each pixel. In addition to the distance from the nearest port (which can be of any size port), we also include the distance from each pixel centroid to the nearest of the top 20 container ports according to the Lloyd's list of 2024 \cite{LloydsListTopPorts2024}. We include this since traffic density, loitering practices, and navigation behavior in major ports differ from those in regular ports. Additional geographic features include the water area within each pixel (excluding land and the 1 km S1 buffer from shore) and a categorical variable indicating which of the five major ocean basins each pixel falls within.
+For each pixel we extract spatial information, including depth, distance to shore, and distance to the nearest port, from a high-resolution GFW subproduct (0.01x0.01-degree) and aggregate it to our 1x1-degree grid resolution by computing the minimum value in each pixel. In addition to the distance from the nearest port (which can be of any size port), we also include the distance from each pixel centroid to the nearest of the top 20 container ports according to the Lloyd's list of 2024 \cite{LloydsListTopPorts2024}. We include this since traffic density, loitering practices, and navigation behavior in major ports differ from those in regular ports. Additional geographic features include the total area covered by water within each pixel, the fraction of area within each pixel covered by water, and a categorical variable indicating which of the five major ocean basins each pixel falls within.
 
 \paragraph{Weather features}
 
-Weather may influence both emissions and S1 detections. Sea conditions may affect not only vessel presence (e.g., smaller vessels may remain in port during storms), but also navigation behavior \cite{majamaki2025improving}. In addition, sea surface waves generated by wind modify SAR background signal, directly affecting the ability of the S1 detection model to accurately identify vessels \cite{huo2018ship}. To account for these effects, we extracted weather data from ECMWF Reanalysis v5 (ERA5), the fifth-generation atmospheric reanalysis of the global climate, produced by the Copernicus Climate Change Service \cite{era5cds2023}. We used Google Earth Engine to extract hourly ERA5 data and aggregate it to monthly minimum, maximum, and average values. Because ERA5 has higher spatial resolution than our 1×1-degree grid, we re-aggregated the data for each pixel, excluding land and the 1 km S1 buffer from shore, computing the mean of the monthly minimum, maximum, and average values, as well as the overall minimum and maximum across all sub-pixels (i.e., five values for each parameter). As our final model features, we used mean wind speed (which influences both navigation conditions and S1 detection), mean swell height (which affect navigation and vessel activity), and mean swell period (which also affect navigation and vessel activity).
+Weather influences both vessel activity as well as the ability for SAR to detect vessels. Storms or rough sea conditions may cause vessels, particularly smaller vessels, to stay in port during storms or avoid certain areas \cite{majamaki2025improving}. Sea surface temperature (SST) impacts the distribution of fish species, therefore impacting the spatiotemporal distribution of fishing vessels \cite{xing2026underestimated}. Weather and sea surface state also influences S1's ability to detect vessels. Sea surface waves generated by wind modify SAR background signal, directly affecting the ability of the S1 detection model to accurately identify vessels \cite{huo2018ship}. Heavy rain can also affect sea surface scatter and background cluttering \cite{greidanus2017sumo}, as can swell and wave height \cite{ryu2025environment}, affecting the ability of SAR to detect vessels. To account for these effects, we extracted weather data from ECMWF Reanalysis v5 (ERA5), the fifth-generation atmospheric reanalysis of the global climate, produced by the Copernicus Climate Change Service \cite{era5cds2023}. We used Google Earth Engine to extract hourly ERA5 data and aggregate it to monthly average or total values for the ocean area in each of our 1x1 degree pixels. As our final model features that were used in both the detection classification and detection regression models, we used mean wind speed (which may influence vessel activity and S1 detection), total precipitation (which may influence vessel activity), mean sea surface temperature (which may influence vessel activity, particularly for fishing vessels), mean sea level surface pressure (which may influence vessel activity), mean wave and swell height which may influence vessel activity), and mean wave period (which may influence vessel activity).
 
 \paragraph{AIS reception quality features}
 
@@ -351,7 +351,7 @@ We included several model features related to AIS reception quality and signal t
 
 \paragraph{Temporal features}
 
-To account for temporal variability in each of the three models, we include a numeric feature representing days since the start of the study period (January 1, 2017). We also include a boolean feature for whether or not the observation occurs on or after January 2020, to coincide with the start of the IMO low sulphur fuel policy. Accounting for temporal variation is particularly important given the variation in S1 coverage over time (Fig. \ref{fig:fig-s1-coverage-time-series}).
+To account for temporal variability in each of the three models, we include a factor feature representing the month of the year. We also include a boolean feature for whether or not the observation occurs on or after January 2020, to coincide with the start of the IMO low sulphur fuel policy. To account for temporal trends of general vessel activity in the detection classification and regression models, we include features characterizing the total number of unique AIS-broadcasting vessels globally each month, as well as the number of unique AIS-broadcasting vessels in each pixel-month. Accounting for temporal variation is particularly important given both the variation in S1 coverage over time, as well as the variation in global fleet composition over time (Fig. \ref{fig:fig-s1-coverage-time-series}).
 
 \subsubsection{Data pre-processing}
 
@@ -663,8 +663,9 @@ Training/test data for all models has an 80/20 split, and is stratified by vesse
     \midrule
     \multicolumn{6}{@{}l}{\textit{Regression models}} \\
     Main engine power   & kW            & 13\,842  & 3\,542  & $R^2$    & 0.929 \\
-    Gross tonnage       & GT            & 62,636  & 15\,687  & $R^2$    & 0.944 \\
+    Gross tonnage       & GT            & 62\,636  & 15\,687  & $R^2$    & 0.944 \\
     Design speed        & knots         & 8\,808  & 2\,241  & $R^2$    & 0.861 \\
+    Engine RPM          & rev$/$min     & 45\,868 & 11\,467  & $R^2$   & 0.533 \\
     Construction year   & year          & 45\,868  & 11\,467  & $R^2$    & 0.447 \\
     \bottomrule
   \end{tabular}
@@ -797,7 +798,7 @@ Continuous numeric vessel characteristics - main engine power, gross tonnage, de
 \paragraph{Training data}
 
 All models make use of the inferred, identity, and activity features described above. Labels are drawn from clean, aggregated registry data, ensuring that re-used MMSIs and MMSIs with conflating classes by registry are dropped from training.
-The engine power model had a training set of 13,000 samples, the gross tonnage model had a training set of 63,000 samples, the design speed model had a training set of 8,808 samples, the construction year model had a training set of 45,868 samples, and the engine type model had a training set of 46,108 samples.
+The engine power model had a training set of 13,000 samples, the gross tonnage model had a training set of 63,000 samples, the design speed model had a training set of 8,808 samples, the construction year and engine RPM models had a training set of 45,868 samples, and the engine type model had a training set of 46,108 samples.
 
 \paragraph{Performance}
 \\
@@ -815,16 +816,21 @@ The tonnage model achieved an R$^2$ of 0.944 with a mean absolute error of 2,830
 \\
 The design speed model achieved an R$^2$ of 0.861 with a mean absolute error of 0.82 kn and a mean absolute percentage error of 4.9\%.
 \\
+\\
 \textit{Year-of-build model}
 \\
-The year-of-build model achieved an R$^2$ of 0.447 with a mean absolute error of 6.68 and a mean absolute percentage error of \%.
+The year-of-build model achieved an R$^2$ of 0.447 with a mean absolute error of 6.68 and a mean absolute percentage error of 0.3\%.
+\\
+\\
+\textit{Engine RPM model}
+\\
+The engine RPM model achieved an R$^2$ of 0.533 with a mean absolute error of 360.56 and a mean absolute percentage error of 33.2\%.
 \\
 \\
 \textit{Engine type model}
 \\
 Accuracy of 99.08\%; macro-F1 54.6\%; weighted F1 0.991\%. Per class F1: oil 99.5\%, gas 61.7\%, turbine 57.1\%, reciprocating 0.00.
-\\
-\\
+
 \paragraph{Key predictive features}
 
 \textit{Engine power model}
@@ -847,6 +853,11 @@ Top speed (95th percentile): 0.609. Median speed: 0.054. Neural network supply v
 Average engine power inferred by the neural network: 0.162. First digit of the MMSI code: 0.101. Average tonnage inferred by the neural network: 0.063.
 \\
 \\
+\textit{Engine RPM model}
+\\
+Average gross tonnage inferred by the neural network: 0.310. Average length inferred by the neural network: 0.093. Average percentage of self-identified shiptype messages as fishing: 0.074.
+\\
+\\
 \textit{Engine type model}
 \\
 Top speed (95th percentile): 0.096. Neural network patrol vessel score: 0.080. Average engine power inferred by the neural network: 0.062.
@@ -854,17 +865,19 @@ Top speed (95th percentile): 0.096. Neural network patrol vessel score: 0.080. A
 \paragraph{Interpretability}
 
 Both the engine power and the tonnage predictions are largely driven by the neural network's inferred values, indicating that these models are refining existing predictions.
-
+\\
 The design speed predictions are most heavily reliant on the vessel's top speed and median speed, which makes intuitive sense as the two act as a proxy for design speed.
-
+\\
 The year-of-build predictions are less singularly reliant on one strong signal, but are driven the most by the neural network's inferred engine power and the first digit of the MMSI code. The latter likely acts as a proxy for build/registration era for each flag state.
-
+\\
+The engine RPM predictions are largely weighted by physical characteristics of the vessel, but similarly less reliant on a single feature. The physical characteristics describing a vessel likely act as a proxy for RPM, while the self-identified shiptype likely distinguishes fishing and non-fishing vessel properties.
+\\
 The top features for engine type predictions are much more diffuse, suggesting that no single feature strongly separates engine types and the model relies on combinations of weaker signals.
 
 \paragraph{Overfitting controls and known weaknesses}
 To mitigate overfitting, all models are trained with a fixed random seed and a train/test split stratified by vessel class and first-digit MMSI. The engine type model additionally used class-weight balancing to counteract severe class imbalance in the training labels. However, because the engine type labels are so heavily skewed towards oil engines, the model only performs reliably for that class, and semi-reliably for gas. As higher volume data becomes available for a greater diversity of engine types, future models will be more sophistication and better predictive of the less represented types. 
 
-The year-of-build model has a 6-7 year mean error, suggesting that it is useful for predicting general build era up to around a decade, but not reliable for year-by-year predictions.
+The year-of-build model has a 6-7 year mean error, suggesting that it is useful for predicting general build era up to around a decade, but not reliable for year-by-year predictions. The engine RPM model has mean error of 360 revolutions per minute, indicating that it can capture very broad patterns but with more relative error than the year-of-build model.
 The engine power, tonnage, and design speed models all show the same pattern: performance is strongest in the mid-range of each variable and degrades substantially at the extremes, where training data is sparse.
 
 
