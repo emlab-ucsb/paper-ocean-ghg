@@ -13,32 +13,32 @@ Log(AIS emissions) & Dependent variable & No & No & Yes & log(MT) & Numeric & Ye
 Vessel type (fishing or non-fishing) & Dependent variable & Yes & Yes & Yes & - & Boolean & Yes & Yes & GFW & \cite{paolo2024satellite}\\
 Lower threshold of vessel length bin & S1 detection features & Yes & Yes & No & m & Numeric & No & No & GFW & \cite{paolo2024satellite}\\
 \addlinespace
-Vessel length bin (4 categories) & S1 detection features & Yes & Yes & No & - & Factor & Yes & Yes & GFW & \cite{paolo2024satellite}\\
+Vessel length bin category & S1 detection features & Yes & Yes & No & - & Factor & Yes & Yes & GFW & \cite{paolo2024satellite}\\
 S1 detections per km$^2$ of area for each length bin & S1 detection features & No & No & Yes & detects/km2 & Numeric & Yes & Yes & GFW & \cite{paolo2024satellite}\\
+Total pixel area imaged by S1 across all time & S1 detection features & Yes & Yes & No & km2 & Numeric & Yes & No & GFW & \cite{paolo2024satellite}\\
+Unique AIS-broadcasting vessels in pixel-month & AIS reception quality & Yes & Yes & No & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
+Unique AIS-broadcasting vessels globally & AIS reception quality & Yes & Yes & No & - & Numeric & No & Yes & GFW & \cite{kroodsma2018tracking}\\
+\addlinespace
+Positions reported by AIS type A & AIS reception quality & Yes & Yes & Yes & - & Numeric & Yes & No & GFW & \cite{kroodsma2018tracking}\\
+Positions reported by AIS type B & AIS reception quality & Yes & Yes & Yes & - & Numeric & Yes & No & GFW & \cite{kroodsma2018tracking}\\
+Proportion of messages, dynamic AIS receivers & AIS reception quality & Yes & Yes & Yes & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
+Proportion of messages, terrestrial AIS receivers & AIS reception quality & Yes & Yes & Yes & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
+Proportion of messages, satellite AIS receivers & AIS reception quality & Yes & Yes & Yes & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
+\addlinespace
+Month of year & Temporal features & Yes & Yes & Yes & - & Factor & No & Yes & GFW & -\\
 Post-2020 IMO Sulphur policy & Temporal features & No & No & Yes & - & Boolean & No & Yes & IMO & \cite{imo_sulphur_2020}\\
 Ocean basin & Geographic features  & Yes & Yes & Yes & - & Factor & Yes & No & GFW & \cite{kroodsma2018tracking}\\
 Pixel water area & Geographic features  & Yes & Yes & Yes & km2 & Numeric & Yes & No & GFW & \cite{paolo2024satellite}\\
+Pixel water fraction & Geographic features & No & No & Yes & - & Numeric & Yes & No & GFW & \cite{paolo2024satellite}\\
 \addlinespace
 Mean ocean depth & Geographic features  & Yes & Yes & Yes & m & Numeric & Yes & No & GFW & \cite{kroodsma2018tracking}\\
 Mean distance from shore & Geographic features  & Yes & Yes & Yes & m & Numeric & Yes & No & GFW & \cite{kroodsma2018tracking}\\
 Mean distance from nearest port & Geographic features  & Yes & Yes & Yes & m & Numeric & Yes & No & GFW & \cite{kroodsma2018tracking}\\
-Distance to top 20 ports & Geographic features  & Yes & Yes & Yes & m & Numeric & Yes & No & Lloyd’s List & \cite{LloydsListTopPorts2024}\\
-Positions reported by AIS type a & AIS reception quality & Yes & Yes & Yes & - & Numeric & Yes & No & GFW & \cite{kroodsma2018tracking}\\
-\addlinespace
-Positions reported by AIS type b & AIS reception quality & Yes & Yes & Yes & - & Numeric & Yes & No & GFW & \cite{kroodsma2018tracking}\\
-Proportion of messages, dynamic AIS receivers & AIS reception quality & Yes & Yes & Yes & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
-Proportion of messages, terrestrial AIS receivers & AIS reception quality & Yes & Yes & Yes & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
-Proportion of messages, satellite AIS receivers & AIS reception quality & Yes & Yes & Yes & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
+Minimum distance to top 20 port & Geographic features  & Yes & Yes & Yes & m & Numeric & Yes & No & Lloyd’s List & \cite{LloydsListTopPorts2024}\\
 Mean wind speed & Weather features & No & Yes & No & m/s & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
 \addlinespace
-Mean primary wave height & Weather features & No & Yes & No & m & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
-Mean primary wave period & Weather features & No & Yes & No & s & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
-Total pixel area imaged by S1 across all time & S1 detection features & Yes & Yes & No & km2 & Numeric & Yes & No & GFW & \cite{paolo2024satellite}\\
-Pixel water fraction & Geographic features & No & No & Yes & - & Numeric & Yes & No & GFW & \cite{paolo2024satellite}\\
-Unique AIS-broadcasting vessels in pixel & AIS reception quality & Yes & Yes & No & - & Numeric & Yes & Yes & GFW & \cite{kroodsma2018tracking}\\
-\addlinespace
-Unique AIS-broadcasting vessels globally & AIS reception quality & Yes & Yes & No & - & Numeric & No & Yes & GFW & \cite{kroodsma2018tracking}\\
-Month of year & Temporal features & Yes & Yes & Yes & - & Factor & No & Yes & GFW & -\\
+Mean significant wave and swell height & Weather features & No & Yes & No & m & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
+Mean wave period & Weather features & No & Yes & No & s & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
 Mean sea surface temperature & Weather features & No & Yes & No & K & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
 Mean sea level pressure & Weather features & No & Yes & No & Pa & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
 Total precipitation & Weather features & No & Yes & No & m & Numeric & Yes & Yes & ERA5 & \cite{era5cds2023}\\
