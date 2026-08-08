@@ -512,5 +512,38 @@ list(
       file_path = file.path("data", "gfw", "annual_ais_activity_summary.csv")
     ),
     format = "file"
+  ),
+  # The same summary read from the daily gridded table instead of the ping table,
+  # and split by registry status as well as by vessel class.
+  #
+  # Same measures as the extract above except n_pings, which the daily table
+  # cannot supply: a row there is one ssvid, date and grid cell rather than one
+  # AIS message, so COUNT(*) counts cell-days. The other four measures are exact
+  # rather than approximate - the daily table is a pre-aggregation of the same
+  # ping-level emissions, so summing them reproduces the ping-level totals.
+  #
+  # Roughly 21x cheaper to scan (5.8 billion rows against 139 billion), which is
+  # what makes the registry split affordable to carry alongside the class split.
+  #
+  # Shares activity_summary_start_year with the extract above so the two cover
+  # the same window and can be compared row for row.
+  tar_file_read(
+    name = annual_ais_activity_summary_cheap,
+    command = file.path("sql", "annual_ais_activity_summary_cheap.sql"),
+    read = download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_ais = run_version_ais,
+          analysis_start_year = activity_summary_start_year,
+          analysis_end_year = analysis_end_year
+        ),
+      file_path = file.path(
+        "data",
+        "gfw",
+        "annual_ais_activity_summary_cheap.csv"
+      )
+    ),
+    format = "file"
   )
 )

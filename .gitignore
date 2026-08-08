@@ -38,3 +38,5 @@ paper-ocean-ghg.Rproj
 # Don't save quarto cache - it gets big
 qmd/quarto_notebook_cache/
 qmd/quarto_notebook_cache/*
+
+*.zip

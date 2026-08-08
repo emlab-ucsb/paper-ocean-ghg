@@ -1,0 +1,41 @@
+data_source,vessel_count_definition,year,emissions_mt,vessels,intensity_kt_per_vessel
+GFW (AIS),"Distinct SSVID, entire AIS fleet incl. fishing and small craft",2015,687.2,249732,2.75
+GFW (AIS),"Distinct SSVID, entire AIS fleet incl. fishing and small craft",2016,752.7,282661,2.66
+GFW (AIS),"Distinct SSVID, entire AIS fleet incl. fishing and small craft",2017,824.2,316073,2.61
+GFW (AIS),"Distinct SSVID, entire AIS fleet incl. fishing and small craft",2018,861.4,345277,2.49
+GFW (AIS),"Distinct SSVID, entire AIS fleet incl. fishing and small craft",2019,884.1,375934,2.35
+GFW (AIS),"Distinct SSVID, entire AIS fleet incl. fishing and small craft",2020,879.1,393810,2.23
+GFW (AIS),"Distinct SSVID, entire AIS fleet incl. fishing and small craft",2021,941.1,425933,2.21
+GFW (AIS),"Distinct SSVID, entire AIS fleet incl. fishing and small craft",2022,1004.5,449659,2.23
+GFW (AIS),"Distinct SSVID, entire AIS fleet incl. fishing and small craft",2023,1054.2,480651,2.19
+GFW (AIS),"Distinct SSVID, entire AIS fleet incl. fishing and small craft",2024,1139.2,508849,2.24
+GFW (AIS),"Distinct SSVID, entire AIS fleet incl. fishing and small craft",2025,1189.4,529848,2.24
+"GFW (AIS, any registry)",Distinct SSVID appearing on any register (IMO or other),2015,564.9,84417,6.69
+"GFW (AIS, any registry)",Distinct SSVID appearing on any register (IMO or other),2016,604.4,90243,6.7
+"GFW (AIS, any registry)",Distinct SSVID appearing on any register (IMO or other),2017,643.7,94832,6.79
+"GFW (AIS, any registry)",Distinct SSVID appearing on any register (IMO or other),2018,658.8,96672,6.81
+"GFW (AIS, any registry)",Distinct SSVID appearing on any register (IMO or other),2019,625.5,98261,6.37
+"GFW (AIS, any registry)",Distinct SSVID appearing on any register (IMO or other),2020,580.7,97327,5.97
+"GFW (AIS, any registry)",Distinct SSVID appearing on any register (IMO or other),2021,572.8,98252,5.83
+"GFW (AIS, any registry)",Distinct SSVID appearing on any register (IMO or other),2022,555.7,97262,5.71
+"GFW (AIS, any registry)",Distinct SSVID appearing on any register (IMO or other),2023,521.7,95147,5.48
+"GFW (AIS, any registry)",Distinct SSVID appearing on any register (IMO or other),2024,500.9,93392,5.36
+"GFW (AIS, any registry)",Distinct SSVID appearing on any register (IMO or other),2025,470.4,91140,5.16
+ICCT (distance-reporting classes),SAVE classes reporting both CO2 and distance (excl. Unknown),2016,761,108833,6.99
+ICCT (distance-reporting classes),SAVE classes reporting both CO2 and distance (excl. Unknown),2017,783.8,110268,7.11
+ICCT (distance-reporting classes),SAVE classes reporting both CO2 and distance (excl. Unknown),2018,806.9,112207,7.19
+ICCT (distance-reporting classes),SAVE classes reporting both CO2 and distance (excl. Unknown),2019,805.6,113741,7.08
+ICCT (distance-reporting classes),SAVE classes reporting both CO2 and distance (excl. Unknown),2020,786.2,123553,6.36
+ICCT (distance-reporting classes),SAVE classes reporting both CO2 and distance (excl. Unknown),2021,809.6,125288,6.46
+ICCT (distance-reporting classes),SAVE classes reporting both CO2 and distance (excl. Unknown),2022,834.3,126791,6.58
+ICCT (distance-reporting classes),SAVE classes reporting both CO2 and distance (excl. Unknown),2023,827.5,125867,6.57
+IMO,"'Total included', Fourth IMO GHG Study 2020 (transcribed)",2015,991,181005,5.47
+IMO,"'Total included', Fourth IMO GHG Study 2020 (transcribed)",2016,1026,194059,5.29
+IMO,"'Total included', Fourth IMO GHG Study 2020 (transcribed)",2017,1064,228134,4.66
+IMO,"'Total included', Fourth IMO GHG Study 2020 (transcribed)",2018,1056,237505,4.45
+OECD,IMO-matched + MMSI-matched + imputed non-AIS vessels,2019,889.4,112300,7.92
+OECD,IMO-matched + MMSI-matched + imputed non-AIS vessels,2020,854.6,112000,7.63
+OECD,IMO-matched + MMSI-matched + imputed non-AIS vessels,2021,893.6,114200,7.82
+OECD,IMO-matched + MMSI-matched + imputed non-AIS vessels,2022,911.8,115100,7.92
+OECD,IMO-matched + MMSI-matched + imputed non-AIS vessels,2023,920,118800,7.74
+OECD,IMO-matched + MMSI-matched + imputed non-AIS vessels,2024,972.7,122500,7.94
