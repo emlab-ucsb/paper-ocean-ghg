@@ -487,8 +487,7 @@ list(
   # n_vessels_by_year_and_class extract: that read the same ping table for the
   # class split of the vessel count alone, which meant no extract carried
   # emissions per class on the same scoping as the paper's annual totals.
-  # Year-level consumers go through read_annual_ais_activity(), which collapses
-  # the class rows back to one row per year.
+  # Consumers that want a year-level series sum the class rows themselves.
   #
   # This series starts earlier than analysis_start_year to give the comparison a
   # longer activity baseline. It has its own start year target rather than moving
