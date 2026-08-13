@@ -228,6 +228,12 @@ list(
     name = inventory_comparison_figure,
     command = plot_inventory_comparison(
       all_inventory_data,
+      # Panel A starts at 2017 rather than the function's 2015 default, so all
+      # three panels open on the same year. The two years given up are sparse -
+      # only the inventories that reach back that far draw them - and panels B
+      # and C never showed them anyway, so the figure was asking the reader to
+      # switch x ranges between panels for very little.
+      start_year = 2017L,
       file_path = file.path(
         "figures",
         "si_inventory_comparison",
@@ -256,15 +262,34 @@ list(
     name = gfw_registry_emissions,
     command = gfw_registry_series()
   ),
+  # The split on its own, in relative terms. This is the figure that lives at
+  # registry_split_comparison.png; it had been produced by hand and its function
+  # was dropped in 03796c3, leaving the PNG with no code behind it. Restored as a
+  # target so the file rebuilds with the rest.
   tar_target(
-    name = registry_split_comparison_figure,
+    name = registry_split_relative_figure,
+    command = plot_registry_split_relative(
+      gfw_registry_emissions,
+      file_path = file.path(
+        "figures",
+        "si_inventory_comparison",
+        "registry_split_comparison.png"
+      )
+    ),
+    format = "file"
+  ),
+  # The same split drawn into the inventory-comparison layout. Writes to its own
+  # filename rather than registry_split_comparison.png, which the relative figure
+  # above already owns.
+  tar_target(
+    name = registry_split_with_inventories_figure,
     command = plot_registry_split_comparison(
       gfw_registry_emissions,
       all_inventory_data = all_inventory_data,
       file_path = file.path(
         "figures",
         "si_inventory_comparison",
-        "registry_split_comparison.png"
+        "registry_split_with_inventories.png"
       )
     ),
     format = "file"
@@ -539,6 +564,48 @@ list(
         "figures",
         "si_inventory_comparison",
         "registry_split_size_change.png"
+      )
+    ),
+    format = "file"
+  ),
+  # The same size-and-registry cut restricted to passenger, the class carrying
+  # the most of the growth, with levels and unmatched-share panels beside it.
+  tar_target(
+    name = passenger_size_disaggregation_figure,
+    command = plot_passenger_size_disaggregation(
+      file_path = file.path(
+        "figures",
+        "si_inventory_comparison",
+        "passenger_size_disaggregation.png"
+      )
+    ),
+    format = "file"
+  ),
+  # Passenger headcount beside passenger emissions, in levels (A, B) and in
+  # 2017-2025 change (C, D), all on the same length bins and no registry split -
+  # is the tail's growth more vessels, or more activity credited to the same ones?
+  # The panel-by-panel reading is documented on the function.
+  tar_target(
+    name = passenger_size_panels_figure,
+    command = plot_passenger_size_panels(
+      file_path = file.path(
+        "figures",
+        "si_inventory_comparison",
+        "passenger_size_panels.png"
+      )
+    ),
+    format = "file"
+  ),
+  # The same change cut by vessel class rather than length bin - which trades the
+  # growth sits in, against which sizes. Its function was dropped in 03796c3
+  # while the PNG stayed, so it is restored here with a target.
+  tar_target(
+    name = registry_split_class_change_figure,
+    command = plot_registry_split_class_change(
+      file_path = file.path(
+        "figures",
+        "si_inventory_comparison",
+        "registry_split_class_change.png"
       )
     ),
     format = "file"
