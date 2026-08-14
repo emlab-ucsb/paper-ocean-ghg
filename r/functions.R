@@ -1271,71 +1271,6 @@ plot_inventory_comparison <- function(
   inventory_plot
 }
 
-# Our AIS total split by registry status, drawn on the inventory-comparison
-# layout so the fragments can be read against the published inventories.
-#
-# Kept as its own figure rather than as three more lines on
-# inventory_comparison_all_sources.png. Drawn there, the no-registry fragment
-# reaches +295 % on the relative panels against a previous ceiling near +45 %,
-# and the axis rescale flattens every inventory line into a band at zero -- the
-# comparison those panels exist to make. The fragments are a partition of one
-# series and grow from a small base, so they do not share an axis with the
-# inventories in relative terms even though they do in absolute ones.
-#
-# Every inventory is drawn alongside, the same set the main figure carries, so
-# the two figures show the same field and only the registry fragments are new.
-# reference_sources exists to narrow that set if a version of the figure needs
-# it; NULL keeps everything, character() drops to the fragments alone.
-#
-# The two relative panels keep the main figure's baselines - 2017 for panel B,
-# 2019 for panel C - so a reader moving between the figures normalises on the
-# same years in both.
-plot_registry_split_comparison <- function(
-  registry_series,
-  all_inventory_data = NULL,
-  reference_sources = NULL,
-  baseline_year = 2017L,
-  late_baseline_year = 2019L,
-  # Held at 2017 rather than following the inventory figure back to 2015: the
-  # registry fragments are cut from our AIS series, which starts in 2017, so
-  # earlier years would only add empty space to the left of the subject of this
-  # figure.
-  start_year = 2017L,
-  file_path = NULL,
-  width = 9,
-  height = 14
-) {
-  reference <- if (is.null(all_inventory_data)) {
-    NULL
-  } else {
-    selected <- if (is.null(reference_sources)) {
-      all_inventory_data
-    } else {
-      all_inventory_data |>
-        dplyr::filter(.data$data_source %in% reference_sources)
-    }
-    selected |>
-      dplyr::select(dplyr::all_of(c("data_source", "year", "emissions_co2_mt")))
-  }
-
-  combined <- dplyr::bind_rows(
-    reference,
-    registry_series |>
-      dplyr::select(dplyr::all_of(c("data_source", "year", "emissions_co2_mt")))
-  ) |>
-    dplyr::mutate(year = as.integer(.data$year))
-
-  plot_inventory_comparison(
-    combined,
-    baseline_year = baseline_year,
-    late_baseline_year = late_baseline_year,
-    start_year = start_year,
-    file_path = file_path,
-    width = width,
-    height = height
-  )
-}
-
 # Colours for figures that draw the registry fragments without the published
 # inventories beside them.
 #
@@ -1355,6 +1290,9 @@ registry_fragment_colors <- function(data_sources) {
     "GFW (AIS)" = "#E69F00",
     "GFW (AIS, no registry)" = "#CC3311",
     "GFW (AIS, registry)" = "#004488",
+    # A size cut rather than a registry cut, so it takes a hue outside the
+    # red/blue pair the registry halves use.
+    "GFW (AIS, ≥150 m)" = "#56B4E9",
     "ICCT" = "#CC79A7",
     "IMO" = "#009E73",
     "OECD" = "#D55E00"
@@ -1389,9 +1327,19 @@ registry_fragment_colors <- function(data_sources) {
 # absolute terms that is registry_sankey_with_series_2025.png panel C; this is
 # the same fact as a rate.
 #
-# Levels are deliberately absent. Every line starts at 0 % by construction, so
-# nothing here says how large either half is - the sankey and the counts table
-# carry that, and this figure should not be read for it.
+# Levels are carried by the end-of-line labels rather than the axis. Every line
+# starts at 0 % by construction, so the axis alone says nothing about how large
+# each fragment is; the label at each line's right-hand end gives its final
+# absolute value beside its percent change, which is what lets a +295 % fragment
+# be read against the much larger half it is growing away from.
+#
+# A third cut is drawn beside the two registry halves: vessels at or above 150 m.
+# The registry split says which part of our total the other inventories were ever
+# in a position to enumerate. The size cut says which part of it is immune to our
+# own observation expanding - carriage there was already settled in 2017 and the
+# unmatched share of S1 detections has barely moved since, so that fragment's
+# growth cannot be vessels entering the record by beginning to broadcast. Two
+# different questions about the same line, and the growth argument needs both.
 plot_registry_split_relative <- function(
   registry_series = NULL,
   gfw_activity_file = file.path(
@@ -1403,8 +1351,12 @@ plot_registry_split_relative <- function(
   # Includes the GFW (AIS) total so the halves can be read against the line they
   # partition rather than only against each other.
   include_total = TRUE,
+  # The length bins that make up the size-restricted fragment. Named by the
+  # labels used in annual_ais_activity_summary_cheap.csv.
+  large_bins = c("150-175m", "175-200m", "200-225m", "225m+"),
+  large_label = "GFW (AIS, ≥150 m)",
   file_path = NULL,
-  width = 9,
+  width = 10,
   height = 6
 ) {
   if (is.null(registry_series)) {
@@ -1452,6 +1404,24 @@ plot_registry_split_relative <- function(
     series <- dplyr::bind_rows(series, total)
   }
 
+  # Added after the total is computed, not before: the total is the sum of the
+  # two registry halves, and this fragment overlaps both, so folding it in
+  # earlier would double-count it.
+  #
+  # All vessel classes, not non-fishing only. Fishing vessels are 0.1 % of
+  # emissions at these lengths (0.45 of 511 Mt in 2017), so restricting the cut
+  # would change the series by less than the rounding on its label while making
+  # it differ from the other three in two ways instead of one.
+  large_series <- readr::read_csv(gfw_activity_file, show_col_types = FALSE) |>
+    dplyr::filter(.data$length_bin %in% large_bins) |>
+    dplyr::group_by(year = as.integer(.data$year)) |>
+    dplyr::summarise(
+      emissions_co2_mt = sum(.data$emissions_co2_mt, na.rm = TRUE),
+      .groups = "drop"
+    ) |>
+    dplyr::mutate(data_source = large_label)
+  series <- dplyr::bind_rows(series, large_series)
+
   relative <- series |>
     dplyr::filter(.data$year >= baseline_year) |>
     dplyr::group_by(.data$data_source) |>
@@ -1468,6 +1438,7 @@ plot_registry_split_relative <- function(
   source_levels <- c(
     "GFW (AIS, no registry)",
     "GFW (AIS)",
+    large_label,
     "GFW (AIS, registry)"
   )
   relative <- relative |>
@@ -1479,6 +1450,39 @@ plot_registry_split_relative <- function(
     )
 
   present <- levels(relative$data_source)
+
+  # Percent change and the absolute level it ends at, so the figure carries
+  # magnitude as well as rate.
+  end_labels <- relative |>
+    dplyr::group_by(.data$data_source) |>
+    dplyr::filter(.data$year == max(.data$year)) |>
+    dplyr::ungroup() |>
+    dplyr::mutate(
+      label = sprintf(
+        "%+.0f%%  (%s Mt)",
+        100 * .data$relative_change,
+        formatC(
+          round(.data$emissions_co2_mt / 1e6),
+          format = "d",
+          big.mark = ","
+        )
+      )
+    )
+
+  # The AIS total and the size-restricted fragment end within a few percentage
+  # points of each other, so label positions are walked apart from the lowest up
+  # until each clears the one below by a minimum gap in axis units. Only the text
+  # moves; the lines and points stay where the data put them.
+  label_gap <- 0.06 * diff(range(relative$relative_change))
+  label_order <- order(end_labels$relative_change)
+  stacked <- end_labels$relative_change[label_order]
+  for (i in seq_along(stacked)[-1]) {
+    if (stacked[i] - stacked[i - 1] < label_gap) {
+      stacked[i] <- stacked[i - 1] + label_gap
+    }
+  }
+  end_labels$label_y <- NA_real_
+  end_labels$label_y[label_order] <- stacked
 
   relative_plot <- ggplot2::ggplot(
     relative,
@@ -1492,9 +1496,27 @@ plot_registry_split_relative <- function(
     ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "grey40") +
     ggplot2::geom_line(linewidth = 1) +
     ggplot2::geom_point(size = 1.8) +
+    ggplot2::geom_text(
+      data = end_labels,
+      ggplot2::aes(
+        x = .data$year + 0.12,
+        y = .data$label_y,
+        label = .data$label,
+        color = .data$data_source
+      ),
+      hjust = 0,
+      size = 3.1,
+      fontface = "bold",
+      show.legend = FALSE,
+      inherit.aes = FALSE
+    ) +
     ggplot2::scale_color_manual(values = registry_fragment_colors(present)) +
     ggplot2::scale_linetype_manual(values = inventory_linetypes(present)) +
-    ggplot2::scale_x_continuous(breaks = sort(unique(relative$year))) +
+    ggplot2::scale_x_continuous(
+      breaks = sort(unique(relative$year)),
+      # Right-hand room for the end labels.
+      expand = ggplot2::expansion(mult = c(0.02, 0.20))
+    ) +
     ggplot2::scale_y_continuous(labels = scales::percent) +
     ggplot2::labs(
       x = "",
@@ -4779,300 +4801,6 @@ plot_registry_split_size_change <- function(
   size_change_plot
 }
 
-# The passenger class, opened up by vessel length.
-#
-# Passenger is the class that carries the most of the AIS-side growth and the one
-# whose growth is almost entirely registry-unmatched, so the objection it invites
-# is specific: is this a fleet of ferries and cruise ships that a registry-built
-# inventory should have enumerated, or is it the small-boat tail? The answer is
-# the tail - two thirds of the class-wide increase sits in the 0-25 m bin alone,
-# on the unmatched side - but the larger bins are not silent either, and the
-# panels are laid out so both readings are available.
-#
-# (a) is levels over time by bin, so the 0-25 m dominance and its trajectory are
-# visible before any differencing. (b) is the registry_split_size_change cut
-# restricted to passenger, faceted into the small tail and the registry-mandated
-# sizes with free axes - one shared axis would compress everything above 50 m
-# into a hairline against the 0-25 m bar. (c) is the unmatched share of each
-# bin's emissions at the two endpoints, which is where the large bins speak: they
-# start almost fully matched and end with a substantial unmatched fraction.
-#
-# Same extract, same two-category registry split, and the same baseline/end years
-# as the fleet-wide figure, so the two are read against each other.
-plot_passenger_size_disaggregation <- function(
-  gfw_activity_file = file.path(
-    "data",
-    "gfw",
-    "annual_ais_activity_summary_cheap.csv"
-  ),
-  comparison_years = c(2017L, 2025L),
-  vessel_class_name = "passenger",
-  file_path = NULL,
-  width = 10,
-  height = 8
-) {
-  first_year <- min(comparison_years)
-  last_year <- max(comparison_years)
-
-  passenger <- readr::read_csv(gfw_activity_file, show_col_types = FALSE) |>
-    dplyr::filter(.data$vessel_class == vessel_class_name) |>
-    dplyr::mutate(
-      year = as.integer(.data$year),
-      length_bin = factor(.data$length_bin, levels = s1_length_bin_levels()),
-      registry = ifelse(
-        .data$registry_type == "no_registry",
-        "No registry",
-        "Any registry"
-      )
-    )
-
-  if (nrow(passenger) == 0) {
-    stop(
-      "The activity extract has no rows for vessel class ",
-      vessel_class_name,
-      "."
-    )
-  }
-
-  for (yr in c(first_year, last_year)) {
-    if (!yr %in% passenger$year) {
-      stop(
-        "The activity extract has no data for year ",
-        yr,
-        ". It covers ",
-        paste(range(passenger$year), collapse = "-"),
-        "."
-      )
-    }
-  }
-
-  bin_colors <- stats::setNames(
-    s1_length_palette(length(s1_length_bin_levels())),
-    s1_length_bin_levels()
-  )
-  registry_colors <- c("No registry" = "#c1332a", "Any registry" = "#3b8bc4")
-
-  # The emissions column is named _mt in the extract but holds tonnes, so
-  # everything plotted here is divided by 1e6.
-  by_bin_year <- passenger |>
-    dplyr::group_by(.data$length_bin, .data$year) |>
-    dplyr::summarise(
-      co2_mt = sum(.data$emissions_co2_mt) / 1e6,
-      .groups = "drop"
-    )
-
-  levels_panel <- by_bin_year |>
-    ggplot2::ggplot(
-      ggplot2::aes(
-        x = .data$year,
-        y = .data$co2_mt,
-        fill = forcats::fct_rev(.data$length_bin)
-      )
-    ) +
-    ggplot2::geom_area(colour = "white", linewidth = 0.15) +
-    ggplot2::scale_fill_manual(
-      "Vessel length",
-      values = bin_colors,
-      breaks = s1_length_bin_levels()
-    ) +
-    ggplot2::scale_x_continuous(breaks = scales::breaks_width(2)) +
-    ggplot2::guides(
-      fill = ggplot2::guide_legend(nrow = 2, byrow = TRUE, reverse = FALSE)
-    ) +
-    ggplot2::labs(
-      x = NULL,
-      y = bquote("Annual CO"[2] * " (Mt)"),
-      subtitle = "(a) Emissions by vessel length"
-    ) +
-    ggplot2::theme_bw(base_size = 9) +
-    ggplot2::theme(
-      legend.position = "bottom",
-      legend.key.size = ggplot2::unit(8, "pt"),
-      panel.grid.minor = ggplot2::element_blank(),
-      plot.subtitle = ggplot2::element_text(face = "bold")
-    )
-
-  endpoints <- passenger |>
-    dplyr::filter(.data$year %in% c(first_year, last_year)) |>
-    dplyr::group_by(.data$length_bin, .data$registry, .data$year) |>
-    dplyr::summarise(
-      co2_mt = sum(.data$emissions_co2_mt) / 1e6,
-      .groups = "drop"
-    ) |>
-    tidyr::complete(
-      .data$length_bin,
-      .data$registry,
-      .data$year,
-      fill = list(co2_mt = 0)
-    ) |>
-    dplyr::mutate(
-      # Free axes per group: the 0-25 m bin is an order of magnitude above the
-      # rest, and a shared axis would leave the larger bins unreadable.
-      size_group = ifelse(
-        .data$length_bin %in% c("0-25m", "25-50m"),
-        "Small tail (< 50 m)",
-        "Registry-mandated sizes (≥ 50 m)"
-      ),
-      size_group = factor(
-        .data$size_group,
-        levels = c("Small tail (< 50 m)", "Registry-mandated sizes (≥ 50 m)")
-      )
-    )
-
-  changes <- endpoints |>
-    tidyr::pivot_wider(
-      names_from = "year",
-      values_from = "co2_mt",
-      names_prefix = "y"
-    ) |>
-    dplyr::mutate(
-      change_mt = .data[[paste0("y", last_year)]] -
-        .data[[paste0("y", first_year)]]
-    )
-
-  change_panel <- changes |>
-    ggplot2::ggplot(
-      ggplot2::aes(
-        y = forcats::fct_rev(.data$length_bin),
-        x = .data$change_mt,
-        fill = .data$registry
-      )
-    ) +
-    ggplot2::geom_vline(xintercept = 0, colour = "grey20", linewidth = 0.4) +
-    ggplot2::geom_col(
-      position = ggplot2::position_dodge(width = 0.72),
-      width = 0.66
-    ) +
-    ggplot2::facet_wrap(~size_group, scales = "free") +
-    ggplot2::scale_fill_manual(
-      "Registry status",
-      values = registry_colors,
-      breaks = c("No registry", "Any registry")
-    ) +
-    ggplot2::scale_x_continuous(
-      labels = scales::label_number(style_positive = "plus")
-    ) +
-    ggplot2::labs(
-      x = bquote(
-        "Change in annual CO"[2] * " (Mt), " * .(first_year) * " - " *
-          .(last_year)
-      ),
-      y = "Vessel length",
-      subtitle = paste0(
-        "(b) Change by length and registry status - unmatched vessels carry the ",
-        "increase at every size"
-      )
-    ) +
-    ggplot2::theme_bw(base_size = 9) +
-    ggplot2::theme(
-      legend.position = "bottom",
-      strip.background = ggplot2::element_rect(fill = "transparent", color = NA),
-      strip.text = ggplot2::element_text(face = "bold"),
-      panel.grid.minor = ggplot2::element_blank(),
-      panel.grid.major.y = ggplot2::element_blank(),
-      plot.subtitle = ggplot2::element_text(face = "bold")
-    )
-
-  unmatched_share <- endpoints |>
-    dplyr::group_by(.data$length_bin, .data$year) |>
-    dplyr::summarise(
-      share = sum(.data$co2_mt[.data$registry == "No registry"]) /
-        sum(.data$co2_mt),
-      .groups = "drop"
-    ) |>
-    dplyr::mutate(year = factor(.data$year))
-
-  share_segments <- unmatched_share |>
-    tidyr::pivot_wider(
-      names_from = "year",
-      values_from = "share",
-      names_prefix = "y"
-    ) |>
-    dplyr::rename(
-      share_start = paste0("y", first_year),
-      share_end = paste0("y", last_year)
-    )
-
-  year_colors <- stats::setNames(
-    c("grey60", "#c1332a"),
-    as.character(c(first_year, last_year))
-  )
-
-  share_panel <- share_segments |>
-    ggplot2::ggplot(ggplot2::aes(y = forcats::fct_rev(.data$length_bin))) +
-    ggplot2::geom_segment(
-      ggplot2::aes(x = .data$share_start, xend = .data$share_end),
-      arrow = ggplot2::arrow(length = ggplot2::unit(5, "pt"), type = "closed"),
-      colour = "grey40",
-      linewidth = 0.5
-    ) +
-    ggplot2::geom_point(
-      data = unmatched_share,
-      ggplot2::aes(x = .data$share, colour = .data$year),
-      size = 2.4
-    ) +
-    ggplot2::scale_colour_manual(NULL, values = year_colors) +
-    ggplot2::scale_x_continuous(
-      labels = scales::percent,
-      limits = c(0, 1),
-      expand = ggplot2::expansion(mult = c(0.02, 0.04))
-    ) +
-    ggplot2::labs(
-      x = bquote("Share of the bin's CO"[2] * " from vessels matched to no registry"),
-      y = "Vessel length",
-      subtitle = "(c) Unmatched share of each bin"
-    ) +
-    ggplot2::theme_bw(base_size = 9) +
-    ggplot2::theme(
-      legend.position = "bottom",
-      panel.grid.minor = ggplot2::element_blank(),
-      panel.grid.major.y = ggplot2::element_blank(),
-      plot.subtitle = ggplot2::element_text(face = "bold")
-    )
-
-  title <- cowplot::ggdraw() +
-    cowplot::draw_label(
-      paste0(
-        "Passenger emissions growth sits in the small, registry-unmatched ",
-        "tail - but the unmatched share rises in every size class"
-      ),
-      fontface = "bold",
-      size = 11,
-      hjust = 0,
-      x = 0.01
-    )
-
-  top_row <- cowplot::plot_grid(
-    levels_panel,
-    share_panel,
-    nrow = 1,
-    rel_widths = c(1, 1)
-  )
-
-  disaggregation_plot <- cowplot::plot_grid(
-    title,
-    top_row,
-    change_panel,
-    ncol = 1,
-    rel_heights = c(0.07, 0.5, 0.5)
-  )
-
-  if (!is.null(file_path)) {
-    dir.create(dirname(file_path), showWarnings = FALSE, recursive = TRUE)
-    ggplot2::ggsave(
-      file_path,
-      disaggregation_plot,
-      width = width,
-      height = height,
-      dpi = 200,
-      bg = "white"
-    )
-    return(file_path)
-  }
-
-  disaggregation_plot
-}
-
 # The passenger class opened up by vessel length, in four square panels: levels
 # and changes, counts and emissions.
 #
@@ -5589,235 +5317,6 @@ plot_registry_split_class_change <- function(
   }
 
   change_plot
-}
-
-# A flat vessel count against the same detections weighted by size.
-#
-# The count of detected vessels barely moves over the period, which reads as an
-# argument that nothing is growing. But a count gives a 20 m trawler and a 300 m
-# container ship the same weight, and they do not emit the same. Weighting each
-# size bin by length squared - engine power scales roughly with the square of
-# length, and emissions with power - turns the flat count into growth that lands
-# most of the way to the fused emissions series.
-#
-# Panel B says where that growth sits: the largest non-fishing bins gain share
-# of the weighted index while fishing loses it. The segment in decline is the
-# emissions-light one and the segment growing is the emissions-heavy one, which
-# is why the two panels disagree in the first place.
-#
-# The exponent is a proxy rather than the model's own per-bin emissions, so this
-# is an order-of-magnitude reconciliation, not a decomposition. The ribbon spans
-# exponents 1.5 to 2.5 to show how much that choice carries.
-plot_counts_vs_sizeweighted_activity <- function(
-  density_file = file.path(
-    "data",
-    "gfw",
-    "s1_detection_density_by_denominator.csv"
-  ),
-  monthly_series_file = file.path(
-    "data",
-    "gfw",
-    "monthly_aggregated_time_series.csv"
-  ),
-  file_path = NULL,
-  width = 9,
-  height = 7.6
-) {
-  # Bin midpoints stand in for vessel length. The open-ended top bins have no
-  # midpoint, so each fleet gets a representative length instead. Those two
-  # numbers carry weight: the top non-fishing bin dominates the weighted index.
-  density <- readr::read_csv(density_file, show_col_types = FALSE) |>
-    dplyr::mutate(
-      month = as.Date(.data$time),
-      fleet = ifelse(.data$fishing, "Fishing", "Non-fishing"),
-      bin_min = as.numeric(.data$length_bin_min),
-      bin_max = suppressWarnings(as.numeric(.data$length_bin_max)),
-      midpoint_m = ifelse(
-        is.na(.data$bin_max) | is.infinite(.data$bin_max),
-        ifelse(.data$fishing, 110, 250),
-        (.data$bin_min + .data$bin_max) / 2
-      )
-    )
-
-  fused <- readr::read_csv(monthly_series_file, show_col_types = FALSE) |>
-    dplyr::mutate(time = as.Date(.data$time)) |>
-    dplyr::group_by(.data$time) |>
-    dplyr::summarise(
-      ais = sum(.data$emissions_co2_mt),
-      dark = sum(.data$emissions_co2_dark_mt),
-      .groups = "drop"
-    ) |>
-    dplyr::mutate(total = .data$ais + .data$dark)
-
-  weighted_density <- function(exponent) {
-    density |>
-      dplyr::mutate(weight = .data$midpoint_m^exponent) |>
-      dplyr::group_by(.data$month) |>
-      dplyr::summarise(
-        value = sum(.data$dens_union_scenes * .data$weight),
-        .groups = "drop"
-      )
-  }
-
-  count_label <- "Detected vessels (counts)"
-  weighted_label <- paste(
-    "Detected vessels, size-weighted (~ emissions-relevant)"
-  )
-  fused_label <- "Fused CO2 emissions (AIS + S1)"
-
-  activity_series <- dplyr::bind_rows(
-    weighted_density(0) |> dplyr::mutate(series = count_label),
-    weighted_density(2) |> dplyr::mutate(series = weighted_label),
-    fused |>
-      dplyr::transmute(
-        month = .data$time,
-        value = .data$total,
-        series = fused_label
-      )
-  ) |>
-    dplyr::group_by(.data$series) |>
-    dplyr::mutate(index = index_to_baseline(.data$value, .data$month)) |>
-    dplyr::ungroup()
-
-  sensitivity_band <- dplyr::inner_join(
-    weighted_density(1.5) |>
-      dplyr::transmute(
-        month = .data$month,
-        lower = index_to_baseline(.data$value, .data$month)
-      ),
-    weighted_density(2.5) |>
-      dplyr::transmute(
-        month = .data$month,
-        upper = index_to_baseline(.data$value, .data$month)
-      ),
-    by = "month"
-  )
-
-  series_colors <- c("grey45", "#2c7fb8", "#e69f00")
-  names(series_colors) <- c(count_label, weighted_label, fused_label)
-
-  panel_a <- activity_series |>
-    ggplot2::ggplot(
-      ggplot2::aes(.data$month, .data$index, colour = .data$series)
-    ) +
-    ggplot2::geom_ribbon(
-      data = sensitivity_band,
-      ggplot2::aes(.data$month, ymin = .data$lower, ymax = .data$upper),
-      inherit.aes = FALSE,
-      fill = "#2c7fb8",
-      alpha = 0.12
-    ) +
-    ggplot2::geom_hline(yintercept = 1, colour = "grey70", linewidth = 0.3) +
-    ggplot2::geom_line(linewidth = 0.45, alpha = 0.5) +
-    ggplot2::geom_smooth(
-      method = "loess",
-      span = 0.3,
-      se = FALSE,
-      linewidth = 1
-    ) +
-    ggplot2::scale_colour_manual(NULL, values = series_colors) +
-    ggplot2::scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
-    ggplot2::labs(
-      x = "",
-      y = "Index (2017-18 = 1)",
-      title = "A near-flat vessel count conceals emissions-relevant growth",
-      subtitle = paste0(
-        "Same S1 detections, same coverage normalisation. Weighting each size ",
-        "bin by length^2 (band: length^1.5-length^2.5)\nturns the flat count ",
-        "into growth of roughly +18% - most of the way to the fused emissions ",
-        "series."
-      )
-    ) +
-    ggplot2::theme_minimal(base_size = 9) +
-    ggplot2::theme(
-      legend.position = "top",
-      panel.grid.minor = ggplot2::element_blank(),
-      plot.title = ggplot2::element_text(face = "bold")
-    )
-
-  segment_levels <- c(
-    "Non-fishing 175m+",
-    "Non-fishing 50-175m",
-    "Non-fishing <50m",
-    "Fishing (all)"
-  )
-
-  segment_shares <- density |>
-    dplyr::mutate(
-      weight = .data$midpoint_m^2,
-      year = as.integer(format(.data$month, "%Y")),
-      segment = dplyr::case_when(
-        !.data$fishing & .data$bin_min >= 175 ~ "Non-fishing 175m+",
-        !.data$fishing & .data$bin_min >= 50 ~ "Non-fishing 50-175m",
-        !.data$fishing ~ "Non-fishing <50m",
-        TRUE ~ "Fishing (all)"
-      )
-    ) |>
-    dplyr::group_by(.data$year, .data$segment) |>
-    dplyr::summarise(
-      value = sum(.data$dens_union_scenes * .data$weight),
-      .groups = "drop"
-    ) |>
-    dplyr::group_by(.data$year) |>
-    dplyr::mutate(share = .data$value / sum(.data$value)) |>
-    dplyr::ungroup() |>
-    dplyr::mutate(segment = factor(.data$segment, levels = segment_levels))
-
-  panel_b <- segment_shares |>
-    ggplot2::ggplot(
-      ggplot2::aes(.data$year, .data$share, fill = .data$segment)
-    ) +
-    ggplot2::geom_area(alpha = 0.85) +
-    ggplot2::scale_fill_manual(
-      NULL,
-      values = c("#08519c", "#6baed6", "#c6dbef", "#d95f0e")
-    ) +
-    ggplot2::scale_y_continuous(labels = scales::percent) +
-    ggplot2::scale_x_continuous(
-      breaks = seq(
-        min(segment_shares$year),
-        max(segment_shares$year),
-        by = 1
-      )
-    ) +
-    ggplot2::labs(
-      x = "",
-      y = "Share of size-weighted activity",
-      subtitle = paste0(
-        "Where the emissions-relevant activity sits: the largest non-fishing ",
-        "class grows as a share of the weighted index,\nwhile fishing ",
-        "shrinks. The declining segment is emissions-light; the growing one ",
-        "is emissions-heavy."
-      )
-    ) +
-    ggplot2::theme_minimal(base_size = 9) +
-    ggplot2::theme(
-      legend.position = "right",
-      panel.grid.minor = ggplot2::element_blank()
-    )
-
-  combined <- cowplot::plot_grid(
-    panel_a,
-    panel_b,
-    ncol = 1,
-    rel_heights = c(1.15, 0.85),
-    labels = c("A", "B")
-  )
-
-  if (!is.null(file_path)) {
-    dir.create(dirname(file_path), showWarnings = FALSE, recursive = TRUE)
-    ggplot2::ggsave(
-      file_path,
-      combined,
-      width = width,
-      height = height,
-      dpi = 200,
-      bg = "white"
-    )
-    return(file_path)
-  }
-
-  combined
 }
 
 # Whether the AIS message explosion inflated the inventory.

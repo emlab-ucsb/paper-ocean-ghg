@@ -278,22 +278,6 @@ list(
     ),
     format = "file"
   ),
-  # The same split drawn into the inventory-comparison layout. Writes to its own
-  # filename rather than registry_split_comparison.png, which the relative figure
-  # above already owns.
-  tar_target(
-    name = registry_split_with_inventories_figure,
-    command = plot_registry_split_comparison(
-      gfw_registry_emissions,
-      all_inventory_data = all_inventory_data,
-      file_path = file.path(
-        "figures",
-        "si_inventory_comparison",
-        "registry_split_with_inventories.png"
-      )
-    ),
-    format = "file"
-  ),
   # The same split as a composition rather than a trend: what share of the fleet
   # each registry status holds against what share of the CO2 it emits.
   #
@@ -568,19 +552,6 @@ list(
     ),
     format = "file"
   ),
-  # The same size-and-registry cut restricted to passenger, the class carrying
-  # the most of the growth, with levels and unmatched-share panels beside it.
-  tar_target(
-    name = passenger_size_disaggregation_figure,
-    command = plot_passenger_size_disaggregation(
-      file_path = file.path(
-        "figures",
-        "si_inventory_comparison",
-        "passenger_size_disaggregation.png"
-      )
-    ),
-    format = "file"
-  ),
   # Passenger headcount beside passenger emissions, in levels (A, B) and in
   # 2017-2025 change (C, D), all on the same length bins and no registry split -
   # is the tail's growth more vessels, or more activity credited to the same ones?
@@ -606,18 +577,6 @@ list(
         "figures",
         "si_inventory_comparison",
         "registry_split_class_change.png"
-      )
-    ),
-    format = "file"
-  ),
-  tar_target(
-    name = counts_vs_sizeweighted_activity_figure,
-    command = plot_counts_vs_sizeweighted_activity(
-      density_file = s1_detection_density_file,
-      file_path = file.path(
-        "figures",
-        "emissions_reconciliation",
-        "fig1-counts-vs-sizeweighted-activity.png"
       )
     ),
     format = "file"
