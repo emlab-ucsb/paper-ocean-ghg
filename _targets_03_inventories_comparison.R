@@ -546,9 +546,7 @@ list(
   # an edited extract without a pull ever being wired in.
   # Reads the fixed-metre-bin extract, shared with the carriage-saturation and
   # density-by-match-status figures, so a length bin means the same thing
-  # wherever it appears. The per-fleet decile extract it used to read
-  # (data/gfw/s1_detections_by_fleet_decile.csv) is kept in the repo but is no
-  # longer wired into the pipeline.
+  # wherever it appears.
   tar_target(
     name = unmatched_fraction_fullperiod_figure,
     command = plot_unmatched_fraction_fullperiod(
