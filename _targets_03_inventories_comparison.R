@@ -236,8 +236,39 @@ list(
       start_year = 2017L,
       file_path = file.path(
         "figures",
-        "si_inventory_comparison",
-        "inventory_comparison_all_sources.png"
+        "figS-inventory-comparison-all-sources.png"
+      )
+    ),
+    format = "file"
+  ),
+  # The same comparison asked of fleet size rather than emissions: how far each
+  # inventory's vessel count has moved from its own first year, with ours split
+  # by registry status.
+  #
+  # plot_vessel_counts_relative() was dropped in 03796c3 and this figure never
+  # had a target at all - it had been drawn by hand - so the PNG the text cites
+  # sat in figures/ with no code behind it. Both are restored here.
+  #
+  # The counts come from the committed CSV rather than being re-derived: building
+  # it calls inventory_vessel_counts(), which downloads the ICCT workbook and
+  # queries our own fleet, and the published counts it reads are settled. Tracked
+  # as a tar_file() so an edited extract still triggers a redraw.
+  tar_file(
+    name = inventory_vessel_counts_by_registry_file,
+    command = file.path(
+      "data",
+      "inventories",
+      "si_inventory_comparison",
+      "inventory_vessel_counts_by_registry.csv"
+    )
+  ),
+  tar_target(
+    name = vessel_counts_relative_figure,
+    command = plot_vessel_counts_relative(
+      vessel_counts_file = inventory_vessel_counts_by_registry_file,
+      file_path = file.path(
+        "figures",
+        "figS-inventory-vessel-counts-by-registry.png"
       )
     ),
     format = "file"
@@ -263,7 +294,7 @@ list(
     command = gfw_registry_series()
   ),
   # The split on its own, in relative terms. This is the figure that lives at
-  # registry_split_comparison.png; it had been produced by hand and its function
+  # figS-registry-split-comparison.png; it had been produced by hand and its function
   # was dropped in 03796c3, leaving the PNG with no code behind it. Restored as a
   # target so the file rebuilds with the rest.
   tar_target(
@@ -272,8 +303,7 @@ list(
       gfw_registry_emissions,
       file_path = file.path(
         "figures",
-        "si_inventory_comparison",
-        "registry_split_comparison.png"
+        "figS-registry-split-comparison.png"
       )
     ),
     format = "file"
@@ -299,8 +329,34 @@ list(
       year = registry_sankey_year,
       file_path = file.path(
         "figures",
-        "si_inventory_comparison",
-        paste0("registry_sankey_with_series_", registry_sankey_year, ".png")
+        paste0("figS-registry-sankey-with-series-", registry_sankey_year, ".png")
+      )
+    ),
+    format = "file"
+  ),
+  # The same Sankey cut by vessel class rather than registry status. Restored
+  # with its fleet-shares input from 03796c3^, which dropped both while the PNG
+  # the text cites stayed in figures/.
+  #
+  # plot_registry_sankey_with_series() above is a thin wrapper on the same
+  # plotting function, so the two figures are drawn by one implementation and
+  # differ only in the composition handed to it.
+  tar_target(
+    name = fleet_shares_by_year,
+    command = fleet_emissions_and_size_by_year()
+  ),
+  tar_target(
+    name = fleet_sankey_year,
+    command = 2025L
+  ),
+  tar_target(
+    name = fleet_sankey_with_series_figure,
+    command = plot_fleet_sankey_with_series(
+      fleet_shares_by_year,
+      year = fleet_sankey_year,
+      file_path = file.path(
+        "figures",
+        paste0("figS-fleet-sankey-with-series-", fleet_sankey_year, ".png")
       )
     ),
     format = "file"
@@ -344,7 +400,7 @@ list(
     name = fleet_growth_by_year_figure,
     command = plot_fleet_growth_by_year(
       fleet_growth_by_year_data,
-      file_path = file.path("figures", "fleet_growth_by_year.png")
+      file_path = file.path("figures", "figS-fleet-growth-by-year.png")
     ),
     format = "file"
   ),
@@ -452,8 +508,28 @@ list(
       gfw_data_sources = c("GFW (AIS + S1)", "GFW (AIS)"),
       file_path = file.path(
         "figures",
-        "multisector_shipping_comparison.png"
+        "figS-multisector-shipping-comparison.png"
       )
+    ),
+    format = "file"
+  ),
+  # Figure 2: the same series indexed to a common baseline, which is the only
+  # way a ~39,000 Mt series and a ~800 Mt one share an axis. Restored from
+  # 03796c3^ along with plot_multisector_comparison(), which that commit dropped
+  # while leaving the PNG the text cites in figures/.
+  #
+  # Both GFW whole-fleet series are drawn here even though the shipping figure
+  # keeps only one pair: on the relative-change view AIS and AIS + S1 do not
+  # coincide, because the non-broadcasting fleet the fused series adds is the
+  # part that grows.
+  tar_target(
+    name = multisector_comparison_figure,
+    command = plot_multisector_comparison(
+      multisector_inventory_data,
+      gfw_series = gfw_edgar_marine_emissions,
+      gfw_data_sources = c("GFW (AIS + S1)", "GFW (AIS)"),
+      baseline_year = 2017L,
+      file_path = file.path("figures", "figS-multisector-comparison.png")
     ),
     format = "file"
   ),
@@ -477,7 +553,7 @@ list(
     name = unmatched_fraction_fullperiod_figure,
     command = plot_unmatched_fraction_fullperiod(
       fixed_bin_file = s1_detections_by_fixed_length_bin_file,
-      file_path = file.path("figures", "fig-unmatched-fraction-fullperiod.png")
+      file_path = file.path("figures", "figS-unmatched-fraction-fullperiod.png")
     ),
     format = "file"
   ),
@@ -495,8 +571,7 @@ list(
       fixed_bin_file = s1_detections_by_fixed_length_bin_file,
       file_path = file.path(
         "figures",
-        "si_inventory_comparison",
-        "ais_carriage_saturation_by_size.png"
+        "figS-ais-carriage-saturation-by-size.png"
       )
     ),
     format = "file"
@@ -521,8 +596,7 @@ list(
     command = plot_passenger_size_panels(
       file_path = file.path(
         "figures",
-        "si_inventory_comparison",
-        "passenger_size_panels.png"
+        "figS-passenger-size-panels.png"
       )
     ),
     format = "file"
@@ -532,8 +606,7 @@ list(
     command = plot_messages_hours_emissions(
       file_path = file.path(
         "figures",
-        "emissions_reconciliation",
-        "fig3-messages-vs-hours-vs-emissions.png"
+        "figS-messages-vs-hours-vs-emissions.png"
       )
     ),
     format = "file"

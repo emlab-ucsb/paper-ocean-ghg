@@ -1,4 +1,4 @@
-# Builds figures/si_inventory_comparison/fig-density-denominators-and-bins.png
+# Builds figures/figS-density-denominators-and-bins.png
 #
 # Aggregate Sentinel-1 detection density drawn twice, under two independent
 # measures of observing effort:
@@ -282,8 +282,7 @@ bind_rows(
 
 out_path <- file.path(
   "figures",
-  "si_inventory_comparison",
-  "fig-density-denominators-and-bins.png"
+  "figS-density-denominators-and-bins.png"
 )
 ggsave(out_path, combined, width = 11, height = 6.7, dpi = 200, bg = "white")
 cat("\nwrote:", out_path, "\n")

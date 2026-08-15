@@ -1,4 +1,4 @@
-# Builds figures/si_inventory_comparison/fig-density-by-match-status.png
+# Builds figures/figS-density-by-match-status.png
 #
 # Sentinel-1 detection density per length bin, split three ways by whether a
 # detection matched an AIS broadcast. Row A alone is TOTAL detected activity per
@@ -322,7 +322,7 @@ figure <- plot_grid(
   axis = "tb"
 )
 
-out <- file.path("figures", "si_inventory_comparison",
-                 "fig-density-by-match-status.png")
+out <- file.path("figures",
+                 "figS-density-by-match-status.png")
 ggsave(out, figure, width = 13, height = 11, dpi = 200, bg = "white")
 cat(sprintf("\nwrote %s\n", out))
