@@ -81,10 +81,7 @@ list(
       file.path("data", "steam", "steam_ship_annual_emissions.csv")
     ),
     format = "file"
-  )
-
-  ,
-
+  ),
   # SEIM (Shipping Emission Inventory Model) ----
   # Global shipping emissions from SEIM, developed at Tsinghua University and
   # published on Zenodo: https://zenodo.org/records/11069531
@@ -114,10 +111,7 @@ list(
       file.path("data", "seim", "seim_ship_annual_emissions.csv")
     ),
     format = "file"
-  )
-
-  ,
-
+  ),
   # ICCT ----
   # The International Council on Clean Transportation's systematic assessment of
   # global shipping emissions, published as a supplemental workbook alongside
@@ -146,10 +140,7 @@ list(
       file.path("data", "icct", "icct_ship_annual_emissions.csv")
     ),
     format = "file"
-  )
-
-  ,
-
+  ),
   # OECD ----
   # The OECD's experimental maritime transport CO2 statistics, taken from the
   # SDMX API so the series updates with the pipeline rather than being a manual
@@ -178,10 +169,7 @@ list(
       file.path("data", "oecd", "oecd_ship_annual_emissions.csv")
     ),
     format = "file"
-  )
-
-  ,
-
+  ),
   # Inventory comparison figure ----
   # An extended version of the notebook's Figure S4: the same GFW / EDGAR / OECD
   # / IMO comparison, plus the inventories this pipeline downloads (STEAM, SEIM,
@@ -196,6 +184,17 @@ list(
   tar_target(
     name = gfw_edgar_marine_emissions,
     command = gfw_edgar_marine_co2()
+  ),
+  # Written out because the figures that consume it now live in
+  # qmd/quarto_notebook.qmd, which reads its inputs as CSVs the way the notebook
+  # reads every other series
+  tar_target(
+    name = gfw_edgar_marine_emissions_file,
+    command = write_inventory_csv(
+      gfw_edgar_marine_emissions,
+      file.path("data", "gfw", "gfw_edgar_marine_emissions.csv")
+    ),
+    format = "file"
   ),
   # IMO and MariTEAM have no machine-readable source, so their values are
   # transcribed in r/functions.R rather than downloaded. IMO covers 2015-2018;
@@ -224,19 +223,38 @@ list(
     ),
     format = "file"
   ),
+  # CO2 per vessel for every model, the table the manuscript cites for the
+  # intensity comparison. It was a hand-run script, so the CSV went stale
+  # whenever all_inventory_data changed; as a target it rebuilds with its
+  # inputs.
+  #
+  # The three transcribed inputs are tracked as files rather than read by path
+  # inside the function, so editing any of them invalidates the table. The
+  # activity extract belongs to 01_gfw_data_pull, which has its own store, so it
+  # is tracked here as a plain file input.
+  tar_file(
+    name = inventory_vessel_counts_file,
+    command = file.path("data", "inventories", "inventory_vessel_counts.csv")
+  ),
+  tar_file(
+    name = icct_gfw_ais_comparison_file,
+    command = file.path("data", "inventories", "icct_gfw_ais_comparison.csv")
+  ),
+  tar_file(
+    name = annual_ais_activity_summary_cheap_file,
+    command = file.path("data", "gfw", "annual_ais_activity_summary_cheap.csv")
+  ),
   tar_target(
-    name = inventory_comparison_figure,
-    command = plot_inventory_comparison(
-      all_inventory_data,
-      # Panel A starts at 2017 rather than the function's 2015 default, so all
-      # three panels open on the same year. The two years given up are sparse -
-      # only the inventories that reach back that far draw them - and panels B
-      # and C never showed them anyway, so the figure was asking the reader to
-      # switch x ranges between panels for very little.
-      start_year = 2017L,
+    name = inventory_intensity_all_models_file,
+    command = build_inventory_intensity(
+      inventory_data = all_inventory_data,
+      vessel_counts_file = inventory_vessel_counts_file,
+      icct_comparison_file = icct_gfw_ais_comparison_file,
+      gfw_activity_file = annual_ais_activity_summary_cheap_file,
       file_path = file.path(
-        "figures",
-        "figS-inventory-comparison-all-sources.png"
+        "data",
+        "inventories",
+        "inventory_intensity_all_models.csv"
       )
     ),
     format = "file"
@@ -262,17 +280,6 @@ list(
       "inventory_vessel_counts_by_registry.csv"
     )
   ),
-  tar_target(
-    name = vessel_counts_relative_figure,
-    command = plot_vessel_counts_relative(
-      vessel_counts_file = inventory_vessel_counts_by_registry_file,
-      file_path = file.path(
-        "figures",
-        "figS-inventory-vessel-counts-by-registry.png"
-      )
-    ),
-    format = "file"
-  ),
 
   # Registry split of our AIS series ----
   # The same total the figure above compares against the published inventories,
@@ -293,18 +300,12 @@ list(
     name = gfw_registry_emissions,
     command = gfw_registry_series()
   ),
-  # The split on its own, in relative terms. This is the figure that lives at
-  # figS-registry-split-comparison.png; it had been produced by hand and its function
-  # was dropped in 03796c3, leaving the PNG with no code behind it. Restored as a
-  # target so the file rebuilds with the rest.
+  # Read as a CSV by the registry split figure in qmd/quarto_notebook.qmd
   tar_target(
-    name = registry_split_relative_figure,
-    command = plot_registry_split_relative(
+    name = gfw_registry_emissions_file,
+    command = write_inventory_csv(
       gfw_registry_emissions,
-      file_path = file.path(
-        "figures",
-        "figS-registry-split-comparison.png"
-      )
+      file.path("data", "gfw", "gfw_registry_emissions.csv")
     ),
     format = "file"
   ),
@@ -318,21 +319,18 @@ list(
     name = registry_shares_by_year,
     command = registry_emissions_and_size_by_year()
   ),
+  # Read as a CSV by the registry sankey figure in qmd/quarto_notebook.qmd
+  tar_target(
+    name = registry_shares_by_year_file,
+    command = write_inventory_csv(
+      registry_shares_by_year,
+      file.path("data", "gfw", "registry_shares_by_year.csv")
+    ),
+    format = "file"
+  ),
   tar_target(
     name = registry_sankey_year,
     command = 2025L
-  ),
-  tar_target(
-    name = registry_sankey_with_series_figure,
-    command = plot_registry_sankey_with_series(
-      registry_shares_by_year,
-      year = registry_sankey_year,
-      file_path = file.path(
-        "figures",
-        paste0("figS-registry-sankey-with-series-", registry_sankey_year, ".png")
-      )
-    ),
-    format = "file"
   ),
   # The same Sankey cut by vessel class rather than registry status. Restored
   # with its fleet-shares input from 03796c3^, which dropped both while the PNG
@@ -345,21 +343,18 @@ list(
     name = fleet_shares_by_year,
     command = fleet_emissions_and_size_by_year()
   ),
+  # Read as a CSV by the fleet sankey figure in qmd/quarto_notebook.qmd
+  tar_target(
+    name = fleet_shares_by_year_file,
+    command = write_inventory_csv(
+      fleet_shares_by_year,
+      file.path("data", "gfw", "fleet_shares_by_year.csv")
+    ),
+    format = "file"
+  ),
   tar_target(
     name = fleet_sankey_year,
     command = 2025L
-  ),
-  tar_target(
-    name = fleet_sankey_with_series_figure,
-    command = plot_fleet_sankey_with_series(
-      fleet_shares_by_year,
-      year = fleet_sankey_year,
-      file_path = file.path(
-        "figures",
-        paste0("figS-fleet-sankey-with-series-", fleet_sankey_year, ".png")
-      )
-    ),
-    format = "file"
   ),
 
   # Fleet growth ----
@@ -393,14 +388,6 @@ list(
     command = write_inventory_csv(
       fleet_growth_by_year_data,
       file.path("data", "gfw", "fleet_growth_by_year.csv")
-    ),
-    format = "file"
-  ),
-  tar_target(
-    name = fleet_growth_by_year_figure,
-    command = plot_fleet_growth_by_year(
-      fleet_growth_by_year_data,
-      file_path = file.path("figures", "figS-fleet-growth-by-year.png")
     ),
     format = "file"
   ),
@@ -484,77 +471,8 @@ list(
     ),
     format = "file"
   ),
-  # Figure 1: the shipping-only view. What each global inventory allocates to
-  # marine, beside both our GFW estimates - AIS alone, which is the like-for-
-  # like against inventories built from broadcasting vessels, and AIS + S1,
-  # which adds the non-broadcasting fleet none of them attempt to cover. CEDS
-  # appears at both scopes, so the gap between its two lines is the domestic
-  # navigation that EDGAR folds into its single Water-borne Navigation sector.
-  #
-  # Reuses gfw_edgar_marine_emissions from the shipping comparison above for the
-  # GFW series, so both figures draw the same GFW numbers.
-  tar_target(
-    name = multisector_shipping_comparison_figure,
-    command = plot_multisector_shipping_comparison(
-      multisector_inventory_data,
-      gfw_series = gfw_edgar_marine_emissions,
-      # GFW is carried by the two whole-fleet series: AIS alone is the
-      # like-for-like against inventories built from broadcasting vessels, and
-      # AIS + S1 adds the non-broadcasting fleet none of them attempt to cover,
-      # so the gap between the two is what this comparison cannot otherwise see.
-      # The maritime-transport subsets are dropped: four GFW lines on one ramp
-      # crowded the comparison, and those scopes are the subject of the
-      # inventory-comparison figures, where they can be read properly.
-      gfw_data_sources = c("GFW (AIS + S1)", "GFW (AIS)"),
-      file_path = file.path(
-        "figures",
-        "figS-multisector-shipping-comparison.png"
-      )
-    ),
-    format = "file"
-  ),
-  # Figure 2: the same series indexed to a common baseline, which is the only
-  # way a ~39,000 Mt series and a ~800 Mt one share an axis. Restored from
-  # 03796c3^ along with plot_multisector_comparison(), which that commit dropped
-  # while leaving the PNG the text cites in figures/.
-  #
-  # Both GFW whole-fleet series are drawn here even though the shipping figure
-  # keeps only one pair: on the relative-change view AIS and AIS + S1 do not
-  # coincide, because the non-broadcasting fleet the fused series adds is the
-  # part that grows.
-  tar_target(
-    name = multisector_comparison_figure,
-    command = plot_multisector_comparison(
-      multisector_inventory_data,
-      gfw_series = gfw_edgar_marine_emissions,
-      gfw_data_sources = c("GFW (AIS + S1)", "GFW (AIS)"),
-      baseline_year = 2017L,
-      file_path = file.path("figures", "figS-multisector-comparison.png")
-    ),
-    format = "file"
-  ),
 
   # Sentinel-1 detection diagnostics ----
-  # The comparison above says our series grows faster than the registry-built
-  # inventories. These figures answer the obvious objection to that: whether the
-  # growth is activity or just more of the ocean coming into view.
-  #
-  # They read committed CSVs rather than pulling from BigQuery. Each underlying
-  # query scans 2.5-4.6 GB and the results are settled, so the extracts are kept
-  # in the repo as data/gfw/s1_*.csv with their queries beside them as
-  # sql/s1_*.sql. Tracking the CSVs as tar_file() inputs means a redraw follows
-  # an edited extract without a pull ever being wired in.
-  # Reads the fixed-metre-bin extract, shared with the carriage-saturation and
-  # density-by-match-status figures, so a length bin means the same thing
-  # wherever it appears.
-  tar_target(
-    name = unmatched_fraction_fullperiod_figure,
-    command = plot_unmatched_fraction_fullperiod(
-      fixed_bin_file = s1_detections_by_fixed_length_bin_file,
-      file_path = file.path("figures", "figS-unmatched-fraction-fullperiod.png")
-    ),
-    format = "file"
-  ),
   tar_file(
     name = s1_detections_by_fixed_length_bin_file,
     command = file.path(
@@ -562,51 +480,5 @@ list(
       "gfw",
       "s1_detections_by_fixed_length_bin.csv"
     )
-  ),
-  tar_target(
-    name = ais_carriage_saturation_figure,
-    command = plot_ais_carriage_saturation_by_size(
-      fixed_bin_file = s1_detections_by_fixed_length_bin_file,
-      file_path = file.path(
-        "figures",
-        "figS-ais-carriage-saturation-by-size.png"
-      )
-    ),
-    format = "file"
-  ),
-
-  # Emissions reconciliation ----
-  # Two figures that close the same argument from the AIS side: whether the
-  # passenger tail's growth is more vessels or more activity credited to the same
-  # ones, and whether the post-2021 explosion in AIS message volume inflated the
-  # inventory.
-  #
-  # These read 01_gfw_data_pull's extracts by path, the same way the fleet and
-  # registry targets above do - that pipeline has its own store, so there is no
-  # target here to depend on.
-
-  # Passenger headcount beside passenger emissions, in levels (A, B) and in
-  # 2017-2025 change (C, D), all on the same length bins and no registry split -
-  # is the tail's growth more vessels, or more activity credited to the same ones?
-  # The panel-by-panel reading is documented on the function.
-  tar_target(
-    name = passenger_size_panels_figure,
-    command = plot_passenger_size_panels(
-      file_path = file.path(
-        "figures",
-        "figS-passenger-size-panels.png"
-      )
-    ),
-    format = "file"
-  ),
-  tar_target(
-    name = messages_hours_emissions_figure,
-    command = plot_messages_hours_emissions(
-      file_path = file.path(
-        "figures",
-        "figS-messages-vs-hours-vs-emissions.png"
-      )
-    ),
-    format = "file"
   )
 )
