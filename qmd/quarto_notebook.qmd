@@ -5159,6 +5159,12 @@ plot_fleet_sankey_with_series <- function(
   fleet_data,
   file_path = NULL,
   year = 2025L,
+  # First year drawn in the B and C series. The AIS record starts in 2015, but
+  # the fused AIS + S1 series and the rest of the supplementary figures start in
+  # 2017, so the series is cut to the same period. Panel A is a single-year
+  # snapshot and is unaffected, as are the class palette and the size threshold,
+  # both of which are still read off the full record above.
+  series_first_year = 2017L,
   min_share = 0.005,
   min_label_share = 0.04,
   grouped_as_reefer = c(
@@ -5230,6 +5236,7 @@ plot_fleet_sankey_with_series <- function(
   names(full_palette) <- palette_levels
 
   series_data <- fleet_data |>
+    dplyr::filter(.data$year >= series_first_year) |>
     dplyr::left_join(small, by = "vessel_class") |>
     dplyr::mutate(
       # Reefers go into the catch-all rather than standing as their own group,
@@ -6801,12 +6808,16 @@ height <- 8.4
 first_year <- min(comparison_years)
 last_year <- max(comparison_years)
 
+# The activity extract starts in 2015, but panels A and B are cut to the same
+# period as panels C and D - and as the rest of the supplementary figures -
+# rather than opening two years before the comparison they illustrate.
 passenger <- annual_ais_activity_summary_cheap |>
   dplyr::filter(.data$vessel_class == vessel_class_name) |>
   dplyr::mutate(
     year = as.integer(.data$year),
     length_bin = factor(.data$length_bin, levels = s1_length_bin_levels())
-  )
+  ) |>
+  dplyr::filter(.data$year >= first_year)
 
 if (nrow(passenger) == 0) {
   stop(
