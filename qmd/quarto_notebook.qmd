@@ -5693,6 +5693,91 @@ inventory_plot
 ```
 
 ```{r}
+#| results: 'asis'
+# Panel A of the figure above as a table, for the values behind the lines.
+# Built from the objects that chunk leaves behind - the filtered
+# all_inventory_data and its source_order - so the table cannot state a
+# different number from the panel it accompanies.
+
+# Column order follows panel A's key rather than source_order itself. The
+# levels panel draws its line layer before its point layer, so ggplot trains
+# the colour scale on the multi-year series first and the single-year ones
+# (MariTEAM) land at the end of the legend. Reproducing that here keeps the
+# columns in the order a reader meets the series in the figure.
+single_year_sources <- all_inventory_data |>
+  dplyr::count(data_source) |>
+  dplyr::filter(n == 1) |>
+  dplyr::pull(data_source)
+
+table_source_order <- c(
+  setdiff(source_order, single_year_sources),
+  intersect(source_order, single_year_sources)
+)
+
+# The prose names this inventory SAVE and attributes it to the ICCT, so the
+# table names it the same way. Applied at the export rather than upstream: the
+# figures key their palette and legend on the short label, and a column head
+# has room for the full name where a legend entry does not.
+inventory_table_data <- all_inventory_data |>
+  dplyr::mutate(
+    data_source = dplyr::recode(data_source, "ICCT" = "SAVE (ICCT)")
+  )
+
+table_source_order <- dplyr::recode(
+  table_source_order,
+  "ICCT" = "SAVE (ICCT)"
+)
+
+# Three decimals of a billion tonnes, i.e. 1 Mt, on every cell. Table S7
+# rounds to three significant figures instead, which prints a different number
+# of decimals per cell; here eight series are being read against each other
+# year by year, so a fixed number of decimals matters more than a fixed
+# number of digits.
+inventory_comparison_all_sources_kable <- inventory_table_data |>
+  dplyr::mutate(
+    emissions_co2_mt = formatC(
+      emissions_co2_mt / 1e9,
+      format = "f",
+      digits = 3
+    )
+  ) |>
+  tidyr::pivot_wider(
+    names_from = "data_source",
+    values_from = "emissions_co2_mt"
+  ) |>
+  dplyr::arrange(year) |>
+  dplyr::rename(Year = year) |>
+  dplyr::relocate(Year, dplyr::all_of(table_source_order)) |>
+  # Only the emissions columns: Year has no gaps, and running the replacement
+  # over it would coerce it to text and lose its right alignment
+  dplyr::mutate(
+    dplyr::across(-Year, ~ tidyr::replace_na(.x, "-"))
+  ) |>
+  knitr::kable(
+    format = "latex",
+    label = "inventory_comparison_all_sources",
+    caption = paste0(
+      "Annual marine vessel CO$_{2}$ emissions (billions of metric tonnes) ",
+      "for our AIS-based and fused (AIS + S1) estimates and for the published ",
+      "bottom-up, activity-based inventories. A dash marks a year for which ",
+      "an inventory publishes no estimate."
+    )
+  ) |>
+  kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
+
+inventory_comparison_all_sources_kable
+
+inventory_comparison_all_sources_kable |>
+  writeLines(
+    file.path(
+      project_root,
+      "tables",
+      "inventory_comparison_all_sources.tex"
+    )
+  )
+```
+
+```{r}
 #| label: figS-multisector-comparison
 #| fig-cap: "Marine emissions growth against all sectors and against other transport modes, in EDGAR and CEDS, indexed to 2017."
 #| fig-width: 9
@@ -5998,6 +6083,56 @@ shipping_plot <- ggplot2::ggplot(
 
 
 shipping_plot
+```
+
+```{r}
+#| results: 'asis'
+# The figure above as a table. Reads `shipping` and `series_order` from that
+# chunk rather than rebuilding them, so the two carry the same numbers.
+#
+# Same series order the figure's key uses, so the columns read left to right
+# in the order the legend reads top to bottom.
+multisector_shipping_comparison_kable <- shipping |>
+  dplyr::mutate(
+    emissions_co2_mt = formatC(
+      emissions_co2_mt / 1e9,
+      format = "f",
+      digits = 3
+    )
+  ) |>
+  tidyr::pivot_wider(
+    names_from = "series",
+    values_from = "emissions_co2_mt"
+  ) |>
+  dplyr::arrange(year) |>
+  dplyr::rename(Year = year) |>
+  dplyr::relocate(Year, dplyr::all_of(series_order)) |>
+  dplyr::mutate(
+    dplyr::across(-Year, ~ tidyr::replace_na(.x, "-"))
+  ) |>
+  knitr::kable(
+    format = "latex",
+    label = "multisector_shipping_comparison",
+    caption = paste0(
+      "Annual marine vessel CO$_{2}$ emissions (billions of metric tonnes) ",
+      "for our AIS-based and fused (AIS + S1) estimates against the shipping ",
+      "sector of the top-down EDGAR and CEDS inventories, whose shipping ",
+      "scope combines international and domestic navigation. A dash marks a ",
+      "year for which an inventory publishes no estimate."
+    )
+  ) |>
+  kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
+
+multisector_shipping_comparison_kable
+
+multisector_shipping_comparison_kable |>
+  writeLines(
+    file.path(
+      project_root,
+      "tables",
+      "multisector_shipping_comparison.tex"
+    )
+  )
 ```
 
 ```{r}
@@ -7628,6 +7763,17 @@ inventory_intensity_table <- inventory_intensity_all_models |>
     "intensity_kt_per_vessel",
     "intensity_kg_per_nm"
   ) |>
+  # The prose names this inventory SAVE and attributes it to the ICCT, so the
+  # table names it the same way. Applied at the export rather than upstream:
+  # the figures key their palette and legend on the short label.
+  dplyr::mutate(
+    data_source = dplyr::recode(
+      .data$data_source,
+      "ICCT" = "SAVE (ICCT)",
+      "ICCT (distance-reporting classes)" =
+        "SAVE (ICCT distance-reporting classes)"
+    )
+  ) |>
   dplyr::mutate(
     intensity_kt_per_vessel = sprintf("%.2f", .data$intensity_kt_per_vessel),
     # Left blank rather than zero for the models that publish no distance: a
@@ -7649,7 +7795,7 @@ inventory_intensity_table <- inventory_intensity_all_models |>
     escape = FALSE,
     booktabs = TRUE,
     align = c("l", "r", "r"),
-    caption = "CO$_2$ intensity per vessel for each inventory in the comparison, ordered by intensity. Intensities are computed on the fleet count each model publishes: single-total models use their reported figure, per-year models the mean over years where both a count and emissions exist, and the GFW rows our own activity summary on the same basis. Per-distance intensity is shown only for the models reporting distance travelled: ICCT restricted to its distance-reporting classes, and our AIS series whole and registry-matched.",
+    caption = "CO$_2$ intensity per vessel for each inventory in the comparison, ordered by intensity. Intensities are computed on the fleet count each model publishes: single-total models use their reported figure, per-year models the mean over years where both a count and emissions exist, and the GFW rows our own activity summary on the same basis. Per-distance intensity is shown only for the models reporting distance travelled: SAVE (ICCT) restricted to its distance-reporting classes, and our AIS series whole and registry-matched.",
     label = "inventory_intensity_all_models"
   ) |>
   kableExtra::kable_styling(
