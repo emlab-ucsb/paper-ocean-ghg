@@ -1,24 +1,27 @@
 # Builds figures/si_inventory_comparison/fig-density-by-match-status.png
 #
-# Panel C of si_density_denominators_figure.R, split three ways by whether a
-# detection matched an AIS broadcast. That figure's panel C shows TOTAL detected
-# activity per length bin, which answers "is the fleet growing". It cannot
-# separate growth that lands in the AIS-observed fleet from growth that stays
-# dark - and that separation is what the fused inventory's central claim rests
-# on, because a vessel moving from dark to matched reallocates emissions between
-# the two components rather than adding to the fused sum.
+# Sentinel-1 detection density per length bin, split three ways by whether a
+# detection matched an AIS broadcast. Row A alone is TOTAL detected activity per
+# length bin, which answers "is the fleet growing" - it is the series
+# si_density_denominators_figure.R used to carry as its panel C, dropped there
+# once this figure superseded it. A total cannot separate growth that lands in
+# the AIS-observed fleet from growth that stays dark - and that separation is
+# what the fused inventory's central claim rests on, because a vessel moving
+# from dark to matched reallocates emissions between the two components rather
+# than adding to the fused sum.
 #
-# Rows are the three series, columns the two fleets:
+# Rows are the three series, columns the two fleets. The rows are lettered A, B,
+# C down the left-hand column, so the caption can name them:
 #
-#   Total       = matched + unmatched. Reproduces the published panel C, and is
-#                 the AIS-INDEPENDENT measure of activity: a radar blip is a blip
-#                 whether or not AIS explains it.
-#   Matched     = detections tied to an AIS broadcast.
-#   Unmatched   = detections with no AIS match, i.e. the dark fleet, which is
+#   A Total     = matched + unmatched, and the AIS-INDEPENDENT measure of
+#                 activity: a radar blip is a blip whether or not AIS explains
+#                 it.
+#   B Matched   = detections tied to an AIS broadcast.
+#   C Unmatched = detections with no AIS match, i.e. the dark fleet, which is
 #                 what the dark emissions model is built from.
 #
 # One trap when reading this against the emissions series reported elsewhere:
-# compare emissions to the TOTAL row, never to the matched row. Matched
+# compare emissions to the TOTAL row (A), never to the matched row (B). Matched
 # detections require an AIS match, so they rise when reception and carriage
 # improve - for the same reason the emissions do - and checking one against the
 # other is checking a thermometer against itself. At 0-25m that produces a
@@ -36,9 +39,9 @@
 # verified against AIS ground truth (issue #10 s12).
 #
 # Fits match si_density_denominators_figure.R exactly - log density on time, no
-# calendar-month term - so the Total row reproduces the published panel C rather
-# than differing from it by specification. Adding month-of-year dummies moves
-# these slopes by <= 0.4 pp and changes no sign.
+# calendar-month term - so its aggregate panels and the rows here are read on
+# one specification rather than differing by it. Adding month-of-year dummies
+# moves these slopes by <= 0.4 pp and changes no sign.
 #
 # Run from the project root:  Rscript r/si_density_by_match_status.R
 #
@@ -59,8 +62,8 @@
 #   Sentinel-1B failure; both are properties of the recorded footprints and the
 #   constellation rather than of this denominator, which is immune to them.
 #
-#   Top row reproduces the total-activity result. Middle and bottom rows
-#   decompose it: growth in the small non-fishing bins is carried almost
+#   Row A is total detected activity. Rows B and C decompose it: growth in the
+#   small non-fishing bins is carried almost
 #   entirely by matched detections, while unmatched density there is flat or
 #   falling, so that growth enters the AIS-observed fleet rather than the dark
 #   component. Only the 225+m non-fishing bin shows unmatched density rising.
@@ -291,7 +294,10 @@ subpanel <- function(fleet_name, component_name, show_legend) {
 
 # Legend only on the top row, so it is not repeated three times per fleet. Both
 # columns carry it there, which keeps the two columns' row heights equal.
-fleet_column <- function(fleet_name) {
+#
+# The A/B/C labels go on the left column only: they name the row, not the panel,
+# and repeating them on the right would read as six separately-lettered panels.
+fleet_column <- function(fleet_name, labels = NULL) {
   plot_grid(
     subpanel(fleet_name, "Total", show_legend = TRUE),
     subpanel(fleet_name, "Matched (AIS)", show_legend = FALSE),
@@ -299,12 +305,17 @@ fleet_column <- function(fleet_name) {
     ncol = 1,
     align = "v",
     axis = "lr",
-    rel_heights = c(1.18, 1, 1)
+    rel_heights = c(1.18, 1, 1),
+    labels = labels,
+    label_size = 15,
+    label_fontface = "bold",
+    label_x = 0.002,
+    hjust = 0
   )
 }
 
 figure <- plot_grid(
-  fleet_column("Non-fishing"),
+  fleet_column("Non-fishing", labels = c("A", "B", "C")),
   fleet_column("Fishing"),
   ncol = 2,
   align = "h",

@@ -482,37 +482,6 @@ list(
     format = "file"
   ),
   tar_file(
-    name = s1_detection_density_file,
-    command = file.path(
-      "data",
-      "gfw",
-      "s1_detection_density_by_denominator.csv"
-    )
-  ),
-  tar_target(
-    name = detection_density_unionscenes_figure,
-    command = plot_detection_density_unionscenes(
-      density_file = s1_detection_density_file,
-      file_path = file.path(
-        "figures",
-        "fig-density-unionscenes-fullperiod.png"
-      )
-    ),
-    format = "file"
-  ),
-  tar_file(
-    name = s1_matched_control_file,
-    command = file.path("data", "gfw", "s1_matched_control_fleet.csv")
-  ),
-  tar_target(
-    name = matched_control_fleet_figure,
-    command = plot_matched_control_fleet(
-      matched_control_file = s1_matched_control_file,
-      file_path = file.path("figures", "fig-matched-control.png")
-    ),
-    format = "file"
-  ),
-  tar_file(
     name = s1_detections_by_fixed_length_bin_file,
     command = file.path(
       "data",
@@ -534,25 +503,15 @@ list(
   ),
 
   # Emissions reconciliation ----
-  # Three figures that close the same argument from the AIS side: where the
-  # growth sits by size and registry status, what a size-weighted count of
-  # detections does to an apparently flat headcount, and whether the post-2021
-  # explosion in AIS message volume inflated the inventory.
+  # Two figures that close the same argument from the AIS side: whether the
+  # passenger tail's growth is more vessels or more activity credited to the same
+  # ones, and whether the post-2021 explosion in AIS message volume inflated the
+  # inventory.
   #
   # These read 01_gfw_data_pull's extracts by path, the same way the fleet and
   # registry targets above do - that pipeline has its own store, so there is no
   # target here to depend on.
-  tar_target(
-    name = registry_split_size_change_figure,
-    command = plot_registry_split_size_change(
-      file_path = file.path(
-        "figures",
-        "si_inventory_comparison",
-        "registry_split_size_change.png"
-      )
-    ),
-    format = "file"
-  ),
+
   # Passenger headcount beside passenger emissions, in levels (A, B) and in
   # 2017-2025 change (C, D), all on the same length bins and no registry split -
   # is the tail's growth more vessels, or more activity credited to the same ones?
@@ -564,20 +523,6 @@ list(
         "figures",
         "si_inventory_comparison",
         "passenger_size_panels.png"
-      )
-    ),
-    format = "file"
-  ),
-  # The same change cut by vessel class rather than length bin - which trades the
-  # growth sits in, against which sizes. Its function was dropped in 03796c3
-  # while the PNG stayed, so it is restored here with a target.
-  tar_target(
-    name = registry_split_class_change_figure,
-    command = plot_registry_split_class_change(
-      file_path = file.path(
-        "figures",
-        "si_inventory_comparison",
-        "registry_split_class_change.png"
       )
     ),
     format = "file"

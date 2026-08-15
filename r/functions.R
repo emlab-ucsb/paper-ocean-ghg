@@ -4202,270 +4202,6 @@ plot_unmatched_fraction_fullperiod <- function(
   combined
 }
 
-# Detections per unit of imaging opportunity, by length bin, on denominator C.
-#
-# Three denominators were tried for this. A divides by the summed area of every
-# scene, which double-counts ocean imaged twice in a month; B divides by the
-# union of the footprints, which throws away the second pass entirely. Both move
-# sharply at the December 2021 S1B failure, because both mis-state how much
-# looking happened. C - union area multiplied by mean scenes per cell - counts
-# opportunity rather than area, and is the only one of the three whose fleet
-# trends survive the break without a step.
-#
-# So this is the version of the density figure the write-up leans on, and the
-# reason the density claim can be made at all: under C the fishing fleet's
-# detected activity is flat to falling over the period, which is what the AIS
-# series cannot show on its own.
-plot_detection_density_unionscenes <- function(
-  density_file = file.path(
-    "data",
-    "gfw",
-    "s1_detection_density_by_denominator.csv"
-  ),
-  file_path = NULL,
-  width = 11,
-  height = 4.2
-) {
-  density <- readr::read_csv(density_file, show_col_types = FALSE) |>
-    dplyr::mutate(
-      month = as.Date(.data$time),
-      fleet = forcats::fct_rev(
-        ifelse(.data$fishing, "Fishing", "Non-fishing")
-      ),
-      bin_max = suppressWarnings(as.numeric(.data$length_bin_max)),
-      bin = ifelse(
-        is.na(.data$bin_max) | is.infinite(.data$bin_max),
-        sprintf("%.0f+m", as.numeric(.data$length_bin_min)),
-        sprintf(
-          "%.0f-%.0fm",
-          as.numeric(.data$length_bin_min),
-          .data$bin_max
-        )
-      ),
-      bin = forcats::fct_reorder(.data$bin, .data$length_size_bin),
-      density = .data$dens_union_scenes
-    )
-
-  palette <- s1_length_palette()
-
-  fleet_panel <- function(fleet_name) {
-    panel_data <- density |> dplyr::filter(.data$fleet == fleet_name)
-    panel_bins <- panel_data |>
-      dplyr::distinct(.data$length_size_bin, .data$bin) |>
-      dplyr::arrange(.data$length_size_bin)
-
-    panel_data |>
-      ggplot2::ggplot(
-        ggplot2::aes(.data$month, .data$density, color = .data$bin)
-      ) +
-      ggplot2::geom_line(linewidth = 0.3, alpha = 0.45) +
-      ggplot2::geom_smooth(method = "lm", se = FALSE, linewidth = 0.9) +
-      ggplot2::facet_wrap(~fleet) +
-      ggplot2::scale_y_log10(labels = scales::comma) +
-      ggplot2::scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
-      ggplot2::scale_color_manual(
-        name = paste0(fleet_name, "\nlength bin"),
-        values = stats::setNames(
-          palette[seq_len(nrow(panel_bins))],
-          panel_bins$bin
-        )
-      ) +
-      ggplot2::labs(
-        x = "",
-        y = expression(
-          "Detections per million km"^2 * " imaged x scenes (log scale)"
-        )
-      ) +
-      ggplot2::theme_bw(base_size = 9) +
-      ggplot2::theme(
-        strip.background = ggplot2::element_rect(
-          fill = "transparent",
-          color = NA
-        ),
-        strip.text = ggplot2::element_text(face = "bold"),
-        legend.key.height = ggplot2::unit(0.7, "lines"),
-        legend.title = ggplot2::element_text(size = 8),
-        legend.text = ggplot2::element_text(size = 7),
-        panel.grid.minor = ggplot2::element_blank()
-      )
-  }
-
-  combined <- cowplot::plot_grid(
-    fleet_panel("Non-fishing"),
-    fleet_panel("Fishing"),
-    ncol = 2
-  ) +
-    ggplot2::theme(
-      plot.background = ggplot2::element_rect(fill = "white", color = NA)
-    )
-
-  if (!is.null(file_path)) {
-    dir.create(dirname(file_path), showWarnings = FALSE, recursive = TRUE)
-    ggplot2::ggsave(
-      file_path,
-      combined,
-      width = width,
-      height = height,
-      dpi = 200,
-      bg = "white"
-    )
-    return(file_path)
-  }
-
-  combined
-}
-
-# The control that decides whether the density steps are real.
-#
-# Every series here is scaled to its own pre-2022 mean, so the question is which
-# ones move at the S1B failure and which do not. The green series is the one
-# that matters: matched detections divided by AIS vessel-hours times scene
-# passes, which is detection efficiency measured only on vessels AIS already
-# says were there. It carries no dependence on how many vessels were present, so
-# if it is flat through the break then S1's ability to see a given ship did not
-# change and the steps in the other series are real; if it steps, they are
-# instrument artefacts.
-#
-# The grey band is the plus or minus three months around the break, which the
-# step statistics exclude because the transition months belong to neither era.
-plot_matched_control_fleet <- function(
-  matched_control_file = file.path(
-    "data",
-    "gfw",
-    "s1_matched_control_fleet.csv"
-  ),
-  break_date = as.Date("2021-12-01"),
-  margin_months = 3L,
-  file_path = NULL,
-  width = 9,
-  height = 6.5
-) {
-  margin_low <- seq(
-    break_date,
-    by = "-1 month",
-    length.out = margin_months + 1
-  )[margin_months + 1]
-  margin_high <- seq(
-    break_date,
-    by = "1 month",
-    length.out = margin_months + 1
-  )[margin_months + 1]
-
-  series_labels <- c(
-    total_per_opportunity = "Total detections / opportunity",
-    matched_per_opportunity = "Matched detections / opportunity",
-    unmatched_per_opportunity = "Unmatched (dark) / opportunity",
-    ais_presence = "AIS presence (vessel-hours / km2)",
-    efficiency = "EFFICIENCY: matched / (AIS-hours x passes)"
-  )
-
-  control <- readr::read_csv(matched_control_file, show_col_types = FALSE) |>
-    dplyr::mutate(
-      month = as.Date(.data$time),
-      fleet = forcats::fct_rev(
-        ifelse(.data$fishing, "Fishing", "Non-fishing")
-      ),
-      total_per_opportunity = (.data$n_matched + .data$n_unmatched) /
-        .data$union_x_scenes_km2,
-      matched_per_opportunity = .data$n_matched / .data$union_x_scenes_km2,
-      unmatched_per_opportunity = .data$n_unmatched / .data$union_x_scenes_km2,
-      ais_presence = .data$ais_vessel_hours / .data$union_km2,
-      efficiency = .data$n_matched / .data$ais_hours_x_scenes
-    )
-
-  relative <- control |>
-    dplyr::select(
-      dplyr::all_of(c("month", "fleet", names(series_labels)))
-    ) |>
-    tidyr::pivot_longer(
-      dplyr::all_of(names(series_labels)),
-      names_to = "series",
-      values_to = "value"
-    ) |>
-    dplyr::mutate(
-      series = factor(
-        series_labels[.data$series],
-        levels = unname(series_labels)
-      )
-    ) |>
-    dplyr::group_by(.data$series, .data$fleet) |>
-    dplyr::mutate(
-      relative_value = .data$value /
-        mean(.data$value[.data$month < margin_low])
-    ) |>
-    dplyr::ungroup()
-
-  control_plot <- relative |>
-    ggplot2::ggplot(
-      ggplot2::aes(.data$month, .data$relative_value, color = .data$series)
-    ) +
-    ggplot2::annotate(
-      "rect",
-      xmin = margin_low,
-      xmax = margin_high,
-      ymin = -Inf,
-      ymax = Inf,
-      fill = "grey70",
-      alpha = 0.35
-    ) +
-    ggplot2::geom_hline(yintercept = 1, color = "grey40", linewidth = 0.3) +
-    ggplot2::geom_vline(
-      xintercept = break_date,
-      linetype = "dashed",
-      color = "grey30",
-      linewidth = 0.3
-    ) +
-    ggplot2::geom_line(linewidth = 0.5) +
-    ggplot2::facet_wrap(~fleet, ncol = 1) +
-    ggplot2::scale_color_manual(
-      name = NULL,
-      values = c("grey55", "#4575b4", "#d95f0e", "#984ea3", "#1a9850")
-    ) +
-    ggplot2::scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
-    ggplot2::labs(
-      x = "",
-      y = "Relative to pre-2022 mean",
-      title = paste(
-        "Matched-detections control: is S1 efficiency stable across the",
-        "break?"
-      ),
-      subtitle = paste0(
-        "All series scaled to their pre-2022 mean. Green = detection ",
-        "efficiency for vessels AIS knows are present.\nIf green is flat ",
-        "through the break, the density steps are real; if it steps, they ",
-        "are detectability artifacts."
-      )
-    ) +
-    ggplot2::theme_bw(base_size = 9) +
-    ggplot2::theme(
-      strip.background = ggplot2::element_rect(
-        fill = "transparent",
-        color = NA
-      ),
-      strip.text = ggplot2::element_text(face = "bold"),
-      legend.position = "top",
-      legend.text = ggplot2::element_text(size = 7),
-      panel.grid.minor = ggplot2::element_blank(),
-      plot.title = ggplot2::element_text(face = "bold")
-    ) +
-    ggplot2::guides(color = ggplot2::guide_legend(nrow = 2))
-
-  if (!is.null(file_path)) {
-    dir.create(dirname(file_path), showWarnings = FALSE, recursive = TRUE)
-    ggplot2::ggsave(
-      file_path,
-      control_plot,
-      width = width,
-      height = height,
-      dpi = 200,
-      bg = "white"
-    )
-    return(file_path)
-  }
-
-  control_plot
-}
-
 # Where AIS carriage grew, by vessel size.
 #
 # This is the figure the inventory comparison leans on when it says our series
@@ -4480,6 +4216,24 @@ plot_matched_control_fleet <- function(
 # Fixed metre bins rather than the deciles the trend figure uses: the claim here
 # is about specific size classes and their regulatory status, so a bin has to
 # mean the same thing in both fleets.
+#
+# CAPTION SOURCE - the figure is drawn with no title or subtitle, so the reading
+# lives in the caption instead of being burned into the image where a caption
+# would only repeat it. The text that used to be drawn is kept here as the
+# material to write that caption from:
+#
+#   Title    AIS carriage was already near-universal in the registry-mandated
+#            segment; the expansion happens in the small-vessel tail.
+#
+#   Subtitle Unmatched share of Sentinel-1 detections, <first> vs <last> (the
+#            two comparison_years). Large non-fishing vessels (AIS-mandated)
+#            sit low and barely move; small and fishing vessels start largely
+#            dark and migrate into the AIS-observed fleet.
+#
+# Not drawn, but needed by any caption written from the above: each arrow runs
+# from a bin's unmatched share in the first comparison year to its share in the
+# last, the point marks the two endpoints, and the label beside it is the change
+# in percentage points.
 plot_ais_carriage_saturation_by_size <- function(
   fixed_bin_file = file.path(
     "data",
@@ -4595,20 +4349,7 @@ plot_ais_carriage_saturation_by_size <- function(
     ggplot2::scale_color_manual(name = NULL, values = year_colors) +
     ggplot2::labs(
       x = "Share of S1-detected vessels not matched to an AIS broadcast",
-      y = "Vessel length (S1-estimated)",
-      title = paste0(
-        "AIS carriage was already near-universal in the registry-mandated ",
-        "segment;\nthe expansion happens in the small-vessel tail"
-      ),
-      subtitle = paste0(
-        "Unmatched share of Sentinel-1 detections, ",
-        first_year,
-        " vs ",
-        last_year,
-        ". Large non-fishing vessels (AIS-mandated) sit low and barely ",
-        "move;\nsmall and fishing vessels start largely dark and migrate ",
-        "into the AIS-observed fleet."
-      )
+      y = "Vessel length (S1-estimated)"
     ) +
     ggplot2::theme_bw(base_size = 9) +
     ggplot2::theme(
@@ -4618,8 +4359,7 @@ plot_ais_carriage_saturation_by_size <- function(
       ),
       strip.text = ggplot2::element_text(face = "bold"),
       legend.position = "top",
-      panel.grid.minor = ggplot2::element_blank(),
-      plot.title = ggplot2::element_text(face = "bold")
+      panel.grid.minor = ggplot2::element_blank()
     )
 
   if (!is.null(file_path)) {
@@ -4640,14 +4380,13 @@ plot_ais_carriage_saturation_by_size <- function(
 
 # Emissions reconciliation ----
 #
-# Three supporting figures for the top-down inventory comparison. They answer
+# Two supporting figures for the top-down inventory comparison. They answer
 # the objection the comparison invites: our series grows faster than the
 # registry-built inventories, so is the growth real activity or just more of the
 # ocean coming into view? Each figure isolates one channel through which
 # observation could masquerade as activity.
 #
-# All three redraw from CSVs already in the repo - two 01_gfw_data_pull extracts
-# and the one-off S1 density pull above.
+# Both redraw from 01_gfw_data_pull extracts already in the repo.
 
 # The length bins the S1 detection extracts use, so the AIS-side and
 # satellite-side size axes can be read against each other without re-binning
@@ -4679,133 +4418,6 @@ index_to_baseline <- function(x, t, months = 24L) {
   x / mean(x[t <= baseline_end])
 }
 
-# Where the growth in AIS emissions sits, by vessel length and registry status.
-#
-# The inventory comparison turns on whether a registry-anchored model could have
-# seen the vessels behind our growth. This splits the 2017-2025 change by length
-# bin and by whether the vessel matched any registry at all, and the answer is
-# that essentially all of it sits on the unmatched side.
-#
-# The shape matters as much as the total: the unmatched growth is bimodal. Small
-# vessels enter the AIS fleet as carriage spreads, which is the coverage effect
-# a critic would expect; but the largest bins also grow on the unmatched side
-# while their registry-matched emissions fall, which coverage alone does not
-# explain.
-#
-# IMO and other-registry rows are pooled. The distinction that bounds a
-# registry-built inventory's fleet is whether a vessel appears in any registry,
-# not which one.
-plot_registry_split_size_change <- function(
-  gfw_activity_file = file.path(
-    "data",
-    "gfw",
-    "annual_ais_activity_summary_cheap.csv"
-  ),
-  comparison_years = c(2017L, 2025L),
-  file_path = NULL,
-  width = 8.5,
-  height = 5.4
-) {
-  first_year <- min(comparison_years)
-  last_year <- max(comparison_years)
-
-  registry_size <- readr::read_csv(
-    gfw_activity_file,
-    show_col_types = FALSE
-  ) |>
-    dplyr::filter(.data$year %in% c(first_year, last_year)) |>
-    dplyr::mutate(
-      length_bin = factor(.data$length_bin, levels = s1_length_bin_levels()),
-      registry = ifelse(
-        .data$registry_type == "no_registry",
-        "No registry",
-        "Any registry"
-      )
-    ) |>
-    dplyr::group_by(.data$length_bin, .data$registry, .data$year) |>
-    dplyr::summarise(
-      emissions_co2_mt = sum(.data$emissions_co2_mt),
-      .groups = "drop"
-    ) |>
-    tidyr::pivot_wider(
-      names_from = "year",
-      values_from = "emissions_co2_mt",
-      names_prefix = "y"
-    ) |>
-    dplyr::rename(
-      start_co2 = paste0("y", first_year),
-      end_co2 = paste0("y", last_year)
-    ) |>
-    dplyr::mutate(
-      dplyr::across(
-        dplyr::all_of(c("start_co2", "end_co2")),
-        ~ tidyr::replace_na(.x, 0)
-      ),
-      change_mt = (.data$end_co2 - .data$start_co2) / 1e6
-    )
-
-  size_change_plot <- registry_size |>
-    ggplot2::ggplot(
-      ggplot2::aes(
-        y = forcats::fct_rev(.data$length_bin),
-        x = .data$change_mt,
-        fill = .data$registry
-      )
-    ) +
-    ggplot2::geom_vline(xintercept = 0, colour = "grey20", linewidth = 0.4) +
-    ggplot2::geom_col(
-      position = ggplot2::position_dodge(width = 0.72),
-      width = 0.66
-    ) +
-    ggplot2::scale_fill_manual(
-      "Registry status",
-      values = c("No registry" = "#c1332a", "Any registry" = "#3b8bc4"),
-      breaks = c("No registry", "Any registry")
-    ) +
-    ggplot2::scale_x_continuous(
-      labels = scales::label_number(style_positive = "plus")
-    ) +
-    ggplot2::labs(
-      x = bquote(
-        "Change in annual CO"[2] * " (Mt), " * .(first_year) * " - " *
-          .(last_year)
-      ),
-      y = "Vessel length (bins as used for S1 detections)",
-      title = paste(
-        "Growth in AIS emissions is carried by registry-unmatched vessels",
-        "across all size classes"
-      ),
-      subtitle = paste0(
-        "Emissions change by vessel length and registry status. ",
-        "Registry-matched emissions fall in most size classes;\nthe increase ",
-        "comes from vessels not matched to any registry - including the ",
-        "largest, highest-emitting ones."
-      )
-    ) +
-    ggplot2::theme_bw(base_size = 9) +
-    ggplot2::theme(
-      legend.position = "bottom",
-      panel.grid.minor = ggplot2::element_blank(),
-      panel.grid.major.y = ggplot2::element_blank(),
-      plot.title = ggplot2::element_text(face = "bold", size = 10.5)
-    )
-
-  if (!is.null(file_path)) {
-    dir.create(dirname(file_path), showWarnings = FALSE, recursive = TRUE)
-    ggplot2::ggsave(
-      file_path,
-      size_change_plot,
-      width = width,
-      height = height,
-      dpi = 200,
-      bg = "white"
-    )
-    return(file_path)
-  }
-
-  size_change_plot
-}
-
 # The passenger class opened up by vessel length, in four square panels: levels
 # and changes, counts and emissions.
 #
@@ -4833,7 +4445,7 @@ plot_registry_split_size_change <- function(
 #      its emissions fall (-15%) - so larger passenger vessels are entering the
 #      observed fleet at lower average activity than those already in it.
 #
-# Why C and D are percentages when the registry-split figure plots absolute Mt:
+# Why C and D are percentages rather than absolute Mt:
 # the 0-25 m bin adds ~119,000 vessels and ~100 Mt, two to three orders of
 # magnitude above the bins over 100 m. On a shared absolute axis every bin above
 # 50 m is a hairline and the vessels-against-emissions comparison the panels
@@ -5164,164 +4776,6 @@ plot_passenger_size_panels <- function(
   }
 
   size_panels_plot
-}
-
-# The same change cut by vessel class instead of by length bin.
-#
-# This is the figure behind the closing claim of the inventory-comparison SI
-# section: the growth in our total is not carried by any class as a whole but by
-# the unregistered part of every class. Emissions from registry-matched vessels
-# fall over the period in each major merchant class while unregistered emissions
-# in the same classes rise by more, and passenger's growth is unregistered almost
-# in its entirety.
-#
-# The length-bin version above answers the coverage objection - is the growth
-# just small vessels entering AIS - because size is what determines whether a
-# vessel is required to broadcast or to register. This one answers a different
-# question: which trades the growth sits in. Same deltas, same registry split,
-# different cut, and the two are read together.
-#
-# Two registry categories rather than three: the claim being supported contrasts
-# what a registry-derived inventory could enumerate against what it could not,
-# and for that cut IMO-vs-other is noise.
-#
-# Classes are folded with fold_gfw_vessel_classes() so the class list matches the
-# other per-class figures, and ordered by unregistered growth so the classes
-# carrying the divergence lead.
-plot_registry_split_class_change <- function(
-  gfw_activity_file = file.path(
-    "data",
-    "gfw",
-    "annual_ais_activity_summary_cheap.csv"
-  ),
-  baseline_year = 2017L,
-  end_year = 2025L,
-  file_path = NULL,
-  width = 9,
-  height = 6
-) {
-  activity <- readr::read_csv(gfw_activity_file, show_col_types = FALSE) |>
-    dplyr::mutate(year = as.integer(.data$year))
-
-  for (yr in c(baseline_year, end_year)) {
-    if (!yr %in% activity$year) {
-      stop(
-        "The activity extract has no data for year ",
-        yr,
-        ". It covers ",
-        paste(range(activity$year), collapse = "-"),
-        "."
-      )
-    }
-  }
-
-  # The class list is decided once on the whole fleet, so a class cannot fold
-  # into "Other" in one registry group and stand alone in the other.
-  folded_classes <- activity |>
-    fold_gfw_vessel_classes(measures = "emissions_co2_mt") |>
-    dplyr::pull(.data$vessel_class) |>
-    unique()
-
-  registry_groups <- c(
-    imo = "Any registry",
-    other_registry = "Any registry",
-    no_registry = "No registry"
-  )
-
-  # The emissions column is named _mt in the extract but holds tonnes - the 2015
-  # fleet total is 687,187,536, which is 687 Mt - so deltas are converted here.
-  changes <- activity |>
-    dplyr::mutate(registry = unname(registry_groups[.data$registry_type])) |>
-    dplyr::group_split(.data$registry) |>
-    purrr::map_dfr(function(group) {
-      group |>
-        fold_gfw_vessel_classes(
-          measures = "emissions_co2_mt",
-          keep_classes = folded_classes
-        ) |>
-        dplyr::mutate(registry = group$registry[1])
-    }) |>
-    dplyr::filter(.data$year %in% c(baseline_year, end_year)) |>
-    tidyr::pivot_wider(
-      names_from = "year",
-      values_from = "emissions_co2_mt",
-      names_prefix = "y"
-    ) |>
-    dplyr::mutate(
-      delta_mt = (.data[[paste0("y", end_year)]] -
-        .data[[paste0("y", baseline_year)]]) /
-        1e6
-    )
-
-  # Ordered by unregistered growth, so the classes carrying the divergence sit
-  # at the top and the reader meets the pattern - registered falling, the
-  # unregistered side of the same class rising by more - before the long tail.
-  class_levels <- changes |>
-    dplyr::filter(.data$registry == "No registry") |>
-    dplyr::arrange(.data$delta_mt) |>
-    dplyr::pull(.data$vessel_class)
-
-  plot_data <- changes |>
-    dplyr::mutate(
-      vessel_class = factor(.data$vessel_class, levels = class_levels),
-      registry = factor(
-        .data$registry,
-        levels = c("No registry", "Any registry")
-      )
-    )
-
-  registry_colors <- c(
-    "No registry" = "#CC3311",
-    "Any registry" = "#4292C6"
-  )
-
-  change_plot <- ggplot2::ggplot(
-    plot_data,
-    ggplot2::aes(
-      x = .data$delta_mt,
-      y = .data$vessel_class,
-      fill = .data$registry
-    )
-  ) +
-    ggplot2::geom_col(
-      position = ggplot2::position_dodge(width = 0.8),
-      width = 0.7
-    ) +
-    ggplot2::geom_vline(xintercept = 0, color = "grey30", linewidth = 0.4) +
-    ggplot2::scale_fill_manual(
-      name = "Registry status",
-      values = registry_colors
-    ) +
-    ggplot2::labs(
-      x = bquote(
-        Change ~ "in" ~ annual ~ CO[2] ~ (Mt) *
-          "," ~ .(baseline_year) - .(end_year)
-      ),
-      y = ""
-    ) +
-    ggplot2::theme_minimal() +
-    ggplot2::theme(
-      axis.title.x = ggplot2::element_text(face = "bold", size = 11),
-      panel.grid.major.y = ggplot2::element_blank(),
-      panel.grid.minor = ggplot2::element_blank(),
-      legend.position = "bottom",
-      plot.background = ggplot2::element_rect(fill = "white", color = NA)
-    )
-
-  if (!is.null(file_path)) {
-    dir.create(dirname(file_path), showWarnings = FALSE, recursive = TRUE)
-    ggplot2::ggsave(
-      file_path,
-      change_plot,
-      width = width,
-      height = height,
-      dpi = 300,
-      bg = "white"
-    )
-    return(file_path)
-  }
-
-  change_plot
 }
 
 # Whether the AIS message explosion inflated the inventory.

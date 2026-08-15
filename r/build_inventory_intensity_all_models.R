@@ -182,7 +182,14 @@ intensity_table <- bind_rows(
     period                  = paste0(year_from, "-", year_to),
     intensity_kt_per_vessel = round(mean_mt / 1e3 / n_total, 2),
     intensity_kg_per_nm     = kg_nm,
-    mean_mt                 = round(mean_mt / 1e6, 1)
+    mean_mt                 = round(mean_mt / 1e6, 1),
+    # Name the model, not the product delivering it, matching the labels the
+    # comparison figures use. Renamed here rather than in the tribble above
+    # because the stored data_source is the key the emissions lookup joins on.
+    data_source = recode(
+      data_source,
+      "CAMS-GLOB-SHIP (STEAM)" = "STEAM"
+    )
   ) |>
   select(
     data_source, period, count_basis, n_total, mean_mt,
