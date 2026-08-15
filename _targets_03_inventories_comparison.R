@@ -468,14 +468,15 @@ list(
   # in the repo as data/gfw/s1_*.csv with their queries beside them as
   # sql/s1_*.sql. Tracking the CSVs as tar_file() inputs means a redraw follows
   # an edited extract without a pull ever being wired in.
-  tar_file(
-    name = s1_detections_by_fleet_decile_file,
-    command = file.path("data", "gfw", "s1_detections_by_fleet_decile.csv")
-  ),
+  # Reads the fixed-metre-bin extract, shared with the carriage-saturation and
+  # density-by-match-status figures, so a length bin means the same thing
+  # wherever it appears. The per-fleet decile extract it used to read
+  # (data/gfw/s1_detections_by_fleet_decile.csv) is kept in the repo but is no
+  # longer wired into the pipeline.
   tar_target(
     name = unmatched_fraction_fullperiod_figure,
     command = plot_unmatched_fraction_fullperiod(
-      decile_file = s1_detections_by_fleet_decile_file,
+      fixed_bin_file = s1_detections_by_fixed_length_bin_file,
       file_path = file.path("figures", "fig-unmatched-fraction-fullperiod.png")
     ),
     format = "file"

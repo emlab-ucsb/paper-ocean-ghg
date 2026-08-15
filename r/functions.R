@@ -4091,55 +4091,58 @@ s1_length_palette <- function(n = 10) {
 # what makes the figure a statement about the fleet rather than about the
 # satellite.
 #
-# Deciles rather than fixed metre bins because the fishing and non-fishing
-# fleets occupy different size ranges: a fixed bin holds most of one fleet and
-# almost none of the other, while a decile always holds a tenth of each. The
-# metre edges are printed in the legend so the two panels can still be read
-# against a common scale.
+# Fixed metre bins, the same ones as fig-density-by-match-status.png and
+# ais_carriage_saturation_by_size.png: 0-25m upward in 25m steps to 225+m for
+# non-fishing, collapsed to 100+m for fishing, which has almost nothing above
+# it. An earlier version cut each fleet into its own deciles, which kept the
+# panels equally populated but made a bin mean a different length range in each
+# fleet, and a different one again from the density figures it is read beside.
 plot_unmatched_fraction_fullperiod <- function(
-  decile_file = file.path("data", "gfw", "s1_detections_by_fleet_decile.csv"),
+  fixed_bin_file = file.path(
+    "data",
+    "gfw",
+    "s1_detections_by_fixed_length_bin.csv"
+  ),
   file_path = NULL,
   width = 11,
   height = 4.2
 ) {
-  detections <- readr::read_csv(decile_file, show_col_types = FALSE) |>
+  detections <- readr::read_csv(fixed_bin_file, show_col_types = FALSE) |>
     dplyr::mutate(
       month = as.Date(.data$month),
       fleet = forcats::fct_rev(
         ifelse(.data$fishing, "Fishing", "Non-fishing")
       ),
-      decile = factor(.data$length_decile, levels = 1:10),
+      bin_max = suppressWarnings(as.numeric(.data$length_bin_max)),
+      bin = ifelse(
+        is.na(.data$bin_max) | is.infinite(.data$bin_max),
+        sprintf("%.0f+m", as.numeric(.data$length_bin_min)),
+        sprintf(
+          "%.0f-%.0fm",
+          as.numeric(.data$length_bin_min),
+          .data$bin_max
+        )
+      ),
+      bin = forcats::fct_reorder(.data$bin, .data$length_size_bin),
       unmatched_share = .data$n_s1_detections_unmatched /
         .data$n_s1_detections
-    )
-
-  decile_labels <- detections |>
-    dplyr::distinct(
-      .data$fleet,
-      .data$decile,
-      .data$decile_min_m,
-      .data$decile_max_m
-    ) |>
-    dplyr::mutate(
-      label = sprintf(
-        "t%s (%.0f-%.0fm)",
-        .data$decile,
-        .data$decile_min_m,
-        .data$decile_max_m
-      )
     )
 
   palette <- s1_length_palette()
 
   fleet_panel <- function(fleet_name) {
-    panel_labels <- decile_labels |>
-      dplyr::filter(.data$fleet == fleet_name) |>
-      dplyr::arrange(.data$decile)
+    panel_data <- detections |>
+      dplyr::filter(.data$fleet == fleet_name)
+    # Fishing has five bins to non-fishing's ten, so the colours are taken from
+    # the low end of the shared ramp in both panels - the same convention as
+    # fig-density-by-match-status.png, which keeps 0-25m the same colour in each.
+    panel_bins <- panel_data |>
+      dplyr::distinct(.data$length_size_bin, .data$bin) |>
+      dplyr::arrange(.data$length_size_bin)
 
-    detections |>
-      dplyr::filter(.data$fleet == fleet_name) |>
+    panel_data |>
       ggplot2::ggplot(
-        ggplot2::aes(.data$month, .data$unmatched_share, color = .data$decile)
+        ggplot2::aes(.data$month, .data$unmatched_share, color = .data$bin)
       ) +
       ggplot2::geom_line(linewidth = 0.3, alpha = 0.5) +
       ggplot2::geom_smooth(method = "lm", se = FALSE, linewidth = 0.9) +
@@ -4150,9 +4153,11 @@ plot_unmatched_fraction_fullperiod <- function(
       ) +
       ggplot2::scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
       ggplot2::scale_color_manual(
-        name = paste0(fleet_name, "\nlength decile"),
-        values = stats::setNames(palette, 1:10),
-        labels = stats::setNames(panel_labels$label, panel_labels$decile)
+        name = paste0(fleet_name, "\nlength bin"),
+        values = stats::setNames(
+          palette[seq_len(nrow(panel_bins))],
+          panel_bins$bin
+        )
       ) +
       ggplot2::labs(
         x = "",
@@ -5324,13 +5329,13 @@ plot_registry_split_class_change <- function(
 # Dynamic AIS was widely adopted around 2021 and the message count roughly
 # doubles after it. If emissions were being computed off message volume, the
 # inventory would have inflated for reasons that have nothing to do with
-# shipping. This indexes messages, vessel-hours, distance and emissions to 2021
-# and shows emissions tracking hours and distance rather than messages: the
-# extra messages densify tracks that were already observed, adding resolution
-# rather than activity.
+# shipping. This plots messages, vessel-hours, distance and emissions as percent
+# change from 2021 and shows emissions tracking hours and distance rather than
+# messages: the extra messages densify tracks that were already observed, adding
+# resolution rather than activity.
 #
-# Indexed to the phase-in year rather than the start of the record, so the four
-# series are compared from the moment the concern begins.
+# Referenced to the phase-in year rather than the start of the record, so the
+# four series are compared from the moment the concern begins.
 plot_messages_hours_emissions <- function(
   gfw_activity_file = file.path(
     "data",
@@ -5370,7 +5375,10 @@ plot_messages_hours_emissions <- function(
       values_to = "value"
     ) |>
     dplyr::group_by(.data$series) |>
-    dplyr::mutate(index = .data$value / .data$value[.data$year == baseline_year]) |>
+    dplyr::mutate(
+      pct_change = 100 *
+        (.data$value / .data$value[.data$year == baseline_year] - 1)
+    ) |>
     dplyr::ungroup() |>
     dplyr::mutate(series = factor(.data$series, levels = series_levels))
 
@@ -5380,13 +5388,13 @@ plot_messages_hours_emissions <- function(
   end_labels <- ais_activity |>
     dplyr::filter(.data$year == end_year) |>
     dplyr::mutate(
-      label = sprintf("%s  %+.0f%%", .data$series, 100 * (.data$index - 1))
+      label = sprintf("%s  %+.0f%%", .data$series, .data$pct_change)
     ) |>
-    dplyr::arrange(.data$index) |>
+    dplyr::arrange(.data$pct_change) |>
     dplyr::mutate(
       y_position = {
-        y <- .data$index
-        gap <- 0.07
+        y <- .data$pct_change
+        gap <- 7
         for (i in seq_along(y)[-1]) {
           if (y[i] - y[i - 1] < gap) y[i] <- y[i - 1] + gap
         }
@@ -5403,9 +5411,9 @@ plot_messages_hours_emissions <- function(
 
   messages_plot <- ais_activity |>
     ggplot2::ggplot(
-      ggplot2::aes(.data$year, .data$index, colour = .data$series)
+      ggplot2::aes(.data$year, .data$pct_change, colour = .data$series)
     ) +
-    ggplot2::geom_hline(yintercept = 1, colour = "grey70", linewidth = 0.3) +
+    ggplot2::geom_hline(yintercept = 0, colour = "grey70", linewidth = 0.3) +
     ggplot2::geom_vline(
       xintercept = baseline_year,
       linetype = "dashed",
@@ -5431,23 +5439,17 @@ plot_messages_hours_emissions <- function(
       breaks = seq(start_year, end_year, by = 1),
       limits = c(start_year, end_year + 2)
     ) +
+    ggplot2::scale_y_continuous(
+      labels = function(x) paste0(ifelse(x > 0, "+", ""), round(x), "%")
+    ) +
     ggplot2::labs(
       x = "",
-      y = paste0("Index (", baseline_year, " = 1)"),
-      title = "AIS emissions track hours and distance, not message volume",
-      subtitle = paste0(
-        "Global AIS-side series indexed to ",
-        baseline_year,
-        " (dynamic-AIS phase-in). Messages roughly double while emissions ",
-        "grow with\nobserved hours and distance - densification of ",
-        "already-observed tracks adds resolution, not activity."
-      )
+      y = paste0("Change from ", baseline_year)
     ) +
     ggplot2::theme_minimal(base_size = 9) +
     ggplot2::theme(
       legend.position = "top",
-      panel.grid.minor = ggplot2::element_blank(),
-      plot.title = ggplot2::element_text(face = "bold")
+      panel.grid.minor = ggplot2::element_blank()
     )
 
   if (!is.null(file_path)) {
