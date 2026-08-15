@@ -65,12 +65,6 @@ annual_global_emissions_by_receiver_type_and_flag|stem|3d4ac18a0b0d9548|081e9909
 n_s1_detections|stem|fda1a02b6c59bc93|926b2fdfcde8dfdd|41a78d1b2d08aad8|-1220995872|data/gfw/n_s1_detections.csv|t20663.8422793373s|s107b|107|file|local|vector|||5.711||
 n_vessels_by_vessel_class_file|stem|1a7a1fcb444ec432|bd7f6d1fcbfcd05a|2c530c1562a7fbd1|84280321|sql/n_vessels_by_vessel_class.sql|t20664.9313253829s|s495b|495|file|local|vector|||0||
 n_vessels_by_vessel_class|stem|620aa463fe3c649b|45b97d0dfe794a17|593416c4641686a1|1581250328|data/gfw/n_vessels_by_vessel_class.csv|t20664.9316484593s|s945b|945|file|local|vector|||3.408||
-fleet_emissions_and_size_data|stem|3c860f51681d2620|b6f85934eda577c7|5748f8586b1d03c0|-2085654286||t20664.9368702661s|s1124b|1124|rds|local|vector|||0.245||
-fleet_emissions_and_size_file|stem|3f2053827d1912d0|e5ff6016c6bc02d9|755f7acafe8f6fb8|-2105347730|data/gfw/fleet_emissions_and_size.csv|t20664.9368704056s|s1902b|1902|file|local|vector|||0.001||
-fleet_emissions_and_size_figure|stem|1712de0e491011d1|f66c0d680a69852f|0880779a0158f010|-686309690|figures/fleet_emissions_and_size.png|t20664.9368765904s|s341939b|341939|file|local|vector|||0.519||
-fleet_composition_pie|function|f48c475169027feb
-plot_fleet_emissions_and_size|function|1a85c794a54ab148
-fleet_emissions_and_size|function|b070c4751fb861cf
 n_vessels_by_year_and_class_file|stem|58f63cff5b488c60|d2fad3001385cb0b|2c530c1562a7fbd1|1509731054|sql/n_vessels_by_year_and_class.sql|t20664.9489792582s|s2067b|2067|file|local|vector|||0||
 n_vessels_by_year_and_class|stem|c6171bb153b46aa5|6569547c636586c4|a0caa42070971b4f|1783721810|data/gfw/n_vessels_by_year_and_class.csv|t20664.9501352061s|s9610b|9610|file|local|vector|||27.555||
 annual_ais_activity_summary_file|stem|12f3c3af2dda039b|a263674c72791224|2c530c1562a7fbd1|-533701755|sql/annual_ais_activity_summary.sql|t20665.903395761s|s3959b|3959|file|local|vector|||0||
