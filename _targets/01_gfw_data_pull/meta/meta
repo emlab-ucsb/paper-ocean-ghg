@@ -166,3 +166,11 @@ summarize_cams_ship_co2|function|5ba11ed7029b8e0d
 inventory_vessel_counts_by_registry|function|43f056ac90d3c868
 annual_ais_activity_summary_cheap_file|stem|8121acae59d5448f|676032e46871b1c5|2c530c1562a7fbd1|-2007744426|sql/annual_ais_activity_summary_cheap.sql|t20673.8737837488s|s6073b|6073|file|local|vector|||0||
 annual_ais_activity_summary_cheap|stem|bd862752535fedaf|f16eb18b06a27346|dd5e251242649988|-1731599547|data/gfw/annual_ais_activity_summary_cheap.csv|t20673.8759053141s|s661538b|661538|file|local|vector|||27.702||
+annual_spatial_co2_emissions_by_vessel_class_family_file|stem|0db878ada29ded15|0ccba2123ecde163|2c530c1562a7fbd1|-589649576|sql/annual_spatial_co2_emissions_by_vessel_class_family.sql|t20664.9618643701s|s1414b|1414|file|local|vector|||0||
+pixel_size_analysis|stem|696afb2c5d96399b|bb375a30fa348382|2c530c1562a7fbd1|747103723||t20664.9621871466s|s51b|51|rds|local|vector|||0||
+fishing_vessel_classes|function|9971df3aa5284378
+reefer_vessel_classes|function|3f594d3b2dffefa6
+vessel_class_family|function|06396670e8027f97
+vessel_class_family_sql|function|4f02f50eae07211a
+vessel_class_families|function|9ede3af2b3ba477b
+annual_spatial_co2_emissions_by_vessel_class_family|stem|945cf5ddbc1afe36|4ed1fb02695bc00f|5b6c423ba81d8e21|547664468|data/gfw/annual_spatial_co2_emissions_by_vessel_class_family.csv|t20664.9624698293s|s5071081b|5071081|file|local|vector|||6.721||

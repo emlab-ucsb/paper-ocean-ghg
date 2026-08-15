@@ -66,6 +66,80 @@ combine_EU_data <- function(mrv_raw_files) {
   combined
 }
 
+# Vessel class families --------------------------------------------------------
+# GFW vessel classes are rolled up into four families for Figure 3. These
+# definitions are the single source of truth for that roll-up: the notebook uses
+# them to group and label the bar chart, and _targets_01_gfw_data_pull.R glues
+# vessel_class_family_sql() into the spatial pull, so the maps and the bars are
+# always grouped the same way. All of them take raw GFW class names
+# ("cargo.container", "trawlers"), not the prettified labels.
+
+# The fishing gears, which the notebook also uses for its fishing / non-fishing
+# split
+fishing_vessel_classes <- function() {
+  c(
+    "trawlers",
+    "squid_jigger",
+    "tuna_purse_seines",
+    "set_longlines",
+    "pole_and_line",
+    "set_gillnets",
+    "pots_and_traps",
+    "dredge_fishing",
+    "other_seines",
+    "other_purse_seines",
+    "trollers",
+    "drifting_longlines",
+    "driftnets",
+    "fish_factory",
+    "other_fishing"
+  )
+}
+
+# Refrigerated cargo arrives under several class names, not all of which carry
+# the "cargo" prefix. This is what puts them in the cargo family; Figure 3A
+# gives each of them its own bar rather than collapsing them into one row.
+reefer_vessel_classes <- function() {
+  c("specialized_reefer", "container_reefer", "cargo.refrigerated")
+}
+
+# Assign raw GFW vessel classes to families
+vessel_class_family <- function(vessel_class) {
+  dplyr::case_when(
+    vessel_class %in% fishing_vessel_classes() ~ "Fishing",
+    vessel_class %in% reefer_vessel_classes() ~ "Cargo",
+    stringr::str_starts(vessel_class, "cargo") ~ "Cargo",
+    stringr::str_starts(vessel_class, "tanker") ~ "Tanker",
+    .default = "Service and passenger"
+  )
+}
+
+# The same assignment as a BigQuery CASE expression, so the spatial pull groups
+# classes exactly the way vessel_class_family() does
+vessel_class_family_sql <- function() {
+  sql_list <- function(classes) {
+    paste0("'", classes, "'", collapse = ", ")
+  }
+  paste(
+    "CASE",
+    paste0(
+      "    WHEN vessel_class IN (",
+      sql_list(fishing_vessel_classes()),
+      ") THEN 'Fishing'"
+    ),
+    paste0(
+      "    WHEN vessel_class IN (",
+      sql_list(reefer_vessel_classes()),
+      ") THEN 'Cargo'"
+    ),
+    "    WHEN STARTS_WITH(vessel_class, 'cargo') THEN 'Cargo'",
+    "    WHEN STARTS_WITH(vessel_class, 'tanker') THEN 'Tanker'",
+    "    ELSE 'Service and passenger'",
+    "  END",
+    sep = "\n"
+  )
+}
+
 # Functions for the 03_inventories_comparison pipeline ----
 
 # Download one year of CAMS-GLOB-SHIP CO2 from the Copernicus Atmosphere Data
@@ -1790,33 +1864,11 @@ inventory_color_palette <- function(data_sources) {
 # classes; note the counts are not year-filtered (vessel_info has no date
 # column) while the emissions are restricted to analysis_end_year.
 
-# The fishing classes collapsed into a single "Fishing" slice. Kept in one place
-# because the notebook hardcodes the same list when it facets figure 3.
-gfw_fishing_vessel_classes <- function() {
-  c(
-    "trawlers",
-    "squid_jigger",
-    "tuna_purse_seines",
-    "set_longlines",
-    "pole_and_line",
-    "set_gillnets",
-    "pots_and_traps",
-    "dredge_fishing",
-    "other_seines",
-    "other_purse_seines",
-    "trollers",
-    "drifting_longlines",
-    "driftnets",
-    "fish_factory",
-    "other_fishing"
-  )
-}
-
 # Turn a raw GFW vessel_class into the label used on the pies, folding every
 # fishing gear type into one slice.
 gfw_vessel_class_label <- function(vessel_class) {
   ifelse(
-    vessel_class %in% gfw_fishing_vessel_classes(),
+    vessel_class %in% fishing_vessel_classes(),
     "Fishing",
     # Same transform the notebook applies for figure 3, so the two figures label
     # the same class identically. tanker.chemical stays "Tanker: chemical": it is

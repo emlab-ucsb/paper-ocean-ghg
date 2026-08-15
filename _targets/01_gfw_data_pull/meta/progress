@@ -1,9 +1,0 @@
-name|type|parent|branches|progress
-activity_summary_start_year|stem|activity_summary_start_year|0|skipped
-analysis_end_year|stem|analysis_end_year|0|skipped
-annual_ais_activity_summary_cheap_file|stem|annual_ais_activity_summary_cheap_file|0|dispatched
-annual_ais_activity_summary_cheap_file|stem|annual_ais_activity_summary_cheap_file|0|completed
-bq_billing_project|stem|bq_billing_project|0|skipped
-run_version_ais|stem|run_version_ais|0|skipped
-annual_ais_activity_summary_cheap|stem|annual_ais_activity_summary_cheap|0|dispatched
-annual_ais_activity_summary_cheap|stem|annual_ais_activity_summary_cheap|0|completed

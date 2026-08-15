@@ -24,6 +24,11 @@
 \usepackage{array}
 \usepackage{verbatim}
 \usepackage{url}
+% Keeps tables from floating past the text that follows them. The table
+% environment is a float, but sn-jnl.cls wraps its body in threeparttable, so
+% the [H] specifier used for every figure here errors out on tables. A
+% \FloatBarrier after each table gives the same in-source-order placement.
+\usepackage{placeins}
 
 % Make it so figures aren't forced to the bottom of pages
 \raggedbottom
@@ -59,7 +64,7 @@
 
 \affil[5]{\orgname{Global Fishing Watch}, \orgaddress{\city{Washington}, \postcode{20036}, \state{DC}, \country{USA}}}
 
-\abstract{Marine vessels are central to the blue economy, but are also significant sources of greenhouse gases that drive climate change and other pollutants that negatively impact local air quality and human health. Accurately measuring these emissions is critical for mitigating them. Current approaches rely on the Automatic Identification System (AIS), a high-resolution tracking system carried by many vessels. However, not all vessels carry AIS; and even for those that do, AIS broadcast and reception quality can be inconsistent over space and time. To account for this, we developed a method for quantifying comprehensive marine vessel emissions at global scale by fusing two independent types of satellite data: 1) individual vessel tracking using AIS to estimate vessel-level emissions when possible, and 2) vessel detections using synthetic aperture radar (SAR) imagery to estimate emissions for vessels that do not use AIS or are operating in areas with poor AIS reception. We found that vessels emitted approximately 1.53 billion metric tonnes of CO$_{2}$ in 2025. In 2024, the most recent year for which EDGAR data are available, marine vessels accounted for 16\% of global fossil fuel emissions from the transportation sector. Current AIS-only approaches underestimate the magnitude of 2024 emissions by 22\%. Meanwhile, because AIS coverage has generally been increasing over time, current AIS-only approaches overestimate the increasing emissions trend by 15\% (from 2017 to 2025). By resolving the confound between changes in monitoring and actual changes in emissions, our approach provides a comprehensive estimate of the magnitude, trends, and spatial patterns of marine vessel GHG emissions and non-GHG air pollutant emissions that can enable interventions designed to mitigate them.}
+\abstract{Marine vessels are central to the blue economy, but are also significant sources of greenhouse gases that drive climate change and other pollutants that negatively impact local air quality and human health. Accurately measuring these emissions is critical for mitigating them. Current approaches rely on the Automatic Identification System (AIS), a high-resolution tracking system carried by many vessels. However, not all vessels carry AIS; and even for those that do, AIS broadcast and reception quality can be inconsistent over space and time. To account for this, we developed a method for quantifying comprehensive marine vessel emissions at global scale by fusing two independent types of satellite data: 1) individual vessel tracking using AIS to estimate vessel-level emissions when possible, and 2) vessel detections using synthetic aperture radar (SAR) imagery to estimate emissions for vessels that do not use AIS or are operating in areas with poor AIS reception. We found that vessels emitted approximately 1.53 billion metric tonnes of CO$_{2}$ in 2025. In 2024, the most recent year for which global inventory estimates are available, marine vessels accounted for 16\% of fossil fuel emissions from the transportation sector, and 3.6\% of all emissions globally. Current AIS-only approaches underestimate the magnitude of 2025 emissions by 22\%. Meanwhile, because AIS coverage has generally been increasing over time, current AIS-only approaches overestimate the increasing emissions trend by 15\% (from 2017 to 2025). By resolving the confound between changes in monitoring and actual changes in emissions, our approach provides a comprehensive estimate of the magnitude, trends, and spatial patterns of marine vessel GHG emissions and non-GHG air pollutant emissions that can enable interventions designed to mitigate them.}
 
 \maketitle
 
@@ -75,16 +80,16 @@ The currently accepted state-of-the-art method for estimating marine vessel emis
 
 However, this AIS-based method faces multiple challenges. AIS coverage is incomplete, variable, and not fully representative of global maritime vessel activity. Many vessels are not equipped with AIS systems or are not required to broadcast AIS \cite{taconet2019global}. Satellite imagery analysis has shown that about 75\% of industrial fishing vessels and over 25\% of vessels associated with transport (e.g., cargo, passenger) and offshore energy infrastructure (e.g. tankers, support vessels) are not tracked with AIS \cite{paolo2024satellite}. Even for vessels that do carry AIS, there are often gaps in data transmission due to challenges with the reception quality of satellites and terrestrial receivers, or due to intentional AIS disabling that may be associated with illegal activities or with legal activities such as captains hiding their vessel location in areas prone to piracy \cite{welch2022hot}. Changes in AIS adoption and the evolution of AIS technology over time also make it challenging to assess the trends of vessel activities using AIS data alone. For example, the introduction of a new technology in 2022 whereby AIS receivers, which are typically on land or via satellite, are installed directly on shipping vessels (known as Dynamic-AIS) has increased the AIS reception quality in some high traffic regions \cite{spire_documentation_2022}, resulting in significant increases in the vessel activity captured by AIS that do not necessarily reflect the trend in the actual amount of activity. The landscape of AIS data providers (Orbcomm, Spire Global, Exact Earth, Marine Traffic, Kpler) and the type of AIS data each provides (satellite-based, terrestrial, dynamic) has also changed over time, further confounding the ability to study trends based on AIS data alone. Finally, key technical vessel characteristics necessary for AIS-based emissions modeling are often unknown, particularly for low-information vessels that are not listed in publicly available registries \cite{chen2024analysis}
 
-Here we develop a method to estimate high-resolution marine vessel emissions globally from 2017 through 2024 by fusing AIS data from broadcasting vessels with Sentinel-1 (S1) Synthetic Aperture Radar (SAR) detections of vessels that are not broadcasting AIS. The 20m-resolution S1 SAR imagery allows us to detect and estimate the lengths of most vessels larger than 15 m regardless of whether they broadcast AIS, cloud cover, weather conditions, or solar illumination \cite{paolo2024satellite}. The two S1 satellites active during our study period (full period for S1A, 2017-2021 for S1B) operate in a polar, sun-synchronous orbit, providing a global revisit frequency of 6 to 12 days. For over 770,000 AIS-broadcasting vessels, we quantify emissions for each vessel using precise latitude/longitude/timestamp information for over 119 billion individual AIS messages. We do so using previously published and validated methods for the AIS-based emissions model itself \cite{olmer2017greenhouse, fourth2020greenhouse}, while enriching key vessel characteristics for low-information vessels using machine learning models to infer main engine power, design speed, and vessel type. To account for the vast missing emissions from non-broadcasting vessels (also sometimes known as `dark vessels' \cite{rowlands2019satellite}), we develop a machine learning framework that leverages over 29 million vessel detections from across 845,000 S1 scenes to estimate non-broadcasting emissions at a monthly global 1x1-degree gridded resolution, from 2017 through 2024, and disaggregated by vessel type (fishing or non-fishing). Our method leverages computing infrastructure and technical expertise developed by Global Fishing Watch (GFW) \cite{gfw_website} 
+Here we develop a method to estimate high-resolution marine vessel emissions globally from 2017 through 2025 by fusing AIS data from broadcasting vessels with Sentinel-1 (S1) Synthetic Aperture Radar (SAR) detections of vessels that are not broadcasting AIS. The 20m-resolution S1 SAR imagery allows us to detect and estimate the lengths of most vessels larger than 15 m regardless of whether they broadcast AIS, cloud cover, weather conditions, or solar illumination \cite{paolo2024satellite}. The two S1 satellites active during our study period (full period for S1A, 2017-2021 for S1B) operate in a polar, sun-synchronous orbit, providing a global revisit frequency of 6 to 12 days. For over 775,000 AIS-broadcasting vessels, we quantify emissions for each vessel using precise latitude/longitude/timestamp information for over 119 billion individual AIS messages. We do so using previously published and validated methods for the AIS-based emissions model itself \cite{olmer2017greenhouse, fourth2020greenhouse}, while enriching key vessel characteristics for low-information vessels using machine learning models to infer main engine power, design speed, and vessel type. To account for the vast missing emissions from non-broadcasting vessels (also sometimes known as `dark vessels' \cite{rowlands2019satellite}), we develop a machine learning framework that leverages over 31.9 million vessel detections from across 924,000 S1 scenes to estimate non-broadcasting emissions at a monthly global 1x1-degree gridded resolution, from 2017 through 2025, and disaggregated by vessel type (fishing or non-fishing). Our method leverages computing infrastructure and technical expertise developed by Global Fishing Watch (GFW) \cite{gfw_website} 
  to process AIS data \cite{kroodsma2018tracking} and S1 vessel detection data \cite{paolo2024satellite}, and to estimate key vessel characteristics for vessels lacking readily available public information \cite{park2023tracking}. Our method, therefore, effectively addresses the two major challenges currently present in remotely measuring marine vessel emissions.
 
-Our novel approach to estimating emissions from non-broadcasting vessels actually makes use of information from broadcasting vessels by combining data fusion and machine learning. Because we know the exact time and location of each S1 scene, we can classify every vessel detected by S1 as either being matched to an AIS-broadcasting vessel or not \cite{paolo2024satellite}. Since we estimate vessel level emissions for all AIS-broadcasting vessels using an AIS-based model, we are able to exploit the way S1 data are differentiated by: 1) building a machine learning model that predicts AIS-broadcasting emissions from the density of matched S1 vessel detections over space and time; and 2) using that model to predict non-broadcasting emissions from unmatched S1 vessel detection density over space and time. Because S1 coverage is spatiotemporally heterogeneous (i.e., different areas are imaged at different frequencies over time, and some areas are completely outside the S1 footprint), we build an additional set of machine learning models to predict unmatched vessel density for areas that are not imaged. Using this predicted unmatched vessel density, we can predict non-broadcasting emissions even in areas and times that are not imaged by S1.
+Our novel approach to estimating emissions from non-broadcasting vessels actually makes use of information from broadcasting vessels by combining data fusion and machine learning. Because we know the exact time and location of each S1 scene, we can classify every vessel detected by S1 as either being matched to an AIS-broadcasting vessel or not \cite{paolo2024satellite}. Since we estimate vessel level emissions for all AIS-broadcasting vessels using an AIS-based model, we are able to exploit the way S1 data are differentiated by: 1) building a machine learning model that predicts AIS-broadcasting emissions from the density of matched S1 vessel detections over space and time; and 2) using that model to predict non-broadcasting emissions from unmatched S1 vessel detection density over space and time (i.e., for 1x1 degree pixels each month). To estimate unmatched vessel detection density over space and time, we must first account for the fact that S1 coverage is spatiotemporally heterogeneous. The S1 footprint only ever covers certain regions of the globe, so there are some areas that are never imaged at all (here we define the `S1 footprint' as the spatial union of all S1 scenes during our 2017 -- 2025 study period). And even for those areas within the S1 footprint, different areas are imaged by S1 scenes at different frequencies over time, which means that not all areas within the S1 footprint are even imaged every month. To account for this heterogeniety, we build an additional set of machine learning models to predict unmatched vessel density for areas that are not imaged by S1 in a given month (either because this area is within the S1 footprint but did not receive S1 coverage in this particular month; or because this area falls completely outside the S1 footprint). Using this predicted unmatched vessel density, we can predict non-broadcasting emissions for the entire ocean every month, even in areas and times that are not imaged by S1.
 
-Our approach yields monthly, spatially explicit estimates of marine vessel emissions for three GHGs that drive climate change (carbon dioxide: CO$_{2}$, methane: CH$_{4}$, and nitrous oxide: N$_{2}$O) and six other non-GHG air pollutants that impact ambient air quality and health (carbon monoxide: CO, nitrogen oxides: NO$_{x}$, sulfur oxides: SO$_{x}$, particulate matter 2.5: PM$_{2.5}$, particulate matter 10: PM$_{10}$, and volatile organic compounds: VOCs). Our vessel-level AIS-broadcasting data further allows for quantifying emissions across individual port stays, domestic trips, and international trips. Focusing our main results on CO$_{2}$ as the primary greenhouse gas (with other GHGs and non-GHG air pollutants described in the supplement), we report trends in emissions from 2017 through 2024, and compare trajectories of emission estimates based on either the AIS data alone or the fused AIS-S1 data. We compare the trend in marine vessel CO$_{2}$ emissions to those from other transportation sectors over the same time period. Our data allows for detailed mapping of emissions from vessel activities at a global scale with a breakdown across vessel types. By comparing emission trends from AIS-only models and our fused AIS–SAR approach, we reveal the true magnitude and evolving dynamics of the marine sector’s contribution to global and regional emissions.
+Our approach yields monthly, spatially explicit estimates of marine vessel emissions for three GHGs that drive climate change (carbon dioxide: CO$_{2}$, methane: CH$_{4}$, and nitrous oxide: N$_{2}$O) and six other non-GHG air pollutants that impact ambient air quality and health (carbon monoxide: CO, nitrogen oxides: NO$_{x}$, sulfur oxides: SO$_{x}$, particulate matter 2.5: PM$_{2.5}$, particulate matter 10: PM$_{10}$, and volatile organic compounds: VOCs). Our vessel-level AIS-broadcasting data further allows for quantifying emissions across individual port stays, domestic trips, and international trips. Focusing our main results on CO$_{2}$ as the primary greenhouse gas (with other GHGs and non-GHG air pollutants described in the supplement), we report trends in emissions from 2017 through 2025 (the last full year of available data), and compare trajectories of emission estimates based on either the AIS data alone or the fused AIS-S1 data. We compare the trend in marine vessel CO$_{2}$ emissions to those from other transportation sectors over the same time period. Our data allows for detailed mapping of emissions from vessel activities at a global scale with a breakdown across vessel types. By comparing emission trends from AIS-only models and our fused AIS–SAR approach, we reveal the true magnitude and evolving dynamics of the marine sector’s contribution to global and regional emissions.
 
 \section{Results}
 
-To correctly estimate both the magnitude and trends of marine emissions, it is essential to fuse data from sources that monitor both broadcasting and non-broadcasting vessels. Using this data fusion approach, we find that total global CO$_{2}$ emissions at sea in 2025 was 1.53 billion MT (Fig. \ref{fig:fig-emissions-by-data-source-and-maps}A), with an increase of 38\% from 2017 to 2025 (Fig. \ref{fig:fig-emissions-by-data-source-and-maps}B). If only considering emissions from vessels that broadcast AIS, in line with currently accepted state-of-the-art models, global CO$_{2}$ emissions in 2025 would be only 1.19 billion MT (Fig. \ref{fig:fig-emissions-by-data-source-and-maps}A), with a more pronounced increase from 2017 to 2025 of 44\% (Fig. \ref{fig:fig-emissions-by-data-source-and-maps}B). Thus using only AIS data from broadcasting vessels underestimates current global CO$_{2}$ emissions by 22\%, and overestimates the increasing trend for 2017--2025 by 15\% (see Tables \ref{tab:total_percent_change_by_fleet} and \ref{tab:pollutant_ais_underestimation_overestimation_summary} for summaries of all other GHGs and pollutants). Fusing AIS and S1 data also provides a comprehensive picture of spatial marine vessel emissions patterns and how those patterns change over time (Fig. \ref{fig:fig-emissions-by-data-source-and-maps}C and Fig. \ref{fig:fig-pollutant-maps}).
+To correctly estimate both the magnitude and trends of marine emissions, it is essential to fuse data from sources that monitor both broadcasting and non-broadcasting vessels. Using this data fusion approach, we find that total global CO$_{2}$ emissions at sea in 2025 was 1.53 billion MT (Fig. \ref{fig:fig-emissions-by-data-source-and-maps}A), with an increase of 38\% from 2017 to 2025 (Fig. \ref{fig:fig-emissions-by-data-source-and-maps}B). If only considering emissions from vessels that broadcast AIS, in line with currently accepted state-of-the-art models, global CO$_{2}$ emissions in 2025 would be only 1.19 billion MT (Fig. \ref{fig:fig-emissions-by-data-source-and-maps}A), with a more pronounced increase from 2017 to 2025 of 44\% (Fig. \ref{fig:fig-emissions-by-data-source-and-maps}B). Thus using only AIS data from broadcasting vessels underestimates the magnitude of 2025 global CO$_{2}$ emissions by 22\%, and overestimates the increasing trend for 2017--2025 by 15\% (see Tables \ref{tab:total_percent_change_by_fleet} and \ref{tab:pollutant_ais_underestimation_overestimation_summary} for summaries of all other GHGs and pollutants). Fusing AIS and S1 data also provides a comprehensive picture of spatial marine vessel emissions patterns and how those patterns change over time (Fig. \ref{fig:fig-emissions-by-data-source-and-maps}C and Fig. \ref{fig:fig-pollutant-maps}).
 
 
 \begin{figure}[H]
@@ -94,33 +99,34 @@ To correctly estimate both the magnitude and trends of marine emissions, it is e
     \label{fig:fig-emissions-by-data-source-and-maps}
 \end{figure}
 
-Estimating emissions from non-broadcasting vessels not only offers new insights on the overall magnitude and temporal trends of global emissions, but also provides nuanced spatial information and information disaggregated by fishing and non-fishing vessels (Fig. \ref{fig:fig-spatial-temporal-richness-by-fleet-total-pseudolog}). In 2025, 36\% of CO$_{2}$ emissions from fishing vessels were from non-broadcasting vessels, and 21\% of CO$_{2}$ emissions from non-fishing vessels were from non-broadcasting vessels (Fig. \ref{fig:fig-spatial-temporal-richness-by-fleet-total-pseudolog}A).For both types of vessels, this fraction of emissions from non-broadcasting vessels has generally been declining since 2021, consistent with a steady increase in AIS monitoring over the period, although it ticked up slightly for fishing vessels in
-2025. The time series data reveal strong seasonal trends and event-driven variations in marine GHG emissions. We see consistent dips during major holidays including Christmas, New Year’s Day, and Chinese New Year, as well as during the COVID-19 pandemic (Fig. \ref{fig:fig-spatial-temporal-richness-by-fleet-total-pseudolog}A and Fig. \ref{fig:fig-pollutant-time-series}). Being able to spatially quantify emissions from non-broadcasting vessels fills  important gaps in our current understanding of where marine vessel emissions take place, particularly in southeast Asia, China, the Caribbean, and the Mediterranean (Fig. \ref{fig:fig-spatial-temporal-richness-by-fleet-total-pseudolog}B), crucial for targeting policy or private sector interventions. 
+Estimating emissions from non-broadcasting vessels offers new insights into the temporal trends of and spatial patterns of global emissions (Fig. \ref{fig:fig-emissions-time-series-and-maps}). Although total emissions has generally been increasing (Fig. \ref{fig:fig-emissions-time-series-and-maps}A), the share of emissions from non-broadcasting vessels has generally been declining since 2021 (Fig. \ref{fig:fig-emissions-time-series-and-maps}B), consistent with a steady increase in AIS monitoring over the period. The time series data reveal strong seasonal trends and event-driven variations in marine GHG emissions. We see consistent dips during major holidays including Christmas, New Year’s Day, and Chinese New Year, as well as during the COVID-19 pandemic (Fig. \ref{fig:fig-emissions-time-series-and-maps}A and Fig. \ref{fig:fig-pollutant-time-series}). Being able to spatially quantify emissions from non-broadcasting vessels fills important gaps in our current understanding of where marine vessel emissions take place, particularly in southeast Asia, China, the Caribbean, and the Mediterranean (Fig. \ref{fig:fig-emissions-time-series-and-maps}C), crucial for targeting policy or private sector interventions. Our dataset also provides this sort of nuanced spatiotemporal information disaggregated by fishing and non-fishing vessels (Fig. \ref{fig:fig-spatial-temporal-richness-by-fleet-total-pseudolog}). In 2025, 36\% of CO$_{2}$ emissions from fishing vessels were from non-broadcasting vessels, and 21\% of CO$_{2}$ emissions from non-fishing vessels were from non-broadcasting vessels.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{figures/fig-spatial-temporal-richness-by-fleet-total-pseudolog-1.png}
-    \caption{(A) Time series of monthly global CO$_2$ emissions, shown for both AIS-broadcasting and S1-detected non-broadcasting vessels, and for both fishing and non-fishing vessels. (B) Spatial distribution of cumulative 2017-2025 CO$_{2}$ emissions from both AIS-broadcasting and S1-detected non-broadcasting vessels, for both fishing and non-fishing vessels, and shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale).}
-    \label{fig:fig-spatial-temporal-richness-by-fleet-total-pseudolog}
+    \includegraphics[width=\columnwidth]{figures/fig-emissions-time-series-and-maps-1.png}
+    \caption{(A) Time series of monthly global CO$_2$ emissions, shown for both AIS-broadcasting and S1-detected non-broadcasting vessels. (B) Time series of the monthly share of global CO$_{2}$ emissions attributable to S1-detected non-broadcasting vessels. (C) Spatial distribution of cumulative 2017-2025 CO$_{2}$ emissions from AIS-broadcasting vessels (top), S1-detected non-broadcasting vessels (middle), and both fleets combined (bottom), shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale).}
+    \label{fig:fig-emissions-time-series-and-maps}
 \end{figure}
 
-Across the entire 2017 to 2025 time series, almost all non-broadcasting emissions (96.4\%) occurred inside the S1 footprint and in pixel-months that were imaged by S1 (Fig. \ref{fig:fig-spatial-coverage-footprint}). This makes sense because part of the Copernicus system's observation strategy for S1 is specifically focused on imaging coastal and shipping areas, where ship density is highest \cite{ESA2013S1Handbook}. Our machine learning model for predicting these emissions directly from observed S1 detection density achieves a high out-of-sample predictive performance (traditional R$^{2}$ = 0.94 and total percent error of -8.6\% for CO$_2$, Table \ref{tab:all_performance_metrics_table}). Only 3.5\% of non-broadcasting emissions occurred inside the S1 footprint but in pixel-months that weren't imaged by S1, requiring us to use a two-stage hurdle framework using both a classification model (F1 Score = 0.72) and a regression model (traditional R$^{2}$ = 0.73) to predict S1 detection density before predicting emissions (traditional R$^{2}$ = 0.93). Only 0.08\% of non-broadcasting emissions occurred outside the S1 footprint entirely, since most vessels operating in these open ocean areas use AIS.
+Across the entire 2017 to 2025 time series, almost all non-broadcasting emissions (96.4\%) occurred inside the S1 footprint and in pixel-months that were imaged by S1 (Fig. \ref{fig:fig-spatial-coverage-footprint}). This makes sense because part of the Copernicus system's observation strategy for S1 is specifically focused on imaging coastal and shipping areas, where ship density is highest \cite{ESA2013S1Handbook}. Our machine learning model for predicting these emissions directly from observed S1 detection density achieves a high out-of-sample predictive performance (traditional R$^{2}$ = 0.94 and total percent error of -8.6\% for CO$_2$, Table \ref{tab:all_performance_metrics_table}). Only 3.5\% of non-broadcasting emissions occurred inside the S1 footprint but in pixel-months that weren't imaged by S1, requiring us to use a two-stage hurdle framework using both a classification model (F1 Score = 0.72) and a regression model (traditional R$^{2}$ = 0.73) to predict S1 detection density before predicting emissions (traditional R$^{2}$ = 0.94). Only 0.08\% of non-broadcasting emissions occurred outside the S1 footprint entirely, since most vessels operating in these open ocean areas use AIS.
 
-Our vessel-level AIS-broadcasting emissions data provide a detailed understanding of marine vessel emissions across vessel classes and activity types (Fig. \ref{fig:fig-ais-data-richness}). Container cargo vessels are the largest emitters on aggregate, with most of that emissions occurring during international trips (Fig. \ref{fig:fig-ais-data-richness}A). Trawlers, which use an energy-intensive fishing technique in which nets are dragged through the water \cite{coello2015ais}, are the highest-emitting type of fishing vessel. Emissions from AIS-broadcasting vessels can be assigned to port stays in particular countries and port-to-port voyages within- and between-countries by analyzing the movement tracks of each individual vessel (Fig. \ref{fig:fig-ais-data-richness}A-B). Most emissions for non-fishing vessels occur during international trips, while most emissions for fishing vessels occur during domestic trips. China, Japan, and United States had the most CO$_{2}$ emissions during within-country domestic trips in 2025. China, Malaysia, and United States had the most CO$_{2}$ emissions during international trips that started or ended in these countries in 2025 (where the emissions from each trip are partitioned equally to its departure and arrival country). China, United States, and Indonesia had the most CO$_{2}$ emissions during port stays.
+Our vessel-level AIS-broadcasting emissions data provide a detailed understanding of marine vessel emissions across vessel classes and activity types (Fig. \ref{fig:fig-ais-data-richness}). We are able to distinguish activity between 37 classes of vessels, including 14 classes of fishing vessels; this makes our inventory the first to our knowledge that provides this level of emissions detail for fishing vessels. Container and bulk carriers, which transport much of the world's goods by sea, are the highest-emitting cargo classes (Fig. \ref{fig:fig-ais-data-richness}A-B). Oil tankers, which themselves transport fossil fuels, are the highest-emitting tanker type. Passenger vessels, which are composed of several diverse vessel subclasses including ferries and cruise ships, are the largest emitting vessel class on aggregate. Trawlers, which use an energy-intensive fishing technique in which nets are dragged through the water \cite{coello2015ais}, are the highest-emitting type of fishing vessel. Emissions from AIS-broadcasting vessels can also be assigned to port stays in particular countries and port-to-port voyages within- and between-countries by analyzing the movement tracks of each individual vessel (Fig. \ref{fig:fig-ais-data-richness}C and Fig. \ref{fig:fig-emissions-by-country-and-activity-type}). Most emissions for cargo and tanker vessels occur during international trips, while most service and passenger vessel emissions occur within ports (Fig. \ref{fig:fig-ais-data-richness}C). China, Japan, and United States had the most CO$_{2}$ emissions during within-country domestic trips in 2025. China, Malaysia, and United States had the most CO$_{2}$ emissions during international trips that started or ended in these countries in 2025 (where the emissions from each trip are partitioned equally to its departure and arrival country). China, United States, and Indonesia had the most CO$_{2}$ emissions during port stays. Country totals for every activity type are summarized in Fig. \ref{fig:fig-emissions-by-country-and-activity-type} and listed in Table \ref{tab:top_countries_by_activity_type}. We note that not all AIS messages are broadcast by vessels; we are therefore careful to exclude all non-vessel AIS messages from our emissions estimates. Roughly 47\% of AIS-enabled signals are attributable to buoys, FADs, navigation aids, offshore structures, fishing gear, and other objects. These are classified as a separate `gear' class by our vessel classification model, and are not included in this analysis. 
+
 
  \begin{figure}[H]
     \centering
     \includegraphics[width=\columnwidth]{figures/fig-ais-data-richness-1.png}
-    \caption{Richness of AIS-broadcasting vessel emissions data, showing: (A) CO$_{2}$ emissions by vessel type for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in 2025. (B) CO$_{2}$ emissions by country for AIS-broadcasting vessels during  during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in 2025. For both panels, emissions for each international trip are partitioned equally to its departure and arrival country). Countries with no values are shown in black.}
+    \caption{Richness of AIS-broadcasting vessel emissions data, showing: (A) Total 2025 CO$_{2}$ emissions by vessel class for AIS-broadcasting vessels. Vessel classes are grouped into four families, with the total for each family shown above its bars; every class in a family is shown as its own bar, so panel heights differ with the number of classes. These totals are aggregated from the same gridded emissions shown in panel B, so the two panels describe exactly the same emissions and the bars sum to the mapped total. (B) Spatial distribution of 2025 CO$_{2}$ emissions from AIS-broadcasting vessels for each of those same vessel class families, shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale). Families appear in the same order in both panels. (C) For each family, the share of CO$_{2}$ emissions attributable to international trips, port stays, and domestic trips (note that Panel C is not a decomposition of panel A: it covers only emissions that could be assigned to a trip or port visit that ended in 2025; each family sums to 100\% of its own assigned emissions).}
     \label{fig:fig-ais-data-richness}
 \end{figure}
 
-Our novel methods for inferring key missing vessel characteristics that are necessary for AIS-based emissions modeling allow us to accurately estimate vessel-level emissions for a huge swath of the world's fleet that does not otherwise have publicly available vessel characteristic information. Of the roughly 775,000 AIS-broadcasting vessels in our analysis, only 93,400 (12\%) are
-listed with the IMO, while 45,700 (6\%) are listed on some other public registry; this leaves over 636,000 vessels (82\%) that have no public registry information and must rely completely on modeled vessel characteristics (main engine power and design speed). Using the main engine power and design speed values that are derived from our machine learning models, we achieve an out-of-sample model performance of 0.82 traditional R$^{2}$ when comparing our daily vessel-specific CO$_{2}$ emissions estimates against those derived from a proprietary vessel registry dataset of over 15,000 vessel-specific fuel consumption values that were measured during at-sea trials (Fig. \ref{fig:fig-registered-data-performance}). If we were to instead estimate emissions with our model using only currently available public vessel characteristic data (i.e., the IMO provides lookup tables for average main engine power and design speed for different vessel types and sizes \cite{fourth2020greenhouse}), we would only achieve a predict performance value of 0.74 traditional R$^{2}$. We also measured the performance of our model's ability to estimate annual vessel-level CO$_{2}$ emissions estimates by comparing our estimates to those available in the publicly available European Maritime Safety Agency’s Monitoring, Reporting, and Verification (MRV) database \cite{mrv_emissions}. Using a set of over 2,000 matched vessel-specific annual emissions estimates, we found a performance value of 0.81 traditional R$^{2}$ (Table \ref{tab:tab-performance-tolerance-table}). Because many large vessels are already listed with the IMO, the majority of our total CO$_{2}$ emissions come from these vessels (39\%); 19\% come from vessels listed on other registries; and 42\% come from vessels with no public registry information and which rely entirely on modeled vessel characteristics.
+By developing new methods for inferring key missing vessel characteristics that are necessary for AIS-based emissions modeling, we can accurately estimate vessel-level emissions for a huge swath of the world's fleet that does not otherwise have the necessary vessel characteristic information in public registries. Of the roughly 775,000 AIS-broadcasting vessels in our analysis, we matched 139,000 (18\%) to public registries or proprietary databases, the majority of which (93,000) were IMO-registered. This allowed us to leverage vessel characteristics provided for these vessels from these databases. However, the vast majority of AIS-broadcasting vessels were not present in these registries, meaning that we needed to use model-derived vessel characteristics for between 83\% and 92\% of vessels, depending on the characteristic (\ref{tab:characteristic-availability}).  Because many large vessels are already listed with the IMO, the majority of our total CO$_{2}$ emissions come from these vessels (39\%); 19\% come from vessels listed on other registries; and 42\% come from vessels with no public registry information and which rely entirely on modeled vessel characteristics.
+
+Using the vessel characteristic values that are derived from our machine learning models, we achieve an out-of-sample model performance of 0.85 traditional R$^{2}$ when comparing our daily vessel-specific CO$_{2}$ emissions estimates against those derived from a proprietary vessel registry dataset of over 15,000 vessel-specific fuel consumption values that were measured during at-sea trials (Fig. \ref{fig:fig-registered-data-performance}). If we were to instead estimate emissions with our model using only currently available public vessel characteristic data (i.e., the IMO provides lookup tables for average main engine power and design speed for different vessel types and sizes \cite{fourth2020greenhouse}), we would only achieve a predictive performance value of 0.73 traditional R$^{2}$. We also measured the performance of our model's ability to estimate annual vessel-level CO$_{2}$ emissions estimates by comparing our estimates to those available in the publicly available European Maritime Safety Agency’s Monitoring, Reporting, and Verification (MRV) database \cite{mrv_emissions}. Using a set of over 27,000 matched vessel-specific annual emissions estimates, we found a performance value of 0.84 traditional R$^{2}$ (Table \ref{tab:tab-performance-tolerance-table}).
 
 The dataset also allows us to examine large-scale trends in marine vessel emissions for different parts of the ocean, and for different sectors of the global economy. Although vessel activity in the Southern Ocean represents a very small fractions of the world's marine vessel emissions (0.04\%), it represents the part of the world experiencing the highest growth rate of marine vessel emissions (267\%) (Fig. \ref{fig:fig-emissions-marine-ocean-other}A, Table \ref{tab:emissions_by_ocean_summary_tbl}). These polar estimates are primarily driven by AIS-broadcasting vessels, with only a small fraction coming from non-broadcasting vessels (1.02\% in the Southern Ocean; Table \ref{tab:emissions_by_ocean_summary_tbl}, Figure \ref{fig:fig-annual-emissions-by-ocean-and-data-source}). Polar regions have extremely limited S1 coverage (only 0.06\%  of pixel-months in the Southern Ocean were imaged by S1), meaning that trends there may be more susceptible to AIS adoption biases. This reflects the growing importance of monitoring marine vessel activity in the world's extreme latitudes. 
 
-Using the latest data available from the EU's Emissions Database for Global Atmospheric Research (EDGAR), we estimate that in 2024 marine vessels accounted for 16\% of all transportation-related CO$_{2}$ emissions \cite{JRC143227}. This is consistent with a report from the European Maritime Safety Agency that found that 14.2\% of all transportation-related  CO$_{2}$ emissions in the EU were from the maritime sector in 2022 \cite{emsa2025}. Marine vessel CO$_{2}$ emissions increased by 32\% between 2017 and 2024, five times faster than the growth rate of global emissions as a whole, and ten times faster than the growth rate of emissions from all other transportation-related sectors including railways, road transportation, aviation, and pipelines (Fig. \ref{fig:fig-emissions-marine-ocean-other}B, Table \ref{tab:emissions_by_data_source_summary_tbl}). This provides new evidence supporting the concept of the `blue acceleration' and the expansion of human activity in the oceans \cite{jouffray2020blue}.
+Using the latest data available from the EU's Emissions Database for Global Atmospheric Research (EDGAR), we estimate that in 2024 marine vessels accounted for 16\% of all transportation-related CO$_{2}$ emissions, and 3.6\% of all emissions globally \cite{JRC143227}. This is consistent with a report from the European Maritime Safety Agency that found that 14.2\% of all transportation-related  CO$_{2}$ emissions in the EU were from the maritime sector in 2022 \cite{emsa2025}. Marine vessel CO$_{2}$ emissions increased by 32\% between 2017 and 2024, five times faster than the growth rate of global emissions as a whole, and ten times faster than the growth rate of emissions from all other transportation-related sectors including railways, road transportation, aviation, and pipelines (Fig. \ref{fig:fig-emissions-marine-ocean-other}B, Table \ref{tab:emissions_by_data_source_summary_tbl}). This provides new evidence supporting the concept of the `blue acceleration' and the expansion of human activity in the oceans \cite{jouffray2020blue}.
 
 \begin{figure}[H]
     \centering
@@ -131,19 +137,19 @@ Using the latest data available from the EU's Emissions Database for Global Atmo
 
 \section{Discussion}
 
-High-resolution emissions data for marine vessels are essential for designing, implementing, and evaluating policies aimed at reducing them. However, incomplete vessel tracking data and technical data processing challenges have previously hindered progress \cite{chen2024analysis}. Our new data and methodology overcome these challenges by providing the necessary spatiotemporal data necessary for analyzing interventions that could mitigate the GHG emissions that drive climate change, as well as other air pollutants that impact ambient air quality and health. Our data could also be used to quantify the spatial health impacts of air pollution related to shipping and fishing activity \cite{zhang2021global}, along with the associated environmental justice implications.
+High-resolution emissions data for marine vessels are essential for designing, implementing, and evaluating policies aimed at reducing them. However, incomplete vessel tracking data and technical data processing challenges have previously hindered progress \cite{chen2024analysis}. Our new data and methodology overcome these challenges by providing the spatiotemporal data necessary for analyzing interventions that could mitigate the GHG emissions that drive climate change, as well as other air pollutants that impact ambient air quality and health. Our data could also be used to quantify the spatial health impacts of air pollution related to shipping and fishing activity \cite{zhang2021global}, along with the associated environmental justice implications.
 
-There are three main implications of the results: First, the spatial and temporal detail of our dataset makes it directly relevant for climate change and air quality policy. Carbon pricing, fuel standards, emissions control areas, port queuing reforms, and vessel speed reduction programs all require credible baselines and measurable outcomes. Our estimates provide such a baseline for both broadcasting and non-broadcasting activity, including vessels that would be missed by AIS-only inventories. This is especially relevant for the IMO's effort to move international shipping toward net-zero greenhouse gas emissions by 2050 by implementing a carbon market for international shipping emissions by vessels over 5,000 gross tonnage \cite{imo_carbon_price} \cite{IMO2025NetZero}. Further, the European Union Emissions Trading System has been expanded to include marine transportation under the EU emissions cap, and to subject vessel activity to and from European Economic Area ports to a carbon price \cite{kotzampasakis2025maritime}. Implementing a carbon market based on limiting emissions intensity (the amount of emissions per unit of activity or production) could also be an effective strategy for mitigating marine vessel emissions, even with a growing number of vessels. Carbon markets based on emissions-intensity credits rather than absolute emissions caps, such as India's emerging carbon market \cite{gupta2023assessing}, allow economic growth while continuing to incentivize improvements in emissions efficiency. This policy design is consistent with a review paper on current marine vessel emissions datasets, which concluded that measures aimed at increasing technical efficiency of ships could be an effective way to decouple emissions growth from global trade demand \cite{dengreview}.
+There are three main implications of the results: First, the spatial and temporal detail of our dataset makes it directly relevant for climate change and air quality policy. Carbon pricing, fuel standards, emissions control areas, port queuing reforms, and vessel speed reduction programs all require credible baselines and measurable outcomes. Our estimates provide such a baseline for both broadcasting and non-broadcasting activity, including vessels that would be missed by AIS-only inventories. This is especially relevant for the IMO's effort to move international shipping toward net-zero greenhouse gas emissions by 2050 by implementing a carbon market for international shipping emissions by vessels over 5,000 gross tonnage \cite{imo_carbon_price} \cite{IMO2025NetZero}. Further, the European Union Emissions Trading System has been expanded to include marine transportation under the EU emissions cap, and to subject vessel activity to and from European Economic Area ports to a carbon price \cite{kotzampasakis2025maritime}. Implementing a carbon market based on limiting emissions intensity (the amount of emissions per unit of activity or production) could also be an effective strategy for mitigating marine vessel emissions, even with a growing number of vessels. Carbon markets based on emissions-intensity standards rather than absolute emissions caps, such as India's emerging carbon market \cite{gupta2023assessing}, allow economic growth while continuing to incentivize improvements in emissions efficiency. This policy design is consistent with a review paper on current marine vessel emissions datasets, which concluded that measures aimed at increasing technical efficiency of ships could be an effective way to decouple emissions growth from global trade demand \cite{dengreview}.
 
-Second, our data can be leveraged to document the magnitude of the climate externality social cost (SC) associated with marine vessel activity, which allows a comparison between the externality and the economic value of the activities. We begin by focusing on non-fishing vessels (e.g., cargo ships and tankers) and compare their climate externalities with the value of goods transported by sea. Multiplying our estimated emissions of carbon dioxide, methane, and nitrous oxide from non-fishing vessels by the corresponding social costs of carbon (283 USD/MT \cite{moore2024synthesis}), methane (2,900 USD/MT \cite{wang2023damage}), and nitrous oxide (49,600 USD/MT \cite{wang2023damage}) yields an estimated annual global climate externality of 344 billion USD in 2021 (Table \ref{tab:social_cost_summary_tbl}). This is equivalent to about 5\% of the total value of goods transported by maritime trade, based on an estimated 6.63 trillion USD in global seaborne trade in 2021 \cite{hoffmeister2022developing}. Repeating this calculation for fishing vessels yields an estimated annual global climate externality of 24 billion USD in 2022 (Table \ref{tab:social_cost_summary_tbl}). This amounts to approximately 15\% of the global first-sale value of capture fisheries, which totaled 159 billion USD in 2022 \cite{fisheries2024state}. Our voyage-level emissions dataset can be used to estimate the climate externalities associated with country-to-country trade flows, enabling the construction of metrics such as the social cost per dollar of traded goods or the social cost per metric tonne of cargo transported. For vessels tracked through AIS, these externality costs can also be assigned to individual port-to-port voyages. Beyond their contribution to climate change, marine vessels emit air pollutants that impose substantial human health costs that have yet to be fully understood. \cite{zhang2021global}.
+Second, our data can be used to calculate the climate externality social cost (SC) associated with marine vessel activity, which can be compared against the economic value of the activities; we conduct a simple version of that calculation here. We first focus on non-fishing vessels (e.g., cargo ships and tankers) and compare their climate externalities with the value of goods transported by sea. Multiplying our estimated emissions of carbon dioxide, methane, and nitrous oxide from non-fishing vessels by the corresponding social costs of carbon (283 USD/MT \cite{moore2024synthesis}), methane (2,900 USD/MT \cite{wang2023damage}), and nitrous oxide (49,600 USD/MT \cite{wang2023damage}) yields an estimated annual global climate externality of 344 billion USD in 2021 (Table \ref{tab:social_cost_summary_tbl}). This amounts to about 5\% of the total value of goods transported by maritime trade, based on an estimated 6.63 trillion USD in global seaborne trade in 2021 \cite{hoffmeister2022developing}. Repeating this calculation for fishing vessels yields an estimated annual global climate externality of 24 billion USD in 2022 (Table \ref{tab:social_cost_summary_tbl}). This amounts to about 15\% of the global first-sale value of capture fisheries, which totaled 159 billion USD in 2022 \cite{fisheries2024state}. Our voyage-level emissions dataset can be used to estimate the climate externalities associated with country-to-country trade flows, enabling the construction of metrics such as the social cost per dollar of traded goods or the social cost per metric tonne of cargo transported. For vessels tracked with AIS, these externality costs can also be assigned to individual port-to-port voyages. Beyond their contribution to climate change, marine vessels emit air pollutants that impose substantial human health costs that have yet to be fully understood. \cite{zhang2021global}.
 
 Third, our methodology and data can help addressing a broader challenge in environmental monitoring: temporal trends in environmental variables are often confounded by changes in monitoring effort. For marine vessel emissions, this challenge arises because the adoption of AIS and the number of vessels being tracked have increased over time, causing existing methods to overestimate the growth of at-sea emissions by 15.9\%. Similar biases may arise for other environmental variables when monitoring expands over time, such as the discovery of invasive species \cite{costello2003pattern}. By combining two independent data sources, our approach is more robust to changes in monitoring effort than methods that rely on a single source and therefore produces more accurate estimates of environmental change. The same framework could be applied in other settings where changes in monitoring complicate the measurement of long-run environmental trends.
 
-Several methodological limitations remain. One key assumption is that emissions from non-broadcasting vessels are inferred from the relationship between Sentinel-1 detections and AIS-based emissions for matched vessels. We believe this is a reasonable assumption for several reasons.  First, many unmatched S1 detections likely correspond to AIS-broadcasting vessels that are not observed in the AIS data because of transmission gaps or poor reception quality. In these cases, the relationship between S1 vessel detections and emissions would hold perfectly since these unmatched vessels are in fact just AIS-broadcasting vessels that happen to not be observed by AIS at a given point in time. Second, our model accounts for vessel length, a proxy for main engine power that is one of the primary determinants of emissions in AIS-based models and is applicable to virtually all vessels powered by internal combustion engines. Third, since fishing and non-fishing vessels are known to have different emissions factors \cite{coello2015ais}, we account for this by differentiating detections between fishing and non-fishing vessels. Finally, our model incorporates spatiotemporal features that allow the relationship between detections and emissions to vary across space and time. Consequently, if broadcasting and non-broadcasting vessels operating in a given place and time have similar characteristics, the relationship between detections and emissions is expected to be similar as well. 
+Several methodological limitations remain. One key assumption is that emissions from non-broadcasting vessels can be inferred from the relationship between Sentinel-1 detections and AIS-based emissions for matched vessels. We believe this is a reasonable assumption for several reasons.  First, many unmatched S1 detections likely correspond to AIS-broadcasting vessels that are not observed in the AIS data because of transmission gaps or poor reception quality. In these cases, the relationship between S1 vessel detections and emissions would hold perfectly since these unmatched vessels are in fact just AIS-broadcasting vessels that happen to not be observed by AIS at a given point in time. Second, our model accounts for vessel length, a proxy for main engine power that is one of the primary determinants of emissions in AIS-based models and is applicable to virtually all vessels powered by internal combustion engines. Third, since fishing and non-fishing vessels are known to have different emissions factors \cite{coello2015ais}, we account for this by differentiating detections between fishing and non-fishing vessels. Finally, our model incorporates spatiotemporal features that allow the relationship between detections and emissions to vary across space and time. Consequently, if broadcasting and non-broadcasting vessels operating in a given place and time have similar characteristics, the relationship between detections and emissions is expected to be similar as well. 
 
-Another limitation is that the relationship between detections and emissions may not hold for non-broadcasting vessels if their emissions factors differ substantially from the IMO values we use to convert energy use into emissions \cite{fourth2020greenhouse}. This could arise, for example, if non-broadcasting vessels disproportionately use newer engine or fuel technologies that were not widely represented when the IMO emissions factors were developed in 2020. This highlights one of the primary limitations of the AIS model our methodology builds upon. Since information on the engine type and fuel used by individual vessels is generally not publicly available, we rely on weighted average emissions factors from the IMO \cite{fourth2020greenhouse}. Vessel-level emissions estimates based on average emission factors may be biased if a particular vessel's engine or fuel type is not well represented in the global fleet. This could be an important consideration when using the model to explore policies aimed at technological engine changes and fuel switching. However, when this type of vessel-level information becomes publicly available, our modeling framework could easily be adapted to incorporate it. Despite the fact that we do not currently explicitly account for vessel-level engine and fuel type, our vessel-level emissions model still achieves high performance when validated against two fully independent vessel-level datasets. Finally, neither AIS nor Sentinel-1 have good coverage for very small vessels (i.e., $<$15m), limiting our approach to only represent emissions from large marine vessels. An exciting area of future work would be to incorporate new satellite sensors into our data fusion framework to quantify emissions from small vessels (e.g., optical imagery from Sentinel-2 or Planet).
+Another limitation is that the relationship between detections and emissions may not hold for non-broadcasting vessels if their emissions factors differ substantially from the IMO values we use to convert energy use into emissions \cite{fourth2020greenhouse}. This could arise, for example, if non-broadcasting vessels disproportionately use newer engine or fuel technologies that were not widely represented when the IMO emissions factors were developed in 2020. This highlights one of the primary limitations of the AIS model our methodology builds upon. Since information on the fuel type used by individual vessels is generally not publicly available, we rely on weighted average emissions factors from the IMO \cite{fourth2020greenhouse}. Vessel-level emissions estimates based on average emission factors may be biased if a particular vessel's engine or fuel type is not well represented in the global fleet. This could be an important consideration when using the model to explore policies aimed at technological engine changes and fuel switching. However, when this type of vessel-level information becomes publicly available, our modeling framework could easily be adapted to incorporate it. Despite the fact that we do not currently explicitly account for vessel-level fuel type, our vessel-level emissions model still achieves high performance when validated against two fully independent vessel-level datasets (Figs. \ref{fig:fig-registered-data-performance} - \ref{fig:fig-mrv-performance}). Finally, neither AIS nor Sentinel-1 have good coverage for very small vessels (i.e., $<$15m), limiting our approach to only represent emissions from large marine vessels. An exciting area of future work would be to incorporate new satellite sensors into our data fusion framework to quantify emissions from small vessels (e.g., optical imagery from Sentinel-2 or Planet).
 
-Accurately measuring emissions is a necessary step towards reducing them. Until now, quantifying emissions from vessels in the ocean has been a challenge due to incomplete monitoring at-sea and the opaque nature of vessel characteristics. By fusing two satellite-based data sources that combined are able to track emissions from both broadcasting and non-broadcasting activity, and also by estimating key emissions modeling vessel characteristics for hundreds of thousands of vessels, we now have a comprehensive and high resolution picture of emissions from large marine vessels. This can serve as the foundation for work aimed at decarbonizing the marine sector and reducing the health impacts of marine air pollution.
+Accurately measuring emissions is a necessary step towards reducing them. To date, quantifying emissions from vessels in the ocean has suffered from incomplete monitoring at-sea and the opaque nature of vessel characteristics. We fuse two satellite-based data sources and by doing so, are are able to track emissions from both broadcasting and non-broadcasting activity. Furthermore, by estimating key emissions modeling vessel characteristics for hundreds of thousands of vessels, we now have a comprehensive and high resolution picture of emissions from large marine vessels. This can serve as the foundation for interventions aimed at decarbonizing the marine sector and reducing the health impacts of marine air pollution.
 
 %%%%%%%%%%%%%%%% REFERENCES %%%%%%%%%%%%%%%
 
@@ -187,24 +193,22 @@ The following sections describe our approaches for AIS-broadcasting vessels and 
 
 \paragraph{AIS messages, port visits, and voyages}
 
-We use individual AIS messages (pings) from the latest version of GFW’s AIS pipeline v3 \cite{gfw_version_3}, which parses, cleans, and augments raw AIS data \cite{kroodsma2018tracking}. 
-Since pings are grouped into segments using a segmenter \cite{kroodsma2018tracking,gfw_version_3}, the time for a single ping represents the time since the previous ping in that segment; this value is typically small (the mean value is 0.088 hours and the median value is 0.045 hours, or about 5 minutes and 3 minutes respectively), with virtually all pings representing $<$ 24 hours of activity. The activity associated with individual pings form the basis of our ping-level AIS-broadcasting emissions estimates, described below. These AIS messages come from a combination of satellite, terrestrial, and dynamic receivers (described in more detail under the section below `Trends in AIS receiver types' and Fig. \ref{fig:fig-annual-emissions-by-ais-receiver-type}, Fig. \ref{fig:fig-annual-emissions-by-ais-receiver-type-top-flags}, Fig. \ref{fig:fig-co2-emissions-change-map-by-receiver-type})
+We use individual AIS messages (pings) from the latest version of GFW’s AIS pipeline (`Version 4'), which parses, cleans, and augments raw AIS data \cite{kroodsma2018tracking}. 
+Since pings are grouped into segments using a segmenter \cite{kroodsma2018tracking}, the time for a single ping represents the time since the previous ping in that segment; this value is typically small (the mean value is 0.088 hours and the median value is 0.045 hours, or about 5 minutes and 3 minutes respectively), with virtually all pings representing $<$ 24 hours of activity. The activity associated with individual pings form the basis of our ping-level AIS-broadcasting emissions estimates, described below. These AIS messages come from a combination of satellite, terrestrial, and dynamic receivers (described in more detail under the section below `Trends in AIS receiver types' and Fig. \ref{fig:fig-annual-emissions-by-ais-receiver-type}, Fig. \ref{fig:fig-annual-emissions-by-ais-receiver-type-top-flags}, Fig. \ref{fig:fig-co2-emissions-change-map-by-receiver-type})
 
 This dataset also classifies whether a fishing vessel is actively engaged in fishing activities at the ping level \cite{kroodsma2018tracking}. Finally, we leverage GFW's algorithm for detecting port visits \cite{gfw_anchorages_website}, allowing us to aggregate ping-level emissions to the vessel-specific port stays, as well as to vessel-specific port-to-port trips (both international and domestic). 
 
-In all, we analyze AIS data for over 770,000 AIS-broadcasting vessels, across 119 billion individual timestamped AIS messages which are assigned to 14.4 million international trips, 112 million domestic trips, and 96.4 million port visits that occurred between 2017 and 2025.
+In all, we analyze AIS data for over 775,000 AIS-broadcasting vessels, across 119 billion individual timestamped AIS messages which are assigned to 14.4 million international trips, 112 million domestic trips, and 96.4 million port visits that occurred between 2017 and 2025.
 
 \paragraph{Vessel characteristics data}
 
-We use vessel characteristics data from GFW's vessel metadata tables. For each vessel, this includes: (1) official registry information when available \cite{park2023tracking}, or (2) when registry data are unavailable, algorithm-derived vessel characteristics including vessel class, main engine power, maximum design speed, and gross tonnage \cite{kroodsma2018tracking}. 
+Translating AIS vessel activity data into emissions estimates requires information on numerous vessel-specific characteristics including vessel class, main engine power, engine type, gross tonnage, maximum design speed, vessel construction year, and engine operating speed. A key contribution of this work was therefore to refine and expand GFW's vessel characteristics database to include accurate estimates of these attributes for all 775,000 AIS-broadcasting vessels included in our analysis. For each vessel, this information comes from: (1) official registry information when available \cite{park2023tracking}, or (2) when registry data are unavailable, machine learning vessel characteristics models. We briefly define these models here, and provide full details on training data, features, model performance, and known limitations in the Supplementary Materials Sections \ref{sec:vessel-characteristics-models} and \ref{sec:vessel-characteristics-numeric-models}.
 
-For vessels classified as "cargo" or "tankers" in GFW's metadata tables, we implement a random forest classification sub-models that builds off the general vessel classification algorithm to differentiate sub-categories that better align with the Fourth IMO Greenhouse Gas Study vessel class types. The model is trained on port visit patterns from over 26,000 vessels with known IMO vessel class types. The models are trained using labels derived from S\&P Maritime StatCode5 categories. 
-Features include vessel characteristics and activity metrics such as engine power, tonnage, average speed, AIS broadcasted shiptypes and sequences of port visits. Sequences of port visits were converted into usable model features using a Word2Vec model (50-dimensional embeddings with a context window of 10 anchorages). The cargo sub-model classifies vessels into five categories: bulk carrier, container, general, refrigerated, and ro-ro (roll-on/roll-off for wheeled vehicle transport), achieving a weighted F1 score of 0.91. The tanker sub-model classifies vessels into three categories: chemical/oil, liquefied gas, and other liquids, achieving a weighted F1 score of 0.95. 
-These refined cargo and tanker vessel class categories allows us to more accurately assign auxiliary engine power and boiler power to each vessel, which are based on lookup tables according to vessel class and size \cite{fourth2020greenhouse}. 
+Leveraging work pioneered by \cite{kroodsma2018tracking}, GFW uses a primary vessel classification model to assign each AIS-broadcasting vessel into one of 32 vessel classes (Section \ref{sec:primary-vessel-class-model}). For vessels classified as `cargo' or `tankers' by GFW's primary vessel classification model, we developed new gradient boosting sub-models that refine the general vessel classification into sub-categories aligned with the Fourth IMO Greenhouse Gas Study vessel class types: five cargo categories (bulk carrier, container, general, refrigerated, and ro-ro) and four tanker categories (oil, chemical, liquefied gas, and other liquids) (Section \ref{sec:cargo-submodel} and \ref{sec:tanker-submodel}).. The sub-models are trained on port visit history and vessel activity features, using labels derived from over 26,000 vessels with known IMO vessel class types (S\&P Maritime StatCode5 categories), and achieve weighted F1 scores of 0.91 (cargo) and 0.87 (tanker). These refined cargo and tanker vessel class categories allows us to more accurately assign auxiliary engine power and boiler power to each vessel, which are based on lookup tables according to vessel class and size \cite{fourth2020greenhouse}. 
 
-For the main engine power, gross tonnage, and maximum design speed estimates, we develop separate random forest regression models. All models are trained using the same features: inferred vessel classification scores, AIS self-reported shiptype messages, activity and location features derived from AIS usage, and values inferred from prior regression models. All models were trained on datasets of around 360,000 labeled registry samples, with a holdout test set of 90,000 for an 80/20 train-test split. The main engine power, gross tonnage, and maximum design speed regression models achieved traditional R$^{2}$ values exceeding 0.88, 0.83, and 0.74, respectively.
+For the main engine power, gross tonnage, maximum design speed estimates, vessel construction year, and engine operating speed, we develop separate random forest regression models (Section \ref{sec:vessel-characteristics-numeric-models}). All models are trained using the same features: inferred vessel classification scores, AIS self-reported shiptype messages, activity and location features derived from AIS usage, and values inferred from prior regression models. All models were trained on datasets of around 360,000 labeled registry samples, with a holdout test set of 90,000 for an 80/20 train-test split. The main engine power, gross tonnage, maximum design speed, and construction year regression models achieved traditional R$^{2}$ values exceeding 0.92, 0.94, and 0.86, and 0.45 respectively.
 
-The resulting vessel characteristics dataset contains the necessary metadata for estimating emissions using an AIS-based methodology for over 880,000 active AIS-broadcasting vessels.
+The resulting vessel characteristics dataset contains the necessary metadata for estimating emissions using an AIS-based methodology for over 775,000 active AIS-broadcasting vessels.
 
 It should be noted that even when registries exist, vessel characteristics can be unrepresentative, particularly for fishing vessels. For instance, evidence from the European fishing sector suggests that vessels often use engines larger than those officially registered \cite{EC_EnginePower_2019}, while fraud also extends to reported vessel length and other characteristics \cite{ECA_FisheriesControl_2017}. Underreported main engine power would lead to an underestimation of AIS-based emissions from these vessels; and if underreported main engine power data are used for training models to infer main engine power, this may lead to a systematic underestimation of AIS-based emissions for vessels using inferred main engine power.
 
@@ -212,16 +216,16 @@ It should be noted that even when registries exist, vessel characteristics can b
 
 We adapted our AIS-based model from the methodologies described in the 2017 ICCT study on global shipping emissions \cite{olmer2017greenhouse} and the 2020 IMO Fourth Greenhouse Gas Study \cite{fourth2020greenhouse}, making modifications to better align with the structure and characteristics of our data sets. From a high-level, we: 1) determine the main engine energy use, auxiliary engine energy use, and boiler energy use for each individual AIS message based on dynamic vessel movement and static vessel characteristic data; 2) multiply the engine and boiler energy use numbers by pollutant- and engine-type-specific emissions factors in order to determine the amount of emissions for six pollutants associated with the engines and boiler for each ping; 3) add up the emissions for these six pollutants across the engines and boiler, to obtain the total emissions for each ping and each of these six pollutants; 4) estimate emissions for three additional pollutants that do not detailed information on emissions factors by simply multiplying the total CO$_{2}$ emissions for each ping by a conversion factor \cite{mayesshipping}. We should note that we focus our analysis on estimating emissions associated with fuel combustion in the main engine, auxiliary engine, and boiler; we do not include  methane slip on vessels that use liquefied natural gas, or other non-combustion fugitive emissions associated with refrigeration, cooling, or venting of VOCs from vessels that transport liquid cargo such as oil and chemicals.
 
-Main engine energy use is estimated based on the time between each AIS ping (hours), the main engine power from the vessel characteristics dataset, and a load factor used to adjust the estimate. The load factor is the product of four coefficients: (1) a weather correction factor (represented by distance to shore, a proxy that can be observed from AIS data - vessel operating beyond 5 nautical miles from shore receive a value of 1.15; vessels operating within 5 nautical miles receive a value of 1.1 \cite{fourth2020greenhouse}); (2) a hull fouling correction factor, which causes resistance in the water (set at 1.07 according to \cite{olmer2017greenhouse}); and (3) a vessel draft correction factor (set at 0.85, the emissions-weighted average draft correction factor from \cite{fourth2020greenhouse}; and (4) a cubic term of vessel speed divided by  the vessel's maximum design speed. To determine the vessel speed associated with each AIS message, we use either: 1) the transmitted instantaneous speed associated with the AIS message if less than an hour has passed since the last message was transmitted; or 2) the implied speed for messages for which more than an hour has passed since the previous message (calculated as the distance traveled divided by the elapsed time between the two messages). We apply this hierarchy since implied speed can be imprecise for short time intervals between pings due to signal latency; meanwhile, instantaneous speed can be unrepresentative of longer time intervals between pings, in which case implied speed is more representative. Following \cite{coello2015ais, sala2018economics}, for fishing vessels we adjust the main engine load factor so that it falls between 0.2 and 0.9, and assign a main engine load factor of 0.75 to trawlers and dredge fishing vessels that are actively fishing due to the energy intensive nature of their fishing operations. 
+Main engine energy use is estimated based on the time between each AIS ping (hours), the main engine power from the vessel characteristics dataset, and a load factor used to adjust the estimate. The load factor is the product of four coefficients: (1) a weather correction factor (represented by distance to shore, a proxy that can be observed from AIS data - vessel operating beyond 5 nautical miles from shore receive a value of 1.15; vessels operating within 5 nautical miles receive a value of 1.1 \cite{fourth2020greenhouse}); (2) a hull fouling correction factor, which causes resistance in the water (set at 1.07 according to \cite{olmer2017greenhouse}); and (3) a vessel draft correction factor (set at 0.85, the emissions-weighted average draft correction factor from \cite{fourth2020greenhouse}; and (4) a cubic term of vessel speed divided by  the vessel's maximum design speed. To determine the vessel speed associated with each AIS message, we use either: 1) the transmitted instantaneous speed associated with the AIS message if less than an hour has passed since the last message was transmitted; or 2) the implied speed for messages for which more than an hour has passed since the previous message (calculated as the distance traveled divided by the elapsed time between the two messages). We apply this hierarchy since implied speed can be imprecise for short time intervals between pings due to signal latency; meanwhile, instantaneous speed can be unrepresentative of longer time intervals between pings, in which case implied speed is more representative. Following \cite{coello2015ais, sala2018economics}, for fishing vessels we adjust the main engine load factor so that it falls between 0.2 and 0.9, and assign a main engine load factor of 0.75 to trawlers and dredge fishing vessels that are actively fishing due to the energy intensive nature of their fishing operations. We also apply main engine low-load correction factors since engines operating at loads below 20\% operate inefficiently and emit more of certain pollutants based on how low the engine is operating (CH$_{4}$, CO, N$_{2}$O, NO$_{x}$, VOCs, PM$_{2.5}$, and PM$_{10}$). We apply these correction factor on the main engine emissions for all AIS message with a main engine load below 20\%. 
 
 In accordance with \cite{fourth2020greenhouse}, our model also accounts for differences in auxiliary engine power energy use and boiler energy use depending on the vessel’s operational phase—whether it is at berth, at anchor, maneuvering, or at sea. These phases are identified using AIS speed, distance to port, and distance to the coast. Power outputs for auxiliary engines and boilers, based on vessel class and size, are extracted from \cite{fourth2020greenhouse} and are applied accordingly for each phase.
 
-After calculating energy use, we apply pollutant-specific emission factors to the main engine, auxiliary engine, and boiler for six GHGs and pollutants (CO$_{2}$, CH$_{4}$, CO, NO$_{x}$, SO$_{x}$, N$_{2}$O), following \cite{olmer2017greenhouse}. These factors are each averaged from across the relevant pollutant factors associated with SSD, MSD, and HSD engine types, which together represent approximately 98\% of vessels engines \cite{fourth2020greenhouse}. To get total emissions for each AIS message (i.e., emissions from the previous ping in a segment to the current one), we sum emissions from both engines and boilers. For VOCs, PM$_{2.5}$, and PM$_{10}$, which do not have as detailed information on emissions factors, we instead multiply the CO$_{2}$ emissions by pollutant-specific conversion factors \cite{mayesshipping}. We also apply main engine low-load correction factors since engines operating at loads below 20\% operate inefficiently and emit more of certain pollutants based on how low the engine is operating (CH$_{4}$, CO, N$_{2}$O, NO$_{x}$, VOCs, PM$_{2.5}$, and PM$_{10}$). We apply these correction factor on the main engine emissions for all AIS message with a main engine load below 20\%.
+After calculating energy use, we apply pollutant-specific emission factors to the main engine, auxiliary engine, and boiler for six GHGs and pollutants (CO$_{2}$, CH$_{4}$, CO, NO$_{x}$, SO$_{x}$, N$_{2}$O), following \cite{olmer2017greenhouse}. These factors are each averaged from across the relevant pollutant factors associated with SSD, MSD, and HSD engine types, which together represent approximately 98\% of vessels engines \cite{fourth2020greenhouse}. To get total emissions for each AIS message (i.e., emissions from the previous ping in a segment to the current one), we sum emissions from both engines and boilers. For VOCs, PM$_{2.5}$, and PM$_{10}$, which do not have as detailed information on emissions factors, we instead multiply the CO$_{2}$ emissions by pollutant-specific conversion factors \cite{mayesshipping}.
 
 Starting January 1, 2020, the IMO mandated a low sulfur fuel switch, reducing the allowable sulfur content from 3.5\% to 0.5\% \cite{imo_sulphur_2020}. To account for this, for data starting on January 1, 2020 we apply a correction factor to SO$_{x}$, as well as PM$_{2.5}$, and PM$_{10}$ which are partially produced by sulfur. The SO$_{x}$ emissions factor scales linearly with fuel sulfur percentage content \cite{fourth2020greenhouse}. For pre-2020 data, we use an emissions factor based on a global average sulfur content of 2.5\% \cite{olmer2017greenhouse}. Assuming the sulfur content drops from 2.5\% to 0.5\% starting in 2020, this would correspond to an 80\% drop in sulfur content and an 80\% drop in the sulfur emissions factor. Although this correction factor is assumed and does not explicitly account for non-compliance, scrubbers, or low sulfur areas, this 80\% drop is consistent with several studies that looked at the impact this new requirement had on global sulfur emissions \cite{yuan2024abrupt, yoshioka2024warming}. PM emissions factors are based on an equation that is non-linear to sulfur fuel content \cite{fourth2020greenhouse}. Using this equation and again assuming an 80\% drop in sulfur content we estimate a 79.6\% drop in the PM$_{2.5}$, and PM$_{10}$ emissions factors. We apply these adjusted emissions factors for all SO$_{x}$, PM$_{2.5}$, and PM$_{10}$ emissions starting in January 1, 2020.
 
 
-\subsubsection{Validating AIS-broadcasting emissions model}
+\subsubsection{Validating AIS-broadcasting emissions model}\label{sec:ais-model-performance}
 
 We use two distinct emissions datasets for validation, one to assess the impact of updated vessel metadata from our random forest models on performance, and another to evaluate the model’s overall performance using emissions associated with actual vessel activity.
 
@@ -236,7 +240,7 @@ This comparison shows that the updated vessel metadata using random forest model
 \begin{figure}[H]
     \centering
     \includegraphics[width=\columnwidth]{figures/fig-registered-data-performance-1.png}
-    \caption{Comparison of daily vessel-level CO$_{2}$ emissions estimated using our model with registered emissions from a proprietary vessel database (based on main engine fuel consumption over 24 hours). Estimates are shown using main engine power and design speed from IMO (left), our machine learning random forest models (center), and the same registered dataset (right). The solid red line shows a linear regression fit, while the dashed line represents the 1:1 line. Performance values for traditional R$^{2}$ are shown for each set of vessel characteristics. Over 15,000 vessels are represented in the figure, and blue shading indicates point density. All data are rule-of-three compliant, meaning each cell (20×20 mt) displayed contains at least three vessels.}
+    \caption{Comparison of daily vessel-level CO$_{2}$ emissions estimated using our model with registered emissions from a proprietary vessel database (based on main engine fuel consumption over 24 hours). Estimates are shown using main engine power and design speed from IMO (left), our machine learning random forest models (center), and the same registered dataset (right). The dashed line represents the 1:1 line. Performance values for traditional R$^{2}$ are shown for each set of vessel characteristics. Over 15,000 vessels are represented in the figure, and blue shading indicates point density. All data are rule-of-three compliant, meaning each cell (20×20 mt) displayed contains at least three vessels.}
     \label{fig:fig-registered-data-performance}
 \end{figure}
 
@@ -247,14 +251,15 @@ We also validate our CO$_{2}$ emissions model results against public emissions d
 Our AIS-derived emissions dataset does not contain detailed information on vessel activity while in port (i.e., whether or not cargo is loaded/unloaded or passengers embark/disembark), making it difficult to determine the exact same trip start and end points as defined in the MRV data, as well as which trips are included in the MRV records for a given year and vessel. To align vessel yearly activity across datasets, we: (1) filter our trip-level emissions data to include only trips that begin and/or end in EEA countries; (2) aggregate these trip-level emissions to annual emissions for each vessel; (3) apply varying matching tolerance margins to the MRV-reported annual hours at sea and select vessels-year from our dataset within these limits, in order to ensure that the trips we use for comparison have a total hours at sea roughly equal to that reported in the MRV dataset; and (4) compare annual MRV emissions with the annual sum of our trip-level emissions for the same vessel and year to evaluate model performance.
 
 \input{tables/mrv_performance_results}
+\FloatBarrier
 
-In Table \ref{tab:tab-performance-tolerance-table}, performance peaks at a traditional R$^{2}$ of 0.81 for vessels whose times at sea in our dataset are within 15\% of the MRV-reported values (validation sample of 2,276 vessel-year observations). Beyond this threshold, performance declines as discrepancies grow between our annual aggregated trip activity and that recorded in the MRV dataset.
+In Table \ref{tab:tab-performance-tolerance-table}, performance peaks at a traditional R$^{2}$ of 0.84 for vessels whose times at sea in our dataset are within 15\% of the MRV-reported values (validation sample of 27,657 vessel-year observations, shown in Fig. \ref{fig:fig-mrv-performance}). Beyond this threshold, performance declines as discrepancies grow between our annual aggregated trip activity and that recorded in the MRV dataset.
 
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\columnwidth]{figures/fig-mrv-performance-1.png}
-    \caption{Comparison of annual vessel-level CO$_{2}$ emissions estimated using our model with published emissions from the EU MRV database. The sample includes 2,276 observations from yearly aggregated vessel trips where hours at sea differ by no more than 15\% between our data and the MRV dataset. The solid red line shows the linear regression fit, and the dashed line represents the 1:1 line.}
+    \caption{Comparison of annual vessel-level CO$_{2}$ emissions estimated using our model with published emissions from the EU MRV database. The sample includes 27,657 observations from yearly aggregated vessel trips where hours at sea differ by no more than 15\% between our data and the MRV dataset. The dashed line represents the 1:1 line.}
     \label{fig:fig-mrv-performance}
 \end{figure}
 
@@ -273,7 +278,7 @@ Not all pixel-month observations are imaged by S1, either because there were sim
 \begin{figure}[H]
     \centering
     \includegraphics[width=\columnwidth]{figures/fig-map-fraction-months-imaged-1.png}
-    \caption{Map showing the percentage of months from 2017 through 2024 that were imaged by S1 for each 1x1 degree pixel.}
+    \caption{Map showing the percentage of months from 2017 through 2025 that were imaged by S1 for each 1x1 degree pixel.}
     \label{fig:fig-map-fraction-months-imaged}
 \end{figure}
 
@@ -316,6 +321,7 @@ We define a global spatial resolution of 1x1-degree which is used for all spatia
 \clearpage
 
 \input{tables/data_sources}
+\FloatBarrier
 
 \clearpage
 
@@ -323,7 +329,7 @@ We define a global spatial resolution of 1x1-degree which is used for all spatia
 
 For the emissions regression model, we include several model features that capture the vessel length frequency distribution of S1 detections that occurred in any given pixel-month for each vessel type (fishing or non-fishing).This prevents assigning emissions to vessels for which no emission estimates are available. S1 detections smaller than the minimum vessel size represented in the AIS-broadcasting dataset are excluded to avoid assigning emissions to vessel sizes not characterized by the AIS emissions model. We normalize the detections by the total km² imaged across all S1 scenes within each pixel-month to account for spatiotemporal variation in Sentinel-1 sampling effort and therefore create a measure of detection density (Fig. \ref{fig:fig-map-fraction-months-imaged} shows spatial variation of sampling effort; Fig. \ref{fig:fig-s1-coverage-time-series} shows temporal variation). The emissions regression model is trained with these features corresponding to matched detection density in order to predict AIS-broadcasting emissions; when it comes time for using the model to predict non-broadcasting emissions, the unmatched detection density is used for these features instead.
 
-For the detection classification and detection regression models, each unit of observation represents one of the vessel length bins for each pixel-month and vessel type. We also include two model features describing the length bin for each observation: the numeric lower threshold for the vessel length bin, and a categorical factor representing which of the length bins the observation belongs to.
+For the detection classification and detection regression models, each unit of observation represents one of the vessel length bins for each pixel-month and vessel type. We also include two model features describing the length bin for each observation: the numeric lower threshold for the vessel length bin, and a categorical factor representing which of the length bins the observation belongs to. We finally include for each pixel the total area imaged by S1 across the entire 2017-2025 time period in order to account for the general amount each pixel is imaged. 
 
 \begin{figure}[H]
     \centering    \includegraphics[width=\columnwidth]{figures/fig-s1-coverage-time-series-1.png}
@@ -333,11 +339,11 @@ For the detection classification and detection regression models, each unit of o
 
 \paragraph{Spatial features}
 
-For each pixel we extract spatial information, including depth, distance to shore, and distance to the nearest port, from a high-resolution GFW subproduct (0.01x0.01-degree) and aggregate it to our 1x1-degree grid resolution by computing the minimum value in each pixel. In addition to the distance from the nearest port (which can be of any size port), we also include the distance from each pixel centroid to the nearest of the top 20 container ports according to the Lloyd's list of 2024 \cite{LloydsListTopPorts2024}. We include this since traffic density, loitering practices, and navigation behavior in major ports differ from those in regular ports. Additional geographic features include the water area within each pixel (excluding land and the 1 km S1 buffer from shore) and a categorical variable indicating which of the five major ocean basins each pixel falls within.
+For each pixel we extract spatial information, including depth, distance to shore, and distance to the nearest port, from a high-resolution GFW subproduct (0.01x0.01-degree) and aggregate it to our 1x1-degree grid resolution by computing the minimum value in each pixel. In addition to the distance from the nearest port (which can be of any size port), we also include the distance from each pixel centroid to the nearest of the top 20 container ports according to the Lloyd's list of 2024 \cite{LloydsListTopPorts2024}. We include this since traffic density, loitering practices, and navigation behavior in major ports differ from those in regular ports. Additional geographic features include the total area covered by water within each pixel, the fraction of area within each pixel covered by water, and a categorical variable indicating which of the five major ocean basins each pixel falls within.
 
 \paragraph{Weather features}
 
-Weather may influence both emissions and S1 detections. Sea conditions may affect not only vessel presence (e.g., smaller vessels may remain in port during storms), but also navigation behavior \cite{majamaki2025improving}. In addition, sea surface waves generated by wind modify SAR background signal, directly affecting the ability of the S1 detection model to accurately identify vessels \cite{huo2018ship}. To account for these effects, we extracted weather data from ECMWF Reanalysis v5 (ERA5), the fifth-generation atmospheric reanalysis of the global climate, produced by the Copernicus Climate Change Service \cite{era5cds2023}. We used Google Earth Engine to extract hourly ERA5 data and aggregate it to monthly minimum, maximum, and average values. Because ERA5 has higher spatial resolution than our 1×1-degree grid, we re-aggregated the data for each pixel, excluding land and the 1 km S1 buffer from shore, computing the mean of the monthly minimum, maximum, and average values, as well as the overall minimum and maximum across all sub-pixels (i.e., five values for each parameter). As our final model features, we used mean wind speed (which influences both navigation conditions and S1 detection), mean swell height (which affect navigation and vessel activity), and mean swell period (which also affect navigation and vessel activity).
+Weather influences both vessel activity as well as the ability for SAR to detect vessels. Storms or rough sea conditions may cause vessels, particularly smaller vessels, to stay in port during storms or avoid certain areas \cite{majamaki2025improving}. Sea surface temperature (SST) impacts the distribution of fish species, therefore impacting the spatiotemporal distribution of fishing vessels \cite{xing2026underestimated}. Weather and sea surface state also influences S1's ability to detect vessels. Sea surface waves generated by wind modify SAR background signal, directly affecting the ability of the S1 detection model to accurately identify vessels \cite{huo2018ship}. Heavy rain can also affect sea surface scatter and background cluttering \cite{greidanus2017sumo}, as can swell and wave height \cite{ryu2025environment}, affecting the ability of SAR to detect vessels. To account for these effects, we extracted weather data from ECMWF Reanalysis v5 (ERA5), the fifth-generation atmospheric reanalysis of the global climate, produced by the Copernicus Climate Change Service \cite{era5cds2023}. We used Google Earth Engine to extract hourly ERA5 data and aggregate it to monthly average or total values for the ocean area in each of our 1x1 degree pixels. As our final model features that were used in both the detection classification and detection regression models, we used mean wind speed (which may influence vessel activity and S1 detection), total precipitation (which may influence vessel activity), mean sea surface temperature (which may influence vessel activity, particularly for fishing vessels), mean sea level surface pressure (which may influence vessel activity), mean wave and swell height which may influence vessel activity), and mean wave period (which may influence vessel activity).
 
 \paragraph{AIS reception quality features}
 
@@ -345,7 +351,7 @@ We included several model features related to AIS reception quality and signal t
 
 \paragraph{Temporal features}
 
-To account for temporal variability in each of the three models, we include a numeric feature representing days since the start of the study period (January 1, 2017). We also include a boolean feature for whether or not the observation occurs on or after January 2020, to coincide with the start of the IMO low sulphur fuel policy. Accounting for temporal variation is particularly important given the variation in S1 coverage over time (Fig. \ref{fig:fig-s1-coverage-time-series}).
+To account for temporal variability in each of the three models, we include a factor feature representing the month of the year. We also include a boolean feature for whether or not the observation occurs on or after January 2020, to coincide with the start of the IMO low sulphur fuel policy. To account for temporal trends of general vessel activity in the detection classification and regression models, we include features characterizing the total number of unique AIS-broadcasting vessels globally each month, as well as the number of unique AIS-broadcasting vessels in each pixel-month. Accounting for temporal variation is particularly important given both the variation in S1 coverage over time, as well as the variation in global fleet composition over time (Fig. \ref{fig:fig-s1-coverage-time-series}).
 
 \subsubsection{Data pre-processing}
 
@@ -418,6 +424,7 @@ For the CO$_2$ emissions regression random forest, we simply train the model on 
 
 
 \input{tables/all_performance_metrics_table}
+\FloatBarrier
 
 \subsubsection{Feature importance}
 
@@ -436,15 +443,16 @@ After assessing model performance, we perform a final fit using the entire datas
 Here we look at the linear regression fit statistics for the final models to convert CO$_2$ emissions to emissions of non-CO$_2$ gases (other GHGs and non-GHG pollutants), trained using the full dataset (Table \ref{tab:lm_other_gases_tidy_fit_stats}).
 
 \input{tables/lm_other_gases_tidy_fit_stats}
+\FloatBarrier
 
 \subsubsection{Predicting non-broadcasting emissions}
 
-To generate the final global estimates of non-broadcasting vessel emissions, we: 1) train all models (the three random forests and eight linear regressions) using the entire dataset of observations that have both S1 detections and AIS emissions (Fig \ref{fig:fig-feature-importance}, Table \ref{tab:lm_other_gases_tidy_fit_stats}; noting that again for the presence/absence detection classification model, we use a random stratified training/validation split to first calibrate the classification threshold before fitting the final model on all the data); 2) then applied the final trained models across all ocean pixels on a monthly basis for the entire 2017-2024 study period. The prediction workflow followed a hierarchical logic based on the availability of S1 detections:
+To generate the final global estimates of non-broadcasting vessel emissions, we: 1) train all models (the three random forests and eight linear regressions) using the entire dataset of observations that have both S1 detections and AIS emissions (Fig \ref{fig:fig-feature-importance}, Table \ref{tab:lm_other_gases_tidy_fit_stats}; noting that again for the presence/absence detection classification model, we use a random stratified training/validation split to first calibrate the classification threshold before fitting the final model on all the data); 2) then applied the final trained models across all ocean pixels on a monthly basis for the entire 2017-2025 study period. The prediction workflow followed a hierarchical logic based on the availability of S1 detections:
 
 1. Direct estimation: If unmatched S1 detections are available for a given pixel-month, we use the unmatched detection density to directly predict non-broadcasting CO$_2$ emissions using the emissions regression model. We then use the other eight gas-specific linear regression models to convert CO$_2$ emissions to emissions of each of the other eight gases.
 2. Indirect estimation: If unmatched S1 detections are not available for a given pixel-month, we: a) predict whether or not unmatched detections are present using the classification first stage of the hurdle model; then b) if unmatched detections are predicted to be present, we predict the density of unmatched detections using the regression second stage of the hurdle model; then c) we use the predicted density of unmatched detections in the emissions regression model to predict CO$_2$ emissions; and finally d) we then use the other eight gas-specific linear regression models to convert CO$_2$ emissions to emissions of each of the other eight gases. 
 
-The final output provides a continuous global dataset of monthly non-broadcasting emissions, for all three GHGs and six pollutants, from 2017 to 2024 at 1×1-degree resolution, disaggregated by fishing and non-fishing vessel types.
+The final output provides a continuous global dataset of monthly non-broadcasting emissions, for all three GHGs and six pollutants, from 2017 to 2025 at 1×1-degree resolution, disaggregated by fishing and non-fishing vessel types.
 
 \paragraph{Direct estimation}
 
@@ -470,8 +478,8 @@ For pixel-months where S1 detections were unavailable, either because they were 
 % Fill out your numbers accordingly and delete any lines that aren't applicable.
 \subsection*{Supplementary materials}
 Supplementary Text and Figures\\
-Figures S1 to S7\\
-Table S1 to S5\\
+Figures S1 to S9\\
+Tables S1 to S7\\
 
 
 %%%%%%%%%%%%%%%% END OF MAIN TEXT %%%%%%%%%%%%%%%
@@ -518,8 +526,8 @@ Table S1 to S5\\
 % These are just example numbers that don't match the rest of this template.
 \subsubsection*{This PDF file includes:}
 Supplementary Figures, Tables, and Text\\
-Figures S1 to S7\\
-Table S1 to S5\\
+Figures S1 to S9\\
+Tables S1 to S7\\
 
 \newpage
 \setcounter{section}{1}
@@ -531,8 +539,15 @@ Table S1 to S5\\
 
 \begin{figure}[H]
     \centering
+    \includegraphics[width=\columnwidth]{figures/fig-spatial-temporal-richness-by-fleet-total-pseudolog-1.png}
+    \caption{(A) Time series of monthly global CO$_2$ emissions, shown for both AIS-broadcasting and S1-detected non-broadcasting vessels, and for both fishing and non-fishing vessels. (B) Time series of the monthly share of global CO$_{2}$ emissions attributable to S1-detected non-broadcasting vessels, for both fishing and non-fishing vessels. (C) Spatial distribution of cumulative 2017-2025 CO$_{2}$ emissions from AIS-broadcasting vessels, S1-detected non-broadcasting vessels, and AIS-broadcasting and S1-detected vessels combined (rows), for both fishing and non-fishing vessels (columns), and shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale).}
+    \label{fig:fig-spatial-temporal-richness-by-fleet-total-pseudolog}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
     \includegraphics[width=\columnwidth]{figures/fig-pollutant-maps-qlog10-1.png}
-    \caption{Spatial maps 2024 emissions for each GHG and pollutant, aggregated across AIS-broadcasting vessels and non-broadcasting vessels, and shown at a 1x1 degree spatial resolution. Emissions are area-normalized for each pixel (metric tonnes per square kilometer), and shown using a log-10 scale.}
+    \caption{Spatial maps of 2025 emissions for each GHG and pollutant, aggregated across AIS-broadcasting vessels and non-broadcasting vessels, and shown at a 1x1 degree spatial resolution. Emissions are area-normalized for each pixel (metric tonnes per square kilometer) and shown using a log-10 scale. Each panel is scaled independently, spanning the 75th percentile to the maximum of that pollutant, with lower values drawn in the darkest colour; colours are therefore not comparable between panels.}
     \label{fig:fig-pollutant-maps}
 \end{figure}
 
@@ -545,6 +560,13 @@ Table S1 to S5\\
 
 \begin{figure}[H]
     \centering
+    \includegraphics[width=0.85\columnwidth]{figures/fig-emissions-by-country-and-activity-type-1.png}
+    \caption{CO$_{2}$ emissions by country for AIS-broadcasting vessels during different activity types (international trips, port stays, and domestic trips), aggregated for activities ending in 2025. Emissions for each international trip are partitioned equally to its departure and arrival country. The color scale is square-root transformed, so that lower-emitting countries remain distinguishable alongside the largest emitters. Countries with no values are shown in gray.}
+    \label{fig:fig-emissions-by-country-and-activity-type}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
     \includegraphics[width=\columnwidth]{figures/fig-annual-emissions-by-ocean-and-data-source-1.png}
     \caption{Annual total CO2 emissions by ocean, disaggregated by data source (AIS-broadcasting vessels, and non-broadcasting vessels detected by S1).}
     \label{fig:fig-annual-emissions-by-ocean-and-data-source}
@@ -553,18 +575,27 @@ Table S1 to S5\\
 \subsection{Supplementary Tables}
 
 \input{tables/total_percent_change_by_fleet}
+\FloatBarrier
 
 \input{tables/pollutant_ais_underestimation_overestimation_summary}
+\FloatBarrier
 
 \input{tables/emissions_by_ocean_summary_tbl}
+\FloatBarrier
 
 \input{tables/emissions_by_data_source_summary_tbl}
+\FloatBarrier
 
 \input{tables/annual_sc_fishing_non_fishing_tbl}
+\FloatBarrier
+
+\input{tables/top_countries_by_activity_type}
+\FloatBarrier
+
 
 \subsection{Comparing our emission estimates to other inventories}
 
-Our total emissions estimates (summed across broadcasting and non-broadcasting vessels) are consistent with other well-known global inventories: the International Maritime Organization (IMO) \cite{fourth2020greenhouse}, the EU's Emissions Database for Global Atmospheric Research (EDGAR) \cite{JRC143227}, and the Organization for Economic Co-operation and Development (OECD) experimental shipping database \cite{clarke2023co2} (Fig. \ref{fig:fig-inventory-comparison} and Table \ref{tab:inventory_comparison}). For each inventory, we pull all available years of data from 2017 through 2024. Both the IMO and OECD inventories leverage AIS data, with IMO using an AIS-based model similar to ours, and OECD leveraging a machine learning model trained on the EU MRV database that uses AIS movement data to inform certain model features and which uses this model to make predictions for AIS-broadcasting vessels not contained in the EU MRV database. The EDGAR inventory uses national fuel use data and regional emissions factors to estimate emissions. Our approach combining AIS and S1 data yields the highest estimates, as expected. The level of general agreement for this complex estimate across multiple sources provides support for the reliability and utility of our methodology and results.
+Our total emissions estimates (summed across broadcasting and non-broadcasting vessels) are consistent with other well-known global inventories: the International Maritime Organization (IMO) \cite{fourth2020greenhouse}, the EU's Emissions Database for Global Atmospheric Research (EDGAR) \cite{JRC143227}, and the Organization for Economic Co-operation and Development (OECD) experimental shipping database \cite{clarke2023co2} (Fig. \ref{fig:fig-inventory-comparison} and Table \ref{tab:inventory_comparison}). For each inventory, we pull all available years of data from 2017 through 2025. Both the IMO and OECD inventories leverage AIS data, with IMO using an AIS-based model similar to ours, and OECD leveraging a machine learning model trained on the EU MRV database that uses AIS movement data to inform certain model features and which uses this model to make predictions for AIS-broadcasting vessels not contained in the EU MRV database. The EDGAR inventory uses national fuel use data and regional emissions factors to estimate emissions. Our approach combining AIS and S1 data yields the highest estimates, as expected. The level of general agreement for this complex estimate across multiple sources provides support for the reliability and utility of our methodology and results.
 
 \begin{figure}[H]
     \centering
@@ -574,6 +605,7 @@ Our total emissions estimates (summed across broadcasting and non-broadcasting v
 \end{figure}
 
 \input{tables/inventory_comparison}
+\FloatBarrier
 
 \subsection{Trends in AIS receiver types}
 
@@ -591,19 +623,27 @@ In Fig. \ref{fig:fig-annual-emissions-by-ais-receiver-type-top-flags}, we see th
 \begin{figure}[H]
     \centering
     \includegraphics[width=\columnwidth]{figures/fig-annual-emissions-by-ais-receiver-type-top-flags-1.png}
-    \caption{Annual total CO$_{2}$ emissions (metric tonnes) by AIS-broadcasting vessels, disaggregated by AIS receiver type (satellite, terrestrial, and dynamic) and total aggregated across receiver types, for the top 10 flags with the most emissions in 2024. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.}
+    \caption{Annual total CO$_{2}$ emissions (metric tonnes) by AIS-broadcasting vessels, disaggregated by AIS receiver type (satellite, terrestrial, and dynamic) and total aggregated across receiver types, for the top 10 flags with the most emissions in 2025. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.}
     \label{fig:fig-annual-emissions-by-ais-receiver-type-top-flags}
 \end{figure}
 
-Finally, in Fig. \ref{fig:fig-co2-emissions-change-map-by-receiver-type}, we see how the use of the three AIS receiver types has changed spatially over time between 2017 and 2024. Dynamic AIS was mostly implemented in busy shipping lanes, with clear concentration in areas including the South China Sea, Europe, and the Gulf of Mexico. These regions also generally correspond to decreasing use of satellite and terrestrial receivers. Overall, the largest total change in emissions is generally concentrated in the same regions that saw the largest uptake of Dynamic AIS.
+Finally, in Fig. \ref{fig:fig-co2-emissions-change-map-by-receiver-type}, we see how the use of the three AIS receiver types has changed spatially over time between 2017 and 2025. Dynamic AIS was mostly implemented in busy shipping lanes, with clear concentration in areas including the South China Sea, Europe, and the Gulf of Mexico. These regions also generally correspond to decreasing use of satellite and terrestrial receivers. Overall, the largest total change in emissions is generally concentrated in the same regions that saw the largest uptake of Dynamic AIS.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\columnwidth]{figures/fig-co2-emissions-change-map-by-receiver-type-1.png}
-    \caption{Spatial change in CO$_{2}$ emissions by AIS-broadcasting vessels between 2017 and 2024 (metric tonnes) by receiver type (satellite, terrestrial, and dynamic) and total across receiver types, at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale).}
+    \caption{Spatial change in CO$_{2}$ emissions by AIS-broadcasting vessels between 2017 and 2025 (metric tonnes) by receiver type (satellite, terrestrial, and dynamic) and total across receiver types, at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale).}
     \label{fig:fig-co2-emissions-change-map-by-receiver-type}
 \end{figure}
 
+
+\subsection{Vessel class and characteristics models}\label{sec:vessel-characteristics-models}
+
+Two families of machine learning models are used to estimate vessel classes and properties. Vessel class is determined by a combination of a broad, primary vessel class model and focused cargo and tanker sub-type models. Vessel properties are determined by six separate models used to estimate the following vessel characteristics: gross tonnage (GT), main engine power (kW), design speed (kn), year-of-build (year), and engine type (class). Random forest classifiers are used for the primary vessel class and the engine subtype, random forest regression models are used to estimate gross tonnage, engine power, design speed, and year of build. Finally, gradient boosting classifiers are used for the cargo and tanker sub-type models. Details about each model can be found in the relevant subsections below.
+
+All models are trained on three categories of features derived from AIS information: inferred features (37), identity features (14), and activity features (13). The cargo and tanker sub-type models are trained on an additional 50 features derived from port visits. These features were built with Word2Vec (50 dimensions, window 10, minimum count 5) over each vessel's sequence of anchorage visits, from high-confidence port visits in the 365 days to 2025-06-01; a vessel's vector is the visit-weighted mean of the anchorages it used. Inferred features consist of vessel class neural network scores and neural network estimates for vessel length, tonnage, engine power, and crew size \cite{kroodsma2018tracking}. Identity features include identification data broadcast through a vessel's AIS, such as the first digit and the broadcast vessel class. Activity features describe patterns in a vessel's AIS activity over time, such as fraction of active hours, average speed, distance from shore, etc.
+
+Training/test data for all models has an 80/20 split, and is stratified by vessel class and the first digit of each MMSI to mitigate bias by vessel type or region. The number of training samples varied for each model as labeled data was available, with the primary GFW vessel class model having the maximum 500,000 total samples. Test sample sizes available for all models are provided in the metrics Table \ref{tab:model-summary}. For each vessel characteristic model, Table \ref{tab:characteristic-availability} summarizes the percentage of vessels that had information already available from public sources, private sources, or for which inferred values from our models were used. 
 
 \begin{table}[htbp]
   \centering
@@ -616,105 +656,230 @@ Finally, in Fig. \ref{fig:fig-co2-emissions-change-map-by-receiver-type}, we see
     Model & Target & $n$ train & $n$ test & Metric & Held-out \\
     \midrule
     \multicolumn{6}{@{}l}{\textit{Classification models}} \\
-    Vessel class        & [classes]  & [n]  & [n]  & macro-F1 & [0.00] \\
-    Engine type         & [classes]  & [n]  & [n]  & macro-F1 & [0.00] \\
+    Vessel class        & 32 classes  & 510\,486  & 127\,645  & macro-F1 & 0.878 \\
+    Engine type         & 4 classes  & 46\,108  & 11\,527  & macro-F1 & 0.550 \\
     Cargo sub-type      & 5 classes     & 11\,744 & 2\,939  & macro-F1 & 0.855     \\
     Tanker sub-type     & 4 classes     & 5\,903  & 1\,477  & macro-F1 & 0.712     \\
     \midrule
     \multicolumn{6}{@{}l}{\textit{Regression models}} \\
-    Main engine power   & kW            & [n]  & [n]  & $R^2$    & [0.00] \\
-    Gross tonnage       & GT            & [n]  & [n]  & $R^2$    & [0.00] \\
-    Design speed        & knots         & [n]  & [n]  & $R^2$    & [0.00] \\
-    Engine speed        & rpm           & [n]  & [n]  & $R^2$    & [0.00] \\
-    Construction year   & year          & [n]  & [n]  & $R^2$    & [0.00] \\
+    Main engine power   & kW            & 13\,842  & 3\,542  & $R^2$    & 0.929 \\
+    Gross tonnage       & GT            & 62\,636  & 15\,687  & $R^2$    & 0.944 \\
+    Design speed        & knots         & 8\,808  & 2\,241  & $R^2$    & 0.861 \\
+    Engine RPM          & rev$/$min     & 45\,868 & 11\,467  & $R^2$   & 0.533 \\
+    Construction year   & year          & 45\,868  & 11\,467  & $R^2$    & 0.447 \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-\subsection{Cargo and tanker sub-type models}
 
-\paragraph{Approach} 
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{Availability of vessel characteristics used in emissions modeling, by source.
+  ``Inferred'' is the percentage of vessels for which the characteristic were not matched to any registry and was therefore inferred by our machine-learning models. ``Public Sources'' is the percentage sourced from any publicly available registry, including that maintained by IMO's GISIS (Global Integrated Shipping Information System). ``Private Sources'' is the percentage sourced from proprietary vessel databases, chiefly S\&P Global Market Intelligence Ships Dataset and to a smaller extent non publicly available lists maintained by Global Fishing Watch.}\label{tab:characteristic-availability}
+  \begin{tabular}{@{}lrrr@{}}
+    \toprule
+    Characteristic & Inferred (\%) & Public Sources (\%) & Private Sources (\%) \\
+    \midrule
+    Vessel Class      & 82.5 & 17.5 & 0.0 \\
+    Gross Tonnage     & 85.4 & 14.3 & 0.2 \\
+    Length            & 89.8 & 6.9  & 3.3 \\
+    Main Engine Power & 92.5 & 3.1  & 4.4 \\
+    Engine Type       & 93.9 & 0.0  & 6.1 \\
+    Year of Build     & 94.0 & 0.0  & 6.0 \\
+    Engine RPM        & 95.1 & 0.0  & 4.9 \\
+    Design Speed      & 98.2 & 0.0  & 1.8 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+\FloatBarrier
 
-Two gradient-boosted tree classifiers, learning rate 0.01, at most 10\,000 boosting iterations, early stopping on a 10\% stratified internal validation split), one per parent type.
-A sub-type is assigned only to vessels the upstream GFW vessel-class model has already classified as cargo or tanker.
+The primary GFW vessel class model, used to predict broad classes such as cargo, tanker, trawler, and gear, identifies the cargo and tanker vessels used in this analysis. Based on those classifications, the cargo and tanker sub-type models further refine those predictions into the more granular classes. Note that nearly half of AIS-broadcasting devices are likely associated with non-vessel objects (such as buoys, offshore structures, FADs, etc). These objects are identified as their own vessel class `gear' by the primary GFW vessel class model, and are excluded from the emissions estimates in this paper. Cargo and tanker sub-type labels are drawn from S\&P Global Maritime records, with StatCode5 levels 2--5 mapped to align with the fourth IMO Greenhouse Gas Study vessel class types, keeping only records that report a single MMSI so each label attaches to one vessel identity.
 
-\paragraph{Labels} 
 
-S\&P Global Maritime records.
-StatCode5 levels 2--5 are mapped to the reported sub-types to align with the fourth IMO Greenhouse Gas Study vessel class types.
-Only records reporting a single MMSI are retained, so that each label attaches to one vessel identity.
+\subsubsection{Primary GFW vessel class model}\label{sec:primary-vessel-class-model}
 
-\paragraph{Features} 
+\paragraph{Target} 
+The primary GFW vessel class model made vessel class predictions at the MMSI level for 1.8M active, AIS-broadcasting vessels. Vessels are assigned a unique class, separated into fishing, non-fishing, and gear, where gear refers to non-vessel AIS-enabled objects.
+The final assigned vessel class follows a hierarchy determined by the model’s score for that class, where low-scoring classes get a final assignment at a coarser level. For example, a low-scoring “tanker” might be assigned a final vessel class “non-fishing”.
 
-Models contain 114 features in four blocks.
-\textit{Port visit embeddings (50)}. Word2Vec (50 dimensions, window 10, minimum count 5) over each vessel's sequence of anchorage visits, from port visits with high confidence in the last 365 days up to 2025-06-01. A vessel's embedding is the visit-weighted mean of the anchorages it used.
-\textit{Vessel-class network scores (33)}. Per-class outputs of the upstream GFW vessel-class model.
-\textit{AIS self-reported ship type (14)}. Fraction of a vessel's AIS messages declaring each ship type category.
-\textit{Activity and inferred characteristics (17)}. Speed percentiles, depth, distance from shore, fraction of time in port, AIS class, and inferred length, tonnage, crew size and engine power.
 
-\paragraph{Evaluation} 
+\paragraph{Training data}
+The primary GFW vessel class model makes use of all inferred, identity, and activity features described above. Labels are drawn from clean, aggregated registry data, ensuring that re-used MMSIs and MMSIs with conflicting classes by registry are dropped from training. 
+500,000 vessels with aggregated registry information were used to train the model, with a holdout set of 130,000 for testing.
 
-An 80/20 split stratified by sub-type.
 
-\paragraph{Overfitting controls} 
+\paragraph{Performance}
+The model achieves an accuracy of 98.57\%, with weighted precision, recall, and F1 all at 98.7\%. Macro-averaged precision, recall, and F1 are 87.8\%, 64.8\%, and 71.6\%, respectively. The gap between weighted and macro reflects a class imbalance, with rare classes performing worst.
+Cargo and tanker vessels are well-represented in the training data and perform well individually. Cargo achieves an F1 score of 97.0\%, and tanker reaches an F1 score of 95.6\%.
 
-Early stop of boosting iterations on a held-out internal validation split rather than fixed in advance.
+\paragraph{Key predictive features}
+The top features are determined using the Gini index, an imperfect but useful measure. Transmitted shiptype unavailable: 0.10, median speed: 0.09, most common AIS class: 0.08, transmitted shiptype cargo: 0.07, neural net passenger vessel score: 0.06, neural net gear score: 0.06, neural net cargo score: 0.05.
 
-\paragraph{Potential bias} 
+\paragraph{Interpretability}
+The feature importances are relatively spread out across different training features, with the most indicative feature whether or not the vessel broadcasts a shiptype. This makes sense, as vessel class is gear-dominated, and gear typically does not broadcast a shiptype. Other features, such as median speed, AIS class, and cargo shiptype, indicate a combination of vessel behavior and AIS information itself, while the neural net scores for specific classes show the propagation of one model's predictions into the next.
 
-We identify three potential sources of bias.
-\textit{Label coverage.} Labels exist only for vessels in S\&P data reporting a single MMSI. Non-IMO registered and identity-switching vessels are absent from training by construction, and they form a substantial part of the population to which the models are applied.
-\textit{Upstream inheritance.} A sub-type is assigned only where the GFW vessel-class model returns cargo or tanker. A vessel misclassified upstream may be routed to the wrong sub-model and given a sub-type causing classification errors to compound.
-\textit{Feature availability tracks the same bias.} Anchorage embeddings derive from port visits, and 4.5\% of cargo and 5.6\% of tanker training vessels have no embedding at all. Vessels that avoid ports, or interrupt their AIS transmission are systematically degraded.
 
-\subsubsection{Tanker sub-type model}
+\paragraph{Overfitting controls and known weaknesses}
+The model uses regularized hyperparameters ($n_estimators=300$, $max_depth=35$, $min_samples_leaf=10$, $min_samples_split=20$) rather than an unconstrained forest to balance accuracy against model size. In order to mitigate overfitting or regional bias, the 80/20 slit in the train/test data is stratified by MMSI and MMSI region, and the label-exclusion rules reduce noisy or duplicated MMSI from training. The tight cross-validation variance ($±$0.05\% accuracy across folds) suggests the model isn’t overfit to a particular split.
 
-\paragraph{Target}
+Despite the training data stratification, high-volume classes such as gear and cargo perform very well, while rarer classes where limited data is available struggle significantly. Larger classes, particularly gear, may be over-classified. Since the model score threshold to mitigate low-scoring, incorrect classifications, some genuinely correctly classified vessels may end up assigned too broad of a label.
 
-One of four tanker sub-types (oil, chemical, liquefied gas, other liquids), for 43\,530 vessels the upstream GFW vessel class model classified as tanker.
+As the vessel sub-types models rely on the output of the primary vessel classification model predictions, biases and errors are propagated from this model to the next. This effect similarly happens between the neural net scores and the primary GFW vessel class model.
 
-\paragraph{Training data} 
-
-5\,903 vessels with S\&P registry sub-types: oil 2\,664; chemical 2\,015; liquefied gas 1\,188; other liquids 36.
-
-\paragraph{Performance} 
-
-Accuracy 0.875; macro-F1 0.712; weighted F1 0.874. Per-class F1: liquefied gas 0.92, oil 0.89, chemical 0.84, other liquids 0.20.
-
-\paragraph{Key predictive features} 
-
-Using loss in held-out macro-F1 when permuted. Top speed (95th percentile): 0.169. Anchorage embeddings, 50 dimensions permuted together: 0.145. Vessel-class scores from upstream model, 33 permuted together: 0.061. Average distance traveled per trip: 0.029.
-
-\paragraph{Interpretability} 
-
-One feature, top speed, carries more importance than any other in either sub-type model. That makes the model easy to explain, but it also means it leans on a single behavioural signal that degrades wherever AIS coverage is patchy.
-
-\paragraph{Known deficiencies} 
-
-Performance for \emph{Other liquids} is poor: recall 0.111, with 89\% of those vessels predicted as oil. With 45 labelled vessels in total the class does not have enough signal to be separated. Oil and chemical tankers are often confused with each other: 13\% of chemical vessels are called oil and 10\% the reverse.
 
 \subsubsection{Cargo sub-type model}
+\label{sec:cargo-submodel}
 
 \paragraph{Target}
 
-One of five cargo sub-types (bulk carrier, container, general cargo, refrigerated cargo, ro-ro cargo), for 186\,689 vessels the upstream GFW vessel class model classified as cargo.
+One of five cargo sub-types (bulk carrier, container, general cargo, refrigerated cargo, ro-ro cargo), for 186\,689 vessels the primary vessel class model classified as cargo.
 
-\paragraph{Training data} 
+\paragraph{Training data}
 
 11\,744 vessels with S\&P registry sub-types: bulk carrier 5\,201; general cargo 3\,200; container 2\,166; ro-ro 1\,100; refrigerated 77.
 
-\paragraph{Performance.} Accuracy 0.905; macro-F1 0.855; weighted F1 0.905. Per-class F1: bulk carrier 0.94, container 0.94, general cargo 0.85, ro-ro 0.85, refrigerated 0.70.
+\paragraph{Performance}
+
+Accuracy 90.5\%; macro-F1 85.5\%; weighted F1 90.5\%. Per-class F1: bulk carrier 94.3, container 93.9, general cargo 84.7, ro-ro 84.6, refrigerated 70.3.
 
 \paragraph{Key predictive features}
 
-Using loss in held-out macro-F1 when permuted. Anchorage embeddings, 50 dimensions permuted together: 0.220. Vessel-class scores from upstream model, 33 permuted together: 0.157. Top speed (95th percentile): 0.029. 
+Importance is the loss in held-out macro-F1 when a feature is permuted, used in place of the Gini index, which is undefined for the gradient boosting models used here. Anchorage embeddings, 50 dimensions permuted together: 0.220. Vessel class neural network scores, 33 permuted together: 0.157. Top speed (95th percentile): 0.029.
 
 \paragraph{Interpretability}
 
-Vessel-class scores from upstream model form a substantial part of this model's classification skill is inherited rather than learned from vessel behaviour.
+Vessel class neural network scores form a substantial part of this model's classification skill, indicating it is potentially inherited from the primary model rather than learned from vessel behaviour.
 
-\paragraph{Known deficiencies}
+\paragraph{Overfitting controls and known weaknesses}
 
-Refrigerated cargo has 77 training vessels; its F1 of 0.70 is indicative only. Ro-ro and general cargo are the main confusion pair among the well-populated classes. General cargo is 27\% of the training set but 66\% of predictions, so the model is likely extrapolating beyond its training mix.
+Gradient boosting classifiers with early stopping on a held-out internal validation split, rather than a fixed number of boosting iterations. Unlike the primary model, the train/test split here is stratified by sub-type only rather than by MMSI region, with the split fixed by an MMSI hash so it is stable as data is added.
+
+Refrigerated cargo has 77 training vessels; its F1 of 70.3 is indicative only. Ro-ro and general cargo are the main confusion pair among the well-populated classes: 17\% of ro-ro vessels are predicted as general cargo. General cargo is 27\% of the training set but 66\% of predictions, so the model is likely extrapolating beyond its training mix.
+
+As with the primary model, errors are inherited from it: a vessel it misclassifies is refined against the wrong sub-type vocabulary. Labels exist only for S\&P-registered, single-MMSI vessels, and 4.5\% of training vessels have no port visit features at all.
+
+\subsubsection{Tanker sub-type model}
+\label{sec:tanker-submodel}
+
+\paragraph{Target}
+
+One of four tanker sub-types (oil, chemical, liquefied gas, other liquids), for 43\,530 vessels the primary vessel class model classified as tanker.
+
+\paragraph{Training data}
+
+5\,903 vessels with S\&P registry sub-types: oil 2\,664; chemical 2\,015; liquefied gas 1\,188; other liquids 36.
+
+\paragraph{Performance}
+
+Accuracy 87.5\%; macro-F1 71.2\%; weighted F1 87.4\%. Per-class F1: liquefied gas 91.8, oil 88.6, chemical 84.3, other liquids 20.0.
+
+\paragraph{Key predictive features}
+
+Top speed (95th percentile): 0.169. Anchorage embeddings, 50 dimensions permuted together: 0.145. Vessel class neural network scores, 33 permuted together: 0.061. Average distance traveled per trip: 0.030.
+
+\paragraph{Interpretability}
+
+One feature, top speed, carries more importance than any other in either sub-type model. That makes the model easy to explain, but it also means it leans on a single behavioural signal that degrades wherever AIS coverage is patchy.
+
+\paragraph{Overfitting controls and known weaknesses}
+
+Gradient boosting classifiers with early stopping on a held-out internal validation split. As with the cargo model, the train/test split is stratified by sub-type only, and the same label-coverage limits and inheritance of errors from the primary model apply.
+
+Performance for \emph{other liquids} is poor: recall 11.1\%, with 89\% of those vessels predicted as oil. With 45 labeled vessels in total the class does not have enough signal to be separated. Oil and chemical tankers are often confused with each other: 13\% of chemical vessels are called oil and 10\% the reverse. 5.6\% of training vessels have no port visit features at all.
+
+
+\subsubsection{Other vessel characteristics models}\label{sec:vessel-characteristics-numeric-models}
+
+\paragraph{Targets}
+
+Continuous numeric vessel characteristics - main engine power, gross tonnage, design speed, and construction year - are estimated using random forest regression models, while the categorical engine type value is estimated using a random forest classifier. All models make predictions at the MMSI level for 1.8M active, AIS-broadcasting vessels.
+
+\paragraph{Training data}
+
+All models make use of the inferred, identity, and activity features described above. Labels are drawn from clean, aggregated registry data, ensuring that re-used MMSIs and MMSIs with conflating classes by registry are dropped from training.
+The engine power model had a training set of 13,000 samples, the gross tonnage model had a training set of 63,000 samples, the design speed model had a training set of 8,808 samples, the construction year and engine RPM models had a training set of 45,868 samples, and the engine type model had a training set of 46,108 samples.
+
+\paragraph{Performance}
+\\
+\textit{Engine power model}
+\\
+The engine power model achieved an R$^2$ of 0.929 with a mean absolute error of 548.71 kW and a mean absolute percentage error of 43.8\%.
+\\
+\\
+\textit{Tonnage model}
+\\
+The tonnage model achieved an R$^2$ of 0.944 with a mean absolute error of 2,830.15 GT and a mean absolute percentage error of 209.6\%.
+\\
+\\
+\textit{Design speed model}
+\\
+The design speed model achieved an R$^2$ of 0.861 with a mean absolute error of 0.82 kn and a mean absolute percentage error of 4.9\%.
+\\
+\\
+\textit{Year-of-build model}
+\\
+The year-of-build model achieved an R$^2$ of 0.447 with a mean absolute error of 6.68 and a mean absolute percentage error of 0.3\%.
+\\
+\\
+\textit{Engine RPM model}
+\\
+The engine RPM model achieved an R$^2$ of 0.533 with a mean absolute error of 360.56 and a mean absolute percentage error of 33.2\%.
+\\
+\\
+\textit{Engine type model}
+\\
+Accuracy of 99.08\%; macro-F1 54.6\%; weighted F1 0.991\%. Per class F1: oil 99.5\%, gas 61.7\%, turbine 57.1\%, reciprocating 0.00.
+
+\paragraph{Key predictive features}
+
+\textit{Engine power model}
+\\
+Average engine power inferred by neural network: 0.535. Top speed (95th percentile): 0.149. Average tonnage inferred by neural network: 0.104.
+\\
+\\
+\textit{Tonnage model}
+\\
+Average tonnage inferred by neural network: 0.626. Fraction of hours spent at port: 0.0968. Average distance traveled per trip: 0.041.
+\\
+\\
+\textit{Design speed model}
+\\
+Top speed (95th percentile): 0.609. Median speed: 0.054. Neural network supply vessel score: 0.051.
+\\
+\\
+\textit{Year-of-build model}
+\\
+Average engine power inferred by the neural network: 0.162. First digit of the MMSI code: 0.101. Average tonnage inferred by the neural network: 0.063.
+\\
+\\
+\textit{Engine RPM model}
+\\
+Average gross tonnage inferred by the neural network: 0.310. Average length inferred by the neural network: 0.093. Average percentage of self-identified shiptype messages as fishing: 0.074.
+\\
+\\
+\textit{Engine type model}
+\\
+Top speed (95th percentile): 0.096. Neural network patrol vessel score: 0.080. Average engine power inferred by the neural network: 0.062.
+
+\paragraph{Interpretability}
+
+Both the engine power and the tonnage predictions are largely driven by the neural network's inferred values, indicating that these models are refining existing predictions.
+\\
+The design speed predictions are most heavily reliant on the vessel's top speed and median speed, which makes intuitive sense as the two act as a proxy for design speed.
+\\
+The year-of-build predictions are less singularly reliant on one strong signal, but are driven the most by the neural network's inferred engine power and the first digit of the MMSI code. The latter likely acts as a proxy for build/registration era for each flag state.
+\\
+The engine RPM predictions are largely weighted by physical characteristics of the vessel, but similarly less reliant on a single feature. The physical characteristics describing a vessel likely act as a proxy for RPM, while the self-identified shiptype likely distinguishes fishing and non-fishing vessel properties.
+\\
+The top features for engine type predictions are much more diffuse, suggesting that no single feature strongly separates engine types and the model relies on combinations of weaker signals.
+
+\paragraph{Overfitting controls and known weaknesses}
+To mitigate overfitting, all models are trained with a fixed random seed and a train/test split stratified by vessel class and first-digit MMSI. The engine type model additionally used class-weight balancing to counteract severe class imbalance in the training labels. However, because the engine type labels are so heavily skewed towards oil engines, the model only performs reliably for that class, and semi-reliably for gas. As higher volume data becomes available for a greater diversity of engine types, future models will be more sophistication and better predictive of the less represented types. 
+
+The year-of-build model has a 6-7 year mean error, suggesting that it is useful for predicting general build era up to around a decade, but not reliable for year-by-year predictions. The engine RPM model has mean error of 360 revolutions per minute, indicating that it can capture very broad patterns but with more relative error than the year-of-build model.
+The engine power, tonnage, and design speed models all show the same pattern: performance is strongest in the mid-range of each variable and degrades substantially at the extremes, where training data is sparse.
+
+
 
 \end{document}
