@@ -210,8 +210,11 @@ list(
   #
   # The dependency crosses stores, so targets cannot see it: run
   # 03_inventories_comparison before this pipeline when those inputs change.
+  # Loaded under an SI-specific name: the notebook already builds a variable
+  # called all_inventory_data for its own inventory figure, and a tar_load()ed
+  # object of the same name would be overwritten by it.
   tar_file_read(
-    name = all_inventory_data,
+    name = si_all_inventory_data,
     command = file.path("data", "inventories", "all_inventory_data.csv"),
     read = readr::read_csv(!!.x)
   ),

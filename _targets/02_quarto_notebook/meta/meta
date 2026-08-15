@@ -100,11 +100,13 @@ total_spatial_emissions_by_pollutant|stem|70060c88b7c2ac9d|c9f81ea927c77664|5e10
 fleet_growth_by_year_data|stem|5e2e3e3ed82a2b2d|6e485d4313b70396|83558f0382245500|-914735802||t20680.5982241318s|s4949b|4949|rds|local|vector|||0.023||
 s1_detection_density_by_denominator_file|stem|484cf3f846e2947a|0afc1102d1881c7b|2c530c1562a7fbd1|-559454256|data/gfw/s1_detection_density_by_denominator.csv|t20674.2105086444s|s312356b|312356|file|local|vector|||0||
 s1_detection_density_by_denominator|stem|8372109e9ffc443b|b292e2e9ee671168|2b6c2a33d26a776f|1053679082||t20680.63064184s|s53504b|53504|rds|local|vector|||0.101||
+inventory_intensity_all_models_file|stem|0eab9e73d539fd1d|f5a79651cce5723a|2c530c1562a7fbd1|770373273|data/inventories/inventory_intensity_all_models.csv|t20680.6462854391s|s657b|657|file|local|vector|||0.001||
+inventory_intensity_all_models|stem|fdef9447fb24281d|1e48543f31f128fd|b653975d3ef7b266|-1354260696||t20680.6502480566s|s719b|719|rds|local|vector|||0.091||
 fishing_vessel_classes|function|9971df3aa5284378
 reefer_vessel_classes|function|3f594d3b2dffefa6
 cams_axis_name|function|02d8c48a4c402cd6
 multisector_colors|function|dc6ef1815218c945
-.Random.seed|object|7c53e98fd5a6c7aa
+.Random.seed|object|eaeefe9c21e08577
 ceds_marine_sectors|function|7f0d77ad9523cf8d
 download_gfw_data|function|56ae83fa4e3ee8f3
 cams_slice_times|function|f79193e718ad6a73
@@ -141,6 +143,6 @@ fleet_emissions_and_size_by_year|function|70578a6a109ba74e
 fleet_growth_by_year|function|75a0b26f7a9d0e2b
 sum_cams_nc_to_tonnes|function|0d062ccd5c250ada
 summarize_cams_ship_co2|function|5ba11ed7029b8e0d
-inventory_intensity_all_models_file|stem|0eab9e73d539fd1d|f5a79651cce5723a|2c530c1562a7fbd1|770373273|data/inventories/inventory_intensity_all_models.csv|t20680.6462854391s|s657b|657|file|local|vector|||0.001||
-inventory_intensity_all_models|stem|fdef9447fb24281d|1e48543f31f128fd|b653975d3ef7b266|-1354260696||t20680.6502480566s|s719b|719|rds|local|vector|||0.091||
-quarto_notebook|stem|8217d3f34f8f8b98|984a6d0c1ca0a694|d587ef47fe6acf8f|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20680.6585266756s|s18222789b|18222789|file|local|vector|||714.731||
+si_all_inventory_data_file|stem|bddceb992ca461d6|c0195e25ed68e883|2c530c1562a7fbd1|1735942959|data/inventories/all_inventory_data.csv|t20670.7498776519s|s1983b|1983|file|local|vector|||0.001||
+si_all_inventory_data|stem|ba19a951401b7881|0dd02aa7dd011e3e|8f24150efe440a56|-1503227339||t20680.6855115327s|s979b|979|rds|local|vector|||0.099||
+quarto_notebook|stem|27d01da1e558a5ad|ad2e79cf5cbf50d4|6a3df94577cfbee4|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20680.6938155668s|s18293716b|18293716|file|local|vector|||716.931||

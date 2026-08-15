@@ -121,7 +121,7 @@ targets::tar_load(
     "ping_level_hours_distribution",
     # Inventories comparison inputs, prepared by
     # _targets_03_inventories_comparison.R and read into this pipeline as CSVs
-    "all_inventory_data",
+    "si_all_inventory_data",
     "multisector_inventory_data",
     "inventory_vessel_counts_by_registry",
     "gfw_edgar_marine_emissions",
@@ -5597,6 +5597,11 @@ spread_labels <- function(y_end, gap_fraction, transform = identity,
 #| fig-cap: "Our AIS and fused estimates against the published bottom-up inventories. Panel A shows levels; panels B and C show change relative to 2017 and 2019."
 #| fig-width: 9
 #| fig-height: 14
+
+# The notebook builds its own all_inventory_data earlier for main's inventory
+# figure, which would overwrite the loaded target, so the SI series is loaded
+# under si_all_inventory_data and bound to the name this code expects.
+all_inventory_data <- si_all_inventory_data
 
 baseline_year <- 2017L
 late_baseline_year <- 2019L
