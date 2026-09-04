@@ -110,7 +110,7 @@ Estimating emissions from non-broadcasting vessels offers new insights into the 
 
 Across the entire 2017 to 2025 time series, almost all non-broadcasting emissions (96.4\%) occurred inside the S1 footprint and in pixel-months that were imaged by S1 (Fig. \ref{fig:fig-spatial-coverage-footprint}). This makes sense because part of the Copernicus system's observation strategy for S1 is specifically focused on imaging coastal and shipping areas, where ship density is highest \cite{ESA2013S1Handbook}. Our machine learning model for predicting these emissions directly from observed S1 detection density achieves a high out-of-sample predictive performance (traditional R$^{2}$ = 0.94 and total percent error of -8.6\% for CO$_2$, Table \ref{tab:all_performance_metrics_table}). Only 3.5\% of non-broadcasting emissions occurred inside the S1 footprint but in pixel-months that weren't imaged by S1, requiring us to use a two-stage hurdle framework using both a classification model (F1 Score = 0.72) and a regression model (traditional R$^{2}$ = 0.73) to predict S1 detection density before predicting emissions (traditional R$^{2}$ = 0.94). Only 0.08\% of non-broadcasting emissions occurred outside the S1 footprint entirely, since most vessels operating in these open ocean areas use AIS.
 
-Our vessel-level AIS-broadcasting emissions data provide a detailed understanding of marine vessel emissions across vessel classes and activity types (Fig. \ref{fig:fig-ais-data-richness}). We are able to distinguish activity between 37 classes of vessels, including 14 classes of fishing vessels; this makes our inventory the first to our knowledge that provides this level of emissions detail for fishing vessels. Container and bulk carriers, which transport much of the world's goods by sea, are the highest-emitting cargo classes (Fig. \ref{fig:fig-ais-data-richness}A-B). Oil tankers, which themselves transport fossil fuels, are the highest-emitting tanker type. Passenger vessels, which are composed of several diverse vessel subclasses including ferries and cruise ships, are the largest emitting vessel class on aggregate. Trawlers, which use an energy-intensive fishing technique in which nets are dragged through the water \cite{coello2015ais}, are the highest-emitting type of fishing vessel. Emissions from AIS-broadcasting vessels can also be assigned to port stays in particular countries and port-to-port voyages within- and between-countries by analyzing the movement tracks of each individual vessel (Fig. \ref{fig:fig-ais-data-richness}C and Fig. \ref{fig:fig-emissions-by-country-and-activity-type}). Most emissions for cargo and tanker vessels occur during international trips, while most service and passenger vessel emissions occur within ports (Fig. \ref{fig:fig-ais-data-richness}C). China, Japan, and United States had the most CO$_{2}$ emissions during within-country domestic trips in 2025. China, Malaysia, and United States had the most CO$_{2}$ emissions during international trips that started or ended in these countries in 2025 (where the emissions from each trip are partitioned equally to its departure and arrival country). China, United States, and Indonesia had the most CO$_{2}$ emissions during port stays. Country totals for every activity type are summarized in Fig. \ref{fig:fig-emissions-by-country-and-activity-type} and listed in Table \ref{tab:top_countries_by_activity_type}. We note that not all AIS messages are broadcast by vessels; we are therefore careful to exclude all non-vessel AIS messages from our emissions estimates. Roughly 47\% of AIS-enabled signals are attributable to buoys, FADs, navigation aids, offshore structures, fishing gear, and other objects. These are classified as a separate `gear' class by our vessel classification model, and are not included in this analysis. 
+Our vessel-level AIS-broadcasting emissions data provide a detailed understanding of marine vessel emissions across vessel classes and activity types (Fig. \ref{fig:fig-ais-data-richness}). We are able to distinguish activity between 37 classes of vessels, including 14 classes of fishing vessels; this makes our inventory the first to our knowledge that provides this level of emissions detail for fishing vessels. Container and bulk carriers, which transport much of the world's goods by sea, are the highest-emitting cargo classes (Fig. \ref{fig:fig-ais-data-richness}A-B). Oil tankers, which themselves transport fossil fuels, are the highest-emitting tanker type. These vessel classes are ranked similarly in other inventories \cite{johanssonGlobalAssessmentShipping2017, kramelGlobalShippingEmissions2021, yiHighresolutionGlobalShipping2025, mao2025greenhouse}, with the notable exception of the passenger category. Passenger vessels have a highly aggregated definition in our model, composed of several diverse vessel subclasses including ferries, cruise, Ro-Pax and yachts, which makes it the most numerous class in our fleet and consequently the largest emitting group in 2025 (Fig. \ref{fig:figS-fleet-sankey-with-series-2025}). This and any further departure from other studies reflects our broader vessel coverage, which includes classes and sizes that are absent or underrepresented elsewhere—vessels below 25 m account for most passenger emissions in our inventory (Fig. \ref{fig:figS-passenger-size-panels}, panel B), and fishing vessels are our second-largest class by vessel count (Fig. \ref{fig:figS-fleet-sankey-with-series-2025}). Trawlers, which use an energy-intensive fishing technique in which nets are dragged through the water \cite{coello2015ais}, are the highest-emitting type of fishing vessel. Emissions from AIS-broadcasting vessels can also be assigned to port stays in particular countries and port-to-port voyages within- and between-countries by analyzing the movement tracks of each individual vessel (Fig. \ref{fig:fig-ais-data-richness}C and Fig. \ref{fig:fig-emissions-by-country-and-activity-type}). Most emissions for cargo and tanker vessels occur during international trips, while most service and passenger vessel emissions occur within ports (Fig. \ref{fig:fig-ais-data-richness}C). China, Japan, and United States had the most CO$_{2}$ emissions during within-country domestic trips in 2025. China, Malaysia, and United States had the most CO$_{2}$ emissions during international trips that started or ended in these countries in 2025 (where the emissions from each trip are partitioned equally to its departure and arrival country). China, United States, and Indonesia had the most CO$_{2}$ emissions during port stays. Country totals for every activity type are summarized in Fig. \ref{fig:fig-emissions-by-country-and-activity-type} and listed in Table \ref{tab:top_countries_by_activity_type}. We note that not all AIS messages are broadcast by vessels; we are therefore careful to exclude all non-vessel AIS messages from our emissions estimates. Roughly 47\% of AIS-enabled signals are attributable to buoys, FADs, navigation aids, offshore structures, fishing gear, and other objects. These are classified as a separate `gear' class by our vessel classification model, and are not included in this analysis. 
 
 
  \begin{figure}[H]
@@ -178,11 +178,11 @@ There are no competing interests to declare.
 
 \section*{Methods}
 
-This work relies on multiple sources of spatial and tabular data to assess marine vessel emissions globally. We use AIS data, vessel registry information, Sentinel-1 and Sentinel-2 derived data to construct our AIS-based emission model and the non-broadcasting emissions model (Fig. \ref{fig:gfw_emissions_framework_flowchart}).
+This work relies on multiple sources of spatial and tabular data to assess marine vessel emissions globally. We use AIS data, vessel registry information and Sentinel-1 derived data to construct our AIS-based emission model and the non-broadcasting emissions model (Fig. \ref{fig:gfw_emissions_framework_flowchart}).
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{figures/fig-framework-flowchart.png}
+    \includegraphics[width=\columnwidth]{figures/fig-framework-flowchart-simpler.png}
     \caption{Conceptual flowchart for estimating emissions using the AIS-based emissions model and the non-broadcasting emissions model.}
     \label{fig:gfw_emissions_framework_flowchart}
 \end{figure}
@@ -282,7 +282,7 @@ In Table \ref{tab:tab-performance-tolerance-table}, performance peaks at a tradi
     \label{fig:fig-mrv-performance}
 \end{figure}
 
-\subsection{Non-broadcasting vessels}
+\subsection{Non-broadcasting vessels}\label{sec:non-broadcasting-vessels}
 
 \subsubsection{Sentinel-1 SAR data description}
 
@@ -523,6 +523,19 @@ Tables S1 to S7\\
 \setcounter{page}{1} % not 0 as \newpage already started a supplementary page
 % References continue the numbering from the main text.
 
+% Restarting the counters above also restarts the names hyperref builds its PDF
+% anchors from: those come from \theH<counter>, not from \the<counter>, so the
+% S prefix added above does not reach them. Without these lines Fig. S16 asks
+% for the anchor "figure.16" that main-text Fig. 16 already claimed, pdfTeX
+% drops the duplicate, and the supplementary link lands on the main-text float
+% carrying the same number. Nothing here is printed; it only names the targets.
+\providecommand{\theHfigure}{\arabic{figure}}
+\providecommand{\theHtable}{\arabic{table}}
+\providecommand{\theHequation}{\arabic{equation}}
+\renewcommand{\theHfigure}{S\arabic{figure}}
+\renewcommand{\theHtable}{S\arabic{table}}
+\renewcommand{\theHequation}{S\arabic{equation}}
+
 
 %%%%%%%%%%%%%%%% SUPPLEMENT TITLE PAGE %%%%%%%%%%%%%%%
 
@@ -616,20 +629,6 @@ Tables S1 to S7\\
 \input{tables/top_countries_by_activity_type}
 \FloatBarrier
 
-
-\subsection{Comparing our emission estimates to other inventories}
-
-Our total emissions estimates (summed across broadcasting and non-broadcasting vessels) are consistent with other well-known global inventories: the International Maritime Organization (IMO) \cite{fourth2020greenhouse}, the EU's Emissions Database for Global Atmospheric Research (EDGAR) \cite{JRC143227}, and the Organization for Economic Co-operation and Development (OECD) experimental shipping database \cite{clarke2023co2} (Fig. \ref{fig:fig-inventory-comparison} and Table \ref{tab:inventory_comparison}). For each inventory, we pull all available years of data from 2017 through 2025. Both the IMO and OECD inventories leverage AIS data, with IMO using an AIS-based model similar to ours, and OECD leveraging a machine learning model trained on the EU MRV database that uses AIS movement data to inform certain model features and which uses this model to make predictions for AIS-broadcasting vessels not contained in the EU MRV database. The EDGAR inventory uses national fuel use data and regional emissions factors to estimate emissions. Our approach combining AIS and S1 data yields the highest estimates, as expected. The level of general agreement for this complex estimate across multiple sources provides support for the reliability and utility of our methodology and results.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\columnwidth]{figures/fig-inventory-comparison-1.png}
-    \caption{Comparison of annual marine vessel CO$_{2}$ emissions inventory estimates.}
-    \label{fig:fig-inventory-comparison}
-\end{figure}
-
-\input{tables/inventory_comparison}
-\FloatBarrier
 
 \subsection{Trends in AIS receiver types}
 
@@ -904,6 +903,183 @@ To mitigate overfitting, all models are trained with a fixed random seed and a t
 The year-of-build model has a 6-7 year mean error, suggesting that it is useful for predicting general build era up to around a decade, but not reliable for year-by-year predictions. The engine RPM model has mean error of 360 revolutions per minute, indicating that it can capture very broad patterns but with more relative error than the year-of-build model.
 The engine power, tonnage, and design speed models all show the same pattern: performance is strongest in the mid-range of each variable and degrades substantially at the extremes, where training data is sparse.
 
+\subsection{Systematic comparison of our methods}\label{sec:methods-comparison}
+
+\subsubsection{Scope of the comparison and modeling approaches}
+
+Global ship emission estimates fall into two methodological families, distinguished by whether emissions are derived from aggregate statistics or from the activity of individual vessels. Top-down, fuel-based inventories combine reported marine fuel sales with fuel emission factors, without reference to individual ships. Such estimates rest on fleet-average parameters, cannot resolve operational behaviour, and are known to underestimate emissions relative to activity-based inventories \cite{miolaEstimatingAirEmissions2011}. Bottom-up, activity-based approaches instead derive emissions mechanistically from the observed movement of individual vessels, calculating the pollutants emitted by each ship in a specific spatial context and aggregating over time and fleet \cite{nunesActivitybasedMethodologyAssess2017}. Since the widespread adoption of AIS, which resolves ship activity and operational mode at high spatial and temporal resolution, bottom-up AIS-based models have become the reference methodology for global inventories and the approach adopted by the IMO \cite{fourth2020greenhouse}. We therefore restrict our methods comparison to this family, which includes our AIS-based model, and retain top-down estimates only as an external check on global totals.
+
+Any AIS-based inventory is assembled from four components, and the differences between published inventories are attributable to how each is specified. First, the AIS record itself, which determines which vessels and which movements are observed at all. Second, a vessel-characteristics dataset supplying the parameters the model requires. Third, an engine model converting observed speed into instantaneous main engine load, plus assumptions on auxiliary engine and boiler demand. Fourth, fuel consumption and pollutant specific emission factors, conditioned on engine type, fuel type and the regulation in force at the time and place of the emission. Supplementary Tables \path{bottom-up_inventory_comparison_methods.csv}, \path{bottom-up_inventory_comparison_inputs.csv} and \path{bottom-up_inventory_comparison_outputs.csv} compare our methods, input data and outputs against the most recent and representative global bottom-up inventories: the STEAM model \cite{jalkanenModellingSystemExhaust2009, jalkanenExtensionAssessmentModel2012, bergShipEmissionsSO22012, johanssonGlobalAssessmentShipping2017, majamaki2025improving}, SEIM \cite{wangShipEmissionsChina2021, yiHighresolutionGlobalShipping2025}, MariTEAM \cite{kramelGlobalShippingEmissions2021}, the OECD's recent update transitioning from a machine-learning to a bottom-up approach \cite{clarke2023co2, oecdMaritimeTransportCO2Methodology2025}, the SAVE model developed by the ICCT \cite{olmer2017greenhouse, documentationV2025031Documentation, mao2025greenhouse}, and the Fourth IMO GHG Study \cite{fourth2020greenhouse}.
+
+\subsubsection{Activity and vessel-characteristics data}
+
+All seven inventories in the supplementary tables are global in spatial extent, so the differences lie in AIS coverage, fleet size, and temporal continuity rather than in geographic scope (Supplementary Table \path{bottom-up_inventory_comparison_inputs.csv}). The inventories diverge substantially in the number of vessels represented. Restricting the comparison to vessels explicitly modelled from observed AIS activity, we model 864,738 unique vessels, an average of 396,221 vessels per year rising from 249,732 in 2015 to 529,848 in 2025. This exceeds the AIS modelled fleet of the Fourth IMO GHG Study, the OECD update, SAVE, MariTEAM and SEIM. Our fleet size is only comparable to the STEAM inventory, which reported 376,219 vessels in 2015, exceeding our fleet size for the same year. However, STEAM does not report fleet sizes in subsequent updates, preventing a direct comparison for the later years in which our fleet is larger. The difference with STEAM is also reflected in the underlying AIS data, which used approximately 7.8 billion AIS positions in 2015, compared with approximately 2.3 billion in our 2015 dataset after data cleaning. Our own message volume increases to approximately 26.5 billion positions by 2025, totaling approximately 125 billion positions over the study period (an average of 11.4 billion per year), reflecting the expansion of terrestrial and satellite AIS. It also reflects differences in the AIS data types available to us. Terrestrial and satellite AIS constitute the core AIS data types. In addition, GFW obtains a data add-on for both class A and class B Dynamic-AIS, released by the data provider Spire in 2022, which further increases the density and coverage of our AIS record. To our knowledge, D-AIS is generally not included in base AIS data products from most providers. However, we note that other inventories covering from 2022 onward report conventional AIS data types without explicitly indicating whether Dynamic-AIS (also marketed as shipborne AIS) is included. Therefore, we cannot determine whether the differences arise from variations in input data or simply from a lack of reporting. Among the remaining inventories, SEIM and MariTEAM report lower AIS message volumes, whereas the remaining do not indicate message counts.
+
+Temporal coverage differs in extent. STEAM and MariTEAM are single-year inventories (2015 and 2017 respectively), with STEAM subsequently updated through 2021 to account for ambient conditions \cite{majamaki2025improving}. SEIM covers 2013 and 2016-2021, the Fourth IMO GHG Study 2012-2018, SAVE 2016-2023, and the OECD from 2019 onward. Our use of consistent GFW AIS products, though input density evolves, enables a continuous AIS inventory from 2015—and AIS + S1 inventory from 2017—to the present without methodological discontinuities.
+
+Every inventory uses official registries as the primary source of vessel characteristics and applies gap-filling where information is unavailable. The differences are in how far the registry is extended and how the remainder is inferred. The simplest filling approaches substitute central tendencies. The OECD update restricts to vessels matching between commercial and public registries and imputes from vessel class and size group means \cite{oecdMaritimeTransportCO2Methodology2025}, while SAVE fills missing characteristics from averages values \cite{documentationV2025031Documentation}. STEAM retains some of the within class variation by replicating the characteristics of a similar vessel already listed in its database \cite{johanssonGlobalAssessmentShipping2017}. Regression-based approaches such as that used for MariTEAM, fills gaps using regression models, though its modelled fleet is fully restricted to the registered fleet \cite{kramelGlobalShippingEmissions2021}, while the Fourth IMO GHG Study applies similar regressions as its primary method and falls back to class and size medians, on a dataset expanded with registered and public datasets \cite{fourth2020greenhouse}. Of the published inventories, SEIM is the only one besides ours to describe a more involved machine-learning approach to fill missing characteristics, applied after extending commercial registries with open data \cite{yiHighresolutionGlobalShipping2025}. In our vessel information dataset, characteristics are taken from data purchased from S\&P Global, from publicly available official registries consolidated through extensive prior scraping work \cite{park2023tracking}, and where neither is available, from inferred characteristics, building on \cite{kroodsma2018tracking} using a new random-forest model trained on commercial registry data, enabling inclusion of a substantially larger number of vessels than most previous studies and reach a fleet dominated by small domestic and fishing vessels that the more registry-anchored inventories cannot represent.
+
+Finally, the inventories differ in how they treat vessels absent from the AIS feed. STEAM, SEIM and MariTEAM rely exclusively on AIS or port-call data and make no allowance for unobserved activity. The OECD, SAVE and the Fourth IMO GHG Study models impute activity and emissions for small registered vessels missing from AIS, scaling from explicitly modelled vessels of the same type and size. Both approaches are bounded by the registry, where imputation can only recover a vessel that some registry lists. We instead estimate emissions from non-broadcasting vessels detected in Sentinel-1 SAR imagery using machine learning and data fusion (Section \ref{sec:non-broadcasting-vessels}), which recovers vessels that appear in neither AIS nor any registry. To our knowledge this is the first global shipping inventory to do so.
+
+\subsubsection{Engine and emissions model}
+
+In terms of propulsion formulation, the literature defines two main modeling approaches: load-based (i.e., SEIM, SAVE, the OECD update, the Fourth IMO GHG Study) and resistance-based (i.e., STEAM and MariTEAM). Every AIS-based inventory ultimately estimates the propulsion power required to overcome hull resistance at the observed speed, and the models differ in the resolution at which the components of that resistance are resolved. While load-based models are generally regarded as roughly representative of more complex methods, resistance-based models are often avoided because of the number of inputs needed. Resistance models require hull parameters, which restricts their applicability to vessels with such documented information in the registries. Imputing class-average hull parameters may be acceptable for fleet-level aggregates and well-defined classes with limited variation in hull design, but performance declines for underrepresented and heterogeneous classes and can substantially alter single-vessel estimates \cite{brownPowerModelsAverage2019}. This limitation is particularly relevant because we model a broader fleet dominated by small domestic and fishing vessels, for which hull geometry is often absent or incomplete, and report emissions at a finer resolution, by trip and by vessel. The resistance model's advantage in physical realism would therefore be offset by uncertainty in its inputs. The load-based formulation, by contrast, requires only installed power, design speed, observed speed and a small number of further characteristics that are readily available in registries and can be modeled with confidence where they are not.
+
+In terms of other attributes, such as engine and fuel parameterization, we adapted the methods from the Fourth IMO GHG Study \cite{fourth2020greenhouse}, which established standard assumptions now adopted by most of the shipping emissions models. Building an expanded activity dataset around a community reference also allows us to attribute differences from existing inventories to fleet coverage and activity representation, which is the claim this paper makes. Deviations from \cite{fourth2020greenhouse} methods were dependent to data availability or the quality of inferred values, but remains in line with other load-based models \cite{yiHighresolutionGlobalShipping2025, oecdMaritimeTransportCO2Methodology2025, documentationV2025031Documentation}. Correction factors for main engine activity are implemented, with draft corrections applied at a lower resolution than in \cite{fourth2020greenhouse}, \cite{documentationV2025031Documentation} and \cite{oecdMaritimeTransportCO2Methodology2025}, as draft is not reliably reported in our AIS records. Weather and fouling corrections follow comparable approaches to other load-based models, and an additional new correction is introduced to account for fishing activity. Similarly, SFOC calculations and decomposition in emissions by main auxiliary and boiler engines come from a general consensus across models \cite{fourth2020greenhouse, yiHighresolutionGlobalShipping2025, oecdMaritimeTransportCO2Methodology2025, documentationV2025031Documentation}, even among non load-based ones \cite{johanssonGlobalAssessmentShipping2017, kramelGlobalShippingEmissions2021}. See supplementary table \path{bottom-up_inventory_comparison_methods.csv}.
+
+However, our approach is limited on its fuel types characterization which are not explicitly modeled due to lack of available vessel-level fuel type data. For a given engine type, SFOC values and emissions factors are therefore calculated as the average value from across the fuel types associated with each engine type. LNG was not included as a fuel type due to the lack of available vessel-level fuel type data, the very limited number of vessels that currently use LNG, and the vastly different emissions factors this fuel type produces. Our treatment of policy instruments is also narrower than that of comparable models, which apply fuel-sulphur and NOx limits geographically within Emission Control Areas \cite{johanssonGlobalAssessmentShipping2017, yiHighresolutionGlobalShipping2025, fourth2020greenhouse, documentationV2025031Documentation}. Additionally, STEAM and SAVE account for technologies such as scrubbers and dual-fuel operation. While our NOx limits are assigned by engine Tier from build year, these are not resolved by NOx ECA boundaries, and SOx and PM estimates are expected to be biased upward within ECAs, an effect concentrated before 2020, when the difference between ECA and global sulphur limits was largest.
+
+\subsubsection{Differences in validation}
+
+Validation of existing inventories has rested largely on aggregate benchmarking against independent statistics, top-down approaches and against other bottom-up inventories. Our global totals were cross-compared against all six inventories discussed here, and against the multisector EDGAR and CEDS inventories \cite{guizzardiGlobalUptoDate2025, hoeslyHistorical17502014Anthropogenic2018}. As for the other models, STEAM benchmarked global fuel use against IEA statistics and the Third IMO GHG Study, modelled maritime transport work against UNCTAD seaborne-trade statistics and regional results against the EMEP inventory. SEIM, which rests entirely on this class of evidence, compares global totals and trends against EDGAR, CEDS and the Fourth IMO GHG Study, with an activity and fleet benchmark against UNCTAD. MariTEAM cross-compares against the Fourth IMO GHG Study for the same year and STEAM3 for a different year. The OECD update is the most extensive in this respect, benchmarking global totals against IEA and the Fourth IMO GHG Study, fleet activity against UNCTAD, average efficiencies by class and size against IMO (2018), and country-level results against national Air Emission Accounts for more than 35 countries. SAVE benchmarks aggregated fuel consumption against IMO DCS for ships of 5,000 GT and above, and the Fourth IMO GHG Study against the Third IMO GHG Study, their own top-down estimates, the ICCT inventory, and global fuel sales reported by the IEA and UNSD.
+
+We also validate against two independent in situ measurement datasets: ship-specific measured fuel consumption for 15,679 unique vessels from a registered dataset, and EU MRV records covering 20,432 vessel-years. Together these constitute the largest ship-level validation sample reported for a global bottom-up shipping inventory. Other validations using in situ measurements include that of the Fourth IMO GHG Study, which compares yearly estimates against 9,739 vessel records in the 2018 EU MRV dataset and additionally draws on engine power and fuel consumption measurements from 94 vessels’ Continuous Monitoring Dataset \cite{fourth2020greenhouse}. SAVE also validates per-vessel-year carbon intensity against EU MRV \cite{documentationV2025031Documentation}. The OECD update likewise draws on EU MRV, but compares totals aggregated by vessel class rather than by individual vessel \cite{oecdMaritimeTransportCO2Methodology2025}. MariTEAM validates modelled engine power against in situ measurements for a single vessel \cite{kramelGlobalShippingEmissions2021}. STEAM was validated in earlier versions against a limited sample of in situ measurements \cite{bergShipEmissionsSO22012}, and its recent ambient-conditions update validates modelled fuel consumption against 6,445 vessel-years records in the EU MRV data \cite{majamaki2025improving}. This last comparison bears directly on the choice of propulsion formulation. Applied to an identical fleet and AIS record, resistance-based methods have been reported to yield lower fleet-level CO$_{2}$ than their load-based equivalents \cite{brownPowerModelsAverage2019}, but that offset has so far been established only between models, or against limited samples of in situ measurements \cite{bergShipEmissionsSO22012, kramelGlobalShippingEmissions2021}. Here the two families, represented by STEAM and our model, are each tested against the same independent benchmark dataset (i.e., EU MRV) and perform comparably, both achieving an R$^{2}$ of approximately 0.8 \cite{majamaki2025improving}, supporting our methodological choices and indicating that the load-based formulation as implemented here does not exhibit the systematic upward bias reported by \cite{brownPowerModelsAverage2019}.
+
+
+\subsection{Comparing our emission estimates to other inventories}\label{sec:inventory-comparison}
+
+While validation against the registered and EU MRV datasets tests the emissions model itself, establishing whether it reproduces observed fuel consumption and emissions for individual vessels, it says nothing about whether the modelled fleet is complete. Aggregate benchmarking against independent inventories tests whether totals are of plausible magnitude. Below we first compare our estimates with the activity-based inventories discussed in Section \ref{sec:methods-comparison}, and then with the fuel-statistics-derived inventories EDGAR and CEDS. Each comparison is conditioned by data availability, and is limited to the emissions, vessel counts, fleet composition, etc. that each inventory reports publicly.
+
+\subsubsection{Comparing our estimates with other bottom-up inventories}
+
+Our AIS-based emissions estimates agree closely with the other activity-based inventories (STEAM, SEIM, MariTEAM, OECD, SAVE, and the Fourth IMO GHG Study) over the first years of the study period (Fig. \ref{fig:figS-inventory-comparison-all-sources}, panel A, tabulated in Table \ref{tab:inventory_comparison_all_sources}). This close agreement in emissions coexists with substantial disagreement in fleet scope and AIS coverage—not only between our inventory and the others, but among the other inventories themselves—with our own vessel count and message volume falling within the range of the other inventories in the early years of the series (Table \path{bottom-up_inventory_comparison_inputs.csv}). The convergence in totals therefore likely reflects where emissions are concentrated rather than agreement on fleet extent: although total fleets differ, all of these inventories rely on a registry-matched core of roughly 45,000-90,000 large vessels, which accounts for most emissions \cite{fourth2020greenhouse, yiHighresolutionGlobalShipping2025, oecdMaritimeTransportCO2Methodology2025, documentationV2025031Documentation, johanssonGlobalAssessmentShipping2017, kramelGlobalShippingEmissions2021}. In our inventory, registry-matched vessels likewise account for the majority of estimated emissions in the early years (Fig. \ref{fig:figS-registry-sankey-with-series-2025}, panel C). Differences in emissions instead reflect how much of the low-information tail of smaller vessels and other unregistered vessels each inventory includes. Residual differences in totals are not attributable to scope alone and may also reflect methodological choices (Table \path{bottom-up_inventory_comparison_methods.csv}).
+
+\begin{figure}[!p]
+    \centering
+    \includegraphics[width=\columnwidth,height=0.92\textheight,keepaspectratio]{figures/figS-inventory-comparison-all-sources-1.png}
+    \caption{Our AIS and fused estimates against the published bottom-up inventories. Panel A shows levels; panels B and C show change relative to 2017 and 2019.}
+    \label{fig:figS-inventory-comparison-all-sources}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/figS-registry-sankey-with-series-2025-1.png}
+    \caption{Registry status in 2025: share of the fleet against share of CO$_{2}$ for registry-matched and unmatched vessels, with the supporting series.}
+    \label{fig:figS-registry-sankey-with-series-2025}
+\end{figure}
+
+% Nine columns overflow the text block at the default column padding
+\begingroup
+\setlength{\tabcolsep}{2.5pt}
+\input{tables/inventory_comparison_all_sources}
+\endgroup
+\FloatBarrier
+
+Two subsequent changes drive the divergence in our emissions estimates that follows in the most recent years. First, our AIS-broadcasting fleet grows faster than the OECD and SAVE fleets, the only inventories with vessel-count series overlapping the recent period (Fig. \ref{fig:figS-inventory-vessel-counts-by-registry}). These contrasting trends likely reflect differences in how each fleet is constructed (Table \path{bottom-up_inventory_comparison_inputs.csv}). Inventories that are more constrained by commercial registries (even when they also consider to some extent non-registered vessels) change primarily at the pace of registry updates. Our fleet, by contrast, is more AIS observation-driven where both the number and the share of vessels that cannot be matched to a registry rose over time carrying all the increase in emissions (Fig. \ref{fig:figS-registry-sankey-with-series-2025} and Fig. \ref{fig:figS-registry-split-comparison}). Our trends are therefore conditioned more by the expansion of AIS carriage than are those of other inventories, all of which rely more heavily than ours on registry-based fleet definitions holding their emissions more constant (Fig. \ref{fig:figS-inventory-comparison-all-sources}, panel B and C). Sentinel-1 detections make this directly observable. Among detected large non-fishing vessels—the segment where AIS carriage is mandated and registry coverage is strongest, and thus the closest analogue to a registry-based fleet—the share that cannot be matched to an AIS broadcast is essentially unchanged since 2017, whereas that share falls steeply among small non-fishing and fishing vessels as AIS carriage and reception expand (Fig. \ref{fig:figS-ais-carriage-saturation-by-size}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/figS-inventory-vessel-counts-by-registry-1.png}
+    \caption{Modelled fleet size over time for the inventories publishing a vessel count per year, split by registry status for ours.}
+    \label{fig:figS-inventory-vessel-counts-by-registry}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/figS-registry-split-comparison-1.png}
+    \caption{Emissions from registry-matched and unmatched vessels, relative to 2017, with the size-restricted fragment for comparison.}
+    \label{fig:figS-registry-split-comparison}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/figS-ais-carriage-saturation-by-size-1.png}
+    \caption{AIS carriage saturation by vessel size: the unmatched share is flat for the largest vessels and falls steeply for the smallest.}
+    \label{fig:figS-ais-carriage-saturation-by-size}
+\end{figure}
+
+Second, our observed activity is also shaped by the phase-in of dynamic AIS (D-AIS), after which the emissions gap to the other inventories widens most rapidly (Fig. \ref{fig:figS-inventory-comparison-all-sources}). D-AIS primarily increases AIS-estimated emissions where it fills gaps that were previously unobserved, particularly in high-traffic zones where satellite reception degrades. Activity that was formerly interpolated across, or missed altogether, becomes measured, adding newly observable emissions to the inventory. Alongside this, D-AIS also acts on resolution, densifying segments that were already observed so that trajectories are more tightly constrained and speed profiles better resolved, without additional activity entering the inventory. Both mechanisms operate, but the second predominates: AIS positions received more than double between 2021 and 2025, while observed distance travelled and AIS emissions rise together by only $\sim$27\%, with emissions per message falling accordingly (Fig. \ref{fig:figS-messages-vs-hours-vs-emissions}). Densification also improves S1 detection-AIS matching, so where this occurs activity moves from the modelled dark component to the AIS one, and its emissions get computed directly from AIS rather than estimated by the dark model, a reallocation between the fused components rather than an addition.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/figS-messages-vs-hours-vs-emissions-1.png}
+    \caption{AIS messages received against observed activity and emissions, indexed to 2021, separating densification from new activity.}
+    \label{fig:figS-messages-vs-hours-vs-emissions}
+\end{figure}
+
+The above suggests that the increase in emissions occurs mostly via AIS carriage and, to a lesser extent, AIS coverage. The emissions divergence against the other inventories therefore does not indicate that our totals are inflated—a conclusion also supported by our global per-vessel emissions and emission intensities relative to other models (Table \ref{tab:inventory_intensity_all_models})—but rather that the other inventories, and our own early years, are missing part of the fleet and activity at sea. Global fleet emissions are likely understated wherever limited AIS carriage and/or high reliance on registry-defined fleets leaves low-information vessels out of the scope. This is supported by the S1 detection record where the share of detections that cannot be matched to an AIS broadcast has declined in all size classes since 2017, most steeply among fishing vessels and small non-fishing vessels, indicating an increase in AIS adoption (Fig. \ref{fig:figS-unmatched-fraction-fullperiod}). Indeed, the largest emissions growth we observe comes from passenger vessels, driven by the smallest group (Fig. \ref{fig:figS-passenger-size-panels}), and fishing vessels, a fleet segment comprising numerous small, largely coastal vessels that are poorly covered by registries and enter the model only as their AIS carriage expands (Fig. \ref{fig:figS-fleet-growth-by-year} and Fig. \ref{fig:figS-fleet-sankey-with-series-2025}). This is precisely the segment that registry-based methods are least equipped to capture.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/figS-unmatched-fraction-fullperiod-1.png}
+    \caption{Share of Sentinel-1 detections with no matching AIS broadcast, by length bin, over the full period.}
+    \label{fig:figS-unmatched-fraction-fullperiod}
+\end{figure}
+
+\begin{figure}[!p]
+    \centering
+    \includegraphics[width=\columnwidth,height=0.92\textheight,keepaspectratio]{figures/figS-passenger-size-panels-1.png}
+    \caption{Passenger vessels by length bin, 2017 against 2025, showing growth concentrated in the smallest sizes.}
+    \label{fig:figS-passenger-size-panels}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/figS-fleet-growth-by-year-1.png}
+    \caption{Growth by vessel class since 2017 in emissions, vessel count and activity.}
+    \label{fig:figS-fleet-growth-by-year}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/figS-fleet-sankey-with-series-2025-1.png}
+    \caption{Fleet composition in 2025: each vessel class's share of the fleet against its share of CO$_{2}$, with the supporting series.}
+    \label{fig:figS-fleet-sankey-with-series-2025}
+\end{figure}
+
+\input{tables/inventory_intensity_all_models}
+\FloatBarrier
+
+Still, full coverage of vessel activity remains limited by what the modeling is anchored to, whether AIS transmissions or registry data. Our total estimates (summed across broadcasting and non-broadcasting vessels) extend the inventory through satellite detections, capturing vessels that appear in neither registries nor AIS records. As a result, emissions diverge even further from every other inventory across the entire time range (Fig. \ref{fig:figS-inventory-comparison-all-sources}). The Fourth IMO GHG Study, OECD, and SAVE also attempt to account for vessels with no AIS activity by assigning small registered vessels without AIS signals the activity profiles of explicitly modeled vessels. Yet only the IMO study approaches our total emissions. This again highlights the limits of anchoring an inventory to a registry, where its coverage can reach no further than the registry itself, blind both to the low-information segment of the fleet our AIS series captures and to the dark fleet beyond it.
+
+\subsubsection{Comparing our estimates with top-down inventories}
+
+We also compared our total estimates against two top-down inventories, the Emissions Database for Global Atmospheric Research (EDGAR) and the Community Emissions Data System (CEDS). EDGAR builds its shipping estimates from reported fuel sales, representing international shipping from international marine bunkers and domestic activity from domestic navigation fuel statistics, with recent years extrapolated from Energy Institute fuel oil trends \cite{guizzardiGlobalUptoDate2025}. EDGAR can therefore only count fuel that was sold and reported. CEDS also starts from reported fuel sales but treats them as incomplete, on the view that marine fuel is systematically underreported, and raises its global shipping total using bottom-up estimates, mainly from the IMO GHG Studies \cite{hoeslyHistorical17502014Anthropogenic2018, ceds_data_and_assumptions}. Its limits are therefore not only what gets sold, but also the coverage of the bottom-up studies its global total rests on, whose limitations were described in the previous section.
+
+Our total estimates (summed across broadcasting and non-broadcasting vessels) exceed both inventories, each of which is bounded by the fleet and activity they can resolve (Fig. \ref{fig:figS-multisector-shipping-comparison}, tabulated in Table \ref{tab:multisector_shipping_comparison}). The differences are in magnitude and in trend, reflecting differences in fleet scope and composition, respectively.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/figS-multisector-shipping-comparison-1.png}
+    \caption{Our shipping totals against the shipping sector of the top-down EDGAR and CEDS inventories.}
+    \label{fig:figS-multisector-shipping-comparison}
+\end{figure}
+
+\input{tables/multisector_shipping_comparison}
+\FloatBarrier
+
+The magnitude gap arises from three main differences in the fleets these inventories can account for. First, fishing largely falls outside the shipping sector in both inventories. They report fishing fuel combined with agriculture and forestry, so EDGAR's shipping estimates contain no fishing vessels at all, while in CEDS only some unreported fishing fuel is absorbed into its global shipping sector through the bottom-up anchor. Second, small coastal and inland vessels are only partly covered. Domestic navigation fuel is intended to capture this traffic, but the sector is known to be inconsistently defined across reporting countries \cite{kuenen2014tno}. Third, neither inventory can capture fuel that never passes through reported channels, affecting vessels supplied informally or illegally. Further, even when sales are reported correctly, bunker statistics change only as fast as national energy reporting is revised.
+
+The trend gap is different in kind. Growth in our AIS series can reflect expanding carriage and coverage rather than new activity, but the fused total should be largely insensitive to that: a vessel that starts broadcasting moves from the non-broadcasting component to the AIS one, reallocating emissions between them rather than adding to the sum. Growth in the fused total emissions should therefore reflect a real activity increase, at least in the segments carrying most of the emissions. Satellite detections offer independent confirmation that this could be the case, since S1 detections depend on neither broadcasting nor registration. Detected activity per unit of observing effort stayed roughly flat overall, but its composition shifted, with activity growing at both ends of the size range—among small non-fishing vessels and, most strongly, among the largest—while mid-size classes were flat and fishing declined (Fig. \ref{fig:figS-density-denominators-and-bins} and Fig. \ref{fig:figS-density-by-match-status} panel A). In the smaller segments, part of this growth in new activity can move directly into AIS coverage along any existing activity from the non-broadcasting component becoming visible as AIS carriage expands (e.g., fishing emissions rise in our AIS series even as satellite detections show a decline in fishing activity). For the largest vessels that explanation is unavailable: AIS carriage is already near-universal there (i.e., $>$75\% coverage) and the unmatched share has barely changed since 2017 (Fig. \ref{fig:figS-ais-carriage-saturation-by-size}), so their growth must largely reflect new activity. Additionally, because a large ship emits on the order of a hundred times what a small one does, that compositional shift matters for emissions even if the total number of vessels did not change.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/figS-density-denominators-and-bins-1.png}
+    \caption{Sentinel-1 detection density under two denominators, and by fixed length bin, showing detected activity per unit of observing effort.}
+    \label{fig:figS-density-denominators-and-bins}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/figS-density-by-match-status-1.png}
+    \caption{Sentinel-1 detection density by length bin, split into total, AIS-matched and unmatched detections, for fishing and non-fishing fleets.}
+    \label{fig:figS-density-by-match-status}
+\end{figure}
+
+The magnitude gap rests on firm ground: each of these mechanisms adds emissions the top-down inventories cannot account for, and our own detection limits can only mean we understate the total further. However, for the trend, whether the increase in activity explains it, depends on whether the increase reflects real activity rather than the limits of what our fused approach can observe.
+
+Reallocation between our components requires that a vessel beginning to broadcast was already represented in the non-broadcasting estimate, and that holds only where Sentinel-1 detects it. Vessels too small or too close to shore to be reliably detected, or operating outside the imaged footprint—which accounts for a fifth of our AIS emissions—contribute nothing to that component and might enter the fused total for the first time when they begin broadcasting. Because AIS carriage and reception expanded over the study period, the unobserved fraction was larger at the start of the series than at the end, so part of the measured growth in the fused total is that gap closing rather than activity rising. Figure \ref{fig:figS-density-by-match-status} (panel B and C) shows that this might be the case. Among non-fishing vessels under 25 m, matched detections (i.e., AIS-broadcasting) per unit of observing effort rise at 17\% per year while unmatched detections stay flat, so the growth there is added to the fused total rather than transferred within it. That addition could, in principle, reflect new vessels entering service. However, a 150\% increase in passenger vessels under 25 m over eight years in our AIS record (Fig. \ref{fig:figS-passenger-size-panels}) is difficult to reconcile with the idea that new construction of small craft could plausibly account for it. The more likely interpretation is that most of these vessels were already at sea but unobserved by S1, and became visible as AIS carriage and reception expanded, representing activity newly entering our record rather than newly occurring. A fused trend closely tracking the AIS-only trend is consistent with this. That the fused slope is slightly shallower indicates some genuine reallocation from the non-broadcasting component, but the similarity between the two implies that some of the measured growth enters directly through AIS rather than being transferred within the fused total.
+
+Our fused trend is therefore likely inflated by the expansion of our own observation capacity, and is better read as an upper estimate of the underlying growth than as a measurement of it. This does not, however, imply that the flat trends of the other inventories are correct either. The reconciliation comes from the part of the fleet our approach captures without ambiguity. Among non-fishing vessels of 150 m and above, where AIS carriage is the highest and already settled at the start of our series (Fig. \ref{fig:figS-ais-carriage-saturation-by-size}), AIS-based emissions rose 29\% between 2017 and 2025, compared with 44\% for our full AIS total and 38\% for our fused total, respectively (Fig. \ref{fig:figS-registry-split-comparison}). S1 emissions are not disaggregated by vessel size, so we cannot provide the fused growth for this segment separately. The growth we report is therefore lower than our headline figure once observational expansion is set aside, but it is nowhere near the stability these inventories describe.
+
+If these larger magnitudes and steeper trends were confirmed, the implication is not only that marine emissions have been systematically underreported, but that marine transport is among the fastest-growing sources in the global emissions picture. Our fused estimate grows roughly 4-5 times faster than global emissions across all sectors, and 7-10 times faster than all other transportation modes combined across EDGAR and CEDS (Fig. \ref{fig:figS-multisector-comparison}). Even confined to the segment of the fleet where observation capacity did not expand (i.e, non-fishing vessels of 150 m and above) the increase in AIS-based emissons remains more than 3 times that of global emissions across all sectors and more than 5 times that of all other transportation modes combined.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figures/figS-multisector-comparison-1.png}
+    \caption{Marine emissions growth against all sectors and against other transport modes, in EDGAR and CEDS, indexed to 2017.}
+    \label{fig:figS-multisector-comparison}
+\end{figure}
 
 
 \end{document}

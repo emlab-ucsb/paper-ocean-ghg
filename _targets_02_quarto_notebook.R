@@ -202,6 +202,99 @@ list(
     command = file.path("data", "gfw", "pixels_for_offshore_training_testing_split.csv"),
     read = readr::read_csv(!!.x)
   ),
+  # Inventories comparison inputs ----
+  # CSVs written by _targets_03_inventories_comparison.R, which does the data
+  # work for the "Inventories comparison" section of the notebook. Read here so
+  # the notebook re-renders when an extract changes, the same contract as every
+  # other series above; the figures themselves are drawn in the notebook.
+  #
+  # The dependency crosses stores, so targets cannot see it: run
+  # 03_inventories_comparison before this pipeline when those inputs change.
+  # Loaded under an SI-specific name: the notebook already builds a variable
+  # called all_inventory_data for its own inventory figure, and a tar_load()ed
+  # object of the same name would be overwritten by it.
+  tar_file_read(
+    name = si_all_inventory_data,
+    command = file.path("data", "inventories", "all_inventory_data.csv"),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
+    name = multisector_inventory_data,
+    command = file.path("data", "inventories", "multisector_inventory_data.csv"),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
+    name = inventory_intensity_all_models,
+    command = file.path(
+      "data",
+      "inventories",
+      "inventory_intensity_all_models.csv"
+    ),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
+    name = inventory_vessel_counts_by_registry,
+    command = file.path(
+      "data",
+      "inventories",
+      "si_inventory_comparison",
+      "inventory_vessel_counts_by_registry.csv"
+    ),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
+    name = gfw_edgar_marine_emissions,
+    command = file.path("data", "gfw", "gfw_edgar_marine_emissions.csv"),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
+    name = gfw_registry_emissions,
+    command = file.path("data", "gfw", "gfw_registry_emissions.csv"),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
+    name = registry_shares_by_year,
+    command = file.path("data", "gfw", "registry_shares_by_year.csv"),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
+    name = fleet_shares_by_year,
+    command = file.path("data", "gfw", "fleet_shares_by_year.csv"),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
+    name = fleet_growth_by_year_data,
+    command = file.path("data", "gfw", "fleet_growth_by_year.csv"),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
+    name = s1_detections_by_fixed_length_bin,
+    command = file.path("data", "gfw", "s1_detections_by_fixed_length_bin.csv"),
+    read = readr::read_csv(!!.x)
+  ),
+  # Feeds the two S1 detection-density figures. The extract is committed rather
+  # than pulled: its query scans several GB and the result is settled.
+  tar_file_read(
+    name = s1_detection_density_by_denominator,
+    command = file.path(
+      "data",
+      "gfw",
+      "s1_detection_density_by_denominator.csv"
+    ),
+    read = readr::read_csv(!!.x)
+  ),
+  # Activity extracts from 01_gfw_data_pull, read straight from the CSV the way
+  # the plotting code used to
+  tar_file_read(
+    name = annual_ais_activity_summary,
+    command = file.path("data", "gfw", "annual_ais_activity_summary.csv"),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
+    name = annual_ais_activity_summary_cheap,
+    command = file.path("data", "gfw", "annual_ais_activity_summary_cheap.csv"),
+    read = readr::read_csv(!!.x)
+  ),
   # Render quarto notebook -----
   tar_quarto(
     name = quarto_notebook,

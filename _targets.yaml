@@ -4,5 +4,8 @@
 02_quarto_notebook:
   script: _targets_02_quarto_notebook.R
   store: _targets/02_quarto_notebook
+03_inventories_comparison:
+  script: _targets_03_inventories_comparison.R
+  store: _targets/03_inventories_comparison
 main:
-  inherits: 01_gfw_data_pull
+  inherits: 03_inventories_comparison
