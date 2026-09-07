@@ -104,15 +104,14 @@ The analysis uses the [{targets}](https://docs.ropensci.org/targets/) pipeline f
    (BigQuery)            (public inventories)          (figures + tables)
 ```
 
-The numbering is the dependency order, and nothing points backwards. Pipeline 2 reads
-only what pipeline 1 produced; pipeline 3 reads what 1 and 2 produced. No pipeline reads
-anything generated downstream of itself, so running them in order once is always enough.
+Numbering follows the dependency order. Each pipeline only reads what the ones before it
+wrote, so a single pass in order is enough and you never have to go back to an earlier one.
 
-Pipelines hand off almost entirely through **committed CSV files** rather than through each
-other's `targets` stores, which is why the upstream pipelines can be skipped entirely. The one
-exception is a handful of scalars (`analysis_start_year`, `analysis_end_year`) that pipelines 2
-and 3 read from pipeline 1's store with `tar_read(store = ...)` — pipeline 1's store objects are
-committed precisely so that keeps working without BigQuery access.
+Handoff is through committed CSVs rather than through each other's `targets` stores, which is
+what makes the upstream pipelines skippable. The exception is `analysis_start_year` and
+`analysis_end_year`, which pipelines 2 and 3 pull from pipeline 1's store via
+`tar_read(store = ...)`; pipeline 1's store objects are committed so that still works without
+BigQuery access.
 
 ### Pipeline 1: `01_gfw_data_pull` (data acquisition)
 
@@ -120,7 +119,7 @@ committed precisely so that keeps working without BigQuery access.
 
 Downloads analysis-ready datasets from Google BigQuery tables maintained by Global Fishing Watch. This pipeline executes 23 SQL queries and saves results as CSV files in `data/gfw/`. It requires authenticated access to the `emlab-gcp` BigQuery billing project and the `world-fishing-827` GFW data project.
 
-**⚠️ This pipeline cannot be run without special BigQuery permissions.** Every output CSV is committed to the repository, and so are this pipeline's `targets` store objects, so pipelines 2 and 3 run without it and without any Google credentials.
+You can't run this without BigQuery access to those projects, and you don't need to: every output CSV is committed, along with this pipeline's store objects, so pipelines 2 and 3 run without any Google credentials.
 
 ### Pipeline 2: `02_inventories_comparison` (published inventories)
 
@@ -128,35 +127,32 @@ Downloads analysis-ready datasets from Google BigQuery tables maintained by Glob
 
 Downloads the published marine emissions inventories the manuscript compares against — CAMS/STEAM, SEIM, ICCT, CEDS, EDGAR and OECD — puts them on a common schema, and writes tidy CSVs to `data/inventories/` (plus `data/steam/`, `data/seim/`, `data/icct/`, `data/ceds/`) that pipeline 3 reads back in.
 
-**No BigQuery access is needed.** It reads the GFW inputs it needs as committed CSVs from `data/gfw/`, and takes `analysis_start_year` / `analysis_end_year` from pipeline 1's committed store.
+No BigQuery access needed. It reads its GFW inputs as committed CSVs from `data/gfw/`, and takes `analysis_start_year` / `analysis_end_year` from pipeline 1's store.
 
-**⚠️ Two things make this pipeline expensive to re-run:**
+Re-running it is expensive, for two reasons. The CAMS/STEAM targets need a free Copernicus ADS token (see below), and fail without one. And the source grids are big: each CAMS year is a ~885 MB zip, so a full re-run pulls about 6 GB and spends ~25 s aggregating per year. Each year is downloaded to a temp file, aggregated, and deleted in the same target, so only the processed CSVs stick around.
 
-- The CAMS/STEAM targets need a free Copernicus Atmosphere Data Store personal access token. Without it those targets fail. See [Getting a Copernicus ADS token](#getting-a-copernicus-ads-token) below.
-- Raw inventory grids are large. Each CAMS year is a ~885 MB zip, so a full re-run pulls roughly **6 GB** and spends ~25 s aggregating per year. Each year is downloaded to a temporary file, aggregated, and deleted in the same target, so only the small processed CSVs are kept.
-
-Unlike the other two, **this store's `objects/` are not committed** — not because they are large (all of this pipeline's outputs together are ~44 KB) but simply because they were never added. The consequence is that `tar_outdated()` on a fresh clone reports the whole pipeline as stale even though its output CSVs are present and current. That is expected and harmless: **pipeline 3 reads those CSVs from disk and never touches this store**, so nothing downstream breaks. You do not need to run this pipeline unless you are deliberately refreshing an inventory.
+This is also the one store whose `objects/` aren't committed. No good reason — they're tiny (~44 KB for the whole pipeline), they just never got added. So `tar_outdated()` on a fresh clone flags the whole pipeline as stale even though its CSVs are present and current. Ignore it: pipeline 3 reads those CSVs from disk and never touches this store. Only run this pipeline if you're actually refreshing an inventory.
 
 #### Getting a Copernicus ADS token
 
-Only needed if you are re-running this pipeline. It is free, and unrelated to the Google BigQuery credentials pipeline 1 needs.
+Free, and nothing to do with the BigQuery credentials pipeline 1 needs. Only relevant if you're re-running this pipeline.
 
-1. Register for a free ECMWF account at <https://ads.atmosphere.copernicus.eu/> and log in.
-2. Accept the licence for the *CAMS global emission inventories* dataset at <https://ads.atmosphere.copernicus.eu/datasets/cams-global-emission-inventories> — downloads fail until the licence is accepted on your account, even with a valid token.
-3. Copy your **Personal Access Token** from <https://ads.atmosphere.copernicus.eu/profile>.
+1. Register for an ECMWF account at <https://ads.atmosphere.copernicus.eu/> and log in.
+2. Accept the licence for the CAMS global emission inventories dataset at <https://ads.atmosphere.copernicus.eu/datasets/cams-global-emission-inventories>. Downloads fail until you do, even with a valid token.
+3. Copy your personal access token from <https://ads.atmosphere.copernicus.eu/profile>.
 4. Store it once, in R:
 
    ```r
    ecmwfr::wf_set_key()   # paste the token when prompted
    ```
 
-That writes the token to your system keyring under the service name `ecmwfr`, which is where `wf_request()` looks for it. To confirm it is stored:
+That writes it to your system keyring under the service name `ecmwfr`, which is where `wf_request()` looks. Check it took with:
 
 ```r
 ecmwfr::wf_get_key(user = "ecmwfr")
 ```
 
-> **Gotcha:** `wf_get_key(service = "ads")` will *not* find it — the `service` argument refers to a different, older storage layout. Use `user = "ecmwfr"` as above.
+Note that `wf_get_key(service = "ads")` won't find it — `service` refers to an older storage layout. Use `user = "ecmwfr"`.
 
 ### Pipeline 3: `03_quarto_notebook` (analysis and figures)
 
@@ -166,24 +162,19 @@ Loads all CSV files from `data/gfw/` and external datasets (EDGAR, OECD, MRV), t
 
 ### Running without BigQuery permissions
 
-This is the normal case, and everything works. Only pipeline 1 touches BigQuery, and you do
-not need to run it.
+This is the normal case. Only pipeline 1 touches BigQuery, and you don't need to run it.
 
-| Pipeline | Credentials needed | Do you need to run it? |
+| Pipeline | Credentials | Need to run it? |
 |---|---|---|
-| 1 `01_gfw_data_pull` | Google BigQuery (`emlab-gcp`, `world-fishing-827`) | **No.** Its CSVs and store objects are committed. |
-| 2 `02_inventories_comparison` | Free [Copernicus ADS token](#getting-a-copernicus-ads-token) (CAMS targets only) — *no BigQuery* | **No.** All 14 of its output CSVs are committed. |
-| 3 `03_quarto_notebook` | None | **Yes** — this is what `run.r` runs. |
+| 1 `01_gfw_data_pull` | BigQuery (`emlab-gcp`, `world-fishing-827`) | No — CSVs and store objects are committed |
+| 2 `02_inventories_comparison` | [Copernicus ADS token](#getting-a-copernicus-ads-token), CAMS targets only. No BigQuery | No — all 14 output CSVs are committed |
+| 3 `03_quarto_notebook` | None | Yes — this is what `run.r` runs |
 
-So a fresh clone only needs R 4.5.x, `renv::restore()`, and `quarto` on your `PATH`. Run
-`source("run.r")` and every figure, table and in-text statistic is regenerated from committed
-data. Nothing in pipeline 3 reads a BigQuery table, and nothing it needs is fetched over the
-network at render time.
+A fresh clone needs R 4.5.x, `renv::restore()`, and `quarto` on `PATH`. Run `source("run.r")`
+and everything regenerates from committed data; nothing in pipeline 3 hits BigQuery or the
+network.
 
-If you *do* want to refresh an upstream pipeline, uncomment it in `run.r` and run the
-pipelines in order — 01, then 02, then 03. Because the dependencies never point backwards, a
-single pass in that order is always sufficient; you never have to come back to an earlier
-pipeline afterwards.
+To refresh an upstream pipeline, uncomment it in `run.r` and run 01, 02, 03 in order.
 
 ## Key data sources
 
@@ -273,7 +264,7 @@ LaTeX table files are generated by `qmd/quarto_notebook.qmd` and saved to `table
 - **R 4.5.x** — not 4.6 or newer. `renv.lock` pins package versions from the R 4.5 era, and R 4.6 removed several legacy C API entry points (`Rf_allocSExp`, `SET_ENCLOS`, `Rf_findVarInFrame3`), so pinned sources such as `magrittr` 2.0.3 fail to compile. `renv::restore()` will not complete under R 4.6.
 - **quarto** — must be on your `PATH`, not only inside your IDE. `targets` shells out to the `quarto` CLI, so `Rscript run.r` from a terminal fails with "Quarto CLI not found" if the IDE's bundled copy is the only one installed.
 - [Positron](https://positron.posit.co/) or RStudio IDE (recommended)
-- **No credentials of any kind** are needed to reproduce the manuscript. `run.r` runs pipeline 3 only, from committed data. Credentials matter solely if you deliberately re-run an upstream pipeline: BigQuery access for 1, a [Copernicus ADS token](#getting-a-copernicus-ads-token) for 2.
+- No credentials needed. `run.r` runs pipeline 3 only, off committed data. Credentials only come into play if you re-run an upstream pipeline: BigQuery for 1, a [Copernicus ADS token](#getting-a-copernicus-ads-token) for 2.
 
 If you juggle multiple R versions, [rig](https://github.com/r-lib/rig) makes switching a one-liner:
 
@@ -303,10 +294,9 @@ renv::restore()
 
 ### Step 3: Run the analysis
 
-The entry point is `run.r`. **It needs no credentials of any kind.** Pipelines 1 and 2 are
-both commented out there — 1 needs BigQuery permissions, 2 needs a Copernicus token and
-~6 GB of downloads — and neither is required, because every file they produce is committed.
-`run.r` therefore runs pipeline 3 only, loading the committed CSVs and rendering the notebook:
+The entry point is `run.r`, and it needs no credentials. Pipelines 1 and 2 are commented out
+there (1 needs BigQuery, 2 needs a Copernicus token and ~6 GB of downloads); neither is
+required, since everything they produce is committed. So `run.r` runs pipeline 3 only:
 
 ```r
 source("run.r")
@@ -337,15 +327,13 @@ targets::tar_visnetwork()
 
 ## Working across machines
 
-The `01_gfw_data_pull` and `03_quarto_notebook` stores under `_targets/` are **committed to
-git** — the metadata (`meta/meta`) *and* the target objects (`objects/`). This is deliberate:
-it means a fresh clone is already up to date, so `tar_outdated()` reports nothing (or at most
-the Quarto notebook) without anyone having to re-run the pipeline or hold BigQuery credentials.
+The `01_gfw_data_pull` and `03_quarto_notebook` stores under `_targets/` are committed to git,
+both the metadata (`meta/meta`) and the target objects (`objects/`). That's on purpose: a fresh
+clone is already up to date, so `tar_outdated()` comes back empty (or at most the Quarto
+notebook) without anyone re-running the pipeline or holding BigQuery credentials.
 
-`02_inventories_comparison` is the exception: only its `meta/meta` is committed, not its
-`objects/`. Its output CSVs are committed instead, which is all pipeline 3 needs, so
-`tar_outdated()` will always list that pipeline as stale on a fresh clone. Leave it be unless
-you are refreshing an inventory.
+`02_inventories_comparison` only commits `meta/meta`. Its output CSVs are committed instead,
+which is all pipeline 3 needs, so that pipeline always shows as stale on a fresh clone.
 
 `targets` does not set this up by default — it generates a `.gitignore` in each store that
 commits only `meta/meta`. Those files have been edited to also include `objects/`, and each
