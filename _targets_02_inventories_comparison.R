@@ -5,14 +5,14 @@ library(ecmwfr) # CAMS downloads go through this, so declare it for renv
 library(ncdf4) # NetCDF grids are read through this, so declare it for renv
 
 # Set the targets pipeline, since this repo has multiple targets pipelines
-Sys.setenv(TAR_PROJECT = "03_inventories_comparison")
+Sys.setenv(TAR_PROJECT = "02_inventories_comparison")
 
 # Run the R scripts in the R/ folder with your custom functions:
 tar_source("r/functions.R")
 
 # This pipeline downloads published emissions inventories from their public
 # sources, processes them onto a common schema, and writes tidy CSVs to
-# data/inventories/ that 02_quarto_notebook reads back in for the comparison
+# data/inventories/ that 03_quarto_notebook reads back in for the comparison
 # analysis.
 #
 # Raw inventory downloads are deliberately not kept: the source grids are large
@@ -73,7 +73,7 @@ list(
     ),
     pattern = map(steam_ship_years)
   ),
-  # Write the tidy series that 02_quarto_notebook reads back in
+  # Write the tidy series that 03_quarto_notebook reads back in
   tar_target(
     name = steam_ship_annual_emissions_file,
     command = write_inventory_csv(
@@ -148,7 +148,7 @@ list(
   # https://data-explorer.oecd.org/vis?df[id]=DSD_MARITIME_TRANSPORT%40DF_MARITIME_TRANSPORT
   #
   # This supersedes data/oecd/annual_oecd_experimental_data.csv, which
-  # 02_quarto_notebook still reads: that file is a hand-downloaded extract of
+  # 03_quarto_notebook still reads: that file is a hand-downloaded extract of
   # dataflow v1.0, while this pulls v2.0, which revises the values and adds a
   # methodology dimension. Point the notebook at this target to move over.
   #
@@ -176,14 +176,36 @@ list(
   # ICCT) and MariTEAM.
   #
   # The GFW and EDGAR series are derived inside qmd/quarto_notebook.qmd rather
-  # than being targets, so gfw_edgar_marine_co2() reads the upstream targets from
-  # the 02_quarto_notebook and 01_gfw_data_pull stores and repeats that
-  # aggregation. This pipeline therefore depends on 02_quarto_notebook having
-  # been run; because the dependency crosses stores, targets cannot see it, so
-  # this target will not invalidate on its own when those upstream targets change.
+  # than being targets there, so gfw_edgar_marine_co2() repeats that aggregation
+  # here. Its two inputs are read from their own files below rather than from the
+  # notebook pipeline's store, which keeps this pipeline downstream of
+  # 01_gfw_data_pull alone and lets targets see both dependencies.
+  #
+  # Written by 01_gfw_data_pull. The notebook pipeline reads the same CSV under
+  # the same target name; both are plain reads of 01's output, not a dependency
+  # between the two downstream pipelines.
+  tar_file_read(
+    name = annual_emissions_all_pollutants,
+    command = file.path("data", "gfw", "annual_emissions_all_pollutants.csv"),
+    read = readr::read_csv(!!.x)
+  ),
+  # Hand-downloaded EDGAR extract committed to the repo, read with the same sheet
+  # and skip the notebook pipeline uses.
+  tar_file_read(
+    name = annual_edgar_emissions,
+    command = file.path(
+      "data",
+      "IEA_EDGAR_CO2_1970_2024",
+      "IEA_EDGAR_CO2_1970_2024.xlsx"
+    ),
+    read = readxl::read_excel(!!.x, sheet = "IPCC 2006", skip = 9)
+  ),
   tar_target(
     name = gfw_edgar_marine_emissions,
-    command = gfw_edgar_marine_co2()
+    command = gfw_edgar_marine_co2(
+      annual_emissions_all_pollutants = annual_emissions_all_pollutants,
+      annual_edgar_emissions = annual_edgar_emissions
+    )
   ),
   # Written out because the figures that consume it now live in
   # qmd/quarto_notebook.qmd, which reads its inputs as CSVs the way the notebook
@@ -292,13 +314,14 @@ list(
   # see, and the answer is that the growth sits almost entirely in the part they
   # were not.
   #
-  # Reads annual_ais_activity_summary_cheap.csv by path, the same way the fleet
-  # figures below do: registry_type only exists in that extract, and it is
-  # written by 01_gfw_data_pull with its own store, so there is no target here to
-  # depend on.
+  # registry_type only exists in the cheap activity extract that 01_gfw_data_pull
+  # writes, passed in through annual_ais_activity_summary_cheap_file so targets
+  # tracks the file the same way the fleet figures below do.
   tar_target(
     name = gfw_registry_emissions,
-    command = gfw_registry_series()
+    command = gfw_registry_series(
+      gfw_activity_file = annual_ais_activity_summary_cheap_file
+    )
   ),
   # Read as a CSV by the registry split figure in qmd/quarto_notebook.qmd
   tar_target(
@@ -407,7 +430,7 @@ list(
   #
   # Both inventories are downloaded from their published source, as the shipping
   # inventories above are. Note that the EDGAR download reproduces the workbook
-  # already sitting in data/IEA_EDGAR_CO2_1970_2024/ that 02_quarto_notebook
+  # already sitting in data/IEA_EDGAR_CO2_1970_2024/ that 03_quarto_notebook
   # reads - the release zip holds a byte-identical xlsx - so this target does
   # not replace that file, it makes the series reproducible from source and adds
   # the all-sector total the notebook never stores.

@@ -53,7 +53,7 @@ library(sf)
 project_root <- if (dir.exists("_targets")) "." else ".."
 
 data_pull_store <- file.path(project_root, "_targets", "01_gfw_data_pull")
-notebook_store <- file.path(project_root, "_targets", "02_quarto_notebook")
+notebook_store <- file.path(project_root, "_targets", "03_quarto_notebook")
 analysis_start_year <- targets::tar_read(
   analysis_start_year,
   store = data_pull_store
@@ -120,7 +120,7 @@ targets::tar_load(
     "length_size_bin_distributions",
     "ping_level_hours_distribution",
     # Inventories comparison inputs, prepared by
-    # _targets_03_inventories_comparison.R and read into this pipeline as CSVs
+    # _targets_02_inventories_comparison.R and read into this pipeline as CSVs
     "si_all_inventory_data",
     "multisector_inventory_data",
     "inventory_vessel_counts_by_registry",
@@ -4226,7 +4226,7 @@ annual_spatial_emissions_by_receiver_type |>
 
 The figures behind the systematic comparison of our estimates against the
 published bottom-up inventories and the top-down EDGAR and CEDS series. The
-data these read is prepared by `_targets_03_inventories_comparison.R` and
+data these read is prepared by `_targets_02_inventories_comparison.R` and
 loaded above; the plotting happens here so every figure in the paper is drawn
 by this notebook.
 
@@ -5920,7 +5920,11 @@ trend_plot <- ggplot2::ggplot(normalized) +
     direction = "y",
     min.segment.length = Inf,
     fontface = "bold",
-    size = 3.6
+    size = 3.6,
+    # Seeded for the same reason as the normalized-series panels above:
+    # ggrepel's placement search is stochastic, so an unseeded call redraws
+    # slightly differently on every render and shows up as a phantom diff.
+    seed = 42
   ) +
   ggplot2::scale_x_continuous(
     breaks = sort(unique(normalized$year)),
