@@ -140,7 +140,7 @@ vessel_class_family_sql <- function() {
   )
 }
 
-# Functions for the 03_inventories_comparison pipeline ----
+# Functions for the 02_inventories_comparison pipeline ----
 
 # Download one year of CAMS-GLOB-SHIP CO2 from the Copernicus Atmosphere Data
 # Store, sum it to a global annual total, and delete the download.
@@ -835,11 +835,16 @@ mariteam_ship_co2 <- function() {
 
 # Rebuild the GFW and EDGAR marine CO2 series that Figure S4 compares against.
 # Both are derived in qmd/quarto_notebook.qmd rather than being targets of their
-# own, so we read the same upstream targets from the notebook store and repeat
-# the aggregation here. Keep this in sync with the wrangle-gfw-time-series and
-# wrangle-edgar chunks of the notebook.
+# own, so we repeat the aggregation here. Keep this in sync with the
+# wrangle-gfw-time-series and wrangle-edgar chunks of the notebook.
+#
+# The two inputs are passed in as data frames rather than read from another
+# pipeline's store: both are plain file reads of data 01_gfw_data_pull wrote (or
+# of a hand-downloaded extract), so this pipeline can take them straight from
+# their files and stay downstream of 01 alone.
 gfw_edgar_marine_co2 <- function(
-  notebook_store = file.path("_targets", "02_quarto_notebook"),
+  annual_emissions_all_pollutants,
+  annual_edgar_emissions,
   data_pull_store = file.path("_targets", "01_gfw_data_pull"),
   gfw_activity_file = file.path(
     "data",
@@ -857,10 +862,7 @@ gfw_edgar_marine_co2 <- function(
   )
 
   # GFW: total CO2 by fleet, from the all-pollutant annual table
-  annual_co2_by_fleet <- targets::tar_read(
-    annual_emissions_all_pollutants,
-    store = notebook_store
-  ) |>
+  annual_co2_by_fleet <- annual_emissions_all_pollutants |>
     tidyr::pivot_longer(
       -c(year, fishing),
       names_to = "pollutant",
@@ -931,10 +933,7 @@ gfw_edgar_marine_co2 <- function(
   }
 
   # EDGAR: the water-borne navigation sector of the transportation table
-  edgar_marine <- targets::tar_read(
-    annual_edgar_emissions,
-    store = notebook_store
-  ) |>
+  edgar_marine <- annual_edgar_emissions |>
     dplyr::rename(sector = ipcc_code_2006_for_standard_report_name) |>
     dplyr::select(sector, dplyr::starts_with("Y_")) |>
     tidyr::pivot_longer(

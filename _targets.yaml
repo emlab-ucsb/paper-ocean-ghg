@@ -1,11 +1,11 @@
 01_gfw_data_pull:
   script: _targets_01_gfw_data_pull.R
   store: _targets/01_gfw_data_pull
-02_quarto_notebook:
-  script: _targets_02_quarto_notebook.R
-  store: _targets/02_quarto_notebook
-03_inventories_comparison:
-  script: _targets_03_inventories_comparison.R
-  store: _targets/03_inventories_comparison
+03_quarto_notebook:
+  script: _targets_03_quarto_notebook.R
+  store: _targets/03_quarto_notebook
+02_inventories_comparison:
+  script: _targets_02_inventories_comparison.R
+  store: _targets/02_inventories_comparison
 main:
-  inherits: 03_inventories_comparison
+  inherits: 02_inventories_comparison

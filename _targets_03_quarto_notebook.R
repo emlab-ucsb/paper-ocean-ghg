@@ -4,7 +4,7 @@ library(tarchetypes) # Load other packages as needed.
 library(quarto) # tar_quarto() renders through this, so declare it for renv
 
 # Set the targets pipeline, since this repo has multiple targets pipelines
-Sys.setenv(TAR_PROJECT = "02_quarto_notebook")
+Sys.setenv(TAR_PROJECT = "03_quarto_notebook")
 
 # Run the R scripts in the R/ folder with your custom functions:
 tar_source("r/functions.R")
@@ -203,13 +203,15 @@ list(
     read = readr::read_csv(!!.x)
   ),
   # Inventories comparison inputs ----
-  # CSVs written by _targets_03_inventories_comparison.R, which does the data
+  # CSVs written by _targets_02_inventories_comparison.R, which does the data
   # work for the "Inventories comparison" section of the notebook. Read here so
   # the notebook re-renders when an extract changes, the same contract as every
   # other series above; the figures themselves are drawn in the notebook.
   #
-  # The dependency crosses stores, so targets cannot see it: run
-  # 03_inventories_comparison before this pipeline when those inputs change.
+  # These are tracked as file reads, so the notebook re-renders whenever one of
+  # the CSVs changes on disk. What targets cannot see across stores is that
+  # 02_inventories_comparison is what regenerates them, so run 02 first - the
+  # repo order 01 -> 02 -> 03 is exactly the dependency order.
   # Loaded under an SI-specific name: the notebook already builds a variable
   # called all_inventory_data for its own inventory figure, and a tar_load()ed
   # object of the same name would be overwritten by it.
