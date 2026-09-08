@@ -889,14 +889,14 @@ gfw_edgar_marine_co2 <- function(
       emissions_co2_mt = sum(emissions_mt),
       .groups = "drop"
     ) |>
-    dplyr::mutate(data_source = "GFW (AIS + S1)")
+    dplyr::mutate(data_source = "GFW (AIS-based + S1-unmatched)")
 
   gfw_ais <- annual_co2_by_fleet |>
     dplyr::filter(fleet == "AIS-broadcasting") |>
     dplyr::transmute(
       year,
       emissions_co2_mt = emissions_mt,
-      data_source = "GFW (AIS)"
+      data_source = "GFW (AIS-based)"
     )
 
   # Extend the AIS series before analysis_start_year.
@@ -909,7 +909,7 @@ gfw_edgar_marine_co2 <- function(
   # overlapping year, so the earlier years are the same measure carried further
   # back rather than a second estimate spliced onto the first.
   #
-  # Only GFW (AIS) can be extended this way. AIS + S1 needs the non-broadcasting
+  # Only GFW (AIS-based) can be extended this way. AIS-based + S1-unmatched needs the non-broadcasting
   # half, which only the dark-fleet run provides, so that series still begins at
   # analysis_start_year and the two GFW lines start in different years by
   # construction.
@@ -926,7 +926,7 @@ gfw_edgar_marine_co2 <- function(
         emissions_co2_mt = sum(.data$emissions_co2_mt, na.rm = TRUE),
         .groups = "drop"
       ) |>
-      dplyr::mutate(data_source = "GFW (AIS)")
+      dplyr::mutate(data_source = "GFW (AIS-based)")
 
     gfw_ais <- dplyr::bind_rows(earlier_ais, gfw_ais) |>
       dplyr::arrange(.data$year)
@@ -1004,7 +1004,7 @@ combine_inventory_series <- function(
 # inventory table uses, so the three can be drawn as extra lines on the
 # inventory-comparison figure.
 #
-# These are not inventories and are not independent of the GFW (AIS) line: they
+# These are not inventories and are not independent of the GFW (AIS-based) line: they
 # partition it, and the three sum back to it exactly in every year. Drawn beside
 # the published inventories they answer a different question from the rest of the
 # figure -- not "how does our total compare" but "which part of our total do the
@@ -1022,9 +1022,9 @@ gfw_registry_series <- function(
   )
 ) {
   registry_labels <- c(
-    imo = "GFW (AIS, IMO registry)",
-    other_registry = "GFW (AIS, other registry)",
-    no_registry = "GFW (AIS, no registry)"
+    imo = "GFW (AIS-based, IMO registry)",
+    other_registry = "GFW (AIS-based, other registry)",
+    no_registry = "GFW (AIS-based, no registry)"
   )
 
   activity <- readr::read_csv(gfw_activity_file, show_col_types = FALSE) |>
@@ -1053,7 +1053,7 @@ gfw_registry_series <- function(
       emissions_co2_mt = sum(.data$emissions_co2_mt, na.rm = TRUE),
       .groups = "drop"
     ) |>
-    dplyr::mutate(data_source = "GFW (AIS, any registry)")
+    dplyr::mutate(data_source = "GFW (AIS-based, any registry)")
 
   dplyr::bind_rows(split, any_registry) |>
     dplyr::arrange(.data$data_source, .data$year)
@@ -1066,7 +1066,7 @@ inventory_linetypes <- function(data_sources) {
   # independent series, so the three fragments are dashed. Solid is reserved for
   # series that stand on their own, which keeps a fragment from reading as
   # another inventory's estimate.
-  linetypes[startsWith(names(linetypes), "GFW (AIS, ")] <- "22"
+  linetypes[startsWith(names(linetypes), "GFW (AIS-based, ")] <- "22"
   linetypes
 }
 
@@ -1074,14 +1074,14 @@ inventory_color_palette <- function(data_sources) {
   okabe_ito <- paletteer::paletteer_d("colorblindr::OkabeIto")
 
   known <- c(
-    "GFW (AIS + S1)" = okabe_ito[[5]],
-    "GFW (AIS)" = okabe_ito[[1]],
+    "GFW (AIS-based + S1-unmatched)" = okabe_ito[[5]],
+    "GFW (AIS-based)" = okabe_ito[[1]],
     # The two narrowed GFW scopes follow the convention multisector_colors() sets:
     # same source, lighter as the scope narrows. Taken from that function's blue
     # ramp rather than reinvented, so a reader moving between the two figures sees
     # the same scope at the same lightness.
-    "GFW (AIS, maritime transport)" = "#6BAED6",
-    "GFW (AIS, maritime transport excl. passenger)" = "#BDD7E7",
+    "GFW (AIS-based, maritime transport)" = "#6BAED6",
+    "GFW (AIS-based, maritime transport excl. passenger)" = "#BDD7E7",
     "EDGAR" = okabe_ito[[8]],
     "OECD" = okabe_ito[[6]],
     "IMO" = okabe_ito[[3]],
@@ -1106,10 +1106,10 @@ inventory_color_palette <- function(data_sources) {
     # no-registry lightest. The combined line takes the darkest because it is
     # the aggregate the other two partition, matching how the ramp treats
     # scope elsewhere.
-    "GFW (AIS, any registry)" = "#4292C6",
-    "GFW (AIS, IMO registry)" = "#6BAED6",
-    "GFW (AIS, other registry)" = "#9ECAE1",
-    "GFW (AIS, no registry)" = "#C6DBEF"
+    "GFW (AIS-based, any registry)" = "#4292C6",
+    "GFW (AIS-based, IMO registry)" = "#6BAED6",
+    "GFW (AIS-based, other registry)" = "#9ECAE1",
+    "GFW (AIS-based, no registry)" = "#C6DBEF"
   )
 
   missing <- setdiff(data_sources, names(known))
@@ -1854,10 +1854,10 @@ multisector_colors <- function() {
   c(
     # GFW - blues. Widest fleet (AIS + S1) darkest, narrowing through the full
     # broadcasting fleet to the two maritime-transport subsets
-    "GFW (AIS + S1)" = "#08306B",
-    "GFW (AIS)" = "#2171B5",
-    "GFW (AIS, maritime transport)" = "#6BAED6",
-    "GFW (AIS, maritime transport excl. passenger)" = "#BDD7E7",
+    "GFW (AIS-based + S1-unmatched)" = "#08306B",
+    "GFW (AIS-based)" = "#2171B5",
+    "GFW (AIS-based, maritime transport)" = "#6BAED6",
+    "GFW (AIS-based, maritime transport excl. passenger)" = "#BDD7E7",
 
     # EDGAR - oranges and reds
     "EDGAR - All sectors" = "#7F2704",
@@ -2089,7 +2089,7 @@ fleet_growth_by_year <- function(
 #     intensity; without this restriction the kg/nm comparison is not like for
 #     like.
 #
-#   * "GFW (AIS, any registry)" restricts our fleet to registry-matched
+#   * "GFW (AIS-based, any registry)" restricts our fleet to registry-matched
 #     vessels, the closest analogue to the registry-anchored fleets the other
 #     inventories model, and the fair row to read against them.
 #
@@ -2207,8 +2207,8 @@ build_inventory_intensity <- function(
     single_total_rows,
     matched_rows,
     icct_distance_row,
-    gfw_row(gfw_all, "GFW (AIS)"),
-    gfw_row(gfw_registered, "GFW (AIS, any registry)")
+    gfw_row(gfw_all, "GFW (AIS-based)"),
+    gfw_row(gfw_registered, "GFW (AIS-based, any registry)")
   ) |>
     dplyr::mutate(
       period = paste0(.data$year_from, "-", .data$year_to),
