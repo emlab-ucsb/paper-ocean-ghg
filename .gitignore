@@ -25,6 +25,9 @@ vignettes/*.pdf
 # Temporary files created by R markdown
 *.utf8.md
 *.knit.md
+# Quarto writes this intermediate next to the .qmd and deletes it after each
+# render, so tracking it churns the diff and flips it in and out of the tree
+*.rmarkdown
 # R Environment Variables
 .Renviron
 # pkgdown site
