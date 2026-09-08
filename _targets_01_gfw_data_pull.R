@@ -110,6 +110,29 @@ list(
     ),
     format = "file"
   ),
+  # Cumulative share of AIS CO2 emissions falling at or below each per-message
+  # time threshold, from 0.1 to 24.0 hours. Companion to the distribution above:
+  # that one gives the central tendency of the ping gaps, this one gives how
+  # much of the emissions total sits below any given gap cutoff.
+  tar_file_read(
+    name = emissions_by_message_hour_threshold,
+    command = file.path("sql", "emissions_by_message_hour_threshold.sql"),
+    read = download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_ais = run_version_ais,
+          analysis_start_year = analysis_start_year,
+          analysis_end_year = analysis_end_year
+        ),
+      file_path = file.path(
+        "data",
+        "gfw",
+        "emissions_by_message_hour_threshold.csv"
+      ),
+    ),
+    format = "file"
+  ),
   # Number of S1 detections used during our time period
   tar_file_read(
     name = n_s1_detections,

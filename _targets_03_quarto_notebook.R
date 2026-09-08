@@ -32,6 +32,15 @@ list(
     read = readr::read_csv(!!.x)
   ),
   tar_file_read(
+    name = emissions_by_message_hour_threshold,
+    command = file.path(
+      "data",
+      "gfw",
+      "emissions_by_message_hour_threshold.csv"
+    ),
+    read = readr::read_csv(!!.x)
+  ),
+  tar_file_read(
     name = n_s1_detections,
     command = file.path("data", "gfw", "n_s1_detections.csv"),
     read = readr::read_csv(!!.x)
