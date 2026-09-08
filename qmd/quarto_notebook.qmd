@@ -3256,7 +3256,11 @@ time_series_data_monthly_emissions_by_fleet <- monthly_aggregated_time_series |>
 time_series_by_fleet_fig_co2 <- make_pollutant_by_fleet_time_series_figure(
   time_series_data_monthly_emissions_by_fleet,
   y_axis_label = expression(Monthly ~ CO[2] ~ emissions ~ (MT)),
-  legend_position_inside = c(0.60, 0.90),
+  # Top-left of the first facet, matching time_series_fig_co2 and Figure 1.
+  # The old c(0.60, 0.90) sat in the gap between the two facets, which the
+  # longer "AIS-based"/"S1-unmatched" keys outgrew - the wider box covered the
+  # Fishing panel's top y-axis label.
+  legend_position_inside = c(0.02, 0.98),
   facets = facet_wrap(~fishing, nrow = 1, scales = "free_y")
 ) +
   scale_y_continuous(
