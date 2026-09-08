@@ -2386,161 +2386,8 @@ cowplot::plot_grid(
 ## Figure 6
 
 ```{r}
-#| label: fig-registered-data-performance
-#| fig-cap: !expr 'paste0("Comparison of daily vessel-level CO$_{2}$ emissions estimated using our model with registered emissions from a proprietary vessel database (based on main engine fuel consumption over 24 hours). Estimates are shown using main engine power and design speed from IMO (left), our machine learning random forest models (center), and the same registered dataset (right). The dashed line represents the 1:1 line. Performance values for traditional R$^{2}$ are shown for each set of vessel characteristics. Over ", prettyNum(floor(nrow(registered_validation_data) / 1e3) * 1e3, big.mark = ","), " vessels are represented in the figure, and blue shading indicates point density. All data are rule-of-three compliant, meaning each cell (20x20 mt) displayed contains at least three vessels.")'
-#| fig-width: 8
-#| fig-height: 4
-ggplot(
-  vessel_long,
-  aes(
-    x = co2_emissions_tonnes_registered,
-    y = Estimate
-  )
-) +
-  geom_bin2d(
-    bins = 30,
-    aes(
-      fill = after_stat(count),
-      alpha = after_stat(ifelse(count < 3, 0, 1)) # Full transparency for counts < 3
-    )
-  ) +
-  scale_fill_gradientn(
-    colours = colorRampPalette(RColorBrewer::brewer.pal(9, "Blues"))(256),
-    trans = "log10",
-    name = "Count",
-    guide = guide_colorbar(
-      ticks.linewidth = 0.3,
-      frame.colour = "black"
-    )
-  ) +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey60") +
-  geom_text(
-    data = r2_labels |>
-      dplyr::filter(!Model %in% c("RF design speed", "RF engine power")),
-    aes(label = label),
-    x = 450,
-    y = 50,
-    inherit.aes = FALSE,
-    size = 3,
-    fontface = "bold"
-  ) +
-  coord_fixed(ratio = 1, clip = "on") +
-  facet_wrap(Model ~ ., nrow = 1, scales = "fixed") +
-  labs(
-    x = "Registered CO2 emissions (MT)",
-    y = "Estimated CO2 emissions using our model (MT)"
-  ) +
-  scale_x_continuous(limits = c(0, 600)) +
-  scale_y_continuous(limits = c(0, 600)) +
-  theme_minimal() +
-  theme(
-    strip.text = element_text(size = 11, face = "bold"),
-    axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
-    axis.text.y = element_text(size = 7),
-    axis.title = element_text(size = 10),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    axis.line = element_line(color = "black"),
-    axis.ticks = element_line(color = "black"),
-    axis.ticks.length = unit(0.25, "cm"),
-    panel.spacing = unit(1.5, "lines"),
-    strip.placement = "outside",
-    legend.position = "none", # Remove legend
-  )
-```
-
-## Table 1
-
-```{r}
-#| results = 'asis'
-mrv_performance_results_tbl <- performance_results |>
-  dplyr::mutate(
-    rsq = signif(rsq, 2),
-    rsq_trad = signif(rsq_trad, 2),
-    n_observations = prettyNum(n_observations, big.mark = ",")
-  ) |>
-  dplyr::select(
-    Tolerance = threshold,
-    `Number of observations` = n_observations,
-    "R$^{2}$" = rsq,
-    "Traditional R$^{2}$" = rsq_trad
-  ) |>
-  knitr::kable(
-    format = "latex",
-    label = "tab-performance-tolerance-table",
-    caption = "Performance summary across different thresholds for the hours at sea tolerance between datasets. Results are shown using the R$^{2}$ (measuring linear association between observed and predicted values) and traditional R$^{2}$ (proportion of variance explained compared to the mean-only baseline).",
-    escape = FALSE
-  ) |>
-  kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
-
-mrv_performance_results_tbl
-
-mrv_performance_results_tbl |>
-  writeLines(
-    file.path(project_root, "tables", "mrv_performance_results.tex")
-  )
-```
-
-## Figure 7
-
-```{r}
-#| label: fig-mrv-performance
-#| fig-cap: !expr 'paste0("Comparison of annual vessel-level CO$_{2}$ emissions estimated using our model with published emissions from the EU MRV database. The sample includes ", prettyNum(nrow(filtered_df), big.mark = ","), " observations from yearly aggregated vessel trips where hours at sea differ by no more than ", scales::percent(best_performance$threshold), " between our data and the MRV dataset. The dashed line represents the 1:1 line.")'
-#| fig-width: 8
-#| fig-height: 5
-
-ggplot(
-  filtered_df,
-  aes(
-    x = co2_trip_emissions_eu,
-    y = co2_trip_emissions_gfw
-  )
-) +
-  geom_point(
-    size = 1.5,
-    alpha = 0.5,
-    color = "#104E8B"
-  ) +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey60") +
-  annotate(
-    geom = "text",
-    label = paste0(
-      "Traditional R² = ",
-      format(best_performance$rsq_trad, digits = 2)
-    ),
-    x = 130000,
-    y = 10000,
-    size = 3,
-    fontface = "bold"
-  ) +
-  coord_fixed(ratio = 1, clip = "on") +
-  scale_x_continuous(limits = c(0, max(filtered_df)), labels = scales::comma) +
-  scale_y_continuous(limits = c(0, max(filtered_df)), labels = scales::comma) +
-  labs(
-    x = "Published emissions in the EU MRV database (MT)",
-    y = "Estimated CO2 emissions using our model (MT)"
-  ) +
-  theme_minimal() +
-  theme(
-    strip.text = element_text(size = 11, face = "bold"),
-    axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
-    axis.text.y = element_text(size = 7),
-    axis.title = element_text(size = 10),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    axis.line = element_line(color = "black"),
-    axis.ticks = element_line(color = "black"),
-    axis.ticks.length = unit(0.25, "cm"),
-    panel.spacing = unit(1.5, "lines"),
-    strip.placement = "outside"
-  )
-```
-
-## Figure 8
-
-```{r}
 #| label: fig-emissions-by-message-hour-threshold
-#| fig-cap: Cumulative share of AIS-based CO$_{2}$ emissions attributable to AIS messages whose assigned duration falls at or below a given threshold. Each message is assigned the time elapsed since the previous message from that vessel and emissions are estimated over that duration, so long durations are those over which activity is interpolated across a gap in the message stream rather than observed directly. Values at whole-hour thresholds are tabulated in Table \\ref{tab:emissions_by_message_hour_threshold}.
+#| fig-cap: Cumulative share of AIS-based CO$_{2}$ emissions attributable to AIS messages whose assigned duration falls at or below a given threshold. Each message is assigned the time elapsed since the previous message from that vessel and emissions are estimated over that duration, so long durations are those over which activity is interpolated across a gap in the message stream rather than observed directly. Values at whole-hour thresholds are tabulated in Table \ref{tab:emissions_by_message_hour_threshold}.
 #| fig-height: 3.5
 
 emissions_by_message_hour_threshold |>
@@ -2563,7 +2410,7 @@ emissions_by_message_hour_threshold |>
   theme_plot()
 ```
 
-## Table 2
+## Table 1
 
 ```{r}
 emissions_by_message_hour_threshold_tbl <- emissions_by_message_hour_threshold |>
@@ -2627,6 +2474,159 @@ writeLines(
     "emissions_by_message_hour_threshold.tex"
   )
 )
+```
+
+## Figure 7
+
+```{r}
+#| label: fig-registered-data-performance
+#| fig-cap: !expr 'paste0("Comparison of daily vessel-level CO$_{2}$ emissions estimated using our model with registered emissions from a proprietary vessel database (based on main engine fuel consumption over 24 hours). Estimates are shown using main engine power and design speed from IMO (left), our machine learning random forest models (center), and the same registered dataset (right). The dashed line represents the 1:1 line. Performance values for traditional R$^{2}$ are shown for each set of vessel characteristics. Over ", prettyNum(floor(nrow(registered_validation_data) / 1e3) * 1e3, big.mark = ","), " vessels are represented in the figure, and blue shading indicates point density. All data are rule-of-three compliant, meaning each cell (20x20 mt) displayed contains at least three vessels.")'
+#| fig-width: 8
+#| fig-height: 4
+ggplot(
+  vessel_long,
+  aes(
+    x = co2_emissions_tonnes_registered,
+    y = Estimate
+  )
+) +
+  geom_bin2d(
+    bins = 30,
+    aes(
+      fill = after_stat(count),
+      alpha = after_stat(ifelse(count < 3, 0, 1)) # Full transparency for counts < 3
+    )
+  ) +
+  scale_fill_gradientn(
+    colours = colorRampPalette(RColorBrewer::brewer.pal(9, "Blues"))(256),
+    trans = "log10",
+    name = "Count",
+    guide = guide_colorbar(
+      ticks.linewidth = 0.3,
+      frame.colour = "black"
+    )
+  ) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey60") +
+  geom_text(
+    data = r2_labels |>
+      dplyr::filter(!Model %in% c("RF design speed", "RF engine power")),
+    aes(label = label),
+    x = 450,
+    y = 50,
+    inherit.aes = FALSE,
+    size = 3,
+    fontface = "bold"
+  ) +
+  coord_fixed(ratio = 1, clip = "on") +
+  facet_wrap(Model ~ ., nrow = 1, scales = "fixed") +
+  labs(
+    x = "Registered CO2 emissions (MT)",
+    y = "Estimated CO2 emissions using our model (MT)"
+  ) +
+  scale_x_continuous(limits = c(0, 600)) +
+  scale_y_continuous(limits = c(0, 600)) +
+  theme_minimal() +
+  theme(
+    strip.text = element_text(size = 11, face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
+    axis.text.y = element_text(size = 7),
+    axis.title = element_text(size = 10),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"),
+    axis.ticks.length = unit(0.25, "cm"),
+    panel.spacing = unit(1.5, "lines"),
+    strip.placement = "outside",
+    legend.position = "none", # Remove legend
+  )
+```
+
+## Table 2
+
+```{r}
+#| results = 'asis'
+mrv_performance_results_tbl <- performance_results |>
+  dplyr::mutate(
+    rsq = signif(rsq, 2),
+    rsq_trad = signif(rsq_trad, 2),
+    n_observations = prettyNum(n_observations, big.mark = ",")
+  ) |>
+  dplyr::select(
+    Tolerance = threshold,
+    `Number of observations` = n_observations,
+    "R$^{2}$" = rsq,
+    "Traditional R$^{2}$" = rsq_trad
+  ) |>
+  knitr::kable(
+    format = "latex",
+    label = "tab-performance-tolerance-table",
+    caption = "Performance summary across different thresholds for the hours at sea tolerance between datasets. Results are shown using the R$^{2}$ (measuring linear association between observed and predicted values) and traditional R$^{2}$ (proportion of variance explained compared to the mean-only baseline).",
+    escape = FALSE
+  ) |>
+  kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
+
+mrv_performance_results_tbl
+
+mrv_performance_results_tbl |>
+  writeLines(
+    file.path(project_root, "tables", "mrv_performance_results.tex")
+  )
+```
+
+## Figure 8
+
+```{r}
+#| label: fig-mrv-performance
+#| fig-cap: !expr 'paste0("Comparison of annual vessel-level CO$_{2}$ emissions estimated using our model with published emissions from the EU MRV database. The sample includes ", prettyNum(nrow(filtered_df), big.mark = ","), " observations from yearly aggregated vessel trips where hours at sea differ by no more than ", scales::percent(best_performance$threshold), " between our data and the MRV dataset. The dashed line represents the 1:1 line.")'
+#| fig-width: 8
+#| fig-height: 5
+
+ggplot(
+  filtered_df,
+  aes(
+    x = co2_trip_emissions_eu,
+    y = co2_trip_emissions_gfw
+  )
+) +
+  geom_point(
+    size = 1.5,
+    alpha = 0.5,
+    color = "#104E8B"
+  ) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey60") +
+  annotate(
+    geom = "text",
+    label = paste0(
+      "Traditional R² = ",
+      format(best_performance$rsq_trad, digits = 2)
+    ),
+    x = 130000,
+    y = 10000,
+    size = 3,
+    fontface = "bold"
+  ) +
+  coord_fixed(ratio = 1, clip = "on") +
+  scale_x_continuous(limits = c(0, max(filtered_df)), labels = scales::comma) +
+  scale_y_continuous(limits = c(0, max(filtered_df)), labels = scales::comma) +
+  labs(
+    x = "Published emissions in the EU MRV database (MT)",
+    y = "Estimated CO2 emissions using our model (MT)"
+  ) +
+  theme_minimal() +
+  theme(
+    strip.text = element_text(size = 11, face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
+    axis.text.y = element_text(size = 7),
+    axis.title = element_text(size = 10),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"),
+    axis.ticks.length = unit(0.25, "cm"),
+    panel.spacing = unit(1.5, "lines"),
+    strip.placement = "outside"
+  )
 ```
 
 ## Figure 9
