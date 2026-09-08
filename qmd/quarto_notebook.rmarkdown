@@ -7930,3 +7930,4 @@ writeLines(
   file.path(project_root, "tables", "inventory_intensity_all_models.tex")
 )
 ```
+
