@@ -283,8 +283,8 @@ list(
     command = file.path("data", "gfw", "s1_detections_by_fixed_length_bin.csv"),
     read = readr::read_csv(!!.x)
   ),
-  # Feeds the two S1 detection-density figures. The extract is committed rather
-  # than pulled: its query scans several GB and the result is settled.
+  # Feeds the two S1 detection-density figures. Pulled by 01_gfw_data_pull
+  # (sql/s1_detection_density_by_denominator.sql), like the extract above.
   tar_file_read(
     name = s1_detection_density_by_denominator,
     command = file.path(

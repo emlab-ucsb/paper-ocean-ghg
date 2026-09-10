@@ -30,7 +30,7 @@ paper-ocean-ghg/
 ├── r/
 │   └── functions.R                   # Helper functions (BigQuery download, MRV data processing)
 │
-├── sql/                              # BigQuery SQL queries (23 queries)
+├── sql/                              # BigQuery SQL queries, one per pull
 │   ├── n_unique_vessels.sql          # Count of unique AIS-broadcasting vessels
 │   ├── n_ais_messages.sql            # Count of AIS messages with emissions data
 │   ├── annual_emissions_all_pollutants.sql  # Annual emissions by pollutant and fleet
@@ -117,7 +117,17 @@ BigQuery access.
 
 **Script:** `_targets_01_gfw_data_pull.R`
 
-Downloads analysis-ready datasets from Google BigQuery tables maintained by Global Fishing Watch. This pipeline executes 23 SQL queries and saves results as CSV files in `data/gfw/`. It requires authenticated access to the `emlab-gcp` BigQuery billing project and the `world-fishing-827` GFW data project.
+Downloads analysis-ready datasets from Google BigQuery tables maintained by Global Fishing Watch. This pipeline runs the queries in `sql/` and saves results as CSV files in `data/gfw/`. It requires authenticated access to the `emlab-gcp` BigQuery billing project and the `world-fishing-827` GFW data project.
+
+Three targets at the top of the script pin which BigQuery table versions the queries read:
+
+| Target | Drives |
+|---|---|
+| `run_version_ais` | AIS-side pulls: validation (MRV, registered), port and trip emissions, receiver type, vessel info, activity summaries |
+| `run_version_dark` | Everything that reads a dark-fleet model output: emissions totals and maps, monthly series, model performance, variable importance |
+| `run_version_s1` | The S1-descriptive pulls: detection counts, unmatched shares, scene footprints and imaged area, detection density |
+
+`run_version_dark` points at the frozen `_paper_*` snapshot tables, so the manuscript's emissions numbers only change when the dark-fleet model is deliberately rerun and re-snapshotted upstream (in `s1_ratios_rf`). `run_version_s1` exists so the S1 figures can move ahead of that: the S1 detection and coverage tables were rebuilt on 2026-09-09 with deduplicated scene footprints and corrected 2025 detection-AIS matching, before the forests were retrained on them. Once the model rerun lands and the snapshots are refreshed, set `run_version_s1` to the same value as `run_version_dark`. The `s1_coverage_phi_ok` target guards the S1 effort denominator: it fails the pull if the per-pass coverage fraction leaves its historical band, which is how the footprint duplication would show up if it ever came back.
 
 You can't run this without BigQuery access to those projects, and you don't need to: every output CSV is committed, along with this pipeline's store objects, so pipelines 2 and 3 run without any Google credentials.
 

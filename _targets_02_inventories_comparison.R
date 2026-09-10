@@ -493,15 +493,5 @@ list(
       file.path("data", "inventories", "multisector_inventory_data.csv")
     ),
     format = "file"
-  ),
-
-  # Sentinel-1 detection diagnostics ----
-  tar_file(
-    name = s1_detections_by_fixed_length_bin_file,
-    command = file.path(
-      "data",
-      "gfw",
-      "s1_detections_by_fixed_length_bin.csv"
-    )
   )
 )

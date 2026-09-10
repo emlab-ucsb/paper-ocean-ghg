@@ -43,3 +43,5 @@ qmd/quarto_notebook_cache/
 qmd/quarto_notebook_cache/*
 
 *.zip
+# macOS Finder metadata
+.DS_Store

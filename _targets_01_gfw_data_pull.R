@@ -28,6 +28,25 @@ list(
     name = run_version_dark,
     "paper_v20260714"
   ),
+  # Version of the S1 detection and coverage tables that the S1-descriptive
+  # pulls read (detection counts, unmatched shares, scene footprints, imaged
+  # area, detection density). These describe the S1 data itself and depend on
+  # no model output, so they can move ahead of run_version_dark.
+  #
+  # Why they are apart right now: on 2026-09-09 s1_ratios_rf rebuilt the
+  # `_v20260714` base tables with two data fixes - the detect_foot_raw
+  # footprint dedupe (issue #10) and GFW's in-place republish of
+  # sentinel1_clean_v20250827, which corrected the Sept-Oct 2025 unmatched-rate
+  # step (issue #10, Oct 2025 comment). The random forests have NOT been rerun
+  # on the fixed inputs yet, so the `_paper_v20260714` snapshots that
+  # run_version_dark points at still hold the pre-fix model outputs. Once the
+  # model is rerun and the paper snapshots are refreshed
+  # (s1_ratios_rf/REBUILD.md, "Afterwards"), set this back to the same value as
+  # run_version_dark so every pull reads one frozen snapshot set again.
+  tar_target(
+    name = run_version_s1,
+    "v20260714"
+  ),
   # Set analysis start year
   tar_target(
     name = analysis_start_year,
@@ -141,7 +160,7 @@ list(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
         stringr::str_glue(
-          run_version_dark = run_version_dark,
+          run_version_s1 = run_version_s1,
           analysis_start_year = analysis_start_year,
           analysis_end_year = analysis_end_year
         ),
@@ -158,13 +177,58 @@ list(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
         stringr::str_glue(
-          run_version_dark = run_version_dark,
+          run_version_s1 = run_version_s1,
           analysis_start_year = analysis_start_year,
           analysis_end_year = analysis_end_year
         ),
       file_path = file.path("data", "gfw", "s1_time_series.csv"),
     ),
     format = "file"
+  ),
+  # Monthly S1 detections and unmatched detections by fixed 25 m length bin
+  # (the model's bins, from rf_vessel_length_bins) and fishing / non-fishing.
+  # Feeds the SI unmatched-share figures (issue #9).
+  tar_file_read(
+    name = s1_detections_by_fixed_length_bin,
+    command = file.path("sql", "s1_detections_by_fixed_length_bin.sql"),
+    read = download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_s1 = run_version_s1,
+          analysis_start_year = analysis_start_year,
+          analysis_end_year = analysis_end_year
+        ),
+      file_path = file.path("data", "gfw", "s1_detections_by_fixed_length_bin.csv"),
+    ),
+    format = "file"
+  ),
+  # Monthly S1 detection counts per fleet and length bin alongside three
+  # measures of S1 sampling effort (summed per-scene area, union area, union
+  # area x scenes), on the post-2022 cell set. Feeds the two SI detection
+  # density figures (issue #10).
+  tar_file_read(
+    name = s1_detection_density_by_denominator,
+    command = file.path("sql", "s1_detection_density_by_denominator.sql"),
+    read = download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_s1 = run_version_s1,
+          analysis_start_year = analysis_start_year,
+          analysis_end_year = analysis_end_year
+        ),
+      file_path = file.path("data", "gfw", "s1_detection_density_by_denominator.csv"),
+    ),
+    format = "file"
+  ),
+  # Standing invariant on that extract: phi = summed / (union x scenes) must sit
+  # at ~0.46 in every year. Errors out otherwise, so a return of the footprint
+  # duplication that issue #10 found stops the pull instead of quietly moving
+  # every S1 density figure. See assert_s1_coverage_phi() in r/functions.R.
+  tar_target(
+    name = s1_coverage_phi_ok,
+    command = assert_s1_coverage_phi(s1_detection_density_by_denominator)
   ),
   # Get distributions of AIS vessels and S1 detections by length size bin and fishing/non-fishing
   tar_file_read(
@@ -174,7 +238,9 @@ list(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
         stringr::str_glue(
-          run_version_dark = run_version_dark
+          run_version_s1 = run_version_s1,
+          analysis_start_year = analysis_start_year,
+          analysis_end_year = analysis_end_year
         ),
       file_path = file.path("data", "gfw", "length_size_bin_distributions.csv"),
     ),
@@ -403,7 +469,7 @@ list(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
         stringr::str_glue(
-          run_version_dark = run_version_dark
+          run_version_s1 = run_version_s1
         ),
       file_path = file.path("data", "gfw", "number_s1_imaged_months_by_pixel.csv")
     ),

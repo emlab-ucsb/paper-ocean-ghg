@@ -12,10 +12,8 @@ annual_ais_activity_summary_file|stem|266c7d524b5ff2c4|5be8b83c86a922dc|2c530c15
 fraction_vessels_emissions_by_registry_info_file|stem|9dfa7e1657029b63|ffe61a9f4a401452|2c530c1562a7fbd1|-1839977368|data/gfw/fraction_vessels_emissions_by_registry_info.csv|t20662.9562310147s|s155b|155|file|local|vector|||0||
 vessel_size_info_file|stem|ae500f986ed249df|b4a280793a2354af|2c530c1562a7fbd1|1202604510|data/gfw/vessel_size_info.csv|t20662.9562324818s|s34621247b|34621247|file|local|vector|||0||
 monthly_aggregated_time_series_file|stem|34429ced26e21ceb|2c1d3e4469a818f3|2c530c1562a7fbd1|-1375233645|data/gfw/monthly_aggregated_time_series.csv|t20662.9562310389s|s39702b|39702|file|local|vector|||0||
-length_size_bin_distributions_file|stem|7e61459daf5c02d5|310fb997c4e6aae4|2c530c1562a7fbd1|433865839|data/gfw/length_size_bin_distributions.csv|t20662.9562310339s|s1093b|1093|file|local|vector|||0.001||
 trip_emissions_for_mrv_validation_file|stem|efc2fea48b4d7201|0debb64a242a1343|2c530c1562a7fbd1|-869772083|data/MRV/trip_emissions_for_mrv_validation.csv|t20662.9562302786s|s15540019b|15540019|file|local|vector|||0||
 annual_spatial_co2_emissions_by_vessel_class_family_file|stem|945cf5ddbc1afe36|376cd40276ddf255|2c530c1562a7fbd1|-589649576|data/gfw/annual_spatial_co2_emissions_by_vessel_class_family.csv|t20664.9624698293s|s5071081b|5071081|file|local|vector|||0||
-s1_detections_by_fixed_length_bin_file|stem|2e20ff672b800e72|f2fe4281a1fd09d3|2c530c1562a7fbd1|1846949556|data/gfw/s1_detections_by_fixed_length_bin.csv|t20700.9575462319s|s80413b|80413|file|local|vector|||0||
 all_varimp_data_file|stem|e91d21f128a83966|dbf961642fd317bd|2c530c1562a7fbd1|-1713023081|data/gfw/all_varimp_data.csv|t20662.9562303123s|s4434b|4434|file|local|vector|||0.001||
 ping_level_hours_distribution_file|stem|da36d1e9758e9091|97be9a2f6f849793|2c530c1562a7fbd1|-2127817275|data/gfw/ping_level_hours_distribution.csv|t20662.9562310849s|s124b|124|file|local|vector|||0||
 trip_co2_emissions_by_from_to_countries_file|stem|cb06b47c553e4fe4|f12050152a485558|2c530c1562a7fbd1|-603768744|data/gfw/trip_co2_emissions_by_from_to_countries.csv|t20662.9562318003s|s16711312b|16711312|file|local|vector|||0.001||
@@ -25,7 +23,6 @@ annual_edgar_emissions_file|stem|f371a87ee2cc7fb7|0772dcef972b6076|2c530c1562a7f
 annual_emissions_all_pollutants_file|stem|11b864eb5427a570|c04acd2a617c2582|2c530c1562a7fbd1|1490773895|data/gfw/annual_emissions_all_pollutants.csv|t20662.9562303141s|s6442b|6442|file|local|vector|||0.001||
 total_spatial_co2_emissions_by_ocean_file|stem|9ac9e9dcf20b6f58|f641d711f7de680c|2c530c1562a7fbd1|1377586387|data/gfw/total_spatial_co2_emissions_by_ocean.csv|t20662.9562311335s|s2718b|2718|file|local|vector|||0||
 annual_spatial_co2_emissions_ais_dark_by_fleet_file|stem|b271b6ed60f2147f|19eee4ec4ccd3dee|2c530c1562a7fbd1|1830654499|data/gfw/annual_spatial_co2_emissions_ais_dark_by_fleet.csv|t20662.9562308491s|s26675439b|26675439|file|local|vector|||0||
-s1_detection_density_by_denominator_file|stem|484cf3f846e2947a|0afc1102d1881c7b|2c530c1562a7fbd1|-559454256|data/gfw/s1_detection_density_by_denominator.csv|t20700.9575462294s|s312356b|312356|file|local|vector|||0||
 performance_detections_cls_conf_mat_file|stem|61d70d29cce0b1a2|9ba400859061ea45|2c530c1562a7fbd1|-1387584106|data/gfw/performance_detections_cls_conf_mat.csv|t20662.9562310802s|s642b|642|file|local|vector|||0||
 oecd_data_file|stem|3e7d0bc753df4644|a2f4c74db28bd366|2c530c1562a7fbd1|1654771300|data/oecd/annual_oecd_experimental_data.csv|t20700.9575462423s|s2363b|2363|file|local|vector|||0||
 annual_global_emissions_by_receiver_type_and_flag_file|stem|3d4ac18a0b0d9548|8843ae5ce0afd793|2c530c1562a7fbd1|-2060547326|data/gfw/annual_global_emissions_by_receiver_type_and_flag.csv|t20662.9562303229s|s301707b|301707|file|local|vector|||0||
@@ -34,9 +31,7 @@ performance_detections_cls_roc_pr_curves_file|stem|b0009edcbafed4e8|00cfa9a01f5e
 n_unique_vessels_file|stem|813b9c1fdd48f755|5734d55b748db4ce|2c530c1562a7fbd1|30567198|data/gfw/n_unique_vessels.csv|t20662.9562310448s|s24b|24|file|local|vector|||0||
 data_sources_file|stem|93ccc810bf76bf87|5ab7efebc512d212|2c530c1562a7fbd1|1170827296|data/data_sources.csv|t20669.6682154094s|s4079b|4079|file|local|vector|||0||
 total_spatial_co2_emissions_dark_by_footprint_file|stem|e244166738ac2eb8|7eed0db9a8873d04|2c530c1562a7fbd1|1504915767|data/gfw/total_spatial_co2_emissions_dark_by_footprint.csv|t20662.9562311445s|s538024b|538024|file|local|vector|||0||
-n_s1_detections_file|stem|fda1a02b6c59bc93|c146c93917082f51|2c530c1562a7fbd1|-34664370|data/gfw/n_s1_detections.csv|t20662.9562310433s|s107b|107|file|local|vector|||0||
 annual_global_emissions_by_receiver_type_file|stem|58296c0450fa0095|f09e5e970238ea63|2c530c1562a7fbd1|-1682798962|data/gfw/annual_global_emissions_by_receiver_type.csv|t20662.9562303157s|s1725b|1725|file|local|vector|||0||
-number_s1_imaged_months_by_pixel_file|stem|674eeec2496d6d54|d4b090033ffb4445|2c530c1562a7fbd1|-304449923|data/gfw/number_s1_imaged_months_by_pixel.csv|t20662.9562310779s|s631713b|631713|file|local|vector|||0.001||
 annual_ais_activity_summary_cheap_file|stem|bd862752535fedaf|07360ca6227178d2|2c530c1562a7fbd1|-2007744426|data/gfw/annual_ais_activity_summary_cheap.csv|t20700.9575462174s|s661538b|661538|file|local|vector|||0||
 total_monthly_emissions_by_pollutant_file|stem|6de7c39ce8e1fafb|46ab53918bdf14c9|2c530c1562a7fbd1|-1354282208|data/gfw/total_monthly_emissions_by_pollutant.csv|t20662.956231132s|s19142b|19142|file|local|vector|||0||
 all_performance_metrics_file|stem|57abc5276fed61cd|313302273ebb5e6d|2c530c1562a7fbd1|-1333333579|data/gfw/all_performance_metrics.csv|t20662.95623031s|s5006b|5006|file|local|vector|||0||
@@ -54,11 +49,9 @@ annual_ais_activity_summary|stem|1a17f20d9aace9be|ffbcdc2b88bbbb30|171f710af5e27
 fraction_vessels_emissions_by_registry_info|stem|af8ba644d301ee42|05601326f6ec7403|9f7914900b3eba13|-518675064||t20703.9728532677s|s392b|392|rds|local|vector|||0.012||
 vessel_size_info|stem|a3e85691599b2540|09ee69915d9d3cea|5824e5012df3e5e4|-1992877218||t20703.9728537123s|s11467064b|11467064|rds|local|vector|||0.413||
 monthly_aggregated_time_series|stem|092bb6a32910aa10|08f8c37b26806401|23fefc9e9f85a696|590600880||t20703.9728532738s|s12394b|12394|rds|local|vector|||0.166||
-length_size_bin_distributions|stem|4eec2f3ab1b1b600|def8f1e47918e305|92951cfd0c0b98cc|454597906||t20703.9728532718s|s689b|689|rds|local|vector|||0.013||
 trip_emissions_for_mrv_validation|stem|a42487e6d53507a3|b64a32dabe8fb998|d9ee7b9722f245ad|1762988021||t20703.9728536126s|s5336594b|5336594|rds|local|vector|||0.206||
 annual_spatial_co2_emissions_by_vessel_class_family|stem|5c015b7e980334f0|fff101b4de00c731|479b08b42616938e|547664468||t20703.9728532167s|s1417414b|1417414|rds|local|vector|||0.141||
 annual_co2_emissions_by_vessel_class|stem|d7bc9d3f6867da2c|5312a03daa8419f3|a9266667e4f94860|-1932114642||t20703.9728530545s|s965b|965|rds|local|vector|||0.113||
-s1_detections_by_fixed_length_bin|stem|7d6ac494c33180c4|d2f38059194fd22c|65886f85711dd830|448745464||t20703.9728533954s|s11508b|11508|rds|local|vector|||0.014||
 all_varimp_data|stem|7e6077b3936788b8|09d56df032c29768|62da2f0a3d62cb47|-1351249550||t20703.9728530484s|s1456b|1456|rds|local|vector|||0.252||
 ping_level_hours_distribution|stem|9d9d7622f33539d2|9141f4b495c0e880|bfd3a6b4a2486daf|901135014||t20703.9728533763s|s338b|338|rds|local|vector|||0.015||
 trip_co2_emissions_by_from_to_countries|stem|da49babf5e36b957|cc1a47d4eb0391c7|bd1e9570b6f5fa29|-1986711739||t20703.97285351s|s4551738b|4551738|rds|local|vector|||0.394||
@@ -70,7 +63,6 @@ annual_emissions_all_pollutants|stem|e43a0a82db486371|2e728dc6b8be6695|c8ff3f5d5
 registry_shares_by_year|stem|969ffc1c22757a2f|cd8d97e82f88c9f1|4ac6aa5433cf537d|957917901||t20703.9728533905s|s1410b|1410|rds|local|vector|||0.099||
 total_spatial_co2_emissions_by_ocean|stem|a30586b7eed402e0|504f1646ddc230d1|24273a4c5dac52af|-1577136785||t20703.9728534038s|s1440b|1440|rds|local|vector|||0.013||
 annual_spatial_co2_emissions_ais_dark_by_fleet|stem|9a492be912071a82|42d532822144a649|78e8cad5edc5c7ce|1492170606||t20703.9728531942s|s8011531b|8011531|rds|local|vector|||0.781||
-s1_detection_density_by_denominator|stem|8372109e9ffc443b|b292e2e9ee671168|2b6c2a33d26a776f|1053679082||t20703.9728533923s|s53504b|53504|rds|local|vector|||0.101||
 performance_detections_cls_conf_mat|stem|5a679469f38c38a6|4dac75d55fabb02f|684b7e029afa75f9|2091198568||t20703.9728533742s|s467b|467|rds|local|vector|||0.211||
 oecd_data|stem|6e7ad118303f1945|e61fa5b472f3aa78|9b9b156b78eadfc7|-1839373977||t20703.972853373s|s253b|253|rds|local|vector|||0.023||
 annual_global_emissions_by_receiver_type_and_flag|stem|8c793b25f63749c8|931ea62d11960035|7a596fb08cdbc094|-1161925241||t20703.9728530698s|s105229b|105229|rds|local|vector|||0.108||
@@ -80,9 +72,7 @@ n_unique_vessels|stem|50c1944fc4312cbf|0264d260d58dd8bd|8e5cb555a9654a25|1556531
 data_sources|stem|16cbe58c77783bcf|73c44d5b74410d9a|af7642f2e4f13b74|1456474924||t20703.9728532639s|s1559b|1559|rds|local|vector|||0.013||
 fleet_growth_by_year_data|stem|5e2e3e3ed82a2b2d|6e485d4313b70396|83558f0382245500|-914735802||t20703.9728532653s|s4949b|4949|rds|local|vector|||0.023||
 total_spatial_co2_emissions_dark_by_footprint|stem|688b1e967b00dc02|e433e8a5b8b23163|0f5e7554ef84b8b3|-1663666381||t20703.9728534083s|s164768b|164768|rds|local|vector|||0.019||
-n_s1_detections|stem|db2308a1c3cc2e13|c682d60f0f8756cd|402e4c8027926afc|-1220995872||t20703.9728533657s|s343b|343|rds|local|vector|||0.097||
 annual_global_emissions_by_receiver_type|stem|c3eb7d1c6c78f224|a15ed3cd0b15df56|c1e0c5c5655b78d0|-454120393||t20703.9728530665s|s1115b|1115|rds|local|vector|||0.175||
-number_s1_imaged_months_by_pixel|stem|5781895cfc96e076|27fa9883b0898db1|a9558b754e402758|787452024||t20703.9728533713s|s127422b|127422|rds|local|vector|||0.025||
 annual_ais_activity_summary_cheap|stem|01160b7666096bbb|1a7b89cea7d5d97b|2db3fcaae5c802a6|-1731599547||t20703.9728530529s|s178527b|178527|rds|local|vector|||0.018||
 total_monthly_emissions_by_pollutant|stem|8853ed255d295fec|f4894e76a9c2419b|7ff01ea4d221fc51|1770690607||t20703.9728534028s|s8273b|8273|rds|local|vector|||0.501||
 all_performance_metrics|stem|4ab40d0f472bdbaf|94c46e0a343b2937|35674d157306dbd1|-2088621195||t20703.9728530477s|s1183b|1183|rds|local|vector|||0.234||
@@ -108,7 +98,7 @@ fishing_vessel_classes|function|9971df3aa5284378
 reefer_vessel_classes|function|3f594d3b2dffefa6
 cams_axis_name|function|02d8c48a4c402cd6
 multisector_colors|function|4526590c7bf90639
-.Random.seed|object|2ccaf282a4bd11e6
+.Random.seed|object|114e666ea9667d40
 ceds_marine_sectors|function|7f0d77ad9523cf8d
 download_gfw_data|function|56ae83fa4e3ee8f3
 cams_slice_times|function|f79193e718ad6a73
@@ -145,6 +135,16 @@ fleet_emissions_and_size_by_year|function|70578a6a109ba74e
 fleet_growth_by_year|function|75a0b26f7a9d0e2b
 sum_cams_nc_to_tonnes|function|0d062ccd5c250ada
 summarize_cams_ship_co2|function|5ba11ed7029b8e0d
-s1_time_series_file|stem|a27272ea3c496d99|d0eadfdf51e02022|2c530c1562a7fbd1|-2105350290|data/gfw/s1_time_series.csv|t20704.9037458989s|s6394b|6394|file|local|vector|||0||
-s1_time_series|stem|97c080feb40335dc|a8dd20474d386833|e2c23f546dae62ac|1472163843||t20704.908060204s|s2814b|2814|rds|local|vector|||0.116||
-quarto_notebook|stem|a9f776b584dccf4d|d52e514090eb73b6|6562f343ceb7d59b|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20704.9174492424s|s18597838b|18597838|file|local|vector|||810.6||
+s1_detections_by_fixed_length_bin_file|stem|a253c93b4bde0e06|f2fe4281a1fd09d3|2c530c1562a7fbd1|1846949556|data/gfw/s1_detections_by_fixed_length_bin.csv|t20706.6502144428s|s74905b|74905|file|local|vector|||0.001||
+n_s1_detections_file|stem|1950b07aceb27474|c146c93917082f51|2c530c1562a7fbd1|-34664370|data/gfw/n_s1_detections.csv|t20706.6501362122s|s107b|107|file|local|vector|||0||
+number_s1_imaged_months_by_pixel_file|stem|b43f2cf0c6809e5f|d4b090033ffb4445|2c530c1562a7fbd1|-304449923|data/gfw/number_s1_imaged_months_by_pixel.csv|t20706.6500808149s|s631713b|631713|file|local|vector|||0||
+length_size_bin_distributions_file|stem|8ca7e8fb99713182|310fb997c4e6aae4|2c530c1562a7fbd1|433865839|data/gfw/length_size_bin_distributions.csv|t20706.6522874196s|s1092b|1092|file|local|vector|||0||
+s1_detection_density_by_denominator_file|stem|ee4350444c3d0995|0afc1102d1881c7b|2c530c1562a7fbd1|-559454256|data/gfw/s1_detection_density_by_denominator.csv|t20706.6500019867s|s290745b|290745|file|local|vector|||0.001||
+s1_time_series_file|stem|6a72d09f2fc18d6b|d0eadfdf51e02022|2c530c1562a7fbd1|-2105350290|data/gfw/s1_time_series.csv|t20706.6499541928s|s6404b|6404|file|local|vector|||0||
+s1_detections_by_fixed_length_bin|stem|04333960b331eb2d|d2f38059194fd22c|1716375b7b4375fb|448745464||t20706.6540667998s|s11363b|11363|rds|local|vector|||0.127||
+n_s1_detections|stem|c43e3ed73dcb048b|c682d60f0f8756cd|30f566c831e1ffca|-1220995872||t20706.6540670692s|s340b|340|rds|local|vector|||0.016||
+number_s1_imaged_months_by_pixel|stem|7503eaca630b89d9|27fa9883b0898db1|a3e6e3b630df6fbf|787452024||t20706.6540680759s|s127468b|127468|rds|local|vector|||0.022||
+length_size_bin_distributions|stem|6838540d0a26d542|def8f1e47918e305|f4983a2b1c896281|454597906||t20706.6540683709s|s636b|636|rds|local|vector|||0.016||
+s1_detection_density_by_denominator|stem|8c9805de42f4c436|b292e2e9ee671168|5e79420a4742188b|1053679082||t20706.6540687638s|s53332b|53332|rds|local|vector|||0.023||
+s1_time_series|stem|d4bc661a21514298|a8dd20474d386833|b36a4bae0b56f4f7|1472163843||t20706.6540690437s|s2813b|2813|rds|local|vector|||0.013||
+quarto_notebook|stem|aceea0907bda6df2|d52e514090eb73b6|92bdd9069de8458c|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20706.663447528s|s18569197b|18569197|file|local|vector|||809.721||

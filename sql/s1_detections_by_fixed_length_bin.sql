@@ -1,65 +1,36 @@
--- Monthly S1 vessel detections and unmatched detections, disaggregated by
--- vessel length decile (t1 = shortest 10%, t10 = longest 10%) and by
--- fishing / non-fishing.
+-- Monthly S1 vessel detections and unmatched detections, by fishing /
+-- non-fishing and by the model's fixed length bins (25 m steps: ten bins for
+-- non-fishing up to 225+ m, five for fishing up to 100+ m). Bin edges come from
+-- rf_vessel_length_bins, the same table the model features use, so a line on
+-- the figure is a fixed size range over the whole record and a change in it is
+-- a change within that range.
 --
--- Decile cutoffs are computed ONCE over the pooled detection distribution
--- across all months, so bin edges are fixed over time and a change in a
--- line reflects a real change in that fixed size range.
+-- Bins are defined separately for fishing and non-fishing, so the same
+-- length_size_bin index is a different length range in the two fleets; the
+-- emitted length_bin_min / length_bin_max give each bin's actual range.
 --
--- Cutoffs are computed SEPARATELY within fishing and non-fishing, because
--- fishing vessels are substantially shorter as a group: pooled deciles would
--- collapse nearly all fishing vessels into the lowest few bins. So t10 means
--- "longest 10% of fishing vessels" and "longest 10% of non-fishing vessels"
--- respectively -- the two are NOT the same length range. The emitted
--- length_decile_min_m / length_decile_max_m columns give each bin's actual
--- length range so this stays legible on the figure.
---
--- Companion to s1_time_series.sql, which produces the same detection counts
--- aggregated across all length bins and fleets.
-WITH
-detections AS(
-  SELECT
-    detect_id,
-    detect_timestamp,
-    detect_ssvid,
-    fishing,
-    length_m
-  FROM
-    `world-fishing-827.proj_ocean_ghg.rf_s1_detections_size_classified_paper_v20260714`
-  WHERE
-    EXTRACT(YEAR FROM detect_timestamp) BETWEEN 2017 AND 2025
-    AND length_m IS NOT NULL
-    AND fishing IS NOT NULL
-),
--- Global, all-months-pooled deciles over detection length, computed within
--- each fleet separately.
-deciles AS(
-  SELECT
-    detect_id,
-    detect_timestamp,
-    detect_ssvid,
-    fishing,
-    length_m,
-    NTILE(10) OVER (PARTITION BY fishing ORDER BY length_m) AS length_decile
-  FROM
-    detections
-)
+-- Feeds the SI unmatched-share figures (issue #9). Companion to
+-- s1_time_series.sql, which gives the same counts pooled across bins and fleets.
 SELECT
+  fishing,
+  length_size_bin,
   TIMESTAMP_TRUNC(detect_timestamp, MONTH) month,
-  fishing,
-  length_decile,
-  CONCAT('t', CAST(length_decile AS STRING)) length_decile_label,
-  MIN(length_m) length_decile_min_m,
-  MAX(length_m) length_decile_max_m,
   COUNT(DISTINCT detect_id) n_s1_detections,
-  COUNT(DISTINCT CASE WHEN detect_ssvid IS NULL THEN detect_id END) n_s1_detections_unmatched
+  COUNT(DISTINCT CASE WHEN detect_ssvid IS NULL THEN detect_id END) n_s1_detections_unmatched,
+  ANY_VALUE(length_bin_min) length_bin_min,
+  ANY_VALUE(length_bin_max) length_bin_max
 FROM
-  deciles
+  `world-fishing-827.proj_ocean_ghg.rf_s1_detections_size_classified_{run_version_s1}`
+LEFT JOIN
+  `world-fishing-827.proj_ocean_ghg.rf_vessel_length_bins_{run_version_s1}`
+USING (fishing, length_size_bin)
+WHERE
+  EXTRACT(YEAR FROM detect_timestamp) BETWEEN {analysis_start_year} AND {analysis_end_year}
 GROUP BY
-  month,
   fishing,
-  length_decile
+  length_size_bin,
+  month
 ORDER BY
   month,
   fishing,
-  length_decile
+  length_size_bin

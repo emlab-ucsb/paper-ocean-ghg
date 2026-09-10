@@ -2236,3 +2236,44 @@ build_inventory_intensity <- function(
 
   write_inventory_csv(intensity_table, file_path)
 }
+
+# Standing check on the S1 sampling-effort denominator (issue #10, rec. 6).
+#
+# phi = summed per-scene imaged area / (union imaged area x number of scenes)
+# is the fraction of a cell's footprint that one pass covers. It has no reason
+# to move over time, and it did not: 0.45-0.46 in every year 2017-2025 once the
+# footprints are deduplicated. Before the dedupe it read 0.90 in 2017-2019 and
+# 0.63 in 2020, because GFW's detect_foot_raw repeats each scene's footprint
+# row and the coverage query summed over the repeats. That single defect put a
+# 1.8x units step into the model's denominator at May 2021 and went unnoticed
+# for years because nothing was watching phi.
+#
+# So this watches it. It reads the density extract that already carries both
+# denominators, computes phi by year, and stops the pipeline if any year leaves
+# the band. If it fires, the first suspect is a re-ingest of detect_foot_raw
+# upstream; check rows per scene_id there before touching anything here.
+assert_s1_coverage_phi <- function(density_csv, lower = 0.44, upper = 0.48) {
+  phi <- readr::read_csv(density_csv, show_col_types = FALSE) |>
+    dplyr::distinct(time, summed_km2, union_x_scenes_km2) |>
+    dplyr::mutate(year = lubridate::year(time)) |>
+    dplyr::group_by(year) |>
+    dplyr::summarise(
+      phi = sum(summed_km2) / sum(union_x_scenes_km2),
+      .groups = "drop"
+    )
+  bad <- dplyr::filter(phi, phi < lower | phi > upper)
+  if (nrow(bad) > 0) {
+    stop(sprintf(
+      paste0(
+        "S1 coverage invariant FAILED: phi = summed / (union x scenes) is ",
+        "outside [%.2f, %.2f] in %s (%s). The summed-area denominator has ",
+        "changed units; suspect duplicated footprint rows in detect_foot_raw ",
+        "upstream (see issue #10) before using any S1 density result."
+      ),
+      lower, upper,
+      paste(bad$year, collapse = ", "),
+      paste(sprintf("%.3f", bad$phi), collapse = ", ")
+    ), call. = FALSE)
+  }
+  phi
+}
