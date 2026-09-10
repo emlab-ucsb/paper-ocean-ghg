@@ -1,23 +1,21 @@
 \begin{table}[!h]
 \centering
-\caption{\label{tab:s1_matching_double_counting_summary}Estimated double counting between the AIS-based and S1-unmatched CO$_2$ estimates, 2017 to 2025. The share of AIS-based CO$_2$ at risk is the total of Table \ref{tab:s1_matching_double_counting_by_gap}; because an S1 pass is a random instant, it is also the probability that a detection of a broadcasting vessel fails to match. Applied to the matched detections it gives the number of broadcasting-vessel detections now among the unmatched, and the S1-unmatched estimate duplicates AIS-based emissions in that proportion, assuming misclassified vessels emit like the true non-broadcasting vessels in their length bin. The last two rows add the effect of the same detections being absent from the matched densities the emissions regression is trained on, which raises the fitted emissions per detection. Columns give the two readings of the miss rate beyond the last simulated gap of 18 hours.}
+\caption{\label{tab:s1_matching_double_counting_summary}Double counting between the AIS-based and non-broadcasting CO$_2$ estimates, 2017 to 2025, following the steps in the text. The share at risk is the total of Table \ref{tab:s1_matching_double_counting_by_gap}; because S1 images a vessel at an arbitrary moment, it is also the probability that a detection of a broadcasting vessel is missed by the matching. The matched detections are the ones that were not missed, which gives the number missed and their share of the unmatched detections. Non-broadcasting emissions are estimated from unmatched detections, so that share of them duplicates AIS-based emissions. The last two rows add the effect of the missed detections being absent from the matched detections the emissions regression model is trained on. The miss rate beyond 18 hours is taken to reach 100\% at 24 hours (Fig. \ref{fig:fig-s1-matching-double-counting}A, dashed).}
 \centering
 \fontsize{8}{10}\selectfont
-\begin{tabular}[t]{>{\raggedright\arraybackslash}p{9.5cm}rr}
+\begin{tabular}[t]{>{\raggedright\arraybackslash}p{8cm}r}
 \toprule
-\multicolumn{1}{c}{ } & \multicolumn{2}{c}{Miss rate beyond 18 h} \\
-\cmidrule(l{3pt}r{3pt}){2-3}
-  & Rises to 100\% at 24 h & Held at 45.4\%\\
+  & Value\\
 \midrule
-Share of AIS-based CO$_2$ emitted during message gaps in which an S1 detection would be misclassified as unmatched & 5.1\% & 4.5\%\\
-Implied AIS-broadcasting detections misclassified as unmatched (millions) & 0.92 & 0.80\\
-As a share of all unmatched detections & 6.2\% & 5.4\%\\
-S1-unmatched CO$_2$ duplicating AIS-based CO$_2$, 2017--2025 (million tonnes) & 175 & 153\\
-S1-unmatched CO$_2$ duplicating AIS-based CO$_2$, 2025 (million tonnes) & 21 & 19\\
+Share of AIS-based CO$_2$ at risk of double counting: emitted during AIS gaps in which a detection of the vessel would be missed & 5.1\%\\
+Matched S1 detections & 17.0 million\\
+Detections of broadcasting vessels missed by the matching & 0.92 million\\
+Unmatched S1 detections & 14.9 million\\
+Share of unmatched detections that are broadcasting vessels & 6.2\%\\
 \addlinespace
-As a share of AIS-based + S1-unmatched CO$_2$, 2017--2025 & 1.5\% & 1.3\%\\
-Upper end including the effect on fitted emissions per detection: S1-unmatched CO$_2$ overstated by & 11.9\% & 10.4\%\\
-As a share of AIS-based + S1-unmatched CO$_2$, 2017--2025 & 2.9\% & 2.5\%\\
+Non-broadcasting CO$_2$ that duplicates AIS-based CO$_2$, 2017--2025 & 175 million tonnes (1.5\% of combined total)\\
+Increase in the emissions per detection fitted by the emissions regression model, because the missed detections are absent from its training data & 5.4\%\\
+Upper bound on non-broadcasting CO$_2$ that duplicates AIS-based CO$_2$, including that increase & 11.9\% of non-broadcasting CO$_2$ (2.9\% of combined total)\\
 \bottomrule
 \end{tabular}
 \end{table}
