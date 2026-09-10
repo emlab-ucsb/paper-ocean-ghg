@@ -1,0 +1,7 @@
+﻿ais_message_gap_duration_hours,s1_detection_matching_miss_rate
+0.5,0.016
+1,0.032
+2,0.068
+4,0.144
+8,0.274
+18,0.454

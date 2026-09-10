@@ -1,0 +1,22 @@
+\begin{table}[!h]
+\centering
+\caption{\label{tab:s1_matching_double_counting_by_gap}AIS-based CO$_2$ emissions by the length of the AIS message gap they were emitted in, 2017 to 2025, and the share of each at risk of double counting: the emissions in the bin multiplied by the probability, from GFW's hold-out matching experiment, that an S1 detection made during a gap of that length fails to match and is counted as unmatched. The miss rate is interpolated between the simulated gaps and taken to rise to 100\% at 24 hours, the width of the matching window; messages representing more than 24 hours are treated as always missed. Figure \ref{fig:fig-s1-matching-double-counting} shows the inputs and the cumulative curve; Table \ref{tab:s1_matching_double_counting_summary} carries the totals through to emissions.}
+\centering
+\fontsize{8}{10}\selectfont
+\begin{tabular}[t]{lrrrr}
+\toprule
+AIS message gap (hours) & Share of AIS-based CO$_2$ & Miss rate (emissions-weighted) & Share at risk of double counting & Cumulative share at risk\\
+\midrule
+0-0.5 & 74.73\% & 0.4\% & 0.32\% & 0.32\%\\
+0.5-1 & 6.00\% & 2.2\% & 0.13\% & 0.45\%\\
+1-2 & 5.19\% & 4.6\% & 0.24\% & 0.69\%\\
+2-4 & 3.61\% & 10.2\% & 0.37\% & 1.05\%\\
+4-8 & 3.37\% & 20.0\% & 0.68\% & 1.73\%\\
+\addlinespace
+8-12 & 2.07\% & 30.9\% & 0.64\% & 2.37\%\\
+12-18 & 2.74\% & 39.9\% & 1.09\% & 3.46\%\\
+18-24 & 2.29\% & 72.3\% & 1.65\% & 5.12\%\\
+> 24 & 0.00\% & 100.0\% & 0.00\% & 5.12\%\\
+\bottomrule
+\end{tabular}
+\end{table}

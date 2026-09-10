@@ -161,6 +161,23 @@ list(
     command = file.path("data", "gfw", "vessel_size_info.csv"),
     read = readr::read_csv(!!.x)
   ),
+  # S1 detection to AIS matching miss rate as a function of the AIS message gap
+  # around the detection. A hold-out experiment by Zihan Wei (GFW) on the
+  # matching behind sentinel1_clean: detections with high-confidence matches as
+  # truth, AIS positions withheld within a window of the detection, miss rate =
+  # share of true matches that then fall below the score threshold. Six points,
+  # gaps of 0.5 to 18 hours. Full provenance in the README beside the CSV. The
+  # notebook combines it with emissions_by_message_hour_threshold to estimate
+  # double counting between the AIS-based and S1-unmatched estimates.
+  tar_file_read(
+    name = s1_matching_miss_rate,
+    command = file.path(
+      "data",
+      "gfw_s1_to_ais_matching_miss_rate",
+      "gfw_s1_to_ais_matching_miss_rate.csv"
+    ),
+    read = readr::read_csv(!!.x)
+  ),
   tar_file_read(
     name = registered_validation_data,
     command = file.path("data", "registered_validation_data", "registered_validation_data.csv"),

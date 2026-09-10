@@ -120,6 +120,7 @@ targets::tar_load(
     "length_size_bin_distributions",
     "ping_level_hours_distribution",
     "emissions_by_message_hour_threshold",
+    "s1_matching_miss_rate",
     # Inventories comparison inputs, prepared by
     # _targets_02_inventories_comparison.R and read into this pipeline as CSVs
     "si_all_inventory_data",
@@ -1076,6 +1077,200 @@ emissions_by_ocean_summary_tbl <- annual_emissions_by_ocean_normalized |>
   )
 ```
 
+# Double counting between the AIS-based and S1-unmatched estimates
+
+```{r}
+#| label: s1-matching-double-counting
+# ---- Double counting between AIS-based and S1-unmatched emissions ----
+#
+# A broadcasting vessel can be double counted: its emissions are estimated from
+# its AIS messages, and if S1 images it during a gap in those messages the
+# detection can fail to match and enter the non-broadcasting estimate as well.
+# Matching looks for AIS positions up to 12 hours either side of the detection,
+# so the paper used to argue that only gaps longer than 12 hours could cause
+# this. GFW's hold-out simulation shows the failure is gradual instead: with
+# high-confidence matches as ground truth and AIS positions withheld within a
+# window of the detection, the share of true matches falling below the
+# matching-score threshold is already 6.8% at a 2-hour gap and 27.4% at 8 hours
+# (s1_matching_miss_rate, see _targets_03_quarto_notebook.R for provenance).
+#
+# So the exposure is an expectation over gap length, not a bound at 12 hours.
+# emissions_by_message_hour_threshold gives the cumulative share of AIS-based
+# CO2 by the duration each message represents; differencing it gives the share
+# emitted in gaps of each length. An S1 pass is a random instant, so the chance
+# that a detection lands in a gap of length g is proportional to the time spent
+# in such gaps, and weighting by emissions rather than time gives the quantity
+# we want: the share of AIS-based CO2 emitted while the vessel, if imaged, would
+# be classed as unmatched.
+#
+#   share at risk  D = sum over 0.1-h duration bins of
+#                        (share of AIS CO2 in bin) x (miss rate at that gap)
+#
+# Beyond the last simulated gap (18 h) the miss rate is unknown. The matching
+# window is +/-12 h, so a symmetric gap of 24 h cannot match at all: the
+# central case rises linearly from 45.4% at 18 h to 100% at 24 h, and the
+# alternative holds 45.4% flat. Messages representing more than 24 h carry
+# 0.0007% of emissions and are treated as always missed.
+#
+# From D to emissions. Let M be matched detections as observed and U unmatched.
+# True broadcasting detections are M / (1 - D), of which M D / (1 - D) were
+# misclassified and now sit in U. The dark model turns unmatched density into
+# emissions at roughly the rate of a matched vessel of the same length bin, so
+# the share of S1-unmatched CO2 that duplicates AIS-based CO2 is about that
+# misclassified fraction of U. A second, smaller channel runs through training:
+# matched density is understated by (1 - D) against AIS emissions that include
+# the misclassified vessels, so the fitted emissions per detection are high by
+# 1 / (1 - D). The last summary row folds that in.
+#
+# Assumptions to keep in view: the simulation places the detection at the
+# centre of a symmetric gap, whereas real detections fall anywhere in a gap; it
+# uses high-confidence matches as truth; and misclassified broadcasting
+# vessels are taken to emit like the true dark vessels in their length bin.
+
+miss_rate_points <- s1_matching_miss_rate |>
+  dplyr::arrange(ais_message_gap_duration_hours)
+
+matching_window_hours <- 24 # +/- 12 h of AIS positions around a detection
+
+# Two readings of the miss rate beyond the last simulated gap
+miss_rate_at <- function(gap_hours, beyond_18h = c("rise", "hold")) {
+  beyond_18h <- match.arg(beyond_18h)
+  x <- c(0, miss_rate_points$ais_message_gap_duration_hours)
+  y <- c(0, miss_rate_points$s1_detection_matching_miss_rate)
+  if (beyond_18h == "rise") {
+    x <- c(x, matching_window_hours)
+    y <- c(y, 1)
+  }
+  stats::approx(x, y, xout = gap_hours, rule = 2)$y
+}
+
+# Share of AIS-based CO2 emitted in each 0.1-hour duration bin, from the
+# cumulative curve. Everything above 24 h is one extra bin, always missed.
+emissions_by_gap <- emissions_by_message_hour_threshold |>
+  dplyr::arrange(threshold_hours) |>
+  dplyr::transmute(
+    gap_hours = threshold_hours,
+    share = fraction_of_total - dplyr::lag(fraction_of_total, default = 0)
+  ) |>
+  dplyr::bind_rows(
+    tibble::tibble(
+      gap_hours = Inf,
+      share = 1 - max(emissions_by_message_hour_threshold$fraction_of_total)
+    )
+  ) |>
+  dplyr::mutate(
+    # Bin midpoint for the interpolation; the >24 h bin is always missed
+    gap_mid = ifelse(is.infinite(gap_hours), Inf, gap_hours - 0.05),
+    miss_rise = ifelse(is.infinite(gap_mid), 1, miss_rate_at(gap_mid, "rise")),
+    miss_hold = ifelse(is.infinite(gap_mid), 1, miss_rate_at(gap_mid, "hold")),
+    exposed_rise = share * miss_rise,
+    exposed_hold = share * miss_hold
+  )
+
+exposed_share <- c(
+  rise = sum(emissions_by_gap$exposed_rise),
+  hold = sum(emissions_by_gap$exposed_hold)
+)
+
+# Coarse bins for the table and figure
+gap_bin_edges <- c(0, 0.5, 1, 2, 4, 8, 12, 18, 24, Inf)
+gap_bin_labels <- c(
+  "0-0.5", "0.5-1", "1-2", "2-4", "4-8", "8-12", "12-18", "18-24", "> 24"
+)
+
+double_counting_by_gap <- emissions_by_gap |>
+  dplyr::mutate(
+    gap_bin = cut(
+      gap_hours,
+      breaks = gap_bin_edges,
+      labels = gap_bin_labels,
+      right = TRUE
+    )
+  ) |>
+  dplyr::group_by(gap_bin) |>
+  dplyr::summarise(
+    share = sum(share),
+    exposed_rise = sum(exposed_rise),
+    exposed_hold = sum(exposed_hold),
+    .groups = "drop"
+  ) |>
+  dplyr::mutate(
+    # Emissions-weighted mean miss rate within the bin, central case
+    miss_rate = exposed_rise / share,
+    cumulative_exposed = cumsum(exposed_rise)
+  )
+
+# From exposed share to detections and emissions
+matched_detections_million <- n_s1_detections$n_million_s1_detections -
+  n_s1_detections$n_million_s1_detections_unmatched
+unmatched_detections_million <- n_s1_detections$n_million_s1_detections_unmatched
+
+misclassified_million <- matched_detections_million * exposed_share /
+  (1 - exposed_share)
+misclassified_share_of_unmatched <- misclassified_million /
+  unmatched_detections_million
+# Including the training-side rescaling of emissions per detection
+dark_overstatement <- (1 + misclassified_share_of_unmatched) /
+  (1 - exposed_share) - 1
+
+# annual_emissions_all_pollutants is in long form by this point (see
+# wrangle-gfw-time-series-emissions-data): one row per year, fishing,
+# pollutant and fleet, emissions in tonnes.
+co2_totals <- annual_emissions_all_pollutants |>
+  dplyr::filter(pollutant == "co2") |>
+  dplyr::summarise(
+    ais_mt = sum(emissions_mt[fleet == "AIS-broadcasting"]) / 1e6,
+    dark_mt = sum(emissions_mt[fleet == "Non-broadcasting"]) / 1e6,
+    ais_end_mt = sum(
+      emissions_mt[fleet == "AIS-broadcasting" & year == analysis_end_year]
+    ) / 1e6,
+    dark_end_mt = sum(
+      emissions_mt[fleet == "Non-broadcasting" & year == analysis_end_year]
+    ) / 1e6
+  )
+
+duplicated_dark_mt <- misclassified_share_of_unmatched * co2_totals$dark_mt
+duplicated_dark_end_mt <- misclassified_share_of_unmatched * co2_totals$dark_end_mt
+duplicated_share_of_fused <- duplicated_dark_mt /
+  (co2_totals$ais_mt + co2_totals$dark_mt)
+overstated_dark_mt <- dark_overstatement * co2_totals$dark_mt
+overstated_share_of_fused <- overstated_dark_mt /
+  (co2_totals$ais_mt + co2_totals$dark_mt)
+
+double_counting_summary <- tibble::tibble(
+  quantity = c(
+    "Share of AIS-based CO$_2$ emitted during message gaps in which an S1 detection would be misclassified as unmatched",
+    "Implied AIS-broadcasting detections misclassified as unmatched (millions)",
+    "As a share of all unmatched detections",
+    glue::glue("S1-unmatched CO$_2$ duplicating AIS-based CO$_2$, {analysis_start_year}--{analysis_end_year} (million tonnes)"),
+    glue::glue("S1-unmatched CO$_2$ duplicating AIS-based CO$_2$, {analysis_end_year} (million tonnes)"),
+    glue::glue("As a share of AIS-based + S1-unmatched CO$_2$, {analysis_start_year}--{analysis_end_year}"),
+    glue::glue("Upper end including the effect on fitted emissions per detection: S1-unmatched CO$_2$ overstated by"),
+    glue::glue("As a share of AIS-based + S1-unmatched CO$_2$, {analysis_start_year}--{analysis_end_year}")
+  ),
+  rise = c(
+    scales::percent(exposed_share[["rise"]], accuracy = 0.1, suffix = "\\%"),
+    sprintf("%.2f", misclassified_million[["rise"]]),
+    scales::percent(misclassified_share_of_unmatched[["rise"]], accuracy = 0.1, suffix = "\\%"),
+    scales::comma(duplicated_dark_mt[["rise"]], accuracy = 1),
+    scales::comma(duplicated_dark_end_mt[["rise"]], accuracy = 1),
+    scales::percent(duplicated_share_of_fused[["rise"]], accuracy = 0.1, suffix = "\\%"),
+    scales::percent(dark_overstatement[["rise"]], accuracy = 0.1, suffix = "\\%"),
+    scales::percent(overstated_share_of_fused[["rise"]], accuracy = 0.1, suffix = "\\%")
+  ),
+  hold = c(
+    scales::percent(exposed_share[["hold"]], accuracy = 0.1, suffix = "\\%"),
+    sprintf("%.2f", misclassified_million[["hold"]]),
+    scales::percent(misclassified_share_of_unmatched[["hold"]], accuracy = 0.1, suffix = "\\%"),
+    scales::comma(duplicated_dark_mt[["hold"]], accuracy = 1),
+    scales::comma(duplicated_dark_end_mt[["hold"]], accuracy = 1),
+    scales::percent(duplicated_share_of_fused[["hold"]], accuracy = 0.1, suffix = "\\%"),
+    scales::percent(dark_overstatement[["hold"]], accuracy = 0.1, suffix = "\\%"),
+    scales::percent(overstated_share_of_fused[["hold"]], accuracy = 0.1, suffix = "\\%")
+  )
+)
+```
+
 # In-line manuscript statistics
 
 ```{r}
@@ -1337,6 +1532,8 @@ may be more susceptible to AIS adoption biases.
 ## Methods
 
 - The time between pings is typically small (the mean value is `r signif(ping_level_hours_distribution$mean_hours,3)` hours and the median value is `r signif(ping_level_hours_distribution$median_hours,3)` hours, or about `r round(ping_level_hours_distribution$mean_hours*60)` minutes and `r round(ping_level_hours_distribution$median_hours*60)` minutes respectively), while the maximum value for this across our dataset is `r round(ping_level_hours_distribution$max_hours)` hours (meaning this is the most amount of time over which we will estimate emissions for a single message).
+
+- Double counting between the two estimates. The detection-AIS matching considers AIS positions up to 12 hours either side of a detection, but a hold-out experiment by GFW (detections with high-confidence matches as ground truth, AIS positions withheld within a window of the detection) shows that the probability of missing a true match rises gradually with the length of the gap in a vessel's AIS messages rather than switching on at 12 hours: `r scales::percent(miss_rate_points$s1_detection_matching_miss_rate[miss_rate_points$ais_message_gap_duration_hours == 2], accuracy = 0.1)` of true matches are missed at a 2-hour gap, `r scales::percent(miss_rate_points$s1_detection_matching_miss_rate[miss_rate_points$ais_message_gap_duration_hours == 8], accuracy = 0.1)` at 8 hours and `r scales::percent(miss_rate_points$s1_detection_matching_miss_rate[miss_rate_points$ais_message_gap_duration_hours == 18], accuracy = 0.1)` at 18 hours. Weighting the share of AIS-based CO$_2$ emitted in gaps of each length by that miss rate, `r scales::percent(exposed_share[["rise"]], accuracy = 0.1)` of AIS-based CO$_2$ (`r scales::percent(exposed_share[["hold"]], accuracy = 0.1)` if the miss rate is held at its 18-hour value beyond the last simulated gap) is emitted while the vessel, had it been imaged, would have been classed as unmatched. This implies that `r sprintf("%.2f", misclassified_million[["rise"]])` million of the `r signif(n_s1_detections$n_million_s1_detections_unmatched, 3)` million unmatched detections (`r scales::percent(misclassified_share_of_unmatched[["rise"]], accuracy = 0.1)`) are AIS-broadcasting vessels, and hence that about `r scales::percent(misclassified_share_of_unmatched[["rise"]], accuracy = 0.1)` of S1-unmatched CO$_2$ (`r scales::comma(duplicated_dark_mt[["rise"]], accuracy = 1)` million tonnes over `r analysis_start_year`-`r analysis_end_year`, or `r scales::percent(duplicated_share_of_fused[["rise"]], accuracy = 0.1)` of the combined AIS-based + S1-unmatched total) duplicates emissions already counted in the AIS-based estimate. Because the same misclassified detections are also missing from the matched densities the emissions regression is trained on, the fitted emissions per detection are high by a factor of `r sprintf("%.3f", 1 / (1 - exposed_share[["rise"]]))`; folding that in gives an upper end of `r scales::percent(dark_overstatement[["rise"]], accuracy = 0.1)` of S1-unmatched CO$_2$ (`r scales::percent(overstated_share_of_fused[["rise"]], accuracy = 0.1)` of the combined total). This replaces the earlier reasoning that only messages representing more than 12 hours could be affected, which happened to give a similar number (`r scales::percent(1 - emissions_by_message_hour_threshold$fraction_of_total[dplyr::near(emissions_by_message_hour_threshold$threshold_hours, 12)], accuracy = 0.1)`) for the wrong reason: most of the exposure comes from gaps of 2 to 18 hours (Fig. \ref{fig:fig-s1-matching-double-counting}, Table \ref{tab:s1_matching_double_counting_by_gap}, Table \ref{tab:s1_matching_double_counting_summary}).
 
 - In all, we analyze AIS data for over `r scales::comma(floor(n_unique_vessels$n_unique_vessels / 1e4) * 1e4)` AIS-broadcasting vessels, across  `r scales::comma(signif(n_ais_messages$n_billion_ais_messages, 3))`  billion individual timestamped AIS messages which are assigned to `r signif((trip_co2_emissions_by_from_to_countries |> dplyr::filter(from_country_iso3!=to_country_iso3) |> dplyr::pull(n_unique_trips) |> sum())/1e6,3)` million international trips, `r signif((trip_co2_emissions_by_from_to_countries |> dplyr::filter(from_country_iso3==to_country_iso3) |> dplyr::pull(n_unique_trips) |> sum())/1e6,3)` million domestic trips, and `r signif((port_visit_co2_emissions_by_country |> dplyr::pull(n_unique_port_vists) |> sum())/1e6,3)` million port visits that occurred between `r analysis_start_year` and `r analysis_end_year`.
 
@@ -2473,6 +2670,290 @@ writeLines(
     "tables",
     "emissions_by_message_hour_threshold.tex"
   )
+)
+```
+
+## Double counting between the AIS-based and S1-unmatched estimates
+
+The computation lives in the `s1-matching-double-counting` chunk above the
+in-line statistics; these chunks only draw and tabulate it.
+
+```{r}
+#| label: fig-s1-matching-double-counting
+#| fig-cap: !expr 'paste0("Double counting risk from S1 detections of AIS-broadcasting vessels that fail to match. (A) Share of S1 detections with a true AIS match that fall below the matching score threshold, as a function of the gap in the AIS messages of the detected vessel, from a hold-out experiment by GFW in which AIS positions were withheld within a window of each detection (points). The matching considers positions up to 12 hours either side of a detection, so a symmetric 24-hour gap cannot match: beyond the last simulated gap the miss rate is either taken to rise to 100\\% at 24 hours (dashed) or held at its 18-hour value (dotted). (B) Share of AIS-based CO$_{2}$ emissions, ", analysis_start_year, " to ", analysis_end_year, ", by the length of the AIS message gap during which they were emitted. (C) The part of each bar in B at risk of double counting: emissions during which a detection of the vessel would have been missed and counted as unmatched, that is B multiplied by the miss rate for that gap length (labelled above each bar). (D) Running total of C by gap length, under both readings of the miss rate beyond 18 hours.")'
+#| fig-width: 7.5
+#| fig-height: 6.5
+
+# ---- figure ----
+# Four panels, all on linear axes. A: the simulated miss rate and how it is
+# carried past 18 h. B: share of AIS-based CO2 by the length of the message gap
+# it was emitted in. C: the part of each bar in B that is at risk of double
+# counting, i.e. B times the miss rate (labelled on each bar). D: the running
+# total of C, with both readings of the miss rate beyond 18 h. An earlier draft
+# stacked B and C into one bar on a square-root axis; segment heights are not
+# additive under that transform and the at-risk part looked far larger than its
+# share, so they are separate panels now.
+risk_colour <- paletteer::paletteer_d("colorblindr::OkabeIto")[[6]]
+beyond_18h_labels <- c(rise = "Rise to 100% at 24 h", hold = "Hold at 45.4%")
+
+theme_double_counting <- function() {
+  theme_plot() +
+    theme(
+      axis.title.x = element_text(size = 10),
+      axis.title.y = element_text(size = 10),
+      legend.text = element_text(size = 8),
+      legend.background = element_blank()
+    )
+}
+gap_axis <- function() {
+  scale_x_continuous(
+    breaks = seq(0, 24, 4),
+    limits = c(0, 24),
+    expand = expansion(mult = c(0.01, 0.02))
+  )
+}
+
+miss_curve <- dplyr::bind_rows(
+  tibble::tibble(gap_hours = seq(0, 18, by = 0.1), assumption = "simulated") |>
+    dplyr::mutate(miss_rate = miss_rate_at(gap_hours, "rise")),
+  tibble::tibble(
+    gap_hours = seq(18, matching_window_hours, by = 0.1),
+    assumption = beyond_18h_labels[["rise"]]
+  ) |>
+    dplyr::mutate(miss_rate = miss_rate_at(gap_hours, "rise")),
+  tibble::tibble(
+    gap_hours = seq(18, matching_window_hours, by = 0.1),
+    assumption = beyond_18h_labels[["hold"]]
+  ) |>
+    dplyr::mutate(miss_rate = miss_rate_at(gap_hours, "hold"))
+)
+
+panel_miss_rate <- ggplot() +
+  geom_line(
+    data = miss_curve |> dplyr::filter(assumption == "simulated"),
+    aes(gap_hours, miss_rate),
+    linewidth = 0.7, colour = "grey30"
+  ) +
+  geom_line(
+    data = miss_curve |> dplyr::filter(assumption != "simulated"),
+    aes(gap_hours, miss_rate, linetype = assumption),
+    linewidth = 0.7, colour = "grey30"
+  ) +
+  geom_point(
+    data = miss_rate_points,
+    aes(ais_message_gap_duration_hours, s1_detection_matching_miss_rate),
+    size = 2.2, colour = risk_colour
+  ) +
+  scale_linetype_manual(
+    "Beyond the last simulated gap",
+    values = stats::setNames(c("dashed", "dotted"), beyond_18h_labels)
+  ) +
+  gap_axis() +
+  scale_y_continuous(
+    labels = scales::percent, limits = c(0, 1),
+    expand = expansion(mult = c(0, 0.02))
+  ) +
+  labs(
+    x = "AIS message gap (hours)",
+    y = "Share of true matches missed"
+  ) +
+  theme_double_counting() +
+  theme(
+    legend.position = "inside",
+    legend.position.inside = c(0.36, 0.85),
+    legend.title = element_text(size = 8, face = "bold"),
+    legend.key.width = unit(1.4, "lines")
+  )
+
+panel_share <- ggplot(double_counting_by_gap, aes(gap_bin, share)) +
+  geom_col(width = 0.7, fill = "grey60") +
+  geom_text(
+    aes(label = scales::percent(share, accuracy = 0.1)),
+    vjust = -0.4, size = 2.6, colour = "grey30"
+  ) +
+  scale_y_continuous(
+    labels = scales::percent, limits = c(0, 0.85),
+    expand = expansion(mult = c(0, 0.02))
+  ) +
+  labs(
+    x = "AIS message gap (hours)",
+    y = expression(bold("Share of AIS-based CO"[2]))
+  ) +
+  theme_double_counting() +
+  theme(axis.text.x = element_text(size = 7.5))
+
+panel_at_risk <- ggplot(double_counting_by_gap, aes(gap_bin, exposed_rise)) +
+  geom_col(width = 0.7, fill = risk_colour) +
+  # The miss rate that turns each bar of B into this one
+  geom_text(
+    aes(label = paste0("miss\n", scales::percent(miss_rate, accuracy = 0.1))),
+    vjust = -0.3, size = 2.3, colour = "grey30", lineheight = 0.85
+  ) +
+  scale_y_continuous(
+    labels = scales::percent,
+    limits = c(0, max(double_counting_by_gap$exposed_rise) * 1.45),
+    expand = expansion(mult = c(0, 0.02))
+  ) +
+  labs(
+    x = "AIS message gap (hours)",
+    y = expression(atop(
+      bold("Share of AIS-based CO"[2]),
+      bold("at risk of double counting")
+    ))
+  ) +
+  theme_double_counting() +
+  theme(axis.text.x = element_text(size = 7.5))
+
+cumulative_data <- emissions_by_gap |>
+  dplyr::filter(is.finite(gap_hours)) |>
+  dplyr::mutate(rise = cumsum(exposed_rise), hold = cumsum(exposed_hold)) |>
+  tidyr::pivot_longer(
+    c("rise", "hold"), names_to = "assumption", values_to = "cumulative"
+  ) |>
+  dplyr::mutate(assumption = beyond_18h_labels[assumption])
+
+panel_cumulative <- ggplot(
+  cumulative_data,
+  aes(gap_hours, cumulative, linetype = assumption)
+) +
+  geom_line(colour = risk_colour, linewidth = 0.8) +
+  scale_linetype_manual(
+    "Beyond the last simulated gap",
+    values = stats::setNames(c("solid", "dotted"), beyond_18h_labels)
+  ) +
+  gap_axis() +
+  scale_y_continuous(
+    labels = scales::percent, limits = c(0, NA),
+    expand = expansion(mult = c(0, 0.05))
+  ) +
+  labs(
+    x = "AIS message gap (hours)",
+    y = expression(atop(
+      bold("Cumulative share of AIS-based CO"[2]),
+      bold("at risk of double counting")
+    ))
+  ) +
+  theme_double_counting() +
+  theme(
+    legend.position = "inside",
+    legend.position.inside = c(0.36, 0.85),
+    legend.title = element_text(size = 8, face = "bold"),
+    legend.key.width = unit(1.4, "lines")
+  )
+
+cowplot::plot_grid(
+  panel_miss_rate, panel_share, panel_at_risk, panel_cumulative,
+  ncol = 2,
+  labels = c("A", "B", "C", "D"),
+  align = "hv",
+  axis = "tblr"
+)
+```
+
+## Double counting tables
+
+```{r}
+double_counting_by_gap_tbl <- double_counting_by_gap |>
+  dplyr::transmute(
+    `AIS message gap (hours)` = as.character(gap_bin),
+    `Share of AIS-based CO$_2$` = scales::percent(
+      share,
+      accuracy = 0.01,
+      suffix = "\\%"
+    ),
+    `Miss rate (emissions-weighted)` = scales::percent(
+      miss_rate,
+      accuracy = 0.1,
+      suffix = "\\%"
+    ),
+    `Share at risk of double counting` = scales::percent(
+      exposed_rise,
+      accuracy = 0.01,
+      suffix = "\\%"
+    ),
+    `Cumulative share at risk` = scales::percent(
+      cumulative_exposed,
+      accuracy = 0.01,
+      suffix = "\\%"
+    )
+  ) |>
+  knitr::kable(
+    format = "latex",
+    escape = FALSE,
+    booktabs = TRUE,
+    align = "lrrrr",
+    label = "s1_matching_double_counting_by_gap",
+    caption = glue::glue(
+      "AIS-based CO$_2$ emissions by the length of the AIS message gap they ",
+      "were emitted in, {analysis_start_year} to {analysis_end_year}, and the ",
+      "share of each at risk of double counting: the emissions in the bin ",
+      "multiplied by the probability, from GFW's hold-out matching experiment, ",
+      "that an S1 detection made during a gap of that length fails to match ",
+      "and is counted as unmatched. The ",
+      "miss rate is interpolated between the simulated gaps and taken to rise ",
+      "to 100\\% at 24 hours, the width of the matching window; messages ",
+      "representing more than 24 hours are treated as always missed. Figure ",
+      "\\ref{{fig:fig-s1-matching-double-counting}} shows the inputs and the ",
+      "cumulative curve; Table ",
+      "\\ref{{tab:s1_matching_double_counting_summary}} carries the totals ",
+      "through to emissions."
+    )
+  ) |>
+  kableExtra::kable_styling(
+    font_size = 8,
+    latex_options = "hold_position"
+  )
+
+double_counting_by_gap_tbl
+
+writeLines(
+  double_counting_by_gap_tbl,
+  file.path(project_root, "tables", "s1_matching_double_counting_by_gap.tex")
+)
+
+double_counting_summary_tbl <- double_counting_summary |>
+  dplyr::rename(
+    ` ` = quantity,
+    `Rises to 100\\% at 24 h` = rise,
+    `Held at 45.4\\%` = hold
+  ) |>
+  knitr::kable(
+    format = "latex",
+    escape = FALSE,
+    booktabs = TRUE,
+    align = "lrr",
+    label = "s1_matching_double_counting_summary",
+    caption = glue::glue(
+      "Estimated double counting between the AIS-based and S1-unmatched CO$_2$ ",
+      "estimates, {analysis_start_year} to {analysis_end_year}. The share of ",
+      "AIS-based CO$_2$ at risk is the total of Table ",
+      "\\ref{{tab:s1_matching_double_counting_by_gap}}; because an S1 pass is a ",
+      "random instant, it is also the probability that a detection of a ",
+      "broadcasting vessel fails to match. Applied to the matched detections it ",
+      "gives the number of broadcasting-vessel detections now among the ",
+      "unmatched, and the S1-unmatched estimate duplicates AIS-based emissions ",
+      "in that proportion, assuming misclassified vessels emit like the true ",
+      "non-broadcasting vessels in their length bin. The last two rows add the ",
+      "effect of the same detections being absent from the matched densities ",
+      "the emissions regression is trained on, which raises the fitted ",
+      "emissions per detection. Columns give the two readings of the miss rate ",
+      "beyond the last simulated gap of 18 hours."
+    )
+  ) |>
+  kableExtra::add_header_above(
+    c(" " = 1, "Miss rate beyond 18 h" = 2)
+  ) |>
+  kableExtra::column_spec(1, width = "9.5cm") |>
+  kableExtra::kable_styling(
+    font_size = 8,
+    latex_options = "hold_position"
+  )
+
+double_counting_summary_tbl
+
+writeLines(
+  double_counting_summary_tbl,
+  file.path(project_root, "tables", "s1_matching_double_counting_summary.tex")
 )
 ```
 
