@@ -659,7 +659,7 @@ summarize_icct_ship_co2 <- function(
     }
 
     # Each sheet ends with a blank row and a footnote about column H, so keep
-    # only the labelled class rows
+    # only the labeled class rows
     classes <- sheet_data |>
       dplyr::filter(
         !is.na(.data[[class_column]]),
@@ -1148,7 +1148,7 @@ gfw_vessel_class_label <- function(vessel_class) {
 }
 
 # The same composition, but resolved by year rather than collapsed into a single
-# total. Each year is normalised on its own, so a column answers "what did the
+# total. Each year is normalized on its own, so a column answers "what did the
 # fleet / the emissions look like that year", not "how did the fleet grow".
 #
 # Vessel counts start in 2015 but the emissions extracts start in 2017, so the
@@ -1195,7 +1195,7 @@ fleet_emissions_and_size_by_year <- function(
 # how much of the fleet, and how much of its CO2, sits on the IMO register, on
 # some other public register, or on none at all.
 #
-# This is the split that separates a coverage difference from a modelling one.
+# This is the split that separates a coverage difference from a modeling one.
 # Vessels with no registry entry have no published engine power or design speed,
 # so their characteristics are modelled rather than looked up; they are also the
 # vessels a registry-derived inventory cannot enumerate at all. Their share of
@@ -1207,7 +1207,7 @@ fleet_emissions_and_size_by_year <- function(
 # every shared measure, so this is the same fleet the class figures describe --
 # see the header of sql/annual_ais_activity_summary_cheap.sql.
 #
-# Labels are set here rather than in the SQL so the figure can be relabelled
+# Labels are set here rather than in the SQL so the figure can be relabeled
 # without re-running a 233 GiB query. The order is deliberate and is the order
 # the columns stack in: IMO first as the most documented, none last.
 registry_emissions_and_size_by_year <- function(
@@ -1231,7 +1231,7 @@ registry_emissions_and_size_by_year <- function(
     # Character rather than factor: the plotting code builds its own level order
     # with stacked_class_levels() and indexes the palette by name, so a factor
     # arriving here is dropped to its integer codes by the ifelse() folding steps
-    # and the groups end up labelled "1", "2", "3".
+    # and the groups end up labeled "1", "2", "3".
     dplyr::mutate(
       vessel_class = unname(registry_labels[.data$registry_type])
     ) |>
@@ -1259,7 +1259,7 @@ registry_emissions_and_size_by_year <- function(
 #
 # Pulled out of the plotting function because it is needed twice: once for the
 # levels the figure actually draws, and once over the unfolded class list to fix
-# each class's colour (see the palette note in plot_fleet_sankey_with_series).
+# each class's color (see the palette note in plot_fleet_sankey_with_series).
 stacked_class_levels <- function(fleet_data) {
   trailing <- c("Other", "Other not fishing")
   latest <- max(fleet_data$year)
