@@ -45,7 +45,10 @@ list(
   # (s1_ratios_rf/REBUILD.md, "Afterwards"; they keep the paper_v20260714
   # suffix), delete this target and glue run_version_dark into the six S1 pulls
   # and their SQL again, so there is one version for everything. Issue #13 has
-  # the checklist, including the tar_invalidate() the unchanged names require.
+  # the checklist. Note the refreshed snapshots keep their names, so targets
+  # will not notice the rewrite: invalidate the targets downstream of
+  # run_version_dark (and only those; the AIS-side pulls are unaffected)
+  # before running.
   tar_target(
     name = run_version_s1,
     "v20260714"
