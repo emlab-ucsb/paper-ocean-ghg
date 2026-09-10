@@ -39,10 +39,13 @@ list(
   # sentinel1_clean_v20250827, which corrected the Sept-Oct 2025 unmatched-rate
   # step (issue #10, Oct 2025 comment). The random forests have NOT been rerun
   # on the fixed inputs yet, so the `_paper_v20260714` snapshots that
-  # run_version_dark points at still hold the pre-fix model outputs. Once the
-  # model is rerun and the paper snapshots are refreshed
-  # (s1_ratios_rf/REBUILD.md, "Afterwards"), set this back to the same value as
-  # run_version_dark so every pull reads one frozen snapshot set again.
+  # run_version_dark points at still hold the pre-fix model outputs.
+  #
+  # TEMPORARY. Once the model is rerun and the paper snapshots are refreshed
+  # (s1_ratios_rf/REBUILD.md, "Afterwards"; they keep the paper_v20260714
+  # suffix), delete this target and glue run_version_dark into the six S1 pulls
+  # and their SQL again, so there is one version for everything. Issue #13 has
+  # the checklist, including the tar_invalidate() the unchanged names require.
   tar_target(
     name = run_version_s1,
     "v20260714"
