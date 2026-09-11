@@ -28,31 +28,6 @@ list(
     name = run_version_dark,
     "paper_v20260714"
   ),
-  # Version of the S1 detection and coverage tables that the S1-descriptive
-  # pulls read (detection counts, unmatched shares, scene footprints, imaged
-  # area, detection density). These describe the S1 data itself and depend on
-  # no model output, so they can move ahead of run_version_dark.
-  #
-  # Why they are apart right now: on 2026-09-09 s1_ratios_rf rebuilt the
-  # `_v20260714` base tables with two data fixes - the detect_foot_raw
-  # footprint dedupe (issue #10) and GFW's in-place republish of
-  # sentinel1_clean_v20250827, which corrected the Sept-Oct 2025 unmatched-rate
-  # step (issue #10, Oct 2025 comment). The random forests have NOT been rerun
-  # on the fixed inputs yet, so the `_paper_v20260714` snapshots that
-  # run_version_dark points at still hold the pre-fix model outputs.
-  #
-  # TEMPORARY. Once the model is rerun and the paper snapshots are refreshed
-  # (s1_ratios_rf/REBUILD.md, "Afterwards"; they keep the paper_v20260714
-  # suffix), delete this target and glue run_version_dark into the six S1 pulls
-  # and their SQL again, so there is one version for everything. Issue #13 has
-  # the checklist. Note the refreshed snapshots keep their names, so targets
-  # will not notice the rewrite: invalidate the targets downstream of
-  # run_version_dark (and only those; the AIS-side pulls are unaffected)
-  # before running.
-  tar_target(
-    name = run_version_s1,
-    "v20260714"
-  ),
   # Set analysis start year
   tar_target(
     name = analysis_start_year,
@@ -166,7 +141,7 @@ list(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
         stringr::str_glue(
-          run_version_s1 = run_version_s1,
+          run_version_dark = run_version_dark,
           analysis_start_year = analysis_start_year,
           analysis_end_year = analysis_end_year
         ),
@@ -183,7 +158,7 @@ list(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
         stringr::str_glue(
-          run_version_s1 = run_version_s1,
+          run_version_dark = run_version_dark,
           analysis_start_year = analysis_start_year,
           analysis_end_year = analysis_end_year
         ),
@@ -201,7 +176,7 @@ list(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
         stringr::str_glue(
-          run_version_s1 = run_version_s1,
+          run_version_dark = run_version_dark,
           analysis_start_year = analysis_start_year,
           analysis_end_year = analysis_end_year
         ),
@@ -220,7 +195,7 @@ list(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
         stringr::str_glue(
-          run_version_s1 = run_version_s1,
+          run_version_dark = run_version_dark,
           analysis_start_year = analysis_start_year,
           analysis_end_year = analysis_end_year
         ),
@@ -244,7 +219,7 @@ list(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
         stringr::str_glue(
-          run_version_s1 = run_version_s1,
+          run_version_dark = run_version_dark,
           analysis_start_year = analysis_start_year,
           analysis_end_year = analysis_end_year
         ),
@@ -475,7 +450,7 @@ list(
       bq_billing_project,
       sql = readr::read_file(!!.x) |>
         stringr::str_glue(
-          run_version_s1 = run_version_s1
+          run_version_dark = run_version_dark
         ),
       file_path = file.path("data", "gfw", "number_s1_imaged_months_by_pixel.csv")
     ),

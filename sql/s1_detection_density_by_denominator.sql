@@ -21,7 +21,7 @@
 WITH
 post_cells AS(
   SELECT DISTINCT lon_bin, lat_bin
-  FROM `world-fishing-827.proj_ocean_ghg.s1_pixel_area_imaged_by_scene_{run_version_s1}`
+  FROM `world-fishing-827.proj_ocean_ghg.s1_pixel_area_imaged_by_scene_{run_version_dark}`
   WHERE time > TIMESTAMP('2022-03-01')
     AND summed_imaged_m2 > 0
 ),
@@ -33,7 +33,7 @@ cov AS(
     SUM(c.union_imaged_m2 * c.number_s1_scenes) / 1e6    AS union_x_scenes_km2,
     COUNT(*)                                             AS n_cells,
     AVG(c.number_s1_scenes)                              AS mean_scenes
-  FROM `world-fishing-827.proj_ocean_ghg.s1_pixel_area_imaged_by_scene_{run_version_s1}` c
+  FROM `world-fishing-827.proj_ocean_ghg.s1_pixel_area_imaged_by_scene_{run_version_dark}` c
   JOIN post_cells USING(lon_bin, lat_bin)
   WHERE c.summed_imaged_m2 > 0
   GROUP BY c.time
@@ -47,7 +47,7 @@ dets AS(
     ANY_VALUE(f.length_bin_max) AS length_bin_max,
     SUM(f.matched_s1_detections_per_km2_area_imaged   * f.pixel_area_imaged_m2 / 1e6) AS n_matched,
     SUM(f.unmatched_s1_detections_per_km2_area_imaged * f.pixel_area_imaged_m2 / 1e6) AS n_unmatched
-  FROM `world-fishing-827.proj_ocean_ghg.rf_model_features_{run_version_s1}` f
+  FROM `world-fishing-827.proj_ocean_ghg.rf_model_features_{run_version_dark}` f
   JOIN post_cells USING(lon_bin, lat_bin)
   WHERE f.pixel_area_imaged_m2 > 0
     AND EXTRACT(YEAR FROM f.time) BETWEEN {analysis_start_year} AND {analysis_end_year}

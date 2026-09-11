@@ -55,7 +55,7 @@ monthly_detections AS (
     COUNT(DISTINCT CASE WHEN detect_ssvid IS NULL THEN detect_id END) n_s1_detections_unmatched,
     COUNT(DISTINCT scene_id) s1_scenes
   FROM
-    `world-fishing-827.proj_ocean_ghg.rf_s1_detections_with_vessel_info_{run_version_s1}`
+    `world-fishing-827.proj_ocean_ghg.rf_s1_detections_with_vessel_info_{run_version_dark}`
   WHERE
     EXTRACT(YEAR FROM detect_timestamp) BETWEEN {analysis_start_year} AND {analysis_end_year}
   GROUP BY
@@ -68,7 +68,7 @@ monthly_scenes AS (
     TIMESTAMP_TRUNC(detect_timestamp, MONTH) month,
     scene_id
   FROM
-    `world-fishing-827.proj_ocean_ghg.rf_s1_detections_with_vessel_info_{run_version_s1}`
+    `world-fishing-827.proj_ocean_ghg.rf_s1_detections_with_vessel_info_{run_version_dark}`
   WHERE
     EXTRACT(YEAR FROM detect_timestamp) BETWEEN {analysis_start_year} AND {analysis_end_year}
 ),

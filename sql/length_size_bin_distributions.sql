@@ -14,7 +14,7 @@ ais_vessels AS(
     length_size_bin,
     'ais_vessels' type
   FROM
-    `world-fishing-827.proj_ocean_ghg.rf_s1_ais_vessels_size_classified_{run_version_s1}`
+    `world-fishing-827.proj_ocean_ghg.rf_s1_ais_vessels_size_classified_{run_version_dark}`
   GROUP BY fishing, length_size_bin
 ),
 s1_detections AS(
@@ -24,7 +24,7 @@ s1_detections AS(
     length_size_bin,
     's1_detections' type
   FROM
-    `world-fishing-827.proj_ocean_ghg.rf_s1_detections_size_classified_{run_version_s1}`
+    `world-fishing-827.proj_ocean_ghg.rf_s1_detections_size_classified_{run_version_dark}`
   WHERE
     EXTRACT(YEAR FROM detect_timestamp) BETWEEN {analysis_start_year} AND {analysis_end_year}
   GROUP BY fishing, length_size_bin
@@ -38,6 +38,6 @@ SELECT
 FROM
   combined
 LEFT JOIN
-  (SELECT * FROM `world-fishing-827.proj_ocean_ghg.rf_vessel_length_bins_{run_version_s1}`)
+  (SELECT * FROM `world-fishing-827.proj_ocean_ghg.rf_vessel_length_bins_{run_version_dark}`)
 USING(fishing, length_size_bin)
 ORDER BY type, fishing, length_size_bin

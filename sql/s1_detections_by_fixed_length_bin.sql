@@ -20,9 +20,9 @@ SELECT
   ANY_VALUE(length_bin_min) length_bin_min,
   ANY_VALUE(length_bin_max) length_bin_max
 FROM
-  `world-fishing-827.proj_ocean_ghg.rf_s1_detections_size_classified_{run_version_s1}`
+  `world-fishing-827.proj_ocean_ghg.rf_s1_detections_size_classified_{run_version_dark}`
 LEFT JOIN
-  `world-fishing-827.proj_ocean_ghg.rf_vessel_length_bins_{run_version_s1}`
+  `world-fishing-827.proj_ocean_ghg.rf_vessel_length_bins_{run_version_dark}`
 USING (fishing, length_size_bin)
 WHERE
   EXTRACT(YEAR FROM detect_timestamp) BETWEEN {analysis_start_year} AND {analysis_end_year}

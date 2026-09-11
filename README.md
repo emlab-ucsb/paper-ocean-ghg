@@ -119,15 +119,14 @@ BigQuery access.
 
 Downloads analysis-ready datasets from Google BigQuery tables maintained by Global Fishing Watch. This pipeline runs the queries in `sql/` and saves results as CSV files in `data/gfw/`. It requires authenticated access to the `emlab-gcp` BigQuery billing project and the `world-fishing-827` GFW data project.
 
-Three targets at the top of the script pin which BigQuery table versions the queries read:
+Two targets at the top of the script pin which BigQuery table versions the queries read:
 
 | Target | Drives |
 |---|---|
 | `run_version_ais` | AIS-side pulls: validation (MRV, registered), port and trip emissions, receiver type, vessel info, activity summaries |
-| `run_version_dark` | Everything that reads a dark-fleet model output: emissions totals and maps, monthly series, model performance, variable importance |
-| `run_version_s1` | **Temporary.** The S1-descriptive pulls: detection counts, unmatched shares, scene footprints and imaged area, detection density |
+| `run_version_dark` | Everything that reads a dark-fleet model output or the S1 detection and coverage tables: emissions totals and maps, monthly series, model performance, variable importance, detection counts, unmatched shares, scene footprints and imaged area, detection density |
 
-`run_version_dark` points at the frozen `_paper_*` snapshot tables, so the manuscript's emissions numbers only change when the dark-fleet model is deliberately rerun and re-snapshotted upstream (in `s1_ratios_rf`). `run_version_s1` is a stopgap: the S1 detection and coverage tables were rebuilt on 2026-09-09 with deduplicated scene footprints and corrected 2025 detection-AIS matching, before the forests were retrained on them, and this target lets the S1 figures read the fixed base tables while the emissions figures stay on the snapshots. Once the model is rerun and the snapshots refreshed, delete `run_version_s1` and put the six S1 pulls back on `run_version_dark` (issue #13 has the checklist). The `s1_coverage_phi_ok` target guards the S1 effort denominator: it fails the pull if the per-pass coverage fraction leaves its historical band, which is how the footprint duplication would show up if it ever came back.
+`run_version_dark` points at the frozen `_paper_*` snapshot tables, so the manuscript's numbers only change when the dark-fleet model is deliberately rerun and re-snapshotted upstream (in `s1_ratios_rf`). Because a re-snapshot keeps the same table names, `targets` cannot see that the tables were rewritten: invalidate everything downstream of `run_version_dark` by hand before re-running (issue #13 has the snippet). The `s1_coverage_phi_ok` target guards the S1 effort denominator: it fails the pull if the per-pass coverage fraction leaves its historical band, which is how the footprint duplication that issue #10 found would show up if it ever came back.
 
 You can't run this without BigQuery access to those projects, and you don't need to: every output CSV is committed, along with this pipeline's store objects, so pipelines 2 and 3 run without any Google credentials.
 
