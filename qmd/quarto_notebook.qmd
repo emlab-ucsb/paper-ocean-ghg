@@ -658,6 +658,58 @@ dark_emissions_by_area <- monthly_aggregated_time_series |>
     )
   )
 
+# Per-pixel S1-unmatched share of end-year CO2. Defined here rather than
+# alongside Figure 2C, which also plots it, because the in-line statistics
+# below quote it and inline code is evaluated in document order.
+spatial_co2_share_dark <- annual_spatial_co2_emissions_ais_dark_by_fleet |>
+  dplyr::filter(year == analysis_end_year) |>
+  dplyr::group_by(lon_bin, lat_bin) |>
+  dplyr::summarise(
+    emissions_co2_mt = sum(emissions_co2_mt, na.rm = TRUE),
+    emissions_co2_dark_mt = sum(emissions_co2_dark_mt, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  dplyr::mutate(
+    emissions_co2_total_mt = emissions_co2_mt + emissions_co2_dark_mt,
+    share_dark = dplyr::if_else(
+      emissions_co2_total_mt > 0,
+      emissions_co2_dark_mt / emissions_co2_total_mt,
+      0
+    )
+  )
+
+# The share map draws the eye to the pixels with the highest S1-unmatched
+# share, and those are not the pixels where the emissions are. Banding the
+# pixels lets the text say so: what share of pixels, and what share of
+# emissions, sits in each band.
+dark_share_bands <- spatial_co2_share_dark |>
+  dplyr::mutate(
+    band = dplyr::case_when(
+      share_dark < 0.05 ~ "under_5",
+      share_dark < 0.25 ~ "5_to_25",
+      share_dark < 0.5 ~ "25_to_50",
+      TRUE ~ "over_50"
+    )
+  ) |>
+  dplyr::group_by(band) |>
+  dplyr::summarise(
+    n_pixels = dplyr::n(),
+    emissions_co2_total_mt = sum(emissions_co2_total_mt),
+    .groups = "drop"
+  ) |>
+  dplyr::mutate(
+    share_of_pixels = n_pixels / sum(n_pixels),
+    share_of_emissions = emissions_co2_total_mt / sum(emissions_co2_total_mt)
+  )
+
+# Sums the named bands so a single band or a run of them reads the same way
+dark_share_band_pct <- function(bands, metric) {
+  scales::percent(
+    sum(dark_share_bands[[metric]][dark_share_bands$band %in% bands]),
+    accuracy = 0.1
+  )
+}
+
 # Summarize fraction of end-year CO2 emissions that were S1-unmatched,
 # disaggregated by fishing and non-fishing
 dark_emissions_by_fishing <- monthly_aggregated_time_series |>
@@ -1479,6 +1531,8 @@ each vessel using precise latitude/longitude/timestamp information for over `r s
 
 
 
+- Expressed as a share of each pixel's own total rather than as a magnitude, the S1-unmatched contribution concentrates over continental shelves and in coastal waters, while the open-ocean shipping lanes are close to zero. The brightest pixels are not where the emissions are: pixels where more than half of `r analysis_end_year` CO$_{2}$ is S1-unmatched are `r dark_share_band_pct("over_50", "share_of_pixels")` of ocean pixels but only `r dark_share_band_pct("over_50", "share_of_emissions")` of emissions, while `r dark_share_band_pct(c("5_to_25", "25_to_50"), "share_of_emissions")` of emissions occur in pixels where the S1-unmatched share is between 5% and 50%.
+
 -   Across the entire `r analysis_start_year` to `r analysis_end_year`
     time series, almost all S1-unmatched emissions (
     `r dark_emissions_by_area |>   dplyr::filter(inside_footprint & s1_imaged) |>   dplyr::pull(percent_total)`) occurred inside the S1 footprint and in pixel-months that were imaged
@@ -2161,29 +2215,10 @@ spatial_emissions_total_plot_pseudolog <- make_spatial_emissions_by_fleet_map(
 # choropleth uses a different family - so it does not read as another
 # magnitude map. Zeros are real predictions, not missing data, so nothing is
 # masked and 0% sits at the bottom of the ramp.
-spatial_co2_share_dark <- annual_spatial_co2_emissions_ais_dark_by_fleet |>
-  dplyr::filter(year == analysis_end_year) |>
-  dplyr::group_by(lon_bin, lat_bin) |>
-  dplyr::summarise(
-    emissions_co2_mt = sum(emissions_co2_mt, na.rm = TRUE),
-    emissions_co2_dark_mt = sum(emissions_co2_dark_mt, na.rm = TRUE),
-    .groups = "drop"
-  ) |>
-  dplyr::mutate(
-    emissions_co2_total_mt = emissions_co2_mt + emissions_co2_dark_mt,
-    share_dark = dplyr::if_else(
-      emissions_co2_total_mt > 0,
-      emissions_co2_dark_mt / emissions_co2_total_mt,
-      0
-    ),
-    # The two maps above are facets and each carries a strip. This map is a
-    # plain plot, so without a strip of its own it is one strip-height taller
-    # than they are and rel_heights of 2:1 no longer gives three equal maps.
-    # Facet it on a constant and hide the text, keeping the height.
-    strip_spacer = "S1-unmatched share"
-  )
-
-spatial_dark_share_plot <- ggplot(spatial_co2_share_dark) +
+spatial_dark_share_plot <- ggplot(
+  # the strip is a layout device for this figure, not part of the data
+  dplyr::mutate(spatial_co2_share_dark, strip_spacer = "S1-unmatched share")
+) +
   geom_sf(data = world_bbox_sf, fill = emissions_map_ocean_color, color = NA) +
   ggspatial::geom_spatial_tile(aes(
     x = lon_bin + 0.5,
