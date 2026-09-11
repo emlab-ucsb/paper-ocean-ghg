@@ -1601,9 +1601,12 @@ total_annual_emissions_by_fleet_fig <- annual_emissions |>
     # axis. Floating it in the gap between the S1 and AIS lines meant the box
     # struck through the S1 line. legend.justification.inside anchors the
     # legend's own top-left corner at this point rather than its center, so it
-    # cannot spill outside the panel. The 0.08 x inset keeps the box off the
-    # y-axis labels and the panel's left edge.
-    legend.position.inside = c(0.08, 0.99),
+    # cannot spill outside the panel. The x inset is small on purpose: the
+    # AIS-based + S1-unmatched line rises left to right, so the further left the
+    # box sits the lower that line is beneath it. At 0.08 the box's
+    # bottom-right corner met the line around 2021-2022; 0.02 clears it while
+    # still standing off the panel edge.
+    legend.position.inside = c(0.02, 0.99),
     legend.justification.inside = c(0, 1),
     legend.background = element_rect(fill = "white", color = "gray"),
     legend.title = element_blank(),
@@ -1704,7 +1707,10 @@ make_co2_pollutant_map <- function(map_data, fill_scale, color_scale) {
         fill = value
       )
     ) +
-    # one facet level per map, which keeps the panel heading
+    # One facet level per map. The strip heading is blanked: each map's
+    # colorbar title below it already names the quantity in full ("2025
+    # AIS-based + S1-unmatched CO2 emissions (MT/km2)"), so the short heading
+    # above only repeated a weaker version of it.
     facet_wrap(name ~ ., ncol = 1) +
     geom_sf(
       data = land,
@@ -1728,7 +1734,8 @@ make_co2_pollutant_map <- function(map_data, fill_scale, color_scale) {
     theme(
       legend.position = "bottom",
       legend.direction = "horizontal",
-      legend.key.width = unit(2, "cm")
+      legend.key.width = unit(2, "cm"),
+      strip.text = element_blank()
     )
 }
 
@@ -1959,7 +1966,15 @@ make_percent_dark_time_series_figure <- function(
     # NULL when the caller wants a single global panel
     facets +
     theme_plot() +
-    labs(x = "", y = expression(Share ~ of ~ CO[2] ~ from ~ "S1-unmatched")) +
+    labs(
+      x = "",
+      # One line, and short enough to clear the cowplot "B" label at the top of
+      # this panel. It stays one line on purpose: a two-line title widens this
+      # panel's y-axis label block, and y_axis_label_padding() then pads panel
+      # A to match, so both time series lose width. "monthly" is dropped
+      # because panel A's axis and the shared x-axis already establish it.
+      y = expression("S1-unmatched share of" ~ CO[2] ~ "emissions")
+    ) +
     theme(
       panel.grid.minor = element_blank(),
       axis.title.y = element_text(size = 9),
@@ -1970,33 +1985,38 @@ make_percent_dark_time_series_figure <- function(
     )
 }
 
-# Breaks every 10 percentage points, with the upper limit left to the data so
-# the gridlines always span the full range of the series
+# This panel is now a third of the figure height rather than half, and the
+# series only spans ~20-28%. Anchoring the axis at zero left the line squashed
+# into the top of a short panel with the post-2021 decline unreadable, so the
+# range is left to the data. Note this is a zoomed axis: judge the size of the
+# decline from the tick labels, not the slope.
 percent_dark_time_series_fig <- make_percent_dark_time_series_figure(
   time_series_data_monthly_percent_dark,
-  y_limits = c(0, NA),
-  y_breaks = seq(0, 100, by = 10)
-)
+  y_limits = c(NA, NA),
+  y_breaks = scales::pretty_breaks(n = 4)
+) +
+  # a point smaller than panel A's, which is what lets the title sit on one
+  # line inside a panel that is only a third of the figure height
+  theme(axis.title.y = element_text(size = 8))
 ```
 
 ```{r}
 # Figure 2C
 spatial_co2_emissions_ais_dark <- annual_spatial_co2_emissions_ais_dark_by_fleet |>
+  dplyr::filter(year == analysis_end_year) |>
   dplyr::group_by(lon_bin, lat_bin) |>
   dplyr::summarise(
     emissions_co2_mt = sum(emissions_co2_mt, na.rm = TRUE),
     emissions_co2_dark_mt = sum(emissions_co2_dark_mt, na.rm = TRUE)
   ) |>
   dplyr::ungroup() |>
-  # Third map in the panel: both fleets combined
-  dplyr::mutate(
-    emissions_co2_total_mt = emissions_co2_mt + emissions_co2_dark_mt
-  ) |>
+  # No combined map here. Figure 1C already maps the fused total, and against
+  # the AIS-based map it is 94% identical pixel for pixel (AIS is ~79% of the
+  # total), so the slot buys nothing. It goes to the share map instead.
   tidyr::pivot_longer(
     cols = c(
       emissions_co2_mt,
-      emissions_co2_dark_mt,
-      emissions_co2_total_mt
+      emissions_co2_dark_mt
     ),
     names_to = "fleet",
     values_to = "emissions_co2_mt"
@@ -2008,7 +2028,16 @@ spatial_co2_emissions_ais_dark <- annual_spatial_co2_emissions_ais_dark_by_fleet
 
 make_spatial_emissions_by_fleet_map <- function(
   spatial_emissions_data,
-  facets
+  facets,
+  # Defaults describe the cumulative series the SI figure plots. Figure 2C
+  # passes single-year values instead; its magnitudes are ~10x smaller, so the
+  # breaks move down a decade with them.
+  scale_name = bquote(
+    Cumulative ~ CO[2] ~ emissions ~ (MT / km^2) ~ from ~ .(
+      analysis_start_year
+    ) ~ to ~ .(analysis_end_year)
+  ),
+  scale_breaks = c(10, 100, 1000, 10000)
 ) {
   spatial_emissions_data |>
     dplyr::mutate(
@@ -2040,27 +2069,19 @@ make_spatial_emissions_by_fleet_map <- function(
       fill = emissions_map_land_color
     ) +
     scale_color_viridis_c(
-      name = bquote(
-        Cumulative ~ CO[2] ~ emissions ~ (MT / km^2) ~ from ~ .(
-          analysis_start_year
-        ) ~ to ~ .(analysis_end_year)
-      ),
+      name = scale_name,
       option = "magma",
       trans = ggallin::pseudolog10_trans,
-      breaks = c(10, 100, 1000, 10000),
+      breaks = scale_breaks,
       na.value = emissions_map_ocean_color,
       labels = scales::comma,
       guide = "none"
     ) +
     scale_fill_viridis_c(
-      name = bquote(
-        Cumulative ~ CO[2] ~ emissions ~ (MT / km^2) ~ from ~ .(
-          analysis_start_year
-        ) ~ to ~ .(analysis_end_year)
-      ),
+      name = scale_name,
       option = "magma",
       trans = ggallin::pseudolog10_trans,
-      breaks = c(10, 100, 1000, 10000),
+      breaks = scale_breaks,
       na.value = emissions_map_ocean_color,
       labels = scales::comma
     ) +
@@ -2098,30 +2119,124 @@ make_spatial_emissions_by_fleet_map <- function(
 }
 
 # Stacked in a single column: panel C occupies the right half of the figure, so
-# each map gets that full half-width instead of a third of the page. The
-# colorbar comes in from 10 cm so it fits the narrower column.
-spatial_emissions_total_plot_pseudolog <- make_spatial_emissions_by_fleet_map(
-  spatial_co2_emissions_ais_dark,
-  facets = facet_wrap(~fleet, ncol = 1)
-) +
+# each map gets that full half-width instead of a third of the page.
+spatial_emissions_map_colorbar <- function() {
   guides(
     fill = guide_colorbar(
       title.position = "top",
       title.hjust = 0.5,
       frame.color = "white",
       ticks.color = "white",
-      barwidth = unit(7, "cm"),
-      barheight = unit(0.4, "cm")
+      barwidth = unit(7.2, "cm"),
+      barheight = unit(0.35, "cm")
     )
+  )
+}
+
+# The two magnitude maps, sharing one magma scale
+# The maps in this panel are height-limited, not width-limited: each row has a
+# fixed height and the map keeps its aspect ratio, so it letterboxes sideways
+# and leaves white space in the column. Widening the column would not help;
+# reclaiming vertical chrome does. The helper's default 10pt strip margins cost
+# about 1.4 inches across three strips, so they are tightened here (only here -
+# the SI figure that shares this helper keeps the roomier default).
+spatial_map_strip_margin <- margin(t = 2, b = 4)
+
+spatial_emissions_total_plot_pseudolog <- make_spatial_emissions_by_fleet_map(
+  spatial_co2_emissions_ais_dark,
+  facets = facet_wrap(~fleet, ncol = 1),
+  scale_name = bquote(.(analysis_end_year) ~ CO[2] ~ emissions ~ (MT / km^2)),
+  scale_breaks = c(1, 10, 100, 1000)
+) +
+  spatial_emissions_map_colorbar() +
+  theme(
+    legend.title = element_text(size = 9),
+    strip.text.x = element_text(margin = spatial_map_strip_margin, size = 10),
+    panel.spacing = unit(0.3, "lines")
+  )
+
+# The share map. It cannot be a third facet of the plot above: a bounded 0-100%
+# share is a different quantity on a different scale, so it needs its own ramp
+# and its own colorbar. mako rather than magma for the same reason the country
+# choropleth uses a different family - so it does not read as another
+# magnitude map. Zeros are real predictions, not missing data, so nothing is
+# masked and 0% sits at the bottom of the ramp.
+spatial_co2_share_dark <- annual_spatial_co2_emissions_ais_dark_by_fleet |>
+  dplyr::filter(year == analysis_end_year) |>
+  dplyr::group_by(lon_bin, lat_bin) |>
+  dplyr::summarise(
+    emissions_co2_mt = sum(emissions_co2_mt, na.rm = TRUE),
+    emissions_co2_dark_mt = sum(emissions_co2_dark_mt, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  dplyr::mutate(
+    emissions_co2_total_mt = emissions_co2_mt + emissions_co2_dark_mt,
+    share_dark = dplyr::if_else(
+      emissions_co2_total_mt > 0,
+      emissions_co2_dark_mt / emissions_co2_total_mt,
+      0
+    ),
+    # The two maps above are facets and each carries a strip. This map is a
+    # plain plot, so without a strip of its own it is one strip-height taller
+    # than they are and rel_heights of 2:1 no longer gives three equal maps.
+    # Facet it on a constant and hide the text, keeping the height.
+    strip_spacer = "S1-unmatched share"
+  )
+
+spatial_dark_share_plot <- ggplot(spatial_co2_share_dark) +
+  geom_sf(data = world_bbox_sf, fill = emissions_map_ocean_color, color = NA) +
+  ggspatial::geom_spatial_tile(aes(
+    x = lon_bin + 0.5,
+    y = lat_bin + 0.5,
+    fill = share_dark,
+    color = share_dark
+  )) +
+  geom_sf(
+    data = land,
+    color = emissions_map_land_color,
+    fill = emissions_map_land_color
   ) +
-  theme(legend.title = element_text(size = 9))
+  theme_void() +
+  scale_fill_viridis_c(
+    name = bquote(
+      "S1-unmatched share of" ~ .(analysis_end_year) ~ CO[2] ~ "emissions"
+    ),
+    option = "mako",
+    limits = c(0, 1),
+    labels = scales::percent,
+    na.value = emissions_map_ocean_color
+  ) +
+  scale_color_viridis_c(
+    option = "mako",
+    limits = c(0, 1),
+    na.value = emissions_map_ocean_color,
+    guide = "none"
+  ) +
+  labs(x = "", y = "") +
+  facet_wrap(~strip_spacer, ncol = 1) +
+  scale_x_continuous(expand = c(0, 1)) +
+  scale_y_continuous(expand = c(0, 1)) +
+  spatial_emissions_map_colorbar() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_text(size = 9),
+    # same box as the strips on the maps above, but the label is invisible:
+    # the colorbar beneath already names the quantity in full
+    strip.text.x = element_text(
+      margin = spatial_map_strip_margin,
+      size = 10,
+      color = NA
+    ),
+    strip.background = element_rect(fill = "transparent", color = NA)
+  ) +
+  coord_sf(crs = map_projection)
 ```
 
 ```{r}
 #| label: fig-emissions-time-series-and-maps
-#| fig-cap: !expr 'paste0("(A) Time series of monthly global CO$_2$ emissions, shown for both AIS-based and S1-unmatched emissions. (B) Time series of the monthly share of global CO$_{2}$ emissions that is S1-unmatched. (C) Spatial distribution of cumulative ", analysis_start_year, "-", analysis_end_year, " CO$_{2}$ emissions, AIS-based (top), S1-unmatched (middle), and combined (bottom), shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale).")'
+#| fig-cap: !expr 'paste0("(A) Time series of monthly global CO$_2$ emissions, shown for both AIS-based and S1-unmatched emissions. (B) Time series of the monthly share of global CO$_{2}$ emissions that is S1-unmatched. (C) Spatial distribution of ", analysis_end_year, " CO$_{2}$ emissions, AIS-based (top) and S1-unmatched (middle), shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale). The bottom map shows, for each pixel, the share of its ", analysis_end_year, " CO$_{2}$ emissions that is S1-unmatched; unlike the two maps above it this is a bounded percentage rather than a magnitude, so it carries its own color scale. Every pixel has a modelled value, so a pixel reading 0% has no S1-unmatched emissions rather than no data.")'
 #| fig-width: 8
-#| fig-height: 6.5
+#| fig-height: 7.4
 
 # Figure 2 combined
 # Panels A and B share the same monthly x-axis, so only panel B labels the
@@ -2153,6 +2268,28 @@ axis_padding <- y_axis_label_padding(
   list(time_series_fig_co2, percent_dark_time_series_fig)
 )
 
+# Panel C is two blocks, each with its own colorbar directly beneath the maps
+# it describes: the two magnitude maps on one magma scale, then the share map
+# on its own. Splitting them gives each bar the full column width instead of
+# half, and makes the figure read as magnitudes on top, percentages along the
+# bottom.
+#
+# LEGEND_HEIGHT is that colorbar strip measured in map heights. Panel A spans
+# [map, map, legend] and panel B spans [map, legend], so each time series ends
+# level with its block rather than with a bare map edge.
+LEGEND_HEIGHT <- 0.24
+
+spatial_panels <- cowplot::plot_grid(
+  spatial_emissions_total_plot_pseudolog +
+    theme(legend.position = "none"),
+  cowplot::get_legend(spatial_emissions_total_plot_pseudolog),
+  spatial_dark_share_plot +
+    theme(legend.position = "none", plot.margin = margin(t = 6)),
+  cowplot::get_legend(spatial_dark_share_plot),
+  ncol = 1,
+  rel_heights = c(2, LEGEND_HEIGHT, 1, LEGEND_HEIGHT)
+)
+
 time_series_panels <- cowplot::plot_grid(
   time_series_fig_co2 +
     theme(
@@ -2162,6 +2299,7 @@ time_series_panels <- cowplot::plot_grid(
   percent_dark_time_series_fig +
     theme(plot.margin = margin(t = 0, b = -15, l = 24 + axis_padding[2])),
   ncol = 1,
+  rel_heights = c(2 + LEGEND_HEIGHT, 1 + LEGEND_HEIGHT),
   labels = c("A", "B"),
   align = "v",
   axis = "lr"
@@ -2169,7 +2307,7 @@ time_series_panels <- cowplot::plot_grid(
 
 cowplot::plot_grid(
   time_series_panels,
-  spatial_emissions_total_plot_pseudolog,
+  spatial_panels,
   ncol = 2,
   rel_widths = c(0.52, 0.48),
   labels = c("", "C")
