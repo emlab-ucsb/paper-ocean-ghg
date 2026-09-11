@@ -435,7 +435,7 @@ For the detection presence/absence classification model, we use an additional va
 
 \paragraph{Simulated outside S1 footprint testing}
 
-Then, to assess spatial transferability when predicting emissions in areas completely outside the S1 footprint (i.e., areas far from shore), we implement a spatially structured split, training on nearshore pixels ($<=$ 100km from shore) and testing on offshore pixels ($>$ 100km from shore) (Fig. \ref{fig:fig-offshore-outside-footprint-training-testing-map}). 
+Then, to assess spatial transferability when predicting emissions in areas completely outside the S1 footprint (i.e., areas far from shore), we implement a spatially structured split, training on nearshore pixels ($<=$ 100km from the nearest port) and testing on offshore pixels ($>$ 100km from the nearest port) (Fig. \ref{fig:fig-offshore-outside-footprint-training-testing-map}). 
 
 For the detection presence/absence classification model, we again use an additional validation dataset to optimize the classification cutoff threshold. We therefore use data from nearshore pixels to create a stratified random $80\%$/$20\%$ training/validation split, and then test using the offshore pixels.
 
