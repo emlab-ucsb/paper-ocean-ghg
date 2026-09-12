@@ -1,14 +1,45 @@
-# Function to download GFW data and save it in repo
-# Returns file path, for keeping track with targets
-download_gfw_data <- function(sql, bq_billing_project, file_path, ...) {
-  bigrquery::bq_project_query(
+# Download a GFW query to CSV and return the file path, for targets to track.
+#
+# The CSV is written so that it changes only when the numbers change. Without
+# care these files rewrote from top to bottom on every re-freeze even when
+# nothing had moved, for two separate reasons:
+#
+#   1. BigQuery does not promise row order, so rows came back shuffled.
+#   2. Rebuilding an upstream snapshot nudges the last bits of values that are
+#      otherwise identical. The query is not the culprit here - the same query
+#      run twice against the same table returns byte-identical results.
+#
+# So we round the noise away and put the rows in a fixed order. Nine
+# significant figures is far more precision than the paper ever reports, and
+# far less than a float64 carries, so no real information is lost.
+download_gfw_data <- function(sql, bq_billing_project, file_path,
+                              digits = 9, ...) {
+  gfw_data <- bigrquery::bq_project_query(
     bq_billing_project,
     query = sql
   ) |>
-    bigrquery::bq_table_download(n_max = Inf, bigint = "integer64") |>
+    bigrquery::bq_table_download(n_max = Inf, bigint = "integer64")
+
+  # Only plain floating-point columns get rounded. Timestamps and 64-bit
+  # integer counts are also stored as doubles underneath, and rounding either
+  # would corrupt it, so anything carrying a class attribute is left alone.
+  is_plain_double <- function(x) {
+    is.double(x) && is.null(attr(x, "class"))
+  }
+
+  gfw_data |>
+    dplyr::mutate(dplyr::across(
+      dplyr::where(is_plain_double),
+      function(x) signif(x, digits)
+    )) |>
+    # Sort on every column, left to right, so the row order is reproducible.
+    dplyr::arrange(dplyr::across(dplyr::everything())) |>
     readr::write_csv(file_path)
+
   return(file_path)
 }
+
+
 
 # Function to access and combine CO2 emissions data from EU maritime transport
 # Downloaded from https://mrv.emsa.europa.eu/# on July 10, 2025
