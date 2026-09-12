@@ -343,7 +343,7 @@ To reduce overall model complexity, we use a more simplified approach for estima
   & + \beta_5 \times \text{emissions}_{\text{CO}_2,i} \times \log(\text{distance\_to\_shore} + 1) + \epsilon_i
 \end{align*}
 
-Therefore, for all non-CO$_2$ gases, we first predict S1-unmatched CO$_2$ emissions using the framework above, and then convert these emissions to non-CO$_2$ S1-unmatched emissions using these eight linear models.
+Therefore, for all non-CO$_2$ gases, we first predict S1-unmatched CO$_2$ emissions using the framework above, and then convert these emissions to non-CO$_2$ S1-unmatched emissions using these eight linear models. Pollutant-to-CO$_2$ ratios were evaluated with distance to shore winsorized at the 0.1st percentile of the fitting distribution (442 m), to avoid extrapolating the log-linear ratio below the support of the data, where it can become negative.
 
 In the sections below, we detail: 1) the unit of observation and outcome variable for each of the three models; 2) the features used in each of the three models; 3) the data pre-processing steps used for each model; 4) the performance testing procedures and results for each model; 5) the feature importance results for each model; and 6) the final prediction procedure for obtaining our global spatiotemporal S1-unmatched emissions estimates.
 
