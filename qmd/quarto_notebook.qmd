@@ -4503,6 +4503,18 @@ emissions_by_ocean_summary_tbl <- emissions_by_ocean_summary_tbl |>
     "Percent change in total CO2 emissions ({analysis_start_year} to {analysis_end_year})" := percent_emissions_co2_mt_normalized,
     "Percent observations imaged by S1 (across {analysis_start_year}-{analysis_end_year})" := fraction_n_imaged,
   ) |>
+  # Pin the ocean column order. The upstream query returns rows in a
+  # nondeterministic order, so without this the table's columns reshuffle on
+  # every re-pull even when every value is identical. Hardcoded largest to
+  # smallest emitter rather than sorted by value, since Pacific and Atlantic
+  # are within 2% of each other and would swap between snapshots.
+  dplyr::mutate(
+    Ocean = factor(
+      Ocean,
+      levels = c("Pacific", "Atlantic", "Indian", "Arctic", "Southern")
+    )
+  ) |>
+  dplyr::arrange(Ocean) |>
   tidyr::pivot_longer(cols = -Ocean) |>
   tidyr::pivot_wider(names_from = Ocean, values_from = value) |>
   dplyr::rename(`Summary statistic` = name) |>

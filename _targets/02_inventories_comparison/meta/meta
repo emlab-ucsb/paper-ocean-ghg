@@ -191,10 +191,10 @@ fleet_emissions_and_size_by_year|function|70578a6a109ba74e
 fleet_growth_by_year|function|75a0b26f7a9d0e2b
 sum_cams_nc_to_tonnes|function|0d062ccd5c250ada
 summarize_cams_ship_co2|function|5ba11ed7029b8e0d
-annual_emissions_all_pollutants_file|stem|0b201f71c44b8628|c04acd2a617c2582|2c530c1562a7fbd1|1490773895|data/gfw/annual_emissions_all_pollutants.csv|t20707.7782081314s|s6488b|6488|file|local|vector|||0.001||
-annual_emissions_all_pollutants|stem|513c879de28eb1bc|2e728dc6b8be6695|ab88b64c3c0bd79d|1743342825||t20707.7880346105s|s3082b|3082|rds|local|vector|||0.114||
-gfw_edgar_marine_emissions|stem|e7c9e191576301eb|d1c48c58d80382f2|032a06caa2a703c4|-985180910||t20707.7880361023s|s495b|495|rds|local|vector|||0.093||
-all_inventory_data|stem|ca3eae5836631db0|5a48fe803d180bd4|451b631e40bcf744|-181859207||t20707.7880364171s|s833b|833|rds|local|vector|||0.015||
-gfw_edgar_marine_emissions_file|stem|cbddadb784800b67|0dfd21dc0ac48121|9c4fb0eb1c2a5be5|-1227551221|data/gfw/gfw_edgar_marine_emissions.csv|t20707.7880365071s|s1187b|1187|file|local|vector|||0.002||
-inventory_intensity_all_models_file|stem|0703b3d4df82df59|c56f560b57d4134d|bd87ed841ae350f8|770373273|data/inventories/inventory_intensity_all_models.csv|t20707.7880372874s|s669b|669|file|local|vector|||0.061||
-all_inventory_data_file|stem|06568803fd444f82|adfc0c3263fe2abf|94b7d2c38aedb885|-282323309|data/inventories/all_inventory_data.csv|t20707.7880373791s|s2189b|2189|file|local|vector|||0.002||
+annual_emissions_all_pollutants_file|stem|398d4bdd922ba4ff|c04acd2a617c2582|2c530c1562a7fbd1|1490773895|data/gfw/annual_emissions_all_pollutants.csv|t20708.0364851605s|s6460b|6460|file|local|vector|||0||
+annual_emissions_all_pollutants|stem|8907bd08d809c850|2e728dc6b8be6695|13ecbd1670c881c9|1743342825||t20708.0385397067s|s3086b|3086|rds|local|vector|||0.11||
+gfw_edgar_marine_emissions|stem|61abb4b331be17a0|d1c48c58d80382f2|f8047f0312e502c3|-985180910||t20708.0385411615s|s493b|493|rds|local|vector|||0.094||
+all_inventory_data|stem|c7e92e1e461111da|5a48fe803d180bd4|f0eb177f5ec244e9|-181859207||t20708.0385414006s|s834b|834|rds|local|vector|||0.014||
+gfw_edgar_marine_emissions_file|stem|7a279786c68499d2|0dfd21dc0ac48121|1975776a98d6e3fb|-1227551221|data/gfw/gfw_edgar_marine_emissions.csv|t20708.0385414863s|s1191b|1191|file|local|vector|||0.002||
+inventory_intensity_all_models_file|stem|0703b3d4df82df59|c56f560b57d4134d|334db032ae13a7d4|770373273|data/inventories/inventory_intensity_all_models.csv|t20708.0385422415s|s669b|669|file|local|vector|||0.059||
+all_inventory_data_file|stem|4044d5bad814cf6a|adfc0c3263fe2abf|b136a7f7832b8098|-282323309|data/inventories/all_inventory_data.csv|t20708.0385423254s|s2193b|2193|file|local|vector|||0.001||

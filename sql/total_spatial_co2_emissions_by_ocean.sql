@@ -37,3 +37,6 @@ ocean_emissions_info
 JOIN
 ocean_fraction_imaged_info
 USING(ocean,year)
+ORDER BY
+ocean,
+year
