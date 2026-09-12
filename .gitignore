@@ -45,3 +45,8 @@ qmd/quarto_notebook_cache/*
 *.zip
 # macOS Finder metadata
 .DS_Store
+
+# Rendered notebook PDF. main.tex does not reference it and Overleaf compiles
+# its own PDF, so tracking it only pushed ~18 MB of wholesale-rewritten binary
+# through the Overleaf sync on every render. Still written locally by pipeline 03.
+qmd/quarto_notebook.pdf
