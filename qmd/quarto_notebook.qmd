@@ -3899,7 +3899,12 @@ time_series_data_monthly_emissions_by_fleet <- monthly_aggregated_time_series |>
 
 time_series_by_fleet_fig_co2 <- make_pollutant_by_fleet_time_series_figure(
   time_series_data_monthly_emissions_by_fleet,
-  y_axis_label = expression(Monthly ~ CO[2] ~ emissions ~ (MT)),
+  # Two lines, as on panel B below. Panels A and B here are the same height and
+  # each title on one line is as long as the panel it labels, so with the two
+  # titles in one column - which is what lines them up - they meet at the panel
+  # boundary and run into each other. Two lines also keeps both title blocks the
+  # same width, so neither panel is padded to match the other.
+  y_axis_label = expression(atop(Monthly ~ CO[2], emissions ~ (MT))),
   # Top-left of the first facet, matching time_series_fig_co2 and Figure 1.
   # The old c(0.60, 0.90) sat in the gap between the two facets, which the
   # longer "AIS-based"/"S1-unmatched" keys outgrew - the wider box covered the
@@ -3943,27 +3948,35 @@ percent_dark_time_series_by_fishing_fig <- make_percent_dark_time_series_figure(
   y_limits = c(0, 60),
   y_breaks = seq(0, 60, by = 10),
   facets = facet_wrap(~fishing, nrow = 1, scales = "free_y")
-)
+) +
+  # The builder's one-line title is sized for Figure 2, where this panel is a
+  # third of the figure; here it is half of the A/B block and the title is
+  # longer than the panel, so it is broken over two lines (see the note on
+  # panel A above).
+  labs(y = expression(atop("S1-unmatched share", of ~ CO[2] ~ emissions)))
 ```
 
 ```{r}
 # Figure S1C
+# The same three maps as Figure 2C - AIS-based, S1-unmatched, and the
+# S1-unmatched share of each pixel - for the analysis end year, split here into
+# fishing and non-fishing columns. It used to map cumulative 2017-2025
+# emissions with a combined row in place of the share; matching Figure 2 means
+# a reader can carry the main-text maps straight onto these.
 spatial_co2_emissions_ais_dark_by_fleet <- annual_spatial_co2_emissions_ais_dark_by_fleet |>
+  dplyr::filter(year == analysis_end_year) |>
   dplyr::group_by(lon_bin, lat_bin, fishing) |>
   dplyr::summarise(
     emissions_co2_mt = sum(emissions_co2_mt, na.rm = TRUE),
-    emissions_co2_dark_mt = sum(emissions_co2_dark_mt, na.rm = TRUE)
+    emissions_co2_dark_mt = sum(emissions_co2_dark_mt, na.rm = TRUE),
+    .groups = "drop"
   ) |>
-  dplyr::ungroup() |>
-  # Third map row in the panel: both fleets combined
-  dplyr::mutate(
-    emissions_co2_total_mt = emissions_co2_mt + emissions_co2_dark_mt
-  ) |>
+  # No combined row: as in Figure 2C the slot goes to the share map, which
+  # says something the AIS-based map does not already say.
   tidyr::pivot_longer(
     cols = c(
       emissions_co2_mt,
-      emissions_co2_dark_mt,
-      emissions_co2_total_mt
+      emissions_co2_dark_mt
     ),
     names_to = "fleet",
     values_to = "emissions_co2_mt"
@@ -3977,36 +3990,231 @@ spatial_co2_emissions_ais_dark_by_fleet <- annual_spatial_co2_emissions_ais_dark
 
 spatial_emissions_by_fleet_total_plot_pseudolog <- make_spatial_emissions_by_fleet_map(
   spatial_co2_emissions_ais_dark_by_fleet,
-  # Strips sit on the right here (unlike the facet_wrap panel above, where they
-  # sit on top), so "AIS-based + S1-unmatched" on one line eats map width.
-  # Wrapping splits it across two lines and leaves the shorter labels alone.
+  # Strips sit on the right here (unlike the facet_wrap panel in Figure 2,
+  # where they sit on top), so "S1-unmatched" on one line eats map width.
+  # Wrapping splits it across two lines and leaves the shorter label alone.
   facets = facet_grid(
     fleet ~ fishing,
     labeller = labeller(fleet = label_wrap_gen(width = 12))
-  )
+  ),
+  # Single-year magnitudes, so the same scale as Figure 2C rather than the
+  # helper's cumulative default
+  scale_name = bquote(.(analysis_end_year) ~ CO[2] ~ emissions ~ (MT / km^2)),
+  scale_breaks = c(1, 10, 100, 1000)
 )
+
+# Per-pixel S1-unmatched share within each fleet. Unlike the global version in
+# Figure 2C, a pixel here can hold no emissions at all from one of the two
+# fleets, and a share is undefined rather than zero for those - they are left
+# NA and drawn in the background color, exactly as a zero-emissions pixel is on
+# the magnitude maps above.
+spatial_co2_share_dark_by_fleet <- annual_spatial_co2_emissions_ais_dark_by_fleet |>
+  dplyr::filter(year == analysis_end_year) |>
+  dplyr::group_by(lon_bin, lat_bin, fishing) |>
+  dplyr::summarise(
+    emissions_co2_mt = sum(emissions_co2_mt, na.rm = TRUE),
+    emissions_co2_dark_mt = sum(emissions_co2_dark_mt, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  dplyr::mutate(
+    emissions_co2_total_mt = emissions_co2_mt + emissions_co2_dark_mt,
+    share_dark = dplyr::if_else(
+      emissions_co2_total_mt > 0,
+      emissions_co2_dark_mt / emissions_co2_total_mt,
+      NA_real_
+    ),
+    fishing = ifelse(fishing, "Fishing", "Non-fishing") |>
+      forcats::fct_rev(),
+    # a row strip the same width as the wrapped "S1-unmatched" above, so the
+    # maps in the two blocks line up; its label is drawn invisible because the
+    # colorbar beneath already names the quantity
+    strip_spacer = "S1-unmatched"
+  )
+
+spatial_dark_share_by_fleet_plot <- ggplot(spatial_co2_share_dark_by_fleet) +
+  geom_sf(data = world_bbox_sf, fill = emissions_map_ocean_color, color = NA) +
+  ggspatial::geom_spatial_tile(aes(
+    x = lon_bin + 0.5,
+    y = lat_bin + 0.5,
+    fill = share_dark,
+    color = share_dark
+  )) +
+  geom_sf(
+    data = land,
+    color = emissions_map_land_color,
+    fill = emissions_map_land_color
+  ) +
+  theme_void() +
+  # mako, not magma, for the same reason as Figure 2C: a bounded percentage is
+  # a different quantity from a magnitude and should not read as another one
+  scale_fill_viridis_c(
+    name = bquote(
+      "S1-unmatched share of" ~ .(analysis_end_year) ~ CO[2] ~ "emissions"
+    ),
+    option = "mako",
+    limits = c(0, 1),
+    labels = scales::percent,
+    na.value = emissions_map_ocean_color
+  ) +
+  scale_color_viridis_c(
+    option = "mako",
+    limits = c(0, 1),
+    na.value = emissions_map_ocean_color,
+    guide = "none"
+  ) +
+  labs(x = "", y = "") +
+  # same labeller as the maps above, so this invisible row strip reserves
+  # exactly the width theirs does (label_wrap_gen breaks "S1-unmatched" at its
+  # hyphen) and all six maps come out the same size
+  facet_grid(
+    strip_spacer ~ fishing,
+    labeller = labeller(strip_spacer = label_wrap_gen(width = 12))
+  ) +
+  scale_x_continuous(expand = c(0, 1)) +
+  scale_y_continuous(expand = c(0, 1)) +
+  guides(
+    fill = guide_colorbar(
+      title.position = "top",
+      title.hjust = 0.5,
+      frame.color = emissions_map_frame_color,
+      ticks.color = emissions_map_frame_color,
+      barwidth = unit(10, "cm"),
+      barheight = unit(0.5, "cm")
+    )
+  ) +
+  theme(
+    legend.position = "bottom",
+    legend.title.align = 0.5,
+    # the column headings are repeated here because a colorbar now separates
+    # these maps from the ones that carry them
+    strip.text.x = element_text(margin = margin(t = 10, b = 10), size = 10),
+    strip.text.y = element_text(
+      angle = 0,
+      hjust = 0,
+      margin = margin(l = 10, r = 10),
+      size = 10,
+      color = NA
+    ),
+    strip.background = element_rect(fill = "transparent", color = NA),
+    panel.spacing = unit(1, "lines")
+  ) +
+  coord_sf(crs = map_projection)
 ```
 
 ```{r}
 #| label: fig-spatial-temporal-richness-by-fleet-total-pseudolog
-#| fig-cap: !expr 'paste0("(A) Time series of monthly global CO$_2$ emissions, shown for both AIS-based and S1-unmatched emissions, and for both fishing and non-fishing vessels. (B) Time series of the monthly share of global CO$_{2}$ emissions that is S1-unmatched, for both fishing and non-fishing vessels. (C) Spatial distribution of cumulative ", analysis_start_year, "-", analysis_end_year, " CO$_{2}$ emissions, AIS-based, S1-unmatched, and combined (rows), for both fishing and non-fishing vessels (columns), and shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale).")'
+#| fig-cap: !expr 'paste0("The fishing and non-fishing components of Figure 2, panel for panel. (A) Time series of monthly global CO$_2$ emissions, shown for both AIS-based and S1-unmatched emissions, and for both fishing and non-fishing vessels. (B) Time series of the monthly share of global CO$_{2}$ emissions that is S1-unmatched, for both fishing and non-fishing vessels. (C) Spatial distribution of ", analysis_end_year, " CO$_{2}$ emissions, AIS-based (top) and S1-unmatched (middle), for both fishing and non-fishing vessels (columns), shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale). The bottom maps show, for each pixel, the share of its ", analysis_end_year, " CO$_{2}$ emissions from that group of vessels that is S1-unmatched; unlike the maps above them this is a bounded percentage rather than a magnitude, so it carries its own color scale. Pixels with no ", analysis_end_year, " emissions from the group in question have no share to show and are drawn in the background color, as are pixels with no emissions on the maps above.")'
 #| fig-width: 8
-#| fig-height: 11
+#| fig-height: 11.5
 
 # Figure S1 combined
 axis_padding_by_fishing <- y_axis_label_padding(
   list(time_series_by_fleet_fig_co2, percent_dark_time_series_by_fishing_fig)
 )
 
+# Space at the left edge for the cowplot "A"/"B"/"C" labels, which are drawn at
+# x = 0 of their block and would otherwise sit on the rotated y-axis titles.
+panel_label_gutter <- 14
+
+# Where the width difference between the two y axes' labels is spent. cowplot
+# aligns the panels, so that difference has to go somewhere to the left of them;
+# put it to the left of the title (as a plot margin) and the panel with the
+# narrower labels has its whole [title | labels] stack pushed right, leaving the
+# two titles at different x. Putting it between the title and its labels instead
+# lines the panels up and leaves both titles on the figure's left edge.
+title_to_label_gap <- function(padding) {
+  theme(axis.title.y = element_text(margin = margin(r = padding)))
+}
+
+# The chunk's fig-width in points, which every measurement below is against
+figure_width_pt <- 8 * 72
+
+# Panels A and B and the maps of panel C are drawn by different plots, so
+# nothing puts their two columns over the same x range on its own: a time
+# series spends its left edge on an axis title and labels and nothing on its
+# right, while a map spends nothing on its left and its right on the row
+# strips. Measuring what each spends outside its panels lets each be padded on
+# the side where it spends less, so Non-fishing sits above Non-fishing and
+# Fishing above Fishing all the way down the figure.
+panel_side_widths <- function(plot) {
+  plot_table <- ggplotGrob(plot)
+  # faceted panels are named panel-1-1, panel-1-2 ...; a single panel is "panel"
+  panels <- plot_table$layout[grepl("^panel", plot_table$layout$name), ]
+  side_width <- function(columns) {
+    sum(grid::convertWidth(plot_table$widths[columns], "pt", valueOnly = TRUE))
+  }
+  c(
+    left = side_width(seq_len(min(panels$l) - 1)),
+    right = side_width(seq(max(panels$r) + 1, length(plot_table$widths)))
+  )
+}
+
+time_series_sides <- panel_side_widths(
+  time_series_by_fleet_fig_co2 +
+    title_to_label_gap(axis_padding_by_fishing[1]) +
+    theme(plot.margin = margin(t = 0, r = 0, b = 0, l = panel_label_gutter))
+)
+map_sides <- panel_side_widths(
+  spatial_emissions_by_fleet_total_plot_pseudolog +
+    theme(legend.position = "none")
+)
+
+# The column span every panel is aligned to: it starts where the time series
+# panels start and ends where the maps end.
+panel_left_pt <- time_series_sides[["left"]]
+panel_right_pt <- figure_width_pt - map_sides[["right"]]
+time_series_right_margin <- map_sides[["right"]] - time_series_sides[["right"]]
+
+# Maps carry no left-hand furniture of their own, so the whole plot is inset by
+# what the time series spends on its axis.
+pad_to_panel_columns <- function(plot) {
+  pad <- panel_left_pt - panel_side_widths(plot)[["left"]]
+  cowplot::plot_grid(
+    NULL,
+    plot,
+    ncol = 2,
+    rel_widths = c(pad, figure_width_pt - pad)
+  )
+}
+
+# A colorbar describes the maps above it, so it is centered on them rather than
+# on the figure - the maps do not reach the right edge, and a bar centered on
+# the page sits visibly right of what it labels.
+center_on_panel_columns <- function(grob) {
+  cowplot::plot_grid(
+    NULL,
+    grob,
+    NULL,
+    ncol = 3,
+    rel_widths = c(
+      panel_left_pt,
+      panel_right_pt - panel_left_pt,
+      figure_width_pt - panel_right_pt
+    )
+  )
+}
+
 time_series_panels_by_fishing <- cowplot::plot_grid(
   time_series_by_fleet_fig_co2 +
+    title_to_label_gap(axis_padding_by_fishing[1]) +
     theme(
       axis.text.x = element_blank(),
-      plot.margin = margin(b = -5, l = 14 + axis_padding_by_fishing[1])
+      plot.margin = margin(
+        t = 0,
+        r = time_series_right_margin,
+        b = -5,
+        l = panel_label_gutter
+      )
     ),
   percent_dark_time_series_by_fishing_fig +
+    title_to_label_gap(axis_padding_by_fishing[2]) +
     theme(
-      plot.margin = margin(t = 0, b = -15, l = 14 + axis_padding_by_fishing[2])
+      plot.margin = margin(
+        t = 0,
+        r = time_series_right_margin,
+        b = -15,
+        l = panel_label_gutter
+      )
     ),
   ncol = 1,
   labels = c("A", "B"),
@@ -4014,19 +4222,45 @@ time_series_panels_by_fishing <- cowplot::plot_grid(
   axis = "lr"
 )
 
-plot_constrained <- cowplot::plot_grid(
-  NULL,
-  time_series_panels_by_fishing,
-  NULL,
-  ncol = 3,
-  rel_widths = c(0.02, 0.88, 0.10)
+# Panel C is two blocks, each with its own colorbar directly beneath the maps
+# it describes - the two magnitude rows on one magma scale, then the share row
+# on its own - exactly as in Figure 2C. SI_LEGEND_HEIGHT is that colorbar strip
+# measured in map-row heights; the last one is taller because it sits at the
+# foot of the figure, where a legend larger than its row is clipped rather than
+# spilling into white space. The share block takes a little over one row, which
+# is what makes all six maps render at the same size: below that they shrink,
+# above it the row is height-limited and the block grows without them.
+SI_LEGEND_HEIGHT <- 0.3
+
+spatial_panels_by_fishing <- cowplot::plot_grid(
+  pad_to_panel_columns(
+    spatial_emissions_by_fleet_total_plot_pseudolog +
+      theme(legend.position = "none")
+  ),
+  center_on_panel_columns(
+    cowplot::get_legend(spatial_emissions_by_fleet_total_plot_pseudolog)
+  ),
+  pad_to_panel_columns(
+    spatial_dark_share_by_fleet_plot +
+      theme(
+        legend.position = "none",
+        # the same margins as the maps above, so the two blocks are inset by
+        # the same amount
+        plot.margin = margin(t = 6, r = 5.5, b = 5.5, l = 5.5)
+      )
+  ),
+  center_on_panel_columns(
+    cowplot::get_legend(spatial_dark_share_by_fleet_plot)
+  ),
+  ncol = 1,
+  rel_heights = c(2, SI_LEGEND_HEIGHT, 1.1, SI_LEGEND_HEIGHT + 0.2)
 )
 
 cowplot::plot_grid(
-  plot_constrained,
-  spatial_emissions_by_fleet_total_plot_pseudolog,
+  time_series_panels_by_fishing,
+  spatial_panels_by_fishing,
   ncol = 1,
-  rel_heights = c(0.40, 0.60),
+  rel_heights = c(0.36, 0.64),
   labels = c("", "C")
 )
 ```
@@ -4390,6 +4624,34 @@ ggplot(
 
 ```{r}
 #| results = 'asis'
+# Halves the 6pt of padding LaTeX puts either side of every column. The wide
+# tables in this supplement are mostly padding - nine columns spend 108pt of
+# the class's 372pt text width on it - and tightening it buys back more room
+# than any amount of rewording, at no cost a reader can see. The \setlength
+# sits inside the table environment, so it is local to that float. Attributes
+# are carried over because knitr::kable's class is what makes the chunk emit
+# the table as raw LaTeX rather than as a quoted string.
+# A column head broken over several lines. \shortstack is plain LaTeX, so this
+# needs no package main.tex does not already load, but it does need
+# escape = FALSE on the kable call that carries it.
+stacked_head <- function(...) {
+  paste0("\\shortstack{", paste(c(...), collapse = "\\\\"), "}")
+}
+
+tighten_table_columns <- function(latex_table, tabcolsep_pt = 3) {
+  tightened <- sub(
+    "\\\\begin\\{tabular\\}",
+    paste0(
+      "\\\\setlength{\\\\tabcolsep}{",
+      tabcolsep_pt,
+      "pt}\n\\\\begin{tabular}"
+    ),
+    latex_table
+  )
+  attributes(tightened) <- attributes(latex_table)
+  tightened
+}
+
 total_percent_change_by_fleet_tbl <- total_percent_change_by_fleet |>
   # The fleet labels are already the display labels (set where
   # total_percent_change_by_fleet is built), so no relabelling is needed here.
@@ -4409,26 +4671,42 @@ total_percent_change_by_fleet_tbl <- total_percent_change_by_fleet |>
   dplyr::mutate(
     dplyr::across(
       c(percent_total, percent_change),
-      ~ scales::percent(., accuracy = 1)
+      # escape = FALSE below, so the percent sign has to be escaped here or it
+      # opens a LaTeX comment and swallows the rest of the row
+      ~ scales::percent(., accuracy = 1, suffix = "\\%")
     )
   ) |>
   dplyr::arrange(pollutant) |>
+  # Six columns whose heads are all longer than the values under them, against
+  # a 31pc text width: on one line each the table runs off the page. Every head
+  # but Source and Pollutant is therefore broken over two lines, which costs
+  # the table nothing - the cells below them are short - and \tabcolsep is
+  # halved, which is worth 36pt across six columns. \shortstack and \tabcolsep
+  # are both plain LaTeX, so neither needs a package main.tex does not load.
   dplyr::rename(
     `Source` = fleet,
     Pollutant = pollutant,
-    "{analysis_start_year} emissions, MT" := dplyr::all_of(start_col),
-    "{analysis_end_year} emissions, MT" := dplyr::all_of(end_col),
-    "Percent {analysis_end_year} total" := percent_total,
-    "{analysis_start_year} to {analysis_end_year} change" := percent_change
+    !!stacked_head(analysis_start_year, "emissions, MT") :=
+      dplyr::all_of(start_col),
+    !!stacked_head(analysis_end_year, "emissions, MT") :=
+      dplyr::all_of(end_col),
+    !!stacked_head(paste("Percent", analysis_end_year), "total") :=
+      percent_total,
+    !!stacked_head(
+      paste(analysis_start_year, "to", analysis_end_year),
+      "change"
+    ) := percent_change
   ) |>
   knitr::kable(
     format = "latex",
+    escape = FALSE,
     label = "total_percent_change_by_fleet",
     caption = glue::glue(
       "Summary of {analysis_start_year} and {analysis_end_year} emissions, data source and pollutant."
     )
   ) |>
-  kableExtra::kable_styling(font_size = 6, latex_options = "hold_position")
+  kableExtra::kable_styling(font_size = 6, latex_options = "hold_position") |>
+  tighten_table_columns()
 
 total_percent_change_by_fleet_tbl
 
@@ -6501,7 +6779,24 @@ table_source_order <- dplyr::recode(
 # of decimals per cell; here eight series are being read against each other
 # year by year, so a fixed number of decimals matters more than a fixed
 # number of digits.
-inventory_comparison_all_sources_kable <- inventory_table_data |>
+# Column heads are the widest thing in this table and in the multi-sector one
+# below it, and both ran past \linewidth because of it: "GFW (AIS-based +
+# S1-unmatched)" on one line is wider than the eight year columns beside it.
+# These two heads are also the only ones with any slack - every other is a
+# single short word - so they are the ones broken over several lines.
+# \shortstack is part of LaTeX itself, so this needs no package main.tex does
+# not already load, but it does need escape = FALSE on the kable call.
+stack_column_head <- function(column_names) {
+  stacked <- c(
+    "GFW (AIS-based + S1-unmatched)" =
+      stacked_head("GFW", "(AIS-based +", "S1-unmatched)"),
+    "GFW (AIS-based)" = stacked_head("GFW", "(AIS-based)")
+  )
+  replaced <- unname(stacked[column_names])
+  ifelse(is.na(replaced), column_names, replaced)
+}
+
+inventory_comparison_all_sources_data <- inventory_table_data |>
   dplyr::mutate(
     emissions_co2_mt = formatC(
       emissions_co2_mt / 1e9,
@@ -6520,10 +6815,14 @@ inventory_comparison_all_sources_kable <- inventory_table_data |>
   # over it would coerce it to text and lose its right alignment
   dplyr::mutate(
     dplyr::across(-Year, ~ tidyr::replace_na(.x, "-"))
-  ) |>
+  )
+
+inventory_comparison_all_sources_kable <- inventory_comparison_all_sources_data |>
   knitr::kable(
     format = "latex",
     label = "inventory_comparison_all_sources",
+    col.names = stack_column_head(names(inventory_comparison_all_sources_data)),
+    escape = FALSE,
     caption = paste0(
       "Annual marine vessel CO$_{2}$ emissions (billions of metric tonnes) ",
       "for our AIS-based and fused (AIS-based + S1-unmatched) estimates and for the published ",
@@ -6531,7 +6830,10 @@ inventory_comparison_all_sources_kable <- inventory_table_data |>
       "an inventory publishes no estimate."
     )
   ) |>
-  kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
+  # Nine columns: a point smaller than the other inventory tables, and the
+  # tighter column padding, are what bring it inside the text width
+  kableExtra::kable_styling(font_size = 7, latex_options = "hold_position") |>
+  tighten_table_columns()
 
 inventory_comparison_all_sources_kable
 
@@ -6864,7 +7166,7 @@ shipping_plot
 #
 # Same series order the figure's key uses, so the columns read left to right
 # in the order the legend reads top to bottom.
-multisector_shipping_comparison_kable <- shipping |>
+multisector_shipping_comparison_data <- shipping |>
   dplyr::mutate(
     emissions_co2_mt = formatC(
       emissions_co2_mt / 1e9,
@@ -6881,10 +7183,15 @@ multisector_shipping_comparison_kable <- shipping |>
   dplyr::relocate(Year, dplyr::all_of(series_order)) |>
   dplyr::mutate(
     dplyr::across(-Year, ~ tidyr::replace_na(.x, "-"))
-  ) |>
+  )
+
+# Same two over-wide GFW heads as Table S9, broken the same way
+multisector_shipping_comparison_kable <- multisector_shipping_comparison_data |>
   knitr::kable(
     format = "latex",
     label = "multisector_shipping_comparison",
+    col.names = stack_column_head(names(multisector_shipping_comparison_data)),
+    escape = FALSE,
     caption = paste0(
       "Annual marine vessel CO$_{2}$ emissions (billions of metric tonnes) ",
       "for our AIS-based and fused (AIS-based + S1-unmatched) estimates against the shipping ",
