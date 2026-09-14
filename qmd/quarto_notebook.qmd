@@ -188,6 +188,14 @@ all_data_source_color_palette <- c(
   "Non-fishing" = paletteer::paletteer_d("colorblindr::OkabeIto")[[2]]
 )
 
+# Nature Communications asks for panel labels as lower-case bold letters "in the
+# same type size as used elsewhere in the figure". cowplot's default is a 14 pt
+# bold capital, larger than any type in these figures, so the size is set here
+# for every figure built on theme_plot(), whose axis titles are 12 pt. The
+# handful of figures drawn on theme_bw(base_size = 9) pass their own smaller
+# value at the call site rather than using this one.
+panel_label_size <- 12
+
 # Set consistent theme for all plots
 theme_plot <- function() {
   theme_minimal() %+replace%
@@ -1875,7 +1883,7 @@ co2_map <- cowplot::plot_grid(
 
 ```{r}
 #| label: fig-emissions-by-data-source-and-maps
-#| fig-cap: !expr 'paste0("(A) Annual marine vessel CO$_{2}$ emissions, with each line colored based on the data source. (B) Relative change in annual marine vessel CO$_{2}$ emissions from a ", analysis_start_year, " baseline, with each line colored based on the data source. (C) Spatial map of CO$_{2}$ emissions in ", analysis_end_year, " (top) and change in CO$_{2}$ emissions between ", analysis_start_year, " and ", analysis_end_year, " (bottom), aggregated across AIS-based and S1-unmatched emissions, and shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale).")'
+#| fig-cap: !expr 'paste0("(a) Annual marine vessel CO$_{2}$ emissions, with each line colored based on the data source. (b) Relative change in annual marine vessel CO$_{2}$ emissions from a ", analysis_start_year, " baseline, with each line colored based on the data source. (c) Spatial map of CO$_{2}$ emissions in ", analysis_end_year, " (top) and change in CO$_{2}$ emissions between ", analysis_start_year, " and ", analysis_end_year, " (bottom), aggregated across AIS-based and S1-unmatched emissions, and shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale).")'
 #| fig-width: 9
 #| fig-height: 6
 
@@ -1885,7 +1893,8 @@ cowplot::plot_grid(
     total_annual_emissions_by_fleet_fig,
     normalized_annual_emissions_by_fleet_fig,
     ncol = 1,
-    labels = c("A", "B"),
+    labels = c("a", "b"),
+    label_size = panel_label_size,
     # Panels A and B have different y-axis label widths ("0.00 B" vs "0%"), so
     # without this their panel regions start at different x offsets and the
     # vertical gridlines do not line up. axis = "lr" pads the narrower plot's
@@ -1896,7 +1905,8 @@ cowplot::plot_grid(
   ),
   co2_map,
   ncol = 2,
-  labels = c("", "C"),
+  labels = c("", "c"),
+  label_size = panel_label_size,
   rel_widths = c(0.5, 0.5),
   align = "vh"
 )
@@ -2289,7 +2299,7 @@ spatial_dark_share_plot <- ggplot(
 
 ```{r}
 #| label: fig-emissions-time-series-and-maps
-#| fig-cap: !expr 'paste0("(A) Time series of monthly global CO$_2$ emissions, shown for both AIS-based and S1-unmatched emissions. (B) Time series of the monthly share of global CO$_{2}$ emissions that is S1-unmatched. (C) Spatial distribution of ", analysis_end_year, " CO$_{2}$ emissions, AIS-based (top) and S1-unmatched (middle), shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale). The bottom map shows, for each pixel, the share of its ", analysis_end_year, " CO$_{2}$ emissions that is S1-unmatched; unlike the two maps above it this is a bounded percentage rather than a magnitude, so it carries its own color scale. Every pixel has a modelled value, so a pixel reading 0% has no S1-unmatched emissions rather than no data.")'
+#| fig-cap: !expr 'paste0("(a) Time series of monthly global CO$_2$ emissions, shown for both AIS-based and S1-unmatched emissions. (b) Time series of the monthly share of global CO$_{2}$ emissions that is S1-unmatched. (c) Spatial distribution of ", analysis_end_year, " CO$_{2}$ emissions, AIS-based (top) and S1-unmatched (middle), shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale). The bottom map shows, for each pixel, the share of its ", analysis_end_year, " CO$_{2}$ emissions that is S1-unmatched; unlike the two maps above it this is a bounded percentage rather than a magnitude, so it carries its own color scale. Every pixel has a modelled value, so a pixel reading 0% has no S1-unmatched emissions rather than no data.")'
 #| fig-width: 8
 #| fig-height: 7.4
 
@@ -2355,7 +2365,8 @@ time_series_panels <- cowplot::plot_grid(
     theme(plot.margin = margin(t = 0, b = -15, l = 24 + axis_padding[2])),
   ncol = 1,
   rel_heights = c(2 + LEGEND_HEIGHT, 1 + LEGEND_HEIGHT),
-  labels = c("A", "B"),
+  labels = c("a", "b"),
+  label_size = panel_label_size,
   align = "v",
   axis = "lr"
 )
@@ -2365,7 +2376,8 @@ cowplot::plot_grid(
   spatial_panels,
   ncol = 2,
   rel_widths = c(0.52, 0.48),
-  labels = c("", "C")
+  labels = c("", "c"),
+  label_size = panel_label_size
 )
 ```
 
@@ -2373,7 +2385,7 @@ cowplot::plot_grid(
 
 ```{r}
 #| label: fig-ais-data-richness
-#| fig-cap: !expr 'paste0("Richness of AIS-broadcasting vessel emissions data, showing: (A) Total ", analysis_end_year, " CO$_{2}$ emissions by vessel class for AIS-broadcasting vessels. Vessel classes are grouped into four families, with the total for each family shown above its bars; every class in a family is shown as its own bar, so panel heights differ with the number of classes. These totals are aggregated from the same gridded emissions shown in panel B, so the two panels describe exactly the same emissions and the bars sum to the mapped total. (B) Spatial distribution of ", analysis_end_year, " CO$_{2}$ emissions from AIS-broadcasting vessels for each of those same vessel class families, shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale). Families appear in the same order in both panels. (C) For each family, the share of CO$_{2}$ emissions attributable to international trips, port stays, and domestic trips (note that Panel C is not a decomposition of panel A: it covers only emissions that could be assigned to a trip or port visit that ended in ", analysis_end_year, "; each family sums to 100% of its own assigned emissions).")'
+#| fig-cap: !expr 'paste0("Richness of AIS-broadcasting vessel emissions data, showing: (a) Total ", analysis_end_year, " CO$_{2}$ emissions by vessel class for AIS-broadcasting vessels. Vessel classes are grouped into four families, with the total for each family shown above its bars; every class in a family is shown as its own bar, so panel heights differ with the number of classes. These totals are aggregated from the same gridded emissions shown in panel b, so the two panels describe exactly the same emissions and the bars sum to the mapped total. (b) Spatial distribution of ", analysis_end_year, " CO$_{2}$ emissions from AIS-broadcasting vessels for each of those same vessel class families, shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale). Families appear in the same order in both panels. (c) For each family, the share of CO$_{2}$ emissions attributable to international trips, port stays, and domestic trips (note that Panel c is not a decomposition of panel a: it covers only emissions that could be assigned to a trip or port visit that ended in ", analysis_end_year, "; each family sums to 100% of its own assigned emissions).")'
 #| fig-width: 9
 #| fig-height: 10
 
@@ -2582,12 +2594,14 @@ cowplot::plot_grid(
     emissions_by_vessel_class_barplot,
     vessel_class_family_maps,
     ncol = 2,
-    labels = c("A", "B"),
+    labels = c("a", "b"),
+    label_size = panel_label_size,
     rel_widths = c(0.52, 0.48)
   ),
   activity_type_composition_barplot,
   ncol = 1,
-  labels = c("", "C"),
+  labels = c("", "c"),
+  label_size = panel_label_size,
   rel_heights = c(1, 0.2)
 )
 ```
@@ -2596,7 +2610,7 @@ cowplot::plot_grid(
 
 ```{r}
 #| label: fig-emissions-marine-ocean-other
-#| fig-cap: !expr 'paste0("(A) Trend in CO$_{2}$ emissions by ocean (normalized to ", analysis_start_year, " baseline), using our fused AIS+S1 marine vessel data. (B) Comparison in trend of CO$_{2}$ emissions data (normalized to ", analysis_start_year, " baseline) between marine transportation emissions from GFW, other transportation emissions from EDGAR, and all sector emissions from EDGAR. On the right-hand side of the figure, absolute values are shown as text and color-coded for each line, for the last year of available data for that series (", analysis_end_year, " for the GFW marine vessel series in panel A and B; ", edgar_comparison_year, " for the EDGAR series in panel B).")'
+#| fig-cap: !expr 'paste0("(a) Trend in CO$_{2}$ emissions by ocean (normalized to ", analysis_start_year, " baseline), using our fused AIS+S1 marine vessel data. (b) Comparison in trend of CO$_{2}$ emissions data (normalized to ", analysis_start_year, " baseline) between marine transportation emissions from GFW, other transportation emissions from EDGAR, and all sector emissions from EDGAR. On the right-hand side of the figure, absolute values are shown as text and color-coded for each line, for the last year of available data for that series (", analysis_end_year, " for the GFW marine vessel series in panel a and B; ", edgar_comparison_year, " for the EDGAR series in panel b).")'
 #| fig-width: 7.5
 #| fig-height: 7
 
@@ -2768,7 +2782,8 @@ cowplot::plot_grid(
   annual_ocean_emissions_normalized_fig,
   emissions_comparison_figure_normalized,
   ncol = 1,
-  labels = c("A", "B")
+  labels = c("a", "b"),
+  label_size = panel_label_size
 )
 ```
 
@@ -2874,7 +2889,7 @@ in-line statistics; these chunks only draw and tabulate it.
 
 ```{r}
 #| label: fig-s1-matching-double-counting
-#| fig-cap: !expr 'paste0("Double counting of broadcasting vessels through missed S1 matches. (A) Probability that a detection of a broadcasting vessel is missed by the matching, by the length of the gap in its AIS messages (points, from GFW hold-out experiment). Beyond the last simulated gap the line either reaches 100\\% at the 24-hour matching window (dashed) or stays flat (dotted). (B) Share of AIS-based CO$_{2}$ emissions, ", analysis_start_year, " to ", analysis_end_year, ", by the length of the AIS gap during which they were emitted. (C) B multiplied by A, the share of AIS-based emissions at risk of double counting: emitted during gaps in which a detection of the vessel would have been missed and counted as S1-unmatched. The miss probability for each bin is labeled above the bar. (D) Running total of C; the end point is the 5.1\\% in the text.")'
+#| fig-cap: !expr 'paste0("Double counting of broadcasting vessels through missed S1 matches. (a) Probability that a detection of a broadcasting vessel is missed by the matching, by the length of the gap in its AIS messages (points, from GFW hold-out experiment). Beyond the last simulated gap the line either reaches 100\\% at the 24-hour matching window (dashed) or stays flat (dotted). (b) Share of AIS-based CO$_{2}$ emissions, ", analysis_start_year, " to ", analysis_end_year, ", by the length of the AIS gap during which they were emitted. (c) B multiplied by A, the share of AIS-based emissions at risk of double counting: emitted during gaps in which a detection of the vessel would have been missed and counted as S1-unmatched. The miss probability for each bin is labeled above the bar. (d) Running total of C; the end point is the 5.1\\% in the text.")'
 #| fig-width: 7.5
 #| fig-height: 6.5
 
@@ -3038,7 +3053,8 @@ panel_cumulative <- ggplot(
 cowplot::plot_grid(
   panel_miss_rate, panel_share, panel_at_risk, panel_cumulative,
   ncol = 2,
-  labels = c("A", "B", "C", "D"),
+  labels = c("a", "b", "c", "d"),
+  label_size = panel_label_size,
   align = "hv",
   axis = "tblr"
 )
@@ -3556,7 +3572,7 @@ pixels_for_offshore_training_testing_split |>
 performance_detections_cls_roc_pr_curves |>
   tidyr::pivot_wider(names_from = "metric", values_from = "estimate") |>
   dplyr::mutate(
-    test = stringr::str_replace_all(test, "_", " ") |> stringr::str_to_title()
+    test = stringr::str_replace_all(test, "_", " ") |> stringr::str_to_sentence()
   ) |>
   ggplot(aes(x = recall, y = precision)) +
   geom_line() +
@@ -3579,7 +3595,7 @@ performance_detections_cls_roc_pr_curves |>
 performance_detections_cls_roc_pr_curves |>
   tidyr::pivot_wider(names_from = "metric", values_from = "estimate") |>
   dplyr::mutate(
-    test = stringr::str_replace_all(test, "_", " ") |> stringr::str_to_title()
+    test = stringr::str_replace_all(test, "_", " ") |> stringr::str_to_sentence()
   ) |>
   ggplot(aes(x = 1 - specificity, y = sensitivity)) +
   geom_line() +
@@ -3603,7 +3619,7 @@ performance_detections_cls_roc_pr_curves |>
 
 performance_detections_cls_conf_mat |>
   dplyr::mutate(
-    test = stringr::str_replace_all(test, "_", " ") |> stringr::str_to_title()
+    test = stringr::str_replace_all(test, "_", " ") |> stringr::str_to_sentence()
   ) |>
   dplyr::mutate(prediction = forcats::fct_rev(as.factor(prediction))) |>
   ggplot(aes(x = truth, y = prediction)) +
@@ -4123,7 +4139,7 @@ spatial_dark_share_by_fleet_plot <- ggplot(spatial_co2_share_dark_by_fleet) +
 
 ```{r}
 #| label: fig-spatial-temporal-richness-by-fleet-total-pseudolog
-#| fig-cap: !expr 'paste0("The fishing and non-fishing components of Figure 2, panel for panel. (A) Time series of monthly global CO$_2$ emissions, shown for both AIS-based and S1-unmatched emissions, and for both fishing and non-fishing vessels. (B) Time series of the monthly share of global CO$_{2}$ emissions that is S1-unmatched, for both fishing and non-fishing vessels. (C) Spatial distribution of ", analysis_end_year, " CO$_{2}$ emissions, AIS-based (top) and S1-unmatched (middle), for both fishing and non-fishing vessels (columns), shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale). The bottom maps show, for each pixel, the share of its ", analysis_end_year, " CO$_{2}$ emissions from that group of vessels that is S1-unmatched; unlike the maps above them this is a bounded percentage rather than a magnitude, so it carries its own color scale. Pixels with no ", analysis_end_year, " emissions from the group in question have no share to show and are drawn in the background color, as are pixels with no emissions on the maps above.")'
+#| fig-cap: !expr 'paste0("The fishing and non-fishing components of Figure 2, panel for panel. (a) Time series of monthly global CO$_2$ emissions, shown for both AIS-based and S1-unmatched emissions, and for both fishing and non-fishing vessels. (b) Time series of the monthly share of global CO$_{2}$ emissions that is S1-unmatched, for both fishing and non-fishing vessels. (c) Spatial distribution of ", analysis_end_year, " CO$_{2}$ emissions, AIS-based (top) and S1-unmatched (middle), for both fishing and non-fishing vessels (columns), shown at a 1x1 degree spatial resolution; emissions are area-normalized for each pixel (metric tonnes per square kilometer, shown on a pseudolog-10 scale). The bottom maps show, for each pixel, the share of its ", analysis_end_year, " CO$_{2}$ emissions from that group of vessels that is S1-unmatched; unlike the maps above them this is a bounded percentage rather than a magnitude, so it carries its own color scale. Pixels with no ", analysis_end_year, " emissions from the group in question have no share to show and are drawn in the background color, as are pixels with no emissions on the maps above.")'
 #| fig-width: 8
 #| fig-height: 11.5
 
@@ -4237,7 +4253,8 @@ time_series_panels_by_fishing <- cowplot::plot_grid(
       )
     ),
   ncol = 1,
-  labels = c("A", "B"),
+  labels = c("a", "b"),
+  label_size = panel_label_size,
   align = "v",
   axis = "lr"
 )
@@ -4281,7 +4298,8 @@ cowplot::plot_grid(
   spatial_panels_by_fishing,
   ncol = 1,
   rel_heights = c(0.36, 0.64),
-  labels = c("", "C")
+  labels = c("", "c"),
+  label_size = panel_label_size
 )
 ```
 
@@ -6488,7 +6506,8 @@ plot_fleet_sankey_with_series <- function(
     align = "v",
     axis = "lr",
     rel_heights = c(1, 1.08),
-    labels = c("B", "C")
+    labels = c("b", "c"),
+    label_size = 11
   )
 
   # Panel A's drawn area is made to span exactly from C's baseline up to B's
@@ -6516,7 +6535,8 @@ plot_fleet_sankey_with_series <- function(
     series_column,
     nrow = 1,
     rel_widths = c(rel_width_sankey, 1),
-    labels = c("A", "")
+    labels = c("a", ""),
+    label_size = 11
   )
 
   combined <- cowplot::plot_grid(
@@ -6660,7 +6680,7 @@ spread_labels <- function(y_end, gap_fraction, transform = identity,
 
 ```{r}
 #| label: figS-inventory-comparison-all-sources
-#| fig-cap: "Our AIS and fused estimates against the published bottom-up inventories. Panel A shows levels; panels B and C show change relative to 2017 and 2019."
+#| fig-cap: "Our AIS and fused estimates against the published bottom-up inventories. Panel a shows levels; panels b and C show change relative to 2017 and 2019."
 #| fig-width: 9
 #| fig-height: 14
 
@@ -6746,7 +6766,8 @@ inventory_plot <- cowplot::plot_grid(
   panel_b,
   panel_c,
   ncol = 1,
-  labels = c("A", "B", "C"),
+  labels = c("a", "b", "c"),
+  label_size = panel_label_size,
   align = "v",
   axis = "lr"
 ) +
@@ -7623,7 +7644,8 @@ panels <- cowplot::plot_grid(
   panel("pings_change", "AIS position messages"),
   panel("emissions_change", expression(bold("CO"[2] * " emissions"))),
   nrow = 1,
-  labels = c("A", "B", "C"),
+  labels = c("a", "b", "c"),
+  label_size = panel_label_size,
   align = "h",
   axis = "tb"
 )
@@ -8168,8 +8190,8 @@ levels_row <- cowplot::plot_grid(
   counts_panel,
   emissions_panel,
   ncol = 2,
-  labels = c("A", "B"),
-  label_size = 11,
+  labels = c("a", "b"),
+  label_size = 9,
   rel_widths = row_widths(counts_panel, emissions_panel)
 )
 
@@ -8177,8 +8199,8 @@ change_row <- cowplot::plot_grid(
   counts_change_panel,
   emissions_change_panel,
   ncol = 2,
-  labels = c("C", "D"),
-  label_size = 11,
+  labels = c("c", "d"),
+  label_size = 9,
   rel_widths = row_widths(counts_change_panel, emissions_change_panel)
 )
 
@@ -8526,8 +8548,8 @@ panel_ab <- plot_grid(
   ncol = 1,
   align = "v",
   axis = "lr",
-  labels = c("A", "B"),
-  label_size = 15,
+  labels = c("a", "b"),
+  label_size = 9,
   label_fontface = "bold",
   label_x = 0.002,
   hjust = 0
@@ -8804,7 +8826,7 @@ fleet_column <- function(fleet_name, labels = NULL) {
     axis = "lr",
     rel_heights = c(1.18, 1, 1),
     labels = labels,
-    label_size = 15,
+    label_size = 9,
     label_fontface = "bold",
     label_x = 0.002,
     hjust = 0
@@ -8812,7 +8834,7 @@ fleet_column <- function(fleet_name, labels = NULL) {
 }
 
 figure <- plot_grid(
-  fleet_column("Non-fishing", labels = c("A", "B", "C")),
+  fleet_column("Non-fishing", labels = c("a", "b", "c")),
   fleet_column("Fishing"),
   ncol = 2,
   align = "h",
