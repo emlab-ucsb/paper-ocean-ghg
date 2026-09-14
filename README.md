@@ -444,6 +444,25 @@ accumulates loose objects; check with `git count-objects -vH`.
 - `download_gfw_data()` — Executes a BigQuery SQL query and saves results in the repo as CSV. Note that this function can only be used by those who have special permissions to Global Fishing Watch data on BigQuery.
 - `combine_EU_data()` — Reads and combines annual EU MRV Excel files (2018–2024) into a single tibble
 
+## AI disclosure
+
+Much of the code in this repository was written with the assistance of a large language
+model — Anthropic's Claude, used through the Claude Code command-line tool. That includes
+the R analysis and plotting code in `qmd/quarto_notebook.qmd` and `r/functions.R`, the
+BigQuery SQL in `sql/`, the `targets` pipeline definitions, and this README. Commits made
+with that assistance carry a `Co-Authored-By: Claude` trailer, so `git log` records which
+parts of the history it touched.
+
+What that assistance did **not** do is decide anything. The models, the data sources, the
+methodological choices and the conclusions are the authors'. Every number reported in the
+manuscript is computed from the committed data by the code here rather than written by
+hand, and every figure is drawn from that data — none is AI-generated imagery. All code
+was reviewed and run by the authors, who are responsible for its correctness.
+
+The same disclosure appears in the manuscript under "Use of generative AI", following
+[Nature Portfolio's policy on AI](https://www.nature.com/nature-portfolio/editorial-policies/ai):
+a large language model cannot be an author, and its use must be documented.
+
 ## Licensing
 
 This repo uses the[ Create Commons CC BY 4.0 license](https://creativecommons.org/licenses/by/4.0/deed.en).

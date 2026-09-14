@@ -1129,6 +1129,26 @@ emissions_by_ocean_summary_tbl <- annual_emissions_by_ocean_normalized |>
   )
 ```
 
+# AI disclosure
+
+Much of the code in this notebook was written with the assistance of a large language
+model — Anthropic's Claude, used through the Claude Code command-line tool — as were the
+`targets` pipelines that feed it, the BigQuery SQL that produced the data in `data/gfw/`,
+and parts of the manuscript text. Commits made with that assistance carry a
+`Co-Authored-By: Claude` trailer, so `git log` records which parts of the history it
+touched.
+
+That assistance wrote code; it did not decide anything. The models, the data sources, the
+methodological choices and the conclusions are the authors'. Every number quoted in the
+manuscript is computed here from the committed data rather than written by hand — that is
+what the "In-line manuscript statistics" section below is for — and every figure is drawn
+from that data by the code in this notebook, so none is AI-generated imagery. All of it
+was reviewed and run by the authors, who are responsible for its correctness.
+
+The manuscript carries the same disclosure under "Use of generative AI", following
+[Nature Portfolio's policy on AI](https://www.nature.com/nature-portfolio/editorial-policies/ai):
+a large language model cannot be an author, and its use must be documented.
+
 # Double counting between the AIS-based and S1-unmatched estimates
 
 ```{r}
