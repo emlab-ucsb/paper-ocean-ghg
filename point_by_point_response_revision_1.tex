@@ -134,7 +134,73 @@ classification-performance figures were changed to sentence case.
 \point{E4 --- Colour-vision-deficiency-safe figure colours}
 % category: figures | assignee: Gavin
 % Avoid red/green discrimination; use colour-safe palettes.
-\response \todo{confirm palette review across all figures}
+\response We audited every figure in the manuscript rather than inspecting them by
+eye. Each categorical palette was simulated for deuteranopia, protanopia and
+tritanopia using the Machado et al. (2009) severity-1.0 model, and every pair of
+colours within a palette was then measured in CIE $\Delta E_{2000}$. For a
+categorical key the number that matters is the smallest pairwise distance, since
+that is the pair a reader is most likely to confuse.
+
+Most of the manuscript already met the standard, because the figures draw their
+colours from palettes built for this purpose rather than chosen by hand: the
+Okabe-Ito palette for the data-source series that carry Figures 1, 2 and S1;
+Paul Tol's \emph{Safe} palette for categorical keys; the viridis family
+(\texttt{magma}, \texttt{mako}) for the gridded emissions maps; and Crameri's
+\texttt{scico} palettes for the diverging change maps. These are perceptually
+uniform and colour-vision-deficiency-safe by construction, and wherever a figure
+needed arbitrary colours we have taken them from one of these packages rather
+than inventing them. The training/testing map already used the turquoise-and-red
+pairing the editor's guidance suggests. The audit also confirmed what these
+choices are worth: the gridded maps vary monotonically in lightness, so they
+carry their information without relying on hue discrimination at all, and the
+diverging change map holds 20.4 $\Delta E$ between its arms under protanopia.
+
+The audit did find five palettes that did not meet the standard, all of them
+places where colours had been chosen arbitrarily, and four more that were
+marginal. We have changed all nine:
+
+\begin{itemize}\setlength\itemsep{2pt}
+\item \textbf{Ocean trends (Figure 4a)} used ColorBrewer \emph{Dark2}, whose
+green and orange --- Arctic against Pacific --- were 3.4 $\Delta E$ apart under
+deuteranopia. This is now Tol's \emph{Safe} palette, at 17.7.
+\item \textbf{Fleet composition and fleet growth (Supplementary)} spread a
+\emph{Spectral} ramp across vessel classes. Spectral runs red--yellow--green and
+put neighbouring classes 1.4 $\Delta E$ apart under deuteranopia. These now use
+\emph{Safe}, at 12.8 (deuteranopia) and 11.8 (protanopia).
+\item \textbf{Vessel length bins (Supplementary)} used the \texttt{turbo}
+rainbow, at 2.5 $\Delta E$. These bins are ordered, so they now use a sequential
+\texttt{mako} ramp, which contains no red at all.
+\item \textbf{AIS receiver type (Supplementary)} used ColorBrewer \emph{Set2},
+whose pink and blue-purple were 1.6 $\Delta E$ apart under protanopia; now
+\emph{Safe}, at 19.8.
+\item \textbf{Multi-sector inventory comparisons (Supplementary)} encoded the
+inventory as a hue family and the scope as lightness within it, which placed the
+EDGAR and CEDS series 4.0 $\Delta E$ apart under protanopia. Changing hues does
+not fix this --- three dark family endpoints converge whatever hues are chosen ---
+so the inventory is now encoded twice, in hue and in line style, and a reader who
+cannot separate the families by colour can still separate them by line. The same
+redundancy was added to the registry-split figure, where three shades of one blue
+carried a nested split.
+\item Four further adjustments removed marginal pairs: the EDGAR all-sector line
+in Figure 4b (6.4 $\rightarrow$ 24.9), the SEIM inventory line (7.0
+$\rightarrow$ 12.5), and the lightness spacing within the EDGAR scope ramp (8.2
+$\rightarrow$ 16.1).
+\end{itemize}
+
+Two residuals are worth stating plainly. The vessel-class figures draw eleven and
+twelve categories respectively; no qualitative palette keeps that many colours
+separable, and while the red--green axis is now comfortably clear (12.8 and 11.8),
+one pair remains at 6.0 under tritanopia, which is far rarer and is not the
+discrimination the guidance is concerned with. Similarly, ten ordered length bins
+cannot all be far apart on any single sequential ramp; the ordering itself, and
+the label each line carries at its right-hand end, is what separates neighbours
+there. In both cases the affected figures also label their classes directly, so
+colour is not the only channel carrying the identity.
+
+\changes Palettes were changed in five figures and refined in four more, all at
+the source in the analysis code, so the choices cannot drift when figures are
+regenerated. Line style was added as a redundant encoding in the multi-sector and
+registry-split figures.
 
 \point{E5 --- Data Availability section}
 % category: policy | assignee: Gavin

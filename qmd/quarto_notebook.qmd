@@ -199,6 +199,33 @@ all_data_source_color_palette <- c(
 # value at the call site rather than using this one.
 panel_label_size <- 12
 
+# Categorical fills for the vessel-class and registry figures. These used to
+# spread a Spectral ramp over the class list, and Spectral runs red - yellow -
+# green: neighbouring classes came within 1.4 dE2000 of one another once
+# deuteranopia was simulated (Machado et al. 2009, severity 1.0), which is
+# exactly the discrimination the journal asks authors not to rely on. Tol's Safe
+# palette is built for colour-vision deficiency and holds these figures' classes
+# 12.8 (deuteranopia) and 11.8 (protanopia) apart. Black stands in for Safe's own
+# twelfth colour, a grey that sits 5.3 from its teal under deuteranopia. Twelve
+# is the ceiling: past that no qualitative palette stays safe, so more classes
+# than this is a signal to fold the smallest into "Other" rather than to
+# interpolate a ramp and lose the property the palette was chosen for.
+class_color_palette <- function(levels) {
+  safe <- c(
+    as.character(paletteer::paletteer_d("rcartocolor::Safe", 11)),
+    "#000000"
+  )
+  if (length(levels) > length(safe)) {
+    stop(
+      "class_color_palette() holds ", length(safe),
+      " colour-vision-safe colours but was asked for ", length(levels),
+      ". Fold the smallest classes into \"Other\" rather than interpolating.",
+      call. = FALSE
+    )
+  }
+  stats::setNames(safe[seq_along(levels)], levels)
+}
+
 # Set consistent theme for all plots
 theme_plot <- function() {
   theme_minimal() %+replace%
@@ -5475,10 +5502,23 @@ multisector_color_palette <- function(series_labels) {
 # palette cannot drift apart: adding a series there places it in the legend too,
 # in whatever position it was declared.
 
+# Linetype carries the inventory, colour carries the scope within it. The
+# palette gives each source its own hue family and steps lightness across the
+# scopes inside it, which reads cleanly in full colour but not otherwise: the
+# dark ends of the three families converge once colour vision deficiency is
+# simulated, with EDGAR's darkest against CEDS's 4.0 dE2000 apart under
+# protanopia. Swapping hue families does not fix it - three dark endpoints
+# collide whatever the hues - so the inventory is encoded twice, in hue and in
+# linetype, and a reader who cannot separate the families by colour can still
+# separate them by line. Within a family the scopes stay >= 10.4 apart under
+# every simulation, so lightness alone is enough there.
 multisector_linetypes <- function(series_labels) {
   linetypes <- rep("solid", length(series_labels))
   names(linetypes) <- series_labels
-  linetypes[grepl("maritime transport", series_labels)] <- "22"
+  linetypes[startsWith(series_labels, "EDGAR")] <- "22"
+  linetypes[startsWith(series_labels, "CEDS")] <- "12"
+  # the maritime-transport subsets of our own series stay dashed, as before
+  linetypes[grepl("maritime transport", series_labels)] <- "42"
   linetypes
 }
 
@@ -5857,39 +5897,13 @@ plot_fleet_sankey <- function(
     dplyr::pull(.data$vessel_class)
   class_levels <- c(ordered, intersect(trailing, folded$vessel_class))
 
-  # The ramp is spread over the class list as it stands BEFORE the support
-  # classes are folded into "Other", then subset to the classes actually drawn.
-  # Generating it over the folded list instead would spread the same Spectral
-  # ramp across four fewer classes and hand every one of them a different
-  # color, so this diagram would not match the year-series figures.
-  palette_levels <- fleet_data |>
-    dplyr::left_join(small, by = "vessel_class") |>
-    dplyr::mutate(
-      vessel_class = ifelse(
-        .data$vessel_class %in% grouped_as_reefer,
-        reefer_label,
-        .data$vessel_class
-      ),
-      vessel_class = ifelse(
-        .data$small & .data$vessel_class != reefer_label,
-        "Other",
-        .data$vessel_class
-      )
-    ) |>
-    dplyr::group_by(vessel_class, .data$year) |>
-    dplyr::summarise(
-      emissions_co2_mt = sum(.data$emissions_co2_mt),
-      n_unique_vessels = sum(.data$n_unique_vessels),
-      .groups = "drop"
-    ) |>
-    stacked_class_levels()
-
-  full_palette <- grDevices::colorRampPalette(
-    RColorBrewer::brewer.pal(11, "Spectral")
-  )(length(palette_levels))
-  names(full_palette) <- palette_levels
-
-  palette <- full_palette[class_levels]
+  # Colours are assigned over the classes this diagram actually draws, by
+  # position in the ordering both fleet figures compute the same way, so the two
+  # still agree on which class is which colour. They used to come from a ramp
+  # spread over the unfolded class list and then subset, which a fixed
+  # colour-vision-safe palette cannot reproduce: it has twelve colours, not one
+  # for every level of a sixteen-level list.
+  palette <- class_color_palette(class_levels)
 
   # The end nodes take a darker shade of each class's color, so they read as
   # solid anchors while the flows between them stay lighter. Mixing toward black
@@ -6297,45 +6311,15 @@ plot_fleet_sankey_with_series <- function(
       .groups = "drop"
     )
 
-  # As in the year-series figure: the ramp is spread over the class list before
-  # the support classes are folded away, so every class keeps the color it has
-  # in the other figures.
-  palette_levels <- fleet_data |>
-    dplyr::left_join(small, by = "vessel_class") |>
-    dplyr::mutate(
-      vessel_class = ifelse(
-        .data$vessel_class %in% grouped_as_reefer,
-        reefer_label,
-        .data$vessel_class
-      ),
-      vessel_class = ifelse(
-        .data$small & .data$vessel_class != reefer_label,
-        "Other",
-        .data$vessel_class
-      )
-    ) |>
-    dplyr::group_by(vessel_class, .data$year) |>
-    dplyr::summarise(
-      emissions_co2_mt = sum(.data$emissions_co2_mt),
-      n_unique_vessels = sum(.data$n_unique_vessels),
-      .groups = "drop"
-    ) |>
-    stacked_class_levels()
-
-  full_palette <- grDevices::colorRampPalette(
-    RColorBrewer::brewer.pal(11, "Spectral")
-  )(length(palette_levels))
-  names(full_palette) <- palette_levels
-
+  # Assigned over the drawn classes, as in plot_fleet_sankey() above, so panel a
+  # and the series panels beside it agree on which class is which colour.
   series_data <- fleet_data |>
     dplyr::filter(.data$year >= series_first_year) |>
     dplyr::left_join(small, by = "vessel_class") |>
     dplyr::mutate(
       # Reefers go into the catch-all rather than standing as their own group,
-      # matching panel A. Every reefer spelling is below the size threshold, so
+      # matching panel a. Every reefer spelling is below the size threshold, so
       # separately they are slivers too thin to label or to pick out of the key.
-      # The group still exists in palette_levels above, which is what keeps the
-      # other classes on the colors they have in the year-series figures.
       vessel_class = ifelse(
         .data$vessel_class %in% c(grouped_as_reefer, grouped_as_other),
         "Other",
@@ -6361,7 +6345,7 @@ plot_fleet_sankey_with_series <- function(
     dplyr::ungroup()
 
   class_levels <- stacked_class_levels(series_data)
-  palette <- full_palette[class_levels]
+  palette <- class_color_palette(class_levels)
 
   # `show_years` rather than `show_axis`: stacked one above the other, both
   # panels keep their percent axis and only the lower one needs the year labels,
@@ -6597,9 +6581,9 @@ plot_fleet_sankey_with_series <- function(
 #     thirty-seven, and at the class height the diagram stretches into a few
 #     enormous slabs.
 #
-# Colors come from the same Spectral ramp the class figures use, spread over
-# three levels rather than a dozen, so this figure reads as part of the same set
-# without pretending its groups are the class groups.
+# Colors come from the same colour-vision-safe palette the class figures use,
+# over three levels rather than a dozen, so this figure reads as part of the
+# same set without pretending its groups are the class groups.
 
 
 plot_registry_sankey_with_series <- function(
@@ -7616,12 +7600,9 @@ plot_data <- fleet_growth_data |>
     vessel_class = factor(.data$vessel_class, levels = class_levels)
   )
 
-# The same Spectral ramp the composition figures spread over their class list,
-# so a class keeps its color across every fleet figure
-class_colors <- grDevices::colorRampPalette(
-  RColorBrewer::brewer.pal(11, "Spectral")
-)(length(class_levels))
-names(class_colors) <- class_levels
+# The same colour-vision-safe palette the composition figures use, so a class
+# keeps its color across every fleet figure
+class_colors <- class_color_palette(class_levels)
 
 baseline_year <- unique(fleet_growth_data$baseline_year)
 

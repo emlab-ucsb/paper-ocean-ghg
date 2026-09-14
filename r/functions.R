@@ -1097,7 +1097,15 @@ inventory_linetypes <- function(data_sources) {
   # independent series, so the three fragments are dashed. Solid is reserved for
   # series that stand on their own, which keeps a fragment from reading as
   # another inventory's estimate.
+  #
+  # Each fragment takes its own dash pattern rather than sharing one. The three
+  # are a lightness ramp of a single blue, which is the right encoding for a
+  # nested split but leaves colour doing the work alone; under protanopia the
+  # closest pair in that figure falls to 6.9 dE2000. The dash patterns separate
+  # them without colour, and still read as a family against the solid lines.
   linetypes[startsWith(names(linetypes), "GFW (AIS-based, ")] <- "22"
+  linetypes[startsWith(names(linetypes), "GFW (AIS-based, IMO")] <- "42"
+  linetypes[startsWith(names(linetypes), "GFW (AIS-based, other")] <- "12"
   linetypes
 }
 
@@ -1120,8 +1128,10 @@ inventory_color_palette <- function(data_sources) {
     # longer name carried in the data
     "STEAM" = okabe_ito[[2]],
     # Okabe-Ito's yellow is too low-contrast on white for a thin line, so SEIM
-    # takes a darker hue from outside the palette
-    "SEIM" = "#7B3294",
+    # takes a darker hue from outside the palette. Not the purple it used to
+    # take: that sat 7.0 dE2000 from the blue GFW line under deuteranopia, where
+    # this dark red-brown clears every other series in the figure by 10.1.
+    "SEIM" = "#661100",
     "ICCT" = okabe_ito[[7]],
     "MariTEAM" = "grey30",
     # The AIS series split by registry status. These are not inventories - they
@@ -1890,10 +1900,14 @@ multisector_colors <- function() {
     "GFW (AIS-based, maritime transport)" = "#6BAED6",
     "GFW (AIS-based, maritime transport excl. passenger)" = "#BDD7E7",
 
-    # EDGAR - oranges and reds
+    # EDGAR - oranges and reds. The three scopes are spread further apart in
+    # lightness than the ramp they were taken from: at the original spacing the
+    # two middle scopes were 8.2 dE2000 apart under deuteranopia, and lightness
+    # is the only channel separating them once the linetype has been spent on
+    # the inventory. Widened, they clear 16.1.
     "EDGAR - All sectors" = "#7F2704",
-    "EDGAR - Other transportation" = "#D94801",
-    "EDGAR - Shipping" = "#F16913",
+    "EDGAR - Other transportation" = "#E6550D",
+    "EDGAR - Shipping" = "#FDAE6B",
     "EDGAR - Shipping (international)" = "#FD8D3C",
     "EDGAR - Shipping (inland)" = "#FDD0A2",
 
