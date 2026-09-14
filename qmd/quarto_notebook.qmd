@@ -180,7 +180,10 @@ all_data_source_color_palette <- c(
   "S1-unmatched" = paletteer::paletteer_d("colorblindr::OkabeIto")[[
     6
   ]],
-  "All sectors (EDGAR)" = paletteer::paletteer_d("colorblindr::OkabeIto")[[8]],
+  # Okabe-Ito's grey is 6.4 dE2000 from the reddish purple on the line beside it
+  # under deuteranopia; near-black separates them by 24.9 and reads as the
+  # all-sector envelope the other two sit inside.
+  "All sectors (EDGAR)" = "grey20",
   "EDGAR" = paletteer::paletteer_d("colorblindr::OkabeIto")[[8]],
   "OECD" = paletteer::paletteer_d("colorblindr::OkabeIto")[[6]],
   "IMO" = paletteer::paletteer_d("colorblindr::OkabeIto")[[3]],
@@ -2655,8 +2658,13 @@ annual_ocean_emissions_normalized_fig <- annual_emissions_by_ocean_normalized |>
     legend.title = element_blank(),
     legend.background = element_rect(fill = "white", color = "gray")
   ) +
-  scale_color_brewer(
-    palette = "Dark2",
+  # Tol's Safe palette rather than ColorBrewer Dark2. Dark2's green and orange -
+  # here Arctic against Pacific - sit 3.4 dE2000 apart once deuteranopia is
+  # simulated (Machado et al. 2009, severity 1.0), which is the green/orange
+  # confusion the journal asks authors to design out. Safe holds the five oceans
+  # 17.7 apart on the same test, and is already the palette the flag figure uses.
+  paletteer::scale_color_paletteer_d(
+    "rcartocolor::Safe",
     breaks = c(
       "Southern Ocean",
       "Pacific Ocean",
@@ -5145,9 +5153,10 @@ annual_global_emissions_by_receiver_type |>
   scale_x_continuous(
     breaks = unique(annual_global_emissions_by_receiver_type$year)
   ) +
-  scale_color_brewer(
-    type = "qual",
-    palette = "Set2",
+  # Set2's pink and blue-purple are 1.6 dE2000 apart under protanopia, so the
+  # same Safe palette the other categorical figures use replaces it here (19.8).
+  paletteer::scale_color_paletteer_d(
+    "rcartocolor::Safe",
     guide = guide_legend(reverse = TRUE)
   ) +
   theme_plot() +
@@ -5557,8 +5566,14 @@ s1_length_bin_levels <- function() {
 # vessel sits in one length bin and one registry class per year in this extract,
 # so the sum is a headcount rather than a double count.
 
+# Sequential rather than a rainbow: turbo put its neighbouring bins 2.5 dE2000
+# apart under deuteranopia and ran through red and green to do it. mako carries
+# the same ordering on one hue ramp, with no red in it at all, and holds the ten
+# bins 7.1 apart. That is the ceiling for ten levels of any sequential ramp - the
+# lightness axis is only so long - and the ordering itself, plus the trend label
+# each line carries at the right edge, is what separates neighbouring bins.
 s1_length_palette <- function(n = 10) {
-  viridisLite::turbo(n, end = 0.92)
+  viridisLite::mako(n, end = 0.95)
 }
 
 # The dark (unmatched) share of S1 detections, per fleet length decile, with a
@@ -8755,7 +8770,7 @@ trends |>
   as.data.frame() |>
   print()
 
-length_palette <- viridisLite::turbo(10, end = 0.92)
+length_palette <- viridisLite::mako(10, end = 0.95)
 
 # Plot ---------------------------------------------------------------------
 # One plot per fleet x component rather than a facet grid, because each fleet
