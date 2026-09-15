@@ -59,54 +59,26 @@
 \end{center}
 
 \bigskip
-\noindent We thank the editor and both reviewers for their careful reading and
-constructive comments. Below we reproduce every comment verbatim (gray boxes)
+\noindent We greatly appreciate the opportunity to revise our manuscript, and sincerely appreciate the thoughtfulness of the editor and referees in providing constructive feedback. Below we reproduce every comment verbatim (gray boxes)
 and give our response in blue, with the corresponding manuscript changes in
 green. All line and page numbers refer to the tracked-changes version of the
 manuscript.
 
 By incorporating this excellent feedback, we believe our manuscript is significantly stronger as a result.
 
-We are also excited to highlight to the editor and both reviewers that since we first submitted the manuscript for review in March 2026, we have made a number of significant improvements to both the AIS-based and S1-based emissions models. For the AIS-based model, we have improved our vessel characteristic inference algorithms across the board, and are now able to distinguish between chemical and oil tankers. For the S1-based models, we have expanded our set of included predictive model features. The improved models all now have higher predictive power and out-of-sample performance. We have also increased the time period covered by our dataset to make our results more timely and globally relevant, expanding coverage that previously ended in 2024 to now include 2025. We have updated all manuscript figures, statistics, tables, and accompanying text has to reflect these improved models and expanded temporal coverage.
+We are also excited to highlight to the editor and both reviewers that since we first submitted the manuscript for review in March 2026, we have made a number of significant improvements to both the AIS-based and S1-based emissions models. For the AIS-based model, we have improved our vessel characteristic inference algorithms across the board, and are now able to distinguish between chemical and oil tankers. For the S1-based models, we have expanded our set of included predictive model features. The improved models all now have higher predictive power and out-of-sample performance. We have also increased the time period covered by our dataset to make our results more timely and globally relevant, expanding coverage that previously ended in 2024 to now include 2025. We have updated all manuscript figures, statistics, tables, and accompanying text to reflect these improved models and expanded temporal coverage.
 
-% Optional: 2--3 sentence high-level summary of the biggest changes,
-% written LAST once revisions are done.
-
-% =====================================================================
 \reviewer{Response to the Editor}
-% These are the mandatory editorial/formatting gates. The editor stated
-% the manuscript will NOT proceed without them. Not all need prose here,
-% but the ones with a judgement call (Source Data exception) do.
-% =====================================================================
 
-\point{E1 --- Manuscript reformatting (section order)}
-% category: formatting | assignee: Gavin
-% Required order: Title, Author list, Affiliations, Abstract, Introduction
-% (no subheading), Results (one-level subheadings), Discussion (no subheading),
-% Methods (one-level subheadings), Data Availability, Code Availability,
-% References, Acknowledgements, Funding, Author Contributions, Competing
-% Interests, Tables, Figure Legends/Captions. Data & Code Availability MUST
-% sit immediately after Methods.
-\response We have reordered the manuscript to follow the required structure. The
-Methods section now follows the Discussion directly, and the Data Availability and
-Code Availability sections sit immediately below it, ahead of the References. The
-back matter that follows the References is now ordered Acknowledgements, Funding,
-Author Contributions, Competing Interests. The statement that previously covered
-code and data together has been separated into the two required sections.
+Before turning to the point-by-point responses to the referee comments, we would first like to highlight that we have fully formatted the manuscript in accordance with the guidelines provided by \textit{Nature Communications}:
 
-\changes Section order in \texttt{main.tex} is now: Title, Author list,
-Affiliations, Abstract, Introduction, Results, Discussion, Methods, Data
-Availability, Code Availability, References, Acknowledgements, Funding, Author
-Contributions, Competing Interests, followed by the Supplementary Information.
-\todo{three items in this list still need author text, and are flagged in the .tex:
-(i) the Acknowledgements section is empty now that the Climate TRACE sentence sits
-under Funding, where the required order puts it; (ii) the Author Contributions
-statement is still the CRediT-style list and needs rewriting as one paragraph of
-descriptive sentences, as the editor asks; (iii) Results carries no subheadings yet,
-where the required order asks for one level. Also note the manuscript opens with a
-Summary section that is not in the editor's list, and that main-text figures remain
-embedded at their first citation with their legends attached rather than collected
-as a legends-only section at the end --- confirm which the editor prefers.}
+\point{E1 --- Manuscript section order}
+
+\response We have reordered the manuscript to follow the required structure. 
+
+\todo{Two items in this list still need author text, and are flagged in the .tex:
+(i) the Acknowledgements section is empty;
+(ii) the Author Contributions statement is still the CRediT-style list and needs rewriting as one paragraph of descriptive sentences, as the editor asks}
 
 \point{E2 --- Supplementary Information as a separate PDF}
 % category: formatting | assignee: Gavin
@@ -114,111 +86,30 @@ as a legends-only section at the end --- confirm which the editor prefers.}
 % items labelled Supplementary Figure/Table/Note/Discussion/Methods/References.
 \response \todo{confirm SI restructured with cover page + items list}
 
-\point{E3 --- Figure panel labelling}
-% category: figures | assignee: Gavin
-% Sub-panels: lower-case bold a, b, ...; lettering lower-case, first letter capitalised.
-% This is generated by your figure code -- fix at the source.
-\response All multi-panel figures have been relabelled. Panel labels are now
-lower-case bold letters (a, b, c, \ldots) set at the same type size as the rest of
-the type in each figure, in place of the upper-case labels at a larger size that the
-plotting library applies by default.
+\point{E3 --- Figure labeling}
 
-We also checked the lettering inside the figures against the same guidance.
+\response All multi-panel figures have been relabeled using lower case `a', `b', etc, using the same type as the other text in the figure.  All figure lettering is now also lower-case type, with only the first letter capitalized.
 
-\changes Eighteen panel-label sites across thirteen multi-panel figures were
-changed from upper-case to lower-case bold letters, and their type size set to match
-each figure's own text. Panel references were lower-cased throughout the figure
-captions and the main text. The title-case facet headings on the
-classification-performance figures were changed to sentence case.
 
-\point{E4 --- Colour-vision-deficiency-safe figure colours}
-% category: figures | assignee: Gavin
-% Avoid red/green discrimination; use colour-safe palettes.
-\response We audited every figure in the manuscript rather than inspecting them by
-eye. Each categorical palette was simulated for deuteranopia, protanopia and
-tritanopia using the Machado et al. (2009) severity-1.0 model, and every pair of
-colours within a palette was then measured in CIE $\Delta E_{2000}$. For a
-categorical key the number that matters is the smallest pairwise distance, since
-that is the pair a reader is most likely to confuse.
+\point{E4 --- Color-vision-deficiency-safe figure colours}
 
-Most of the manuscript already met the standard, because the figures draw their
-colours from palettes built for this purpose rather than chosen by hand: the
-Okabe-Ito palette for the data-source series that carry Figures 1, 2 and S1;
-Paul Tol's \emph{Safe} palette for categorical keys; the viridis family
-(\texttt{magma}, \texttt{mako}) for the gridded emissions maps; and Crameri's
-\texttt{scico} palettes for the diverging change maps. These are perceptually
-uniform and colour-vision-deficiency-safe by construction, and wherever a figure
-needed arbitrary colours we have taken them from one of these packages rather
-than inventing them. The training/testing map already used the turquoise-and-red
-pairing the editor's guidance suggests. The audit also confirmed what these
-choices are worth: the gridded maps vary monotonically in lightness, so they
-carry their information without relying on hue discrimination at all, and the
-diverging change map holds 20.4 $\Delta E$ between its arms under protanopia.
+\response We audited every figure in the manuscript to ensure each one is color-vision-deficiency-safe. Each categorical palette was simulated for deuteranopia, protanopia and tritanopia using the Machado et al. (2009) severity-1.0 model, and every pair of colours within a palette was then measured in CIE $\Delta E_{2000}$. For a categorical key the number that matters is the smallest pairwise distance, since that is the pair a reader is most likely to confuse.
 
-The audit did find five palettes that did not meet the standard, all of them
-places where colours had been chosen arbitrarily, and four more that were
-marginal. We have changed all nine:
+Most of the manuscript already met the standard, because the figures draw their colours from palettes built for this purpose rather than chosen by hand: the Okabe-Ito palette for the data-source series that carry Figures 1, 2 and S1; Paul Tol's \emph{Safe} palette for categorical keys; the viridis family (\texttt{magma}, \texttt{mako}) for the gridded emissions maps; and Crameri's \texttt{scico} palettes for the diverging change maps. These are perceptually uniform and colour-vision-deficiency-safe by construction, and wherever a figure needed arbitrary colours we have taken them from one of these packages rather than inventing them. The training/testing map already used the turquoise-and-red
+pairing the editor's guidance suggests. The audit also confirmed what these choices are worth: the gridded maps vary monotonically in lightness, so they carry their information without relying on hue discrimination at all, and the diverging change map holds 20.4 $\Delta E$ between its arms under protanopia.
 
-\begin{itemize}\setlength\itemsep{2pt}
-\item \textbf{Ocean trends (Figure 4a)} used ColorBrewer \emph{Dark2}, whose
-green and orange --- Arctic against Pacific --- were 3.4 $\Delta E$ apart under
-deuteranopia. This is now Tol's \emph{Safe} palette, at 17.7.
-\item \textbf{Fleet composition and fleet growth (Supplementary)} spread a
-\emph{Spectral} ramp across vessel classes. Spectral runs red--yellow--green and
-put neighbouring classes 1.4 $\Delta E$ apart under deuteranopia. These now use
-\emph{Safe}, at 12.8 (deuteranopia) and 11.8 (protanopia).
-\item \textbf{Vessel length bins (Supplementary)} used the \texttt{turbo}
-rainbow, at 2.5 $\Delta E$. These bins are ordered, so they now use a sequential
-\texttt{mako} ramp, which contains no red at all.
-\item \textbf{AIS receiver type (Supplementary)} used ColorBrewer \emph{Set2},
-whose pink and blue-purple were 1.6 $\Delta E$ apart under protanopia; now
-\emph{Safe}, at 19.8.
-\item \textbf{Multi-sector inventory comparisons (Supplementary)} encoded the
-inventory as a hue family and the scope as lightness within it, which placed the
-EDGAR and CEDS series 4.0 $\Delta E$ apart under protanopia. Changing hues does
-not fix this --- three dark family endpoints converge whatever hues are chosen ---
-so the inventory is now encoded twice, in hue and in line style, and a reader who
-cannot separate the families by colour can still separate them by line. The same
-redundancy was added to the registry-split figure, where three shades of one blue
-carried a nested split.
-\item Four further adjustments removed marginal pairs: the EDGAR all-sector line
-in Figure 4b (6.4 $\rightarrow$ 24.9), the SEIM inventory line (7.0
-$\rightarrow$ 12.5), and the lightness spacing within the EDGAR scope ramp (8.2
-$\rightarrow$ 16.1).
-\end{itemize}
-
-Two residuals are worth stating plainly. The vessel-class figures draw eleven and
-twelve categories respectively; no qualitative palette keeps that many colours
-separable, and while the red--green axis is now comfortably clear (12.8 and 11.8),
-one pair remains at 6.0 under tritanopia, which is far rarer and is not the
-discrimination the guidance is concerned with. Similarly, ten ordered length bins
-cannot all be far apart on any single sequential ramp; the ordering itself, and
-the label each line carries at its right-hand end, is what separates neighbours
-there. In both cases the affected figures also label their classes directly, so
-colour is not the only channel carrying the identity.
-
-\changes Palettes were changed in five figures and refined in four more, all at
-the source in the analysis code, so the choices cannot drift when figures are
-regenerated. Line style was added as a redundant encoding in the multi-sector and
-registry-split figures.
 
 \point{E5 --- Data Availability section}
-% category: policy | assignee: Gavin
-\response \todo{add Data Availability section after Methods}
+
+\response We have added a Data Availability section.
 
 \point{E6 --- Code Availability section}
-% category: policy | assignee: Gavin
-% NOTE: you already have a public GitHub repo + Code Ocean capsule -- point here.
-\response \todo{add Code Availability section citing repo/Code Ocean DOI}
+
+\response We have added a Code Availability section.
 
 \point{E7 --- Source Data file}
-% category: policy | assignee: Gavin
-% IMPORTANT EXCEPTION: a Source Data file is NOT required if all display
-% items can be reproduced from raw data + code already shared in a public
-% repository. Given your Code Ocean + GitHub setup you may qualify -- decide
-% and state it explicitly to the editor.
-\response \todo{decide: provide Source Data file, OR invoke the public-repo
-reproducibility exception and state it}
+
+\response All manuscript figures, tables, and summary statistics can be reproduced entirely by the data and code provided in the GitHub repo, Zenodo repo, and Code Oceans repo. We therefore did not produce a separate `Source Data file'.
 
 \point{E8 --- Reporting checklist(s)}
 % category: policy | assignee: Gavin
@@ -231,9 +122,8 @@ reproducibility exception and state it}
 \response \todo{link ORCID(s) in the MTS before acceptance}
 
 \point{E10 --- Author-list change form (if applicable)}
-% category: admin | assignee: Gavin
-% Only needed if the author list changes on revision.
-\response \todo{N/A unless author list changes}
+
+\response The author list has not changed since our original submission.
 
 % =====================================================================
 \reviewer{Reviewer \#2}
