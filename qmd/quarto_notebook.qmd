@@ -6828,22 +6828,16 @@ registry_relative <- registry_relative |>
   )
 registry_present <- levels(registry_relative$data_source)
 
-# Percent change and the level it ends at, so the panel carries magnitude as
-# well as rate. Labels are walked apart where series end close together.
+# Percent change only: the panel is half the width of the standalone figure,
+# and the "(1,189 Mt)" suffix the standalone version carries was clipped at the
+# panel edge. Levels are read from panel A and the table. Labels are walked
+# apart where series end close together.
 registry_end_labels <- registry_relative |>
   dplyr::group_by(.data$data_source) |>
   dplyr::filter(.data$year == max(.data$year)) |>
   dplyr::ungroup() |>
   dplyr::mutate(
-    label = sprintf(
-      "%+.0f%%  (%s Mt)",
-      100 * .data$relative_change,
-      formatC(
-        round(.data$emissions_co2_mt / 1e6),
-        format = "d",
-        big.mark = ","
-      )
-    )
+    label = sprintf("%+.0f%%", 100 * .data$relative_change)
   )
 registry_label_gap <- 0.06 * diff(range(registry_relative$relative_change))
 registry_label_order <- order(registry_end_labels$relative_change)
@@ -6890,6 +6884,8 @@ panel_c <- ggplot2::ggplot(
     expand = ggplot2::expansion(mult = c(0.02, 0.20))
   ) +
   ggplot2::scale_y_continuous(labels = scales::percent) +
+  # Let the end labels run past the panel edge rather than be cut off.
+  ggplot2::coord_cartesian(clip = "off") +
   ggplot2::labs(
     x = "",
     y = paste0(
