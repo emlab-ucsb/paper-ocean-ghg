@@ -6676,9 +6676,9 @@ spread_labels <- function(y_end, gap_fraction, transform = identity,
 
 ```{r}
 #| label: figS-inventory-comparison-all-sources
-#| fig-cap: "Our AIS and fused estimates against the published bottom-up inventories. Panel a shows levels; panels b and C show change relative to 2017 and 2019."
-#| fig-width: 9
-#| fig-height: 14
+#| fig-cap: "Our AIS-based and fused estimates against the published bottom-up inventories. Panel a shows levels; panels b and d show change relative to 2017 and 2019; panel c splits our AIS-based series by registry status, with the 150 m and above fragment for comparison."
+#| fig-width: 16
+#| fig-height: 11
 
 # The notebook builds its own all_inventory_data earlier for main's inventory
 # figure, which would overwrite the loaded target, so the SI series is loaded
@@ -6740,20 +6740,184 @@ panel_b <- plot_inventory_relative_change(
   baseline_year = baseline_year,
   source_order = source_order
 )
-# Panel C rebaselines to a later year so OECD, whose series starts in 2019, can
+# Panel D rebaselines to a later year so OECD, whose series starts in 2019, can
 # be included - at the cost of dropping the pre-2019 years and any series that
 # ends before then (IMO). Drop the earlier years first, so the panel starts at
 # its own baseline rather than showing lines that pre-date it.
-panel_c <- plot_inventory_relative_change(
+panel_d <- plot_inventory_relative_change(
   all_inventory_data |> dplyr::filter(year >= late_baseline_year),
   baseline_year = late_baseline_year,
   source_order = source_order
 )
 
-# Panel A carries the legend and the others do not, so their plotting areas
-# would be different widths and the x-axes would not line up. align = "v"
-# with axis = "lr" pads the other panels out to match. Panel C still spans a
-# shorter range of years, so only its left edge aligns.
+# Panel C: our AIS-based series split by registry status, relative to 2017,
+# with the size-restricted (>= 150 m) fragment for comparison. The same panel
+# is drawn standalone as figS-registry-split-comparison further down (kept for
+# reference, not placed in main.tex); folded in here because the SI text reads
+# it directly against the inventory trends in panels B and D. Objects are
+# prefixed registry_ so as not to clobber all_inventory_data or source_order,
+# which the table chunk below reads back.
+registry_series <- gfw_registry_emissions
+large_bins <- c("150-175m", "175-200m", "200-225m", "225m+")
+large_label <- "GFW (AIS-based, ≥150 m)"
+
+# One registered line rather than a per-register breakdown: what bounds a
+# registry-derived inventory is whether a vessel is registered anywhere at all.
+# gfw_registry_series() already sums the two registers into "any registry", so
+# take that row rather than re-summing the fragments.
+registry_split <- registry_series |>
+  dplyr::select(dplyr::all_of(c("data_source", "year", "emissions_co2_mt"))) |>
+  dplyr::filter(
+    .data$data_source %in%
+      c("GFW (AIS-based, any registry)", "GFW (AIS-based, no registry)")
+  ) |>
+  dplyr::mutate(
+    year = as.integer(.data$year),
+    data_source = ifelse(
+      .data$data_source == "GFW (AIS-based, any registry)",
+      "GFW (AIS-based, registry)",
+      .data$data_source
+    )
+  )
+
+# The two halves partition the AIS total, so summing them reconstructs it.
+registry_total <- registry_split |>
+  dplyr::group_by(.data$year) |>
+  dplyr::summarise(
+    emissions_co2_mt = sum(.data$emissions_co2_mt, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  dplyr::mutate(data_source = "GFW (AIS-based)")
+
+# Added after the total: this fragment overlaps both halves. All vessel
+# classes, not non-fishing only - fishing is 0.1 % of emissions at these lengths.
+large_series <- annual_ais_activity_summary_cheap |>
+  dplyr::filter(.data$length_bin %in% large_bins) |>
+  dplyr::group_by(year = as.integer(.data$year)) |>
+  dplyr::summarise(
+    emissions_co2_mt = sum(.data$emissions_co2_mt, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  dplyr::mutate(data_source = large_label)
+
+registry_relative <- dplyr::bind_rows(registry_split, registry_total, large_series) |>
+  dplyr::filter(.data$year >= baseline_year) |>
+  dplyr::group_by(.data$data_source) |>
+  dplyr::arrange(.data$year, .by_group = TRUE) |>
+  dplyr::mutate(
+    baseline = .data$emissions_co2_mt[.data$year == baseline_year][1],
+    relative_change = .data$emissions_co2_mt / .data$baseline - 1
+  ) |>
+  dplyr::ungroup() |>
+  dplyr::filter(!is.na(.data$relative_change))
+
+# Ordered from the half that grows most to the one that grows least, so the
+# legend reads down in the same order the lines end.
+registry_levels <- c(
+  "GFW (AIS-based, no registry)",
+  "GFW (AIS-based)",
+  large_label,
+  "GFW (AIS-based, registry)"
+)
+registry_relative <- registry_relative |>
+  dplyr::mutate(
+    data_source = factor(
+      .data$data_source,
+      levels = intersect(registry_levels, unique(.data$data_source))
+    )
+  )
+registry_present <- levels(registry_relative$data_source)
+
+# Percent change and the level it ends at, so the panel carries magnitude as
+# well as rate. Labels are walked apart where series end close together.
+registry_end_labels <- registry_relative |>
+  dplyr::group_by(.data$data_source) |>
+  dplyr::filter(.data$year == max(.data$year)) |>
+  dplyr::ungroup() |>
+  dplyr::mutate(
+    label = sprintf(
+      "%+.0f%%  (%s Mt)",
+      100 * .data$relative_change,
+      formatC(
+        round(.data$emissions_co2_mt / 1e6),
+        format = "d",
+        big.mark = ","
+      )
+    )
+  )
+registry_label_gap <- 0.06 * diff(range(registry_relative$relative_change))
+registry_label_order <- order(registry_end_labels$relative_change)
+registry_stacked <- registry_end_labels$relative_change[registry_label_order]
+for (i in seq_along(registry_stacked)[-1]) {
+  if (registry_stacked[i] - registry_stacked[i - 1] < registry_label_gap) {
+    registry_stacked[i] <- registry_stacked[i - 1] + registry_label_gap
+  }
+}
+registry_end_labels$label_y <- NA_real_
+registry_end_labels$label_y[registry_label_order] <- registry_stacked
+
+panel_c <- ggplot2::ggplot(
+  registry_relative,
+  ggplot2::aes(
+    x = .data$year,
+    y = .data$relative_change,
+    color = .data$data_source,
+    linetype = .data$data_source
+  )
+) +
+  ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "grey40") +
+  ggplot2::geom_line(linewidth = 1) +
+  ggplot2::geom_point(size = 1.8) +
+  ggplot2::geom_text(
+    data = registry_end_labels,
+    ggplot2::aes(
+      x = .data$year + 0.12,
+      y = .data$label_y,
+      label = .data$label,
+      color = .data$data_source
+    ),
+    hjust = 0,
+    size = 3.1,
+    fontface = "bold",
+    show.legend = FALSE,
+    inherit.aes = FALSE
+  ) +
+  ggplot2::scale_color_manual(values = registry_fragment_colors(registry_present)) +
+  ggplot2::scale_linetype_manual(values = inventory_linetypes(registry_present)) +
+  ggplot2::scale_x_continuous(
+    breaks = sort(unique(registry_relative$year)),
+    # Right-hand room for the end labels.
+    expand = ggplot2::expansion(mult = c(0.02, 0.20))
+  ) +
+  ggplot2::scale_y_continuous(labels = scales::percent) +
+  ggplot2::labs(
+    x = "",
+    y = paste0(
+      "Relative change of\nCO2 emissions from ",
+      baseline_year,
+      " baseline"
+    ),
+    color = "",
+    linetype = ""
+  ) +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(
+    axis.title.y = ggplot2::element_text(
+      angle = 90,
+      face = "bold",
+      vjust = 3,
+      size = 11
+    ),
+    panel.grid.minor = ggplot2::element_blank(),
+    legend.position = "right"
+  )
+
+# Two by two, filled by row: a (levels) and c (registry split) carry legends on
+# the right and sit in the left column; b and d (relative change) carry none
+# and sit in the right column, so the plotting areas within each column are
+# the same width. align = "hv" with axis = "tblr" pads the panels out to match.
+# Panel D still spans a shorter range of years, so only its left edge aligns
+# with panel B.
 #
 # plot_grid also assembles onto a transparent canvas, so set an explicit white
 # background - otherwise the saved PNG has no background at all
@@ -6761,11 +6925,12 @@ inventory_plot <- cowplot::plot_grid(
   panel_a,
   panel_b,
   panel_c,
-  ncol = 1,
-  labels = c("a", "b", "c"),
+  panel_d,
+  ncol = 2,
+  labels = c("a", "b", "c", "d"),
   label_size = panel_label_size,
-  align = "v",
-  axis = "lr"
+  align = "hv",
+  axis = "tblr"
 ) +
   ggplot2::theme(
     plot.background = ggplot2::element_rect(fill = "white", color = NA)
@@ -6886,6 +7051,10 @@ inventory_comparison_all_sources_kable |>
 
 ```{r}
 #| label: figS-multisector-comparison
+#| eval: false
+# Retired from the SI on 2026-09-15 when sec:inventory-comparison was
+# streamlined; kept, not rendered, in case the figure is wanted again. Its
+# committed PNG in figures/ is the last render. Set eval back to true to redraw.
 #| fig-cap: "Marine emissions growth against all sectors and against other transport modes, in EDGAR and CEDS, indexed to 2017."
 #| fig-width: 9
 #| fig-height: 5.5
@@ -7253,6 +7422,10 @@ multisector_shipping_comparison_kable |>
 
 ```{r}
 #| label: figS-inventory-vessel-counts-by-registry
+#| eval: false
+# Retired from the SI on 2026-09-15 when sec:inventory-comparison was
+# streamlined; kept, not rendered, in case the figure is wanted again. Its
+# committed PNG in figures/ is the last render. Set eval back to true to redraw.
 #| fig-cap: "Modelled fleet size over time for the inventories publishing a vessel count per year, split by registry status for ours."
 #| fig-width: 9
 #| fig-height: 6
@@ -7368,6 +7541,10 @@ relative_plot
 
 ```{r}
 #| label: figS-registry-split-comparison
+#| eval: false
+# Retired from the SI on 2026-09-15 when sec:inventory-comparison was
+# streamlined; kept, not rendered, in case the figure is wanted again. Its
+# committed PNG in figures/ is the last render. Set eval back to true to redraw.
 #| fig-cap: "Emissions from registry-matched and unmatched vessels, relative to 2017, with the size-restricted fragment for comparison."
 #| fig-width: 10
 #| fig-height: 6
@@ -7573,6 +7750,10 @@ relative_plot
 
 ```{r}
 #| label: figS-fleet-growth-by-year
+#| eval: false
+# Retired from the SI on 2026-09-15 when sec:inventory-comparison was
+# streamlined; kept, not rendered, in case the figure is wanted again. Its
+# committed PNG in figures/ is the last render. Set eval back to true to redraw.
 #| fig-cap: "Growth by vessel class since 2017 in emissions, vessel count and activity."
 #| fig-width: 18
 #| fig-height: 6
@@ -7684,6 +7865,10 @@ growth_plot
 
 ```{r}
 #| label: figS-unmatched-fraction-fullperiod
+#| eval: false
+# Retired from the SI on 2026-09-15 when sec:inventory-comparison was
+# streamlined; kept, not rendered, in case the figure is wanted again. Its
+# committed PNG in figures/ is the last render. Set eval back to true to redraw.
 #| fig-cap: "Share of Sentinel-1 detections with no matching AIS broadcast, by length bin, over the full period."
 #| fig-width: 11
 #| fig-height: 4.2
@@ -8213,6 +8398,10 @@ size_panels_plot
 
 ```{r}
 #| label: figS-messages-vs-hours-vs-emissions
+#| eval: false
+# Retired from the SI on 2026-09-15 when sec:inventory-comparison was
+# streamlined; kept, not rendered, in case the figure is wanted again. Its
+# committed PNG in figures/ is the last render. Set eval back to true to redraw.
 #| fig-cap: "AIS messages received against observed activity and emissions, indexed to 2021, separating densification from new activity."
 #| fig-width: 8.5
 #| fig-height: 5.2
@@ -8336,6 +8525,10 @@ plot_fleet_sankey_with_series(fleet_shares_by_year, year = 2025L)
 
 ```{r}
 #| label: figS-registry-sankey-with-series-2025
+#| eval: false
+# Retired from the SI on 2026-09-15 when sec:inventory-comparison was
+# streamlined; kept, not rendered, in case the figure is wanted again. Its
+# committed PNG in figures/ is the last render. Set eval back to true to redraw.
 #| fig-cap: "Registry status in 2025: share of the fleet against share of CO2 for registry-matched and unmatched vessels, with the supporting series."
 #| fig-width: 13
 #| fig-height: 6.5
@@ -8345,6 +8538,10 @@ plot_registry_sankey_with_series(registry_shares_by_year, year = 2025L)
 
 ```{r}
 #| label: figS-density-denominators-and-bins
+#| eval: false
+# Retired from the SI on 2026-09-15 when sec:inventory-comparison was
+# streamlined; kept, not rendered, in case the figure is wanted again. Its
+# committed PNG in figures/ is the last render. Set eval back to true to redraw.
 #| fig-cap: "Sentinel-1 detection density on the measure of S1 sampling effort used by the emissions models, showing detected activity per unit of observing effort."
 #| fig-width: 11
 #| fig-height: 5.5
@@ -8504,7 +8701,7 @@ combined
 
 ```{r}
 #| label: figS-density-by-match-status
-#| fig-cap: "Sentinel-1 detection density by length bin, split into total, AIS-matched and unmatched detections, for fishing and non-fishing fleets."
+#| fig-cap: "Sentinel-1 detection density per unit of S1 sampling effort, by length bin, split into total, AIS-matched and unmatched detections, for fishing and non-fishing fleets."
 #| fig-width: 13
 #| fig-height: 11
 #| results: hide
@@ -8770,6 +8967,11 @@ figure
 ## Inventory intensity across models
 
 ```{r}
+#| label: tabS-inventory-intensity-all-models
+#| eval: false
+# Retired from the SI on 2026-09-15 when sec:inventory-comparison was
+# streamlined; kept, not rendered, in case the figure is wanted again. Its
+# committed PNG in figures/ is the last render. Set eval back to true to redraw.
 #| results = 'asis'
 # Only the intensity columns are tabulated. The fleet counts and mean emissions
 # behind them stay in inventory_intensity_all_models.csv, which the text cites
