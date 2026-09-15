@@ -5619,14 +5619,11 @@ s1_length_palette <- function(n = 10) {
 # The dark (unmatched) share of S1 detections, per fleet length decile, with a
 # single full-period trend per decile.
 #
-# The era-split version of this figure fits one line before the December 2021
-# S1B failure and another after it. That split is the right way to read the
-# density figures, where the break moves the level, but it is the wrong way to
-# read this one: the unmatched share is a ratio of two counts drawn from the
-# same scenes, so a change in how much ocean was imaged cancels out of it. A
-# single fit over the whole period is therefore the honest summary, and it is
-# what makes the figure a statement about the fleet rather than about the
-# satellite.
+# One fit spans the whole record, with no break at the December 2021 S1B
+# failure. The unmatched share is a ratio of two counts drawn from the same
+# scenes, so a change in how much ocean was imaged cancels out of it and the
+# loss of half the constellation does not move the level. That is what makes
+# the figure a statement about the fleet rather than about the satellite.
 #
 # Fixed meter bins, the same ones as figS-density-by-match-status.png and
 # figS-ais-carriage-saturation-by-size.png: 0-25m upward in 25m steps to 225+m for
@@ -8348,48 +8345,45 @@ plot_registry_sankey_with_series(registry_shares_by_year, year = 2025L)
 
 ```{r}
 #| label: figS-density-denominators-and-bins
-#| fig-cap: "Sentinel-1 detection density under two denominators, and by fixed length bin, showing detected activity per unit of observing effort."
+#| fig-cap: "Sentinel-1 detection density on the measure of S1 sampling effort used by the emissions models, showing detected activity per unit of observing effort."
 #| fig-width: 11
-#| fig-height: 6.7
+#| fig-height: 5.5
 #| results: hide
 
 # Builds figures/figS-density-denominators-and-bins.png
 #
-# Aggregate Sentinel-1 detection density drawn twice, under two independent
-# measures of observing effort:
+# Aggregate Sentinel-1 detection density on ONE denominator: per-scene imaged
+# area summed across scenes (km2 x passes), which is the measure of S1 sampling
+# effort our model features are normalized by (see "S1 vessel detection
+# features" in the Methods). Series are the two fleets and their sum.
 #
-#   A  aggregate density on the EXACT denominator - per-scene imaged area summed
-#      across scenes (km2 x passes), the effort measure the emissions models
-#      normalize by.
-#
-#   B  aggregate density on union area x passes, built only from fields that do
-#      not depend on how the footprint polygons are drawn.
-#
-# A and B are built from different fields and agree, which is the cross-check
-# the pair exists to provide.
-#
-# History (issue #10). Until 2026-09-09 panel A had to be spliced: GFW's
+# History (issue #10). Until 2026-09-09 this figure carried a second panel
+# drawing the same densities on union area x passes, a denominator built only
+# from fields that do not depend on how the footprint polygons are drawn. That
+# panel existed because the exact denominator could not be trusted: GFW's
 # detect_foot_raw repeats each scene's footprint row before May 2021 (2.0 rows
 # per scene in 2017-2019, 1.4 in 2020, 1.3 in 2021, 1.0 after) and the coverage
 # table summed over the repeats, so the recorded summed area changed units at
-# May 2021 by a factor k = 1.81 and had to be rescaled onto the later basis.
-# The coverage table now collapses the repeats before summing, the recomputed k
-# is 0.98, and phi = summed / (union x passes) sits at 0.455-0.462 in every
-# year, so A is drawn as recorded and B is no longer the only stable measure.
+# May 2021 by a factor k = 1.81 and had to be spliced onto the later basis. The
+# coverage table now collapses the repeats before summing, the recomputed k is
+# 0.98, and phi = summed / (union x passes) sits at 0.455-0.462 in every year.
+# The exact denominator is therefore sound as recorded, the two panels were
+# drawing the same lines rescaled by a constant 1/phi, and the cross-check panel
+# is dropped: the figure is now single-panel on the model's own effort measure.
 #
-# The per-length-bin split that used to sit here as panel C is dropped as well.
-# si_density_by_match_status.R draws the same series as its Total row and then
-# decomposes it by AIS match status, so it carries that reading in full and this
-# figure can stay on the denominator question it exists to settle.
+# The per-length-bin split that used to sit here as a third panel is dropped as
+# well. si_density_by_match_status.R draws the same series as its Total row and
+# then decomposes it by AIS match status, so it carries that reading in full.
 #
-# The file name still says "and-bins" because inventories_comparison.md links
-# the figure by that path.
+# The file name still says "denominators-and-bins" because main.tex and
+# inventories_comparison.md link the figure by that path.
 #
-# The figure carries no title, subtitle or panel descriptions - only the A/B
-# labels and axis titles - so everything a reader needs is in the caption below.
+# The figure carries no title or subtitle - only the axis title and the fleet
+# key - so everything a reader needs is in the caption below.
 #
 # phi is printed below as a standing check: if the footprint duplication ever
-# comes back upstream, it shows up here as a phi that is no longer flat.
+# comes back upstream, it shows up here as a phi that is no longer flat, and
+# this figure's denominator is the one it would corrupt.
 #
 # Input:  data/gfw/s1_detection_density_by_denominator.csv
 #           (pulled by 01_gfw_data_pull from
@@ -8400,47 +8394,33 @@ plot_registry_sankey_with_series(registry_shares_by_year, year = 2025L)
 # description travels with the code that makes it. Numbers quoted are the ones
 # this script prints, so re-check them if the extract is regenerated.
 #
-#   Sentinel-1 detection density, 2017-2025, under two independent measures of
-#   observing effort. Monthly values are thin lines; thick lines are ordinary
-#   least squares fits of log density on time over the full period. Right-edge
+#   Sentinel-1 detection density, 2017-2025, expressed per unit of S1 sampling
+#   effort: detections per million km2 of per-scene imaged area summed across
+#   scenes, in detections per 10^6 km2 x pass. This is the same measure of
+#   sampling effort our emissions models normalize their detection features by,
+#   with scene footprints deduplicated before summing. Series are the two fleets
+#   and their sum. Monthly values are thin lines; thick lines are ordinary
+#   least-squares fits of log density on time over the full period. Right-edge
 #   labels give the fitted trend as percent change per year, exp(slope) - 1,
 #   with significance from the slope's two-sided t test (*** p < 0.001,
 #   ** p < 0.01, * p < 0.05, ns otherwise).
-#
-#   (A) Detections per million km2 of per-scene imaged area summed across
-#   scenes, in detections per 10^6 km2 x pass. This is the exact measure of S1
-#   sampling effort and the one the emissions models normalize by; scene
-#   footprints are deduplicated before summing. Series are the two fleets and
-#   their sum.
-#
-#   (B) Detections per million km2 of union area x mean passes. Union footprint
-#   area and pass counts do not depend on how per-scene polygons are drawn, so
-#   this denominator is independent of the footprint bookkeeping. It overstates
-#   effort by a stable factor 1/phi, where phi is the per-pass coverage
-#   fraction (~0.46), so its level is an index rather than a physical density
-#   while its trends and between-fleet ratios are unaffected. A and B are built
-#   from different fields and agree, which is the cross-check the pair exists
-#   to provide.
-#
-#   Vertical markers in A and B: dashed line, loss of Sentinel-1B in December
-#   2021; grey band, the +/- 3 months around that loss excluded from era-split
-#   fits elsewhere in the analysis (the full-period fits shown here use every
-#   month).
 # --------------------------------------------------------------------------
 
-S1B_FAILURE       <- as.Date("2021-12-01") # constellation halves
-ERA_GAP_START     <- as.Date("2021-09-01") # +/- 3 months excluded from era fits
-ERA_GAP_END       <- as.Date("2022-04-01")
+# Two markers used to sit on this panel and both are gone: a shaded band on the
+# +/- 3 months around the December 2021 Sentinel-1B loss, and a dashed line on
+# the loss itself. Every fit in the paper now spans the whole record, so neither
+# marked anything a reader acts on, and the denominator counts passes, so
+# halving the constellation is already divided out and the series do not step
+# there. Same for figS-density-by-match-status below, which carries neither.
 
-# One x scale for both panels, so a year sits at the same place in each and the
-# right-hand strip is free for the trend labels.
+# The right-hand strip of the x scale is empty on purpose: it is where the trend
+# labels sit, outside the data.
 X_LIMITS <- c(as.Date("2017-01-01"), as.Date("2027-06-01"))
 LABEL_X  <- as.Date("2026-03-01")
 
-# Units spelled out on each axis, because the two denominators are not the same
-# quantity: A is per area imaged, B is per area-times-opportunity.
-Y_TITLE_A <- "Detections per million km² of\nsummed per-scene imaged area"
-Y_TITLE_B <- "Detections per million km² of\nunion area × passes"
+# Units spelled out on the axis, because the denominator is not an area: it is
+# area times opportunity, km2 x passes.
+Y_TITLE <- "Detections per million km² of\nsummed per-scene imaged area"
 
 density <- s1_detection_density_by_denominator |>
   mutate(
@@ -8449,9 +8429,9 @@ density <- s1_detection_density_by_denominator |>
   )
 
 # Per-pass coverage fraction phi = summed / (union x passes): the share of a
-# cell's union footprint that each pass covers. B assumes it is constant, and A
-# and B are proportional exactly when it is. Printed per year so a return of the
-# footprint duplication (which pushed 2017-2019 to ~0.9) is visible at once.
+# cell's union footprint that each pass covers. Printed per year as a standing
+# check on the footprint records - a return of the duplication (which pushed
+# 2017-2019 to ~0.9) shows up at once as a phi that is no longer flat.
 cat("phi = summed / (union x passes), by year:\n")
 density |>
   distinct(month, summed_km2, union_x_scenes_km2) |>
@@ -8461,26 +8441,21 @@ density |>
   as.data.frame() |>
   print(row.names = FALSE)
 
-# Panels A and B ----------------------------------------------------------
-# Drawn as two plots rather than two facets of one, because the denominators
-# carry different units and so each needs its own y title.
-#
+# Panel --------------------------------------------------------------------
 # Densities share a denominator within a month, so they are additive across
 # length bins and fleets: the fleet and all-fleet series are plain sums.
-aggregate_series <- function(column) {
-  bind_rows(
-    density |>
-      group_by(month, fleet) |>
-      summarise(density = sum(.data[[column]]), .groups = "drop"),
-    density |>
-      group_by(month) |>
-      summarise(density = sum(.data[[column]]), .groups = "drop") |>
-      mutate(fleet = "All fleets")
-  ) |>
-    mutate(
-      series = factor(fleet, levels = c("All fleets", "Fishing", "Non-fishing"))
-    )
-}
+series <- bind_rows(
+  density |>
+    group_by(month, fleet) |>
+    summarise(density = sum(dens_summed), .groups = "drop"),
+  density |>
+    group_by(month) |>
+    summarise(density = sum(dens_summed), .groups = "drop") |>
+    mutate(fleet = "All fleets")
+) |>
+  mutate(
+    series = factor(fleet, levels = c("All fleets", "Fishing", "Non-fishing"))
+  )
 
 series_colors <- c(
   "All fleets" = "grey20",
@@ -8488,84 +8463,35 @@ series_colors <- c(
   "Non-fishing" = "#2c7fb8"
 )
 
-aggregate_panel <- function(column, y_title) {
-  series <- aggregate_series(column)
-  trend <- trend_by_group(series, series) |>
-    mutate(y_label = spread_labels(y_end, gap_fraction = 0.085))
+trend <- trend_by_group(series, series) |>
+  mutate(y_label = spread_labels(y_end, gap_fraction = 0.085))
 
-  plot <- ggplot(series, aes(month, density, color = series)) +
-    annotate(
-      "rect",
-      xmin = ERA_GAP_START, xmax = ERA_GAP_END, ymin = -Inf, ymax = Inf,
-      fill = "grey70", alpha = 0.30
-    ) +
-    geom_vline(
-      xintercept = S1B_FAILURE,
-      linetype = "dashed", color = "grey30", linewidth = 0.35
-    ) +
-    geom_line(linewidth = 0.32, alpha = 0.42) +
-    geom_smooth(method = "lm", se = FALSE, linewidth = 1.0) +
-    geom_text(
-      data = trend,
-      aes(x = LABEL_X, y = y_label, label = label, color = series),
-      hjust = 0, size = 2.8, fontface = "bold", show.legend = FALSE
-    ) +
-    scale_color_manual(NULL, values = series_colors) +
-    scale_x_date(
-      date_breaks = "1 year", date_labels = "%Y", limits = X_LIMITS
-    ) +
-    scale_y_continuous(limits = c(0, NA), labels = scales::comma) +
-    labs(x = "", y = y_title) +
-    theme_bw(base_size = 9) +
-    theme(
-      legend.position = "none",
-      panel.grid.minor = element_blank(),
-      plot.margin = margin(14, 10, 2, 6)
-    )
+combined <- ggplot(series, aes(month, density, color = series)) +
+  geom_line(linewidth = 0.32, alpha = 0.42) +
+  geom_smooth(method = "lm", se = FALSE, linewidth = 1.0) +
+  geom_text(
+    data = trend,
+    aes(x = LABEL_X, y = y_label, label = label, color = series),
+    hjust = 0, size = 2.8, fontface = "bold", show.legend = FALSE
+  ) +
+  scale_color_manual(NULL, values = series_colors) +
+  scale_x_date(
+    date_breaks = "1 year", date_labels = "%Y", limits = X_LIMITS
+  ) +
+  scale_y_continuous(limits = c(0, NA), labels = scales::comma) +
+  labs(x = "", y = Y_TITLE) +
+  theme_bw(base_size = 9) +
+  theme(
+    legend.position = "top",
+    legend.justification = "center",
+    panel.grid.minor = element_blank(),
+    plot.margin = margin(6, 10, 2, 6),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
 
-  list(plot = plot, trend = trend)
-}
-
-panel_a <- aggregate_panel("dens_summed", Y_TITLE_A)
-panel_b <- aggregate_panel("dens_union_scenes", Y_TITLE_B)
-
-# One shared fleet legend for A and B, lifted off A so it is not drawn twice.
-fleet_legend <- get_legend(
-  panel_a$plot +
-    theme(legend.position = "top", legend.justification = "center")
-)
-
-# A and B in their own grid so cowplot can align them: their y titles are
-# different lengths, and without this each panel starts wherever its own title
-# leaves room and the two time axes do not line up.
-panel_ab <- plot_grid(
-  panel_a$plot,
-  panel_b$plot,
-  ncol = 1,
-  align = "v",
-  axis = "lr",
-  labels = c("a", "b"),
-  label_size = 9,
-  label_fontface = "bold",
-  label_x = 0.002,
-  hjust = 0
-)
-
-combined <- plot_grid(
-  fleet_legend,
-  panel_ab,
-  ncol = 1,
-  rel_heights = c(0.09, 2)
-) +
-  theme(plot.background = element_rect(fill = "white", color = NA))
-
-cat("\n=== Full-period trend, aggregate panels ===\n\n")
-bind_rows(
-  panel_a$trend |> mutate(panel = "A summed area"),
-  panel_b$trend |> mutate(panel = "B union x passes")
-) |>
+cat("\n=== Full-period trend, summed per-scene imaged area ===\n\n")
+trend |>
   transmute(
-    panel,
     series,
     slope = sprintf("%+.2f%%/yr", pct_per_year),
     sig = significance(p_value)
@@ -8587,9 +8513,9 @@ combined
 #
 # Sentinel-1 detection density per length bin, split three ways by whether a
 # detection matched an AIS broadcast. Row A alone is TOTAL detected activity per
-# length bin, which answers "is the fleet growing" - it is the series
-# si_density_denominators_figure.R used to carry as its panel C, dropped there
-# once this figure superseded it. A total cannot separate growth that lands in
+# length bin, which answers "is the fleet growing" - it is the series the
+# denominators figure above used to carry as a third panel, dropped there once
+# this figure superseded it. A total cannot separate growth that lands in
 # the AIS-observed fleet from growth that stays dark - and that separation is
 # what the fused inventory's central claim rests on, because a vessel moving
 # from dark to matched reallocates emissions between the two components rather
@@ -8610,20 +8536,24 @@ combined
 # detections require an AIS match, so they rise when reception and carriage
 # improve - for the same reason the emissions do - and checking one against the
 # other is checking a thermometer against itself. At 0-25m that produces a
-# spurious agreement where the AIS-independent total grew only +1.8%/yr.
+# spurious agreement where the AIS-independent total grew only +1.7%/yr.
 #
 # What it shows. In small non-fishing bins matched density grows steeply while
 # unmatched is flat to declining: the growth there enters the AIS-observed fleet
-# and the dark component does not grow with it. Unmatched density falls in every
-# non-fishing class except 225+m, at +2.9%/yr - the one place dark activity
-# itself rises. Fishing declines on the unmatched side in every bin.
+# and the dark component does not grow with it. Unmatched density is flat or
+# falling in every non-fishing class except 225+m, where it rises at +2.7%/yr -
+# the one place dark activity itself grows. Fishing declines on the unmatched
+# side in every bin.
 #
-# Denominator is union area x passes throughout, as in panel B of the
-# denominators figure above. Since the footprint dedupe (issue #10) the summed
-# per-scene area is proportional to it in every year (phi ~ 0.46), so the choice
-# no longer changes any trend; B is kept so the two figures and the manuscript
-# text that cites them stay on one basis, and because its linearity in passes
-# was verified against AIS ground truth (issue #10 s12).
+# Denominator is per-scene imaged area summed across scenes throughout - the
+# same measure of S1 sampling effort the emissions models normalize by, and the
+# one the denominators figure above now draws on its own. This figure used to
+# run on union area x passes instead, back when the footprint duplication made
+# the summed area untrustworthy before May 2021 (issue #10). Since the dedupe
+# the two are proportional in every year (phi = 0.455-0.462), so the switch
+# rescales every level by 1/phi and moves no slope by more than 0.37 pp/yr; it
+# is made so that this figure, the denominators figure and the manuscript text
+# citing them all stand on the single effort measure the models use.
 #
 # Fits match the denominators figure exactly - log density on time, no
 # calendar-month term - so its aggregate panels and the rows here are read on
@@ -8639,26 +8569,27 @@ combined
 #
 #   Sentinel-1 detection density by vessel length bin, 2017-2025, split by
 #   whether the detection matched an AIS broadcast. Density is detections per
-#   million km2 of union footprint area x passes; axes are log scaled. Monthly
+#   million km2 of per-scene imaged area summed across scenes, the same measure
+#   of S1 sampling effort the emissions models use; axes are log scaled. Monthly
 #   values are thin lines, thick lines are least-squares fits of log density on
 #   time over the full period, and right-edge labels give the fitted trend as
 #   percent per year with significance from the slope's two-sided t test
-#   (*** p < 0.001, ** p < 0.01, * p < 0.05, ns otherwise). The dashed vertical
-#   marks the Dec 2021 Sentinel-1B failure, which changed the constellation but
-#   not this denominator.
+#   (*** p < 0.001, ** p < 0.01, * p < 0.05, ns otherwise).
 #
 #   Row A is total detected activity. Rows B and C decompose it: growth in the
-#   small non-fishing bins is carried almost
-#   entirely by matched detections, while unmatched density there is flat or
-#   falling, so that growth enters the AIS-observed fleet rather than the dark
-#   component. Only the 225+m non-fishing bin shows unmatched density rising.
+#   small non-fishing bins is carried almost entirely by matched detections,
+#   while unmatched density there is flat or falling, so that growth enters the
+#   AIS-observed fleet rather than the dark component. Only the 225+m
+#   non-fishing bin shows unmatched density rising significantly.
 #
 #   Caveat carried from issue #10 s16.1: instrument stability below ~50m is
 #   inferred rather than verified, so the two smallest bins are the least
 #   reliable in the figure.
 # --------------------------------------------------------------------------
 
-S1B_FAILURE       <- as.Date("2021-12-01")
+# No Dec 2021 Sentinel-1B marker here, and none on the aggregate figure above:
+# the denominator counts passes, so the constellation halving is already
+# divided out and the line marked an event these series do not respond to.
 X_LIMITS          <- c(as.Date("2017-01-01"), as.Date("2027-06-01"))
 LABEL_X           <- as.Date("2026-03-01")
 
@@ -8676,9 +8607,9 @@ LABEL_X           <- as.Date("2026-03-01")
 
 COMPONENTS <- c("Total", "Matched (AIS)", "Unmatched (dark)")
 Y_TITLES <- c(
-  "Total"             = "All detections per million km²\nof union area × passes (log)",
-  "Matched (AIS)"     = "Matched detections per million km²\nof union area × passes (log)",
-  "Unmatched (dark)"  = "Unmatched detections per million km²\nof union area × passes (log)"
+  "Total"             = "All detections per million km²\nof summed per-scene imaged area (log)",
+  "Matched (AIS)"     = "Matched detections per million km²\nof summed per-scene imaged area (log)",
+  "Unmatched (dark)"  = "Unmatched detections per million km²\nof summed per-scene imaged area (log)"
 )
 
 # Data ---------------------------------------------------------------------
@@ -8693,7 +8624,7 @@ raw <- s1_detection_density_by_denominator |>
       sprintf("%.0f-%.0fm", as.numeric(length_bin_min), bin_max)
     ),
     bin = fct_reorder(bin, length_size_bin),
-    effort_mkm2 = union_x_scenes_km2 / 1e6
+    effort_mkm2 = summed_km2 / 1e6
   )
 
 density <- raw |>
@@ -8733,7 +8664,7 @@ trends <- trend_by_group(density, fleet, component, length_size_bin, bin) |>
   ungroup()
 
 
-cat("\n--- trends, %/yr (denominator: union area x passes) ---\n")
+cat("\n--- trends, %/yr (denominator: summed per-scene imaged area) ---\n")
 trends |>
   select(fleet, bin, component, pct_per_year, p_value) |>
   pivot_wider(
@@ -8765,10 +8696,6 @@ subpanel <- function(fleet_name, component_name, show_legend) {
     arrange(length_size_bin)
 
   ggplot(panel_data, aes(month, density, color = bin)) +
-    geom_vline(
-      xintercept = S1B_FAILURE,
-      linetype = "dashed", color = "grey30", linewidth = 0.35
-    ) +
     geom_line(linewidth = 0.3, alpha = 0.45) +
     geom_smooth(method = "lm", se = FALSE, linewidth = 0.9) +
     geom_text(
