@@ -5390,6 +5390,7 @@ registry_fragment_colors <- function(data_sources) {
     "GFW (AIS-based, IMO registry)" = "#4292C6",
     "GFW (AIS-based, other registry)" = "#88CCEE",
     "ICCT" = "#CC79A7",
+    "SAVE" = "#CC79A7", # the ICCT series under its display label
     "IMO" = "#009E73",
     "OECD" = "#D55E00"
   )
@@ -6715,7 +6716,10 @@ all_inventory_data <- all_inventory_data |>
   dplyr::mutate(
     data_source = dplyr::recode(
       data_source,
-      "CAMS-GLOB-SHIP (STEAM)" = "STEAM"
+      "CAMS-GLOB-SHIP (STEAM)" = "STEAM",
+      # The prose calls the ICCT inventory SAVE, its model name, so the legend
+      # and the table below do too. Upstream the series stays "ICCT".
+      "ICCT" = "SAVE"
     )
   )
 
@@ -6958,19 +6962,9 @@ table_source_order <- c(
   intersect(source_order, single_year_sources)
 )
 
-# The prose names this inventory SAVE and attributes it to the ICCT, so the
-# table names it the same way. Applied at the export rather than upstream: the
-# figures key their palette and legend on the short label, and a column head
-# has room for the full name where a legend entry does not.
-inventory_table_data <- all_inventory_data |>
-  dplyr::mutate(
-    data_source = dplyr::recode(data_source, "ICCT" = "SAVE (ICCT)")
-  )
-
-table_source_order <- dplyr::recode(
-  table_source_order,
-  "ICCT" = "SAVE (ICCT)"
-)
+# The ICCT series is already relabeled SAVE in the figure chunk above, and the
+# prose uses the same short name, so the table carries it unchanged.
+inventory_table_data <- all_inventory_data
 
 # Three decimals of a billion tonnes, i.e. 1 Mt, on every cell. Table S7
 # rounds to three significant figures instead, which prints a different number

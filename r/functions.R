@@ -1133,6 +1133,7 @@ inventory_color_palette <- function(data_sources) {
     # this dark red-brown clears every other series in the figure by 10.1.
     "SEIM" = "#661100",
     "ICCT" = okabe_ito[[7]],
+    "SAVE" = okabe_ito[[7]], # the ICCT series under its display label
     "MariTEAM" = "grey30",
     # The AIS series split by registry status. These are not inventories - they
     # are our own AIS total partitioned three ways, and they sum back to it in
