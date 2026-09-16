@@ -163,11 +163,13 @@ In addition, S1 vessel detections unmatched with AIS could correspond to \textit
 
 Finally, because our S1-unmatched model estimates emissions by space (1x1 degree pixels) and time (month) using AIS-broadcasting emissions data from the same space and time, the assumption is only applied to vessels operating in the same space and time. If vessels operating concurrently have similar characteristics, the assumption will hold. We do not use information from AIS-broadcasting vessels to infer S1-unmatched emissions in other places or times.
 
-\changes We explicitly address this assumption, and why we believe it is valid, as its own paragraph in the discussion.
+\changes We explicitly address this assumption, and why we believe it is laregely valid, as its own paragraph in the discussion.
 
 \begin{quote}
 \textcolor{red}{Lines 677-695}: Several methodological limitations remain. One key assumption is that S1-unmatched emissions can be inferred from the relationship between S1 detections and AIS-based emissions for matched vessels. We believe this is a reasonable assumption for several reasons.  First, many unmatched S1 detections likely correspond to AIS-broadcasting vessels that are not observed in the AIS data because of transmission gaps or poor reception quality. In these cases, the relationship between S1 vessel detections and emissions would hold perfectly since these unmatched vessels are in fact just AIS-broadcasting vessels that happen to not be observed by AIS at a given point in time. Second, our model accounts for vessel length, a proxy for main engine power that is one of the primary determinants of emissions in AIS-based models and is applicable to virtually all vessels powered by internal combustion engines. Third, since fishing and non-fishing vessels are known to have different emissions factors, we account for this by differentiating detections between fishing and non-fishing vessels. Finally, our model incorporates spatiotemporal features that allow the relationship between detections and emissions to vary across space and time. Consequently, if broadcasting and non-broadcasting vessels operating in a given place and time have similar characteristics, the relationship between detections and emissions is expected to be similar as well. 
 \end{quote}
+
+Nevertheless, we do still acknowledge 
 
 
 
