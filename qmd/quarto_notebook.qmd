@@ -3178,9 +3178,12 @@ double_counting_summary_tbl <- double_counting_summary |>
     )
   ) |>
   kableExtra::column_spec(1, width = "7cm") |>
+  # Without a width the value column sets to its widest string and the table runs
+  # off the page; 7cm + 4cm plus gutters fits the 31pc text block.
+  kableExtra::column_spec(2, width = "4cm") |>
   kableExtra::kable_styling(
     font_size = 8,
-    latex_options = "hold_position"
+    latex_options = c("hold_position", "scale_down")
   )
 
 double_counting_summary_tbl
@@ -3494,9 +3497,20 @@ data_sources_table <- data_sources |>
     label = "data_sources"
   ) |>
   kableExtra::kable_styling(
-    latex_options = c("hold_position"),
+    latex_options = c("hold_position", "scale_down"),
     font_size = 4
   )
+
+# Eleven columns means \tabcolsep alone eats 132pt of the 372pt text block, which
+# pushed this table off the page. Tightening the gutters brings it back inside
+# without shrinking the body type any further.
+# `[<-` rather than plain assignment so the knitr_kable class survives for the
+# `results = 'asis'` print below.
+data_sources_table[] <- stringr::str_replace(
+  data_sources_table,
+  stringr::fixed("\\begin{tabular}"),
+  "\\setlength{\\tabcolsep}{2pt}\n\\begin{tabular}"
+)
 
 data_sources_table
 
@@ -4877,7 +4891,11 @@ emissions_by_ocean_summary_tbl <- emissions_by_ocean_summary_tbl |>
     ),
     digits = 3
   ) |>
-  kableExtra::kable_styling(latex_options = "hold_position")
+  kableExtra::kable_styling(
+    # Six columns of long row labels overrun the 31pc text block; scale_down
+    # keeps the table inside it (and is a no-op once it already fits).
+    latex_options = c("hold_position", "scale_down")
+  )
 
 emissions_by_ocean_summary_tbl
 
@@ -4934,7 +4952,10 @@ emissions_by_data_source_summary_tbl <- all_edgar_gfw_data_normalized |>
     ),
     digits = 3
   ) |>
-  kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
+  kableExtra::kable_styling(
+    font_size = 8,
+    latex_options = c("hold_position", "scale_down")
+  )
 
 emissions_by_data_source_summary_tbl
 
