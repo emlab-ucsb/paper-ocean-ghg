@@ -8,4 +8,4 @@
   script: _targets_02_inventories_comparison.R
   store: _targets/02_inventories_comparison
 main:
-  inherits: 02_inventories_comparison
+  inherits: 03_quarto_notebook
