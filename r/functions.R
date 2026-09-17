@@ -1936,6 +1936,121 @@ multisector_series_order <- function(series_labels) {
   intersect(names(multisector_colors()), series_labels)
 }
 
+# Inventory comparison palette ----
+# One key for the two figures that put our estimates beside the published
+# inventories: main-text figure 4 (levels, bottom-up on the left and top-down on
+# the right) and the four-panel SI figure that asks the same question in
+# relative terms. Until this existed the two figures took their colours from
+# whichever palette their panels had originally been built on -
+# inventory_color_palette() for the bottom-up sources, multisector_colors() for
+# the top-down ones - so the same inventory changed colour between the main text
+# and the SI, and our own AIS-based series was gold in one figure and blue in
+# the other. Both figures now re-specify their scales from this function, so a
+# reader carries one colour per series across the pair.
+#
+# Only these two figures read it. Their panels are built by the plotting helpers
+# above with those helpers' own palettes, and this is laid on top afterwards, so
+# nothing here feeds back into the other figures the helpers serve.
+#
+# Ours takes the blue ramp multisector_colors() sets - same source, darker as
+# the scope widens. Everything else takes Tol's Safe, the palette the fleet
+# figures use through class_color_palette(), minus every entry that would
+# compete with those blues: #88CCEE, #332288 and #6699CC are blues outright, and
+# #44AA99 collapses toward them once deuteranopia is simulated. That leaves
+# seven, and black fills the eighth slot on MariTEAM, which is a lone point
+# rather than a line.
+inventory_comparison_colors <- function() {
+  c(
+    # Ours, in both figures and in every panel
+    "GFW (AIS-based + S1-unmatched)" = "#08306B",
+    "GFW (AIS-based)" = "#2171B5",
+
+    # The bottom-up, activity-based inventories: figure 4a, SI panels a and b
+    "IMO" = "#CC6677",
+    "OECD" = "#DDCC77",
+    "SAVE" = "#AA4499",
+    "STEAM" = "#999933",
+    # Unchanged from inventory_color_palette(), which already held this one for
+    # the contrast reasons recorded there
+    "SEIM" = "#661100",
+    "MariTEAM" = "#000000",
+
+    # The top-down inventories: figure 4b carries their shipping scope only, the
+    # SI's panel c carries all three scopes. The shipping entries are the shared
+    # ones, so they fix each family's hue and the other two scopes are built
+    # around them.
+    #
+    # multisector_colors() ramps lightness monotonically with scope width, and
+    # that cannot be kept here: shipping is the narrowest scope, so the rule puts
+    # the whole family below the anchor's lightness, and #882255 and #117733 are
+    # already dark. Tried that way first, and the three EDGAR lines came out at
+    # L* 8 / 19 / 30 - all reading as near-black dashes, with the all-sector line
+    # indistinguishable from CEDS's.
+    #
+    # So only the part of the rule that carries a claim is kept: all sectors is
+    # the aggregate the other two sit inside, and stays darkest. Shipping and
+    # other transportation are siblings - neither contains the other - so their
+    # relative lightness asserts nothing, which frees shipping to take the
+    # main-text colour and other transportation to take the light end where it
+    # can actually be told from it.
+    "EDGAR - All sectors" = "#3D0E24",
+    "EDGAR - Other transportation" = "#C2638E",
+    "EDGAR - Shipping" = "#882255",
+    # Lighter than the EDGAR step opposite it, rather than matching it. The SI's
+    # panel c spends linetype on scope, so the two all-sector lines share a dash
+    # pattern and colour is the only thing left separating them - and two
+    # near-black lines, one wine and one green, are exactly the pair that
+    # converges under deuteranopia. Stepping this one up puts 16 L* between them.
+    "CEDS - All sectors" = "#0B5123",
+    "CEDS - Other transportation" = "#5CBF7E",
+    "CEDS - Shipping" = "#117733",
+
+    # The AIS-based total split by registry status, in the SI's panel d. Every
+    # series there is our own AIS total or a piece of it, so the whole panel
+    # stays inside the Blues ramp the GFW entries above are drawn from - no
+    # series in it comes from anywhere else, and a contrasting hue would claim
+    # otherwise.
+    #
+    # What one blue ramp cannot also do here is encode nesting by lightness. The
+    # panel needs four separable steps and the total is pinned to the main
+    # text's #2171B5, which sits mid-ramp, so a fragment ends up darker than the
+    # aggregate whatever the assignment. Lightness is spent on separation
+    # instead, and the ordering claim it would otherwise carry is dropped.
+    #
+    # Only the three fragments have to be told apart by colour: the total is the
+    # panel's one solid line and every fragment is dashed, so linetype already
+    # separates it from all three. That frees the fragments to take the ramp's
+    # ends and middle - 23 L* apart each way - rather than being squeezed into
+    # whatever is left over once the total has taken a step of its own.
+    #
+    # #08306B is left out even though it would spread them further: it is the
+    # fused series in panels a to c, and a reader carrying it into panel d would
+    # read the unregistered half as that series. #C6DBEF is left out at the
+    # other end for a plainer reason - a 1 pt line that pale is barely visible
+    # on white, which is how the size cut first came out here.
+    "GFW (AIS-based, no registry)" = "#08519C",
+    "GFW (AIS-based, registry)" = "#4292C6",
+    "GFW (AIS-based, ≥150 m)" = "#9ECAE1"
+  )
+}
+
+# Look up a subset of that key, failing loudly on a series it does not hold
+# rather than letting scale_color_manual drop the line to grey.
+inventory_comparison_palette <- function(series_labels) {
+  known <- inventory_comparison_colors()
+
+  missing <- setdiff(series_labels, names(known))
+  if (length(missing) > 0) {
+    stop(
+      "No color assigned for comparison series: ",
+      paste(missing, collapse = ", "),
+      ". Add it to inventory_comparison_colors()."
+    )
+  }
+
+  known[series_labels]
+}
+
 # Fleet growth by class ----
 # The fleet-composition figures above answer "what share of the fleet was this
 # class in year X". These answer the other question: how much has each class

@@ -2636,13 +2636,19 @@ cowplot::plot_grid(
 )
 ```
 
-## Figure 4
+## Supplementary Figure: CO2 emissions trend by ocean
+
+Moved out of the main text on 2026-09-16: this was figure 4 panel a, and is now
+a supplementary figure placed beside the by-ocean, by-data-source one. The chunk
+stays here, where the ocean series is built, rather than moving down with the
+other SI figures. Main text figure 4 is now the inventory comparison, assembled
+further down from the two SI panels it reuses.
 
 ```{r}
 #| label: fig-emissions-marine-ocean-other
-#| fig-cap: !expr 'paste0("(a) Trend in CO$_{2}$ emissions by ocean (normalized to ", analysis_start_year, " baseline), using our fused AIS+S1 marine vessel data. (b) Comparison in trend of CO$_{2}$ emissions data (normalized to ", analysis_start_year, " baseline) between marine transportation emissions from GFW, other transportation emissions from EDGAR, and all sector emissions from EDGAR. On the right-hand side of the figure, absolute values are shown as text and color-coded for each line, for the last year of available data for that series (", analysis_end_year, " for the GFW marine vessel series in panel a and B; ", edgar_comparison_year, " for the EDGAR series in panel b).")'
+#| fig-cap: !expr 'paste0("Trend in CO$_{2}$ emissions by ocean (normalized to ", analysis_start_year, " baseline), using our fused AIS+S1 marine vessel data. On the right-hand side of the figure, absolute values for the last year of available data (", analysis_end_year, ") are shown as text and color-coded for each line.")'
 #| fig-width: 7.5
-#| fig-height: 7
+#| fig-height: 4
 
 annual_ocean_emissions_normalized_fig <- annual_emissions_by_ocean_normalized |>
   ggplot() +
@@ -2722,104 +2728,9 @@ annual_ocean_emissions_normalized_fig <- annual_emissions_by_ocean_normalized |>
     seed = 42
   )
 
-# Summarize total emissions by data source for the EDGAR comparison year, for putting on figure
-
-all_edgar_gfw_data_ending <- all_edgar_gfw_data_normalized |>
-  # The EDGAR series stop at edgar_comparison_year while our marine series runs to
-  # analysis_end_year, so label each line at its own last year rather than forcing
-  # them all onto one year (which left the marine label a year behind its line end)
-  dplyr::group_by(data_source) |>
-  dplyr::filter(year == max(year)) |>
-  dplyr::ungroup() |>
-  dplyr::mutate(
-    emissions_co2_mt_ending = paste0(
-      prettyNum(signif(emissions_co2_mt / 1e9, 3), big.mark = ","),
-      " BMT"
-    )
-  ) |>
-  dplyr::select(
-    data_source,
-    emissions_co2_mt_ending,
-    emissions_co2_mt_normalized
-  )
-
-emissions_comparison_figure_normalized <- all_edgar_gfw_data_normalized |>
-  dplyr::filter(
-    data_source %in%
-      c(
-        "Other transportation sectors (EDGAR)",
-        "Marine vessels (AIS-based + S1-unmatched)",
-        "All sectors (EDGAR)"
-      )
-  ) |>
-  ggplot() +
-  # Bounded rather than a full-width geom_hline, for the same reason as panel A
-  annotate(
-    "segment",
-    x = analysis_start_year,
-    xend = analysis_end_year,
-    y = 0,
-    yend = 0,
-    linetype = 2
-  ) +
-  geom_line(
-    aes(x = year, y = emissions_co2_mt_normalized, color = data_source),
-    linewidth = 1.1
-  ) +
-  scale_x_continuous(
-    breaks = seq(analysis_start_year, analysis_end_year),
-    limits = c(analysis_start_year, analysis_end_year + 1)
-  ) +
-  scale_y_continuous(
-    labels = scales::percent
-  ) +
-  theme_plot() +
-  labs(
-    x = "",
-    y = bquote(atop(
-      Relative ~ change ~ of,
-      CO[2] ~ emissions ~ from ~ .(analysis_start_year) ~ baseline
-    ))
-  ) +
-  theme(
-    panel.grid.minor = element_blank(),
-    legend.position = "inside",
-    legend.position.inside = c(0.3, 0.9),
-    legend.direction = "vertical",
-    legend.title = element_blank(),
-    legend.background = element_rect(fill = "white", color = "gray")
-  ) +
-  scale_color_manual(
-    values = all_data_source_color_palette,
-    breaks = c(
-      "Marine vessels (AIS-based + S1-unmatched)",
-      "All sectors (EDGAR)",
-      "Other transportation sectors (EDGAR)"
-    )
-  ) +
-  ggrepel::geom_text_repel(
-    data = all_edgar_gfw_data_ending,
-    aes(
-      x = analysis_end_year,
-      y = emissions_co2_mt_normalized,
-      label = emissions_co2_mt_ending,
-      color = data_source
-    ),
-    show.legend = FALSE,
-    nudge_x = 0,
-    xlim = c(analysis_end_year + 0.1, analysis_end_year + 0.6),
-    min.segment.length = Inf,
-    fontface = "bold",
-    # Seeded for the same reason as panel A above
-    seed = 42
-  )
-cowplot::plot_grid(
-  annual_ocean_emissions_normalized_fig,
-  emissions_comparison_figure_normalized,
-  ncol = 1,
-  labels = c("a", "b"),
-  label_size = panel_label_size
-)
+# A single panel, so it is drawn on its own rather than through
+# cowplot::plot_grid(): with no second panel there is nothing to label.
+annual_ocean_emissions_normalized_fig
 ```
 
 # Methods
@@ -6696,9 +6607,229 @@ spread_labels <- function(y_end, gap_fraction, transform = identity,
 }
 ```
 
+<!-- Runs before figS-inventory-comparison-all-sources, not after, because that
+figure takes `multisector_plot` as its panel c. It builds that object and
+nothing else - see the chunk. -->
+
+```{r}
+#| label: multisector-trend-panel
+
+# Builds `multisector_plot` for panel c of figS-inventory-comparison-all-sources
+# and draws nothing itself.
+#
+# It used to print the plot as well, which made
+# figures/figS-multisector-comparison-1.png. That standalone figure was dropped
+# from sec:inventory-comparison in the SI on 2026-09-15, kept as a PNG for a
+# while afterwards, and removed on 2026-09-17: nothing in main.tex referenced
+# it, and what it showed now reaches the paper as panel c. The trailing
+# `multisector_plot` and the fig-cap / fig-width / fig-height options went with
+# it - the panel takes its size from the chunk that assembles the four-panel
+# figure, so those options never governed how it appears in the paper.
+#
+# The chunk is no longer named figS-*, because the label is what names the PNG:
+# printing a plot from a chunk called figS-multisector-comparison would write
+# the deleted file back.
+
+gfw_series <- NULL
+gfw_data_sources <- c("GFW (AIS-based + S1-unmatched)", "GFW (AIS-based)")
+gfw_transport_series <- NULL
+baseline_year <- 2017L
+first_year <- 2017L
+gfw_series <- gfw_edgar_marine_emissions
+# GFW is carried by the two whole-fleet series: AIS alone is the
+# like-for-like against inventories built from broadcasting vessels, and
+# AIS-based + S1-unmatched adds the S1-unmatched component none of them attempt to cover,
+# so the gap between the two is what this comparison cannot otherwise see.
+gfw_data_sources <- c("GFW (AIS-based + S1-unmatched)", "GFW (AIS-based)")
+baseline_year <- 2017L
+
+# Uses the international + domestic shipping scope, so each inventory
+# contributes one line per scope and the shipping numerator means the same
+# thing on both sources
+trend_data <- multisector_inventory_data |>
+  dplyr::filter(
+    scope %in% c("Shipping", "Other transportation", "All sectors")
+  ) |>
+  dplyr::mutate(series = paste(data_source, "-", scope)) |>
+  dplyr::select(series, year, emissions_co2_mt)
+
+if (!is.null(gfw_series)) {
+  trend_data <- dplyr::bind_rows(
+    trend_data,
+    gfw_series |>
+      dplyr::filter(data_source %in% gfw_data_sources) |>
+      dplyr::transmute(series = data_source, year, emissions_co2_mt)
+  )
+}
+
+# The scope-matched marine series, so the trend panel carries the same GFW
+# scopes the shipping figure does
+if (!is.null(gfw_transport_series)) {
+  trend_data <- dplyr::bind_rows(
+    trend_data,
+    gfw_transport_series |>
+      dplyr::transmute(series = data_source, year, emissions_co2_mt)
+  )
+}
+
+baseline <- trend_data |>
+  dplyr::filter(year == baseline_year) |>
+  dplyr::select(series, emissions_co2_mt_baseline = emissions_co2_mt)
+
+if (nrow(baseline) == 0) {
+  stop(
+    "No multi-sector series has a value for baseline_year ",
+    baseline_year,
+    ", so there is nothing to normalize against."
+  )
+}
+
+normalized <- trend_data |>
+  dplyr::inner_join(baseline, by = "series") |>
+  dplyr::mutate(
+    emissions_co2_mt_normalized = emissions_co2_mt /
+      emissions_co2_mt_baseline -
+      1
+  )
+
+# Applied after normalizing, so the baseline is still taken from
+# baseline_year even when the drawn range starts later. Trims the 2015-16
+# rows that GFW (AIS-based) and the multi-sector inventories carry but the fused
+# AIS-based + S1-unmatched series does not, which would otherwise open the figure on years
+# where the headline series is missing.
+normalized <- normalized |>
+  dplyr::filter(.data$year >= first_year)
+
+# Grouped by source, matching the shipping figure's key
+series_order <- multisector_series_order(unique(normalized$series))
+
+normalized <- normalized |>
+  dplyr::mutate(series = factor(series, levels = series_order))
+
+# Absolute value at each line's own last year, drawn in a gutter to the right
+# of the plotted years exactly as panel A of the notebook's figure 4 does it.
+# The value is each series' own final one, because the three sources stop in
+# different years (CEDS 2023, EDGAR 2024, GFW 2025), but every label is placed
+# at the same x so they read as one column rather than landing mid-panel on
+# top of the lines that are still running past them.
+series_ending <- normalized |>
+  dplyr::group_by(series) |>
+  dplyr::filter(year == max(year)) |>
+  dplyr::ungroup() |>
+  dplyr::mutate(
+    emissions_co2_mt_ending = paste0(
+      prettyNum(signif(emissions_co2_mt / 1e9, 3), big.mark = ","),
+      " BMT"
+    )
+  )
+
+# The last year any series reaches, which is where the label gutter starts
+last_year <- max(normalized$year)
+
+trend_plot <- ggplot2::ggplot(normalized) +
+  ggplot2::geom_hline(yintercept = 0, linetype = 2) +
+  ggplot2::geom_line(
+    ggplot2::aes(
+      x = year,
+      y = emissions_co2_mt_normalized,
+      color = series,
+      linetype = series
+    ),
+    linewidth = 1.1
+  ) +
+  ggplot2::scale_linetype_manual(
+    values = multisector_linetypes(series_order),
+    guide = "none"
+  ) +
+  # The color guide is the single key, with the dashed entries drawn into it
+  ggplot2::guides(
+    color = ggplot2::guide_legend(
+      override.aes = list(linetype = multisector_linetypes(series_order))
+    )
+  ) +
+  # Labels sit in one column in the gutter past the last plotted year, the way
+  # figure 4 places them. Fixing x at last_year for every series is what makes
+  # it a column rather than each label sitting at its own line's end.
+  #
+  # The column is held by hjust = 0 and nudge_x, not by figure 4's xlim: eight
+  # labels do not fit in a strip sized for figure 4's three. Four of these
+  # series end within a few points of zero, and constraining the label boxes to
+  # a strip narrower than the text left ggrepel no vertical room, so it spent
+  # the x budget instead and pushed 7.44, 7.53 and 0.86 BMT back out over the
+  # lines. Anchoring the left edge and restricting movement to y gives it the
+  # whole panel height to separate them in and no way to leave the column.
+  ggrepel::geom_text_repel(
+    data = series_ending,
+    ggplot2::aes(
+      x = last_year,
+      y = emissions_co2_mt_normalized,
+      label = emissions_co2_mt_ending,
+      color = series
+    ),
+    show.legend = FALSE,
+    nudge_x = 0.15,
+    hjust = 0,
+    direction = "y",
+    min.segment.length = Inf,
+    fontface = "bold",
+    size = 3.6,
+    # Seeded for the same reason as the normalized-series panels above:
+    # ggrepel's placement search is stochastic, so an unseeded call redraws
+    # slightly differently on every render and shows up as a phantom diff.
+    seed = 42
+  ) +
+  # The right-hand expansion is the label gutter: it has to hold nudge_x plus
+  # the width of the widest label, so the column clears the last data year
+  # without running off the panel
+  ggplot2::scale_x_continuous(
+    breaks = sort(unique(normalized$year)),
+    expand = ggplot2::expansion(mult = c(0.02, 0.16))
+  ) +
+  ggplot2::coord_cartesian(clip = "off") +
+  # Every 10%, rather than the default's 20% steps: the inventory series all
+  # sit within a few points of zero, so the wider spacing left no gridline
+  # between them to read their spread against.
+  ggplot2::scale_y_continuous(
+    labels = scales::percent,
+    breaks = scales::breaks_width(0.1)
+  ) +
+  ggplot2::scale_color_manual(
+    name = "Inventory and scope",
+    values = multisector_color_palette(series_order)
+  ) +
+  ggplot2::labs(
+    x = "",
+    y = bquote(atop(
+      Relative ~ change ~ of,
+      CO[2] ~ emissions ~ from ~ .(baseline_year) ~ baseline
+    ))
+  ) +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(
+    axis.title.y = ggplot2::element_text(
+      angle = 90,
+      face = "bold",
+      vjust = 3,
+      size = 12
+    ),
+    panel.grid.minor = ggplot2::element_blank(),
+    legend.position = "right",
+    legend.key.height = ggplot2::unit(0.9, "lines")
+  )
+
+# The white background is set on the plot itself. Redundant now that this only
+# ever goes onto the four-panel plot_grid canvas, which sets its own, but
+# harmless and left in place so the object still stands alone if it is ever
+# printed again.
+multisector_plot <- trend_plot +
+  ggplot2::theme(
+    plot.background = ggplot2::element_rect(fill = "white", color = NA)
+  )
+```
+
 ```{r}
 #| label: figS-inventory-comparison-all-sources
-#| fig-cap: "Our AIS-based and fused estimates against the published bottom-up inventories. Panel a shows levels; panels b and d show change relative to 2017 and 2019; panel c splits our AIS-based series by registry status, with the 150 m and above fragment for comparison."
+#| fig-cap: "Trends in our AIS-based and fused estimates against other inventories. Panels a and b show change relative to 2017 and 2019 against the published bottom-up, activity-based inventories. Panel c shows change relative to 2017 against the top-down EDGAR and CEDS inventories, for marine vessels, all other transportation modes, and all sectors. Panel d splits our AIS-based series by registry status, with the 150 m and above fragment for comparison."
 #| fig-width: 16
 #| fig-height: 11
 
@@ -6886,7 +7017,11 @@ panel_c <- ggplot2::ggplot(
 ) +
   ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "grey40") +
   ggplot2::geom_line(linewidth = 1) +
-  ggplot2::geom_point(size = 1.8) +
+  # Lines only. The per-year points this panel used to draw marked nothing the
+  # lines do not already show - every series has a value in every year here, so
+  # they were decoration - and they crowded the four series where they run
+  # together near the baseline. Dropping the layer also takes the dots out of
+  # the key, which is what lets the dash patterns there be read at a glance.
   ggplot2::geom_text(
     data = registry_end_labels,
     ggplot2::aes(
@@ -6896,7 +7031,10 @@ panel_c <- ggplot2::ggplot(
       color = .data$data_source
     ),
     hjust = 0,
-    size = 3.1,
+    # Larger than the 3.1 this panel drew them at: these four percentages are
+    # the numbers the panel is read for, and at 3.1 they came out smaller than
+    # the key naming the lines they belong to.
+    size = 4.2,
     fontface = "bold",
     show.legend = FALSE,
     inherit.aes = FALSE
@@ -6913,11 +7051,16 @@ panel_c <- ggplot2::ggplot(
   ggplot2::coord_cartesian(clip = "off") +
   ggplot2::labs(
     x = "",
-    y = paste0(
-      "Relative change of\nCO2 emissions from ",
-      baseline_year,
-      " baseline"
-    ),
+    # The same plotmath expression the other three panels title their y axis
+    # with, rather than the plain string this one carried. Two things differed
+    # and both showed: the string wrote the subscript as a bare "CO2", and being
+    # a string rather than an expression it honoured the element's face =
+    # "bold" - plotmath does not - so panel d alone had a bold axis title
+    # against three regular-weight ones.
+    y = bquote(atop(
+      Relative ~ change ~ of,
+      CO[2] ~ emissions ~ from ~ .(baseline_year) ~ baseline
+    )),
     color = "",
     linetype = ""
   ) +
@@ -6927,26 +7070,165 @@ panel_c <- ggplot2::ggplot(
       angle = 90,
       face = "bold",
       vjust = 3,
-      size = 11
+      # 12 to match the other three, rather than the 11 this panel kept from
+      # when it was drawn standalone at its own width
+      size = 12
     ),
     panel.grid.minor = ggplot2::element_blank(),
     legend.position = "right"
   )
 
-# Two by two, filled by row: a (levels) and c (registry split) carry legends on
-# the right and sit in the left column; b and d (relative change) carry none
-# and sit in the right column, so the plotting areas within each column are
-# the same width. align = "hv" with axis = "tblr" pads the panels out to match.
-# Panel D still spans a shorter range of years, so only its left edge aligns
-# with panel B.
+# The levels panel moved to main-text figure 4 on 2026-09-16 and is no longer
+# drawn here, so this figure is now four panels of trend and composition:
+#
+#   a  bottom-up inventories, relative to 2017   (panel_b)
+#   b  bottom-up inventories, relative to 2019   (panel_d)
+#   c  top-down EDGAR and CEDS, relative to 2017 (multisector_plot)
+#   d  our own AIS series split by registry      (panel_c)
+#
+# a and b are the same sources on two baselines, c is the same question asked
+# of the fuel-statistics inventories, and d is the disaggregation that explains
+# the gap. `panel_a` is still built above, because figure 4 reads it.
+
+# Colour is re-specified from inventory_comparison_colors(), the key main-text
+# figure 4 also reads, so a series is the same colour in the main text and here
+# - our AIS-based line was gold in this figure and blue in figure 4, and the
+# top-down shipping lines were an orange and a mid green here against figure
+# 4b's wine and dark green. Each panel's scale is replaced rather than the
+# palette helpers being edited, which is what keeps this off the other figures
+# those helpers serve (the standalone multisector and registry PNGs above are
+# drawn before these lines and keep their own palettes). ggplot2 announces a
+# scale replacement; the notebook suppresses messages, and the replacement is
+# the point.
+#
+# The series list comes off each panel's own factor levels rather than being
+# retyped, so a series added upstream reaches the palette lookup - and
+# inventory_comparison_palette() stops rather than drawing it grey if the key
+# has no colour for it.
+si_panel_series <- function(plot, column) {
+  levels(plot$data[[column]])
+}
+
+si_comparison_scale <- function(series) {
+  ggplot2::scale_color_manual(
+    name = NULL,
+    values = inventory_comparison_palette(series)
+  )
+}
+
+# Every panel now carries its own key, drawn inside the panel in the style
+# figure 4 uses: untitled, vertical, white on a grey frame. Before this, panel a
+# carried the only key and the others read across to it, which left panel b
+# unlabelled for a reader who started there - b drops IMO and gains OECD against
+# a, so reading across gets two of its six series wrong - and spent the width of
+# an outside legend on three of the four panels.
+#
+# Top left rather than figure 4's bottom right: these are relative-change
+# panels, so every series leaves 0% at the left edge and the lines fan upward
+# from there, which empties the top-left corner in all four and fills the
+# bottom-right one in b and d.
+#
+# The tick labels are set here too, rather than left at what theme_minimal()
+# derives from its base size. That default is 8.8 pt, which is what every panel
+# was drawing the years and the percent scale at - smaller than the key naming
+# the lines, on a figure this size. 11 pt matches the key. Only the tick labels
+# move: the axis titles are already 12 pt and set per panel.
+si_panel_theme <- function() {
+  ggplot2::theme(
+    axis.text = ggplot2::element_text(size = 11),
+    legend.position = "inside",
+    legend.position.inside = c(0.02, 0.98),
+    legend.justification = c(0, 1),
+    legend.direction = "vertical",
+    legend.title = ggplot2::element_blank(),
+    legend.background = ggplot2::element_rect(fill = "white", color = "gray"),
+    legend.margin = ggplot2::margin(6, 8, 6, 6),
+    # Larger than figure 4's 9 pt. That figure is 12 x 5.5 in and this one is
+    # 16 x 11, so the same point size is set against panels roughly a third
+    # wider and twice as tall, and reproduces smaller once the SI page scales
+    # the whole figure to the text block.
+    legend.text = ggplot2::element_text(size = 11),
+    legend.key.height = ggplot2::unit(1, "lines"),
+    legend.key.width = ggplot2::unit(1.6, "lines")
+  )
+}
+
+# plot_inventory_relative_change() sets legend.position = "none" on every panel
+# it makes, so a and b need the key switched back on as well as moved.
+panel_a_final <- panel_b +
+  si_comparison_scale(si_panel_series(panel_b, "data_source")) +
+  si_panel_theme()
+
+panel_b_final <- panel_d +
+  si_comparison_scale(si_panel_series(panel_d, "data_source")) +
+  si_panel_theme()
+
+# Panel c's linetype is re-cut to carry the scope rather than the inventory.
+# multisector_linetypes() draws every EDGAR series dashed and every CEDS series
+# dotted, which groups the key by source; here the comparison being made is
+# across sources at a scope - our marine total against each inventory's shipping
+# line, and that against the wider sectors - so the shipping series are all
+# solid, like ours, and the two wider scopes take patterns of their own.
+#
+# This costs the redundancy multisector_linetypes() was built for: with the
+# inventory encoded in hue alone, EDGAR's and CEDS's darkest steps have only
+# colour holding them apart, and they converge under deuteranopia. That is why
+# CEDS's all-sector step was lightened in inventory_comparison_colors() - the
+# two all-sector lines now share a dash pattern, so they are separated on
+# lightness instead of on hue.
+si_scope_linetypes <- function(series) {
+  linetypes <- rep("solid", length(series))
+  names(linetypes) <- series
+  linetypes[grepl(" - Other transportation$", series)] <- "12"
+  linetypes[grepl(" - All sectors$", series)] <- "42"
+  linetypes
+}
+
+panel_c_series <- si_panel_series(multisector_plot, "series")
+panel_c_linetypes <- si_scope_linetypes(panel_c_series)
+
+panel_c_final <- multisector_plot +
+  si_comparison_scale(panel_c_series) +
+  ggplot2::scale_linetype_manual(values = panel_c_linetypes, guide = "none") +
+  ggplot2::guides(
+    color = ggplot2::guide_legend(
+      override.aes = list(linetype = panel_c_linetypes)
+    )
+  ) +
+  si_panel_theme()
+
+# Panel d merged its colour and linetype guides into one key while both scales
+# carried the same blank title from its labs() call. Retitling colour to NULL
+# above breaks that match, and ggplot2 then draws the linetype scale as a second
+# key below the first, so the linetype guide is suppressed and its patterns are
+# drawn into the colour key instead - the same way plot_inventory_levels() and
+# the multisector panel already do it. Dropping the guide outright is not an
+# option: the dashes are what mark the three registry fragments as parts of our
+# own total rather than estimates standing on their own.
+panel_d_linetypes <- inventory_linetypes(si_panel_series(panel_c, "data_source"))
+
+panel_d_final <- panel_c +
+  si_comparison_scale(si_panel_series(panel_c, "data_source")) +
+  ggplot2::scale_linetype_manual(values = panel_d_linetypes, guide = "none") +
+  ggplot2::guides(
+    color = ggplot2::guide_legend(
+      override.aes = list(linetype = panel_d_linetypes)
+    )
+  ) +
+  si_panel_theme()
+
+# align = "hv" with axis = "tblr" pads the panels out to a common plotting area.
+# With the keys inside there is no outside legend to widen one panel against
+# another, so this is now only squaring the axes up; panel b still spans a
+# shorter range of years, so only its left edge aligns with panel a.
 #
 # plot_grid also assembles onto a transparent canvas, so set an explicit white
 # background - otherwise the saved PNG has no background at all
 inventory_plot <- cowplot::plot_grid(
-  panel_a,
-  panel_b,
-  panel_c,
-  panel_d,
+  panel_a_final,
+  panel_b_final,
+  panel_c_final,
+  panel_d_final,
   ncol = 2,
   labels = c("a", "b", "c", "d"),
   label_size = panel_label_size,
@@ -7058,193 +7340,6 @@ inventory_comparison_all_sources_kable |>
       "inventory_comparison_all_sources.tex"
     )
   )
-```
-
-```{r}
-#| label: figS-multisector-comparison
-#| eval: false
-# Retired from the SI on 2026-09-15 when sec:inventory-comparison was
-# streamlined; kept, not rendered, in case the figure is wanted again. Its
-# committed PNG in figures/ is the last render. Set eval back to true to redraw.
-#| fig-cap: "Marine emissions growth against all sectors and against other transport modes, in EDGAR and CEDS, indexed to 2017."
-#| fig-width: 9
-#| fig-height: 5.5
-
-gfw_series <- NULL
-gfw_data_sources <- c("GFW (AIS-based + S1-unmatched)", "GFW (AIS-based)")
-gfw_transport_series <- NULL
-baseline_year <- 2017L
-first_year <- 2017L
-gfw_series <- gfw_edgar_marine_emissions
-# GFW is carried by the two whole-fleet series: AIS alone is the
-# like-for-like against inventories built from broadcasting vessels, and
-# AIS-based + S1-unmatched adds the S1-unmatched component none of them attempt to cover,
-# so the gap between the two is what this comparison cannot otherwise see.
-gfw_data_sources <- c("GFW (AIS-based + S1-unmatched)", "GFW (AIS-based)")
-baseline_year <- 2017L
-
-# Uses the international + domestic shipping scope, so each inventory
-# contributes one line per scope and the shipping numerator means the same
-# thing on both sources
-trend_data <- multisector_inventory_data |>
-  dplyr::filter(
-    scope %in% c("Shipping", "Other transportation", "All sectors")
-  ) |>
-  dplyr::mutate(series = paste(data_source, "-", scope)) |>
-  dplyr::select(series, year, emissions_co2_mt)
-
-if (!is.null(gfw_series)) {
-  trend_data <- dplyr::bind_rows(
-    trend_data,
-    gfw_series |>
-      dplyr::filter(data_source %in% gfw_data_sources) |>
-      dplyr::transmute(series = data_source, year, emissions_co2_mt)
-  )
-}
-
-# The scope-matched marine series, so the trend panel carries the same GFW
-# scopes the shipping figure does
-if (!is.null(gfw_transport_series)) {
-  trend_data <- dplyr::bind_rows(
-    trend_data,
-    gfw_transport_series |>
-      dplyr::transmute(series = data_source, year, emissions_co2_mt)
-  )
-}
-
-baseline <- trend_data |>
-  dplyr::filter(year == baseline_year) |>
-  dplyr::select(series, emissions_co2_mt_baseline = emissions_co2_mt)
-
-if (nrow(baseline) == 0) {
-  stop(
-    "No multi-sector series has a value for baseline_year ",
-    baseline_year,
-    ", so there is nothing to normalize against."
-  )
-}
-
-normalized <- trend_data |>
-  dplyr::inner_join(baseline, by = "series") |>
-  dplyr::mutate(
-    emissions_co2_mt_normalized = emissions_co2_mt /
-      emissions_co2_mt_baseline -
-      1
-  )
-
-# Applied after normalizing, so the baseline is still taken from
-# baseline_year even when the drawn range starts later. Trims the 2015-16
-# rows that GFW (AIS-based) and the multi-sector inventories carry but the fused
-# AIS-based + S1-unmatched series does not, which would otherwise open the figure on years
-# where the headline series is missing.
-normalized <- normalized |>
-  dplyr::filter(.data$year >= first_year)
-
-# Grouped by source, matching the shipping figure's key
-series_order <- multisector_series_order(unique(normalized$series))
-
-normalized <- normalized |>
-  dplyr::mutate(series = factor(series, levels = series_order))
-
-# Absolute value at each line's own last year, drawn to the right of the plot
-# as in panel B of the notebook's figure 4. Each series is labeled where it
-# ends rather than at a common year, because the three sources stop in
-# different years (CEDS 2023, EDGAR 2024, GFW 2025) and pinning them to one
-# year would leave two of the labels detached from their line ends.
-series_ending <- normalized |>
-  dplyr::group_by(series) |>
-  dplyr::filter(year == max(year)) |>
-  dplyr::ungroup() |>
-  dplyr::mutate(
-    emissions_co2_mt_ending = paste0(
-      prettyNum(signif(emissions_co2_mt / 1e9, 3), big.mark = ","),
-      " BMT"
-    )
-  )
-
-trend_plot <- ggplot2::ggplot(normalized) +
-  ggplot2::geom_hline(yintercept = 0, linetype = 2) +
-  ggplot2::geom_line(
-    ggplot2::aes(
-      x = year,
-      y = emissions_co2_mt_normalized,
-      color = series,
-      linetype = series
-    ),
-    linewidth = 1.1
-  ) +
-  ggplot2::scale_linetype_manual(
-    values = multisector_linetypes(series_order),
-    guide = "none"
-  ) +
-  # The color guide is the single key, with the dashed entries drawn into it
-  ggplot2::guides(
-    color = ggplot2::guide_legend(
-      override.aes = list(linetype = multisector_linetypes(series_order))
-    )
-  ) +
-  # Labels sit in the padding to the right of the last year. clip = "off"
-  # below lets them draw outside the panel, and the expansion reserves the
-  # room so they do not overlap the lines
-  ggrepel::geom_text_repel(
-    data = series_ending,
-    ggplot2::aes(
-      x = year,
-      y = emissions_co2_mt_normalized,
-      label = emissions_co2_mt_ending,
-      color = series
-    ),
-    show.legend = FALSE,
-    nudge_x = 0.15,
-    hjust = 0,
-    direction = "y",
-    min.segment.length = Inf,
-    fontface = "bold",
-    size = 3.6,
-    # Seeded for the same reason as the normalized-series panels above:
-    # ggrepel's placement search is stochastic, so an unseeded call redraws
-    # slightly differently on every render and shows up as a phantom diff.
-    seed = 42
-  ) +
-  ggplot2::scale_x_continuous(
-    breaks = sort(unique(normalized$year)),
-    expand = ggplot2::expansion(mult = c(0.02, 0.16))
-  ) +
-  ggplot2::coord_cartesian(clip = "off") +
-  ggplot2::scale_y_continuous(labels = scales::percent) +
-  ggplot2::scale_color_manual(
-    name = "Inventory and scope",
-    values = multisector_color_palette(series_order)
-  ) +
-  ggplot2::labs(
-    x = "",
-    y = bquote(atop(
-      Relative ~ change ~ of,
-      CO[2] ~ emissions ~ from ~ .(baseline_year) ~ baseline
-    ))
-  ) +
-  ggplot2::theme_minimal() +
-  ggplot2::theme(
-    axis.title.y = ggplot2::element_text(
-      angle = 90,
-      face = "bold",
-      vjust = 3,
-      size = 12
-    ),
-    panel.grid.minor = ggplot2::element_blank(),
-    legend.position = "right",
-    legend.key.height = ggplot2::unit(0.9, "lines")
-  )
-
-# A single panel, so the white background is set on the plot itself rather
-# than on a plot_grid canvas
-multisector_plot <- trend_plot +
-  ggplot2::theme(
-    plot.background = ggplot2::element_rect(fill = "white", color = NA)
-  )
-
-
-multisector_plot
 ```
 
 ```{r}
@@ -7376,10 +7471,112 @@ shipping_plot <- ggplot2::ggplot(
 shipping_plot
 ```
 
+## Figure 4
+
+```{r}
+#| label: fig-emissions-inventory-comparison
+#| fig-cap: !expr 'paste0("(a) Annual CO$_{2}$ emissions from our AIS-based and fused (AIS-based + S1-unmatched) estimates against the published bottom-up, activity-based inventories. (b) The same two series against the shipping sector of the top-down EDGAR and CEDS inventories, which are derived from fuel statistics rather than from vessel activity. Both panels are absolute annual totals on the same scale, so the vertical distance between any two lines is the same quantity in either panel.")'
+#| fig-width: 12
+#| fig-height: 5.5
+
+# Main-text figure 4, drawn from the two panels the SI figures above already
+# built rather than from rebuilt copies of them: panel a is the levels panel of
+# figS-inventory-comparison-all-sources and panel b is figS-multisector-shipping-comparison
+# in full. Reusing the objects is what keeps the data and geometry of the main
+# figure and the SI ones from drifting apart, and is why this chunk sits here
+# rather than up in the results section - `panel_a` and `shipping_plot` do not
+# exist until those two chunks have run.
+#
+# Colour and legend placement are then re-specified on top. The palettes the
+# panel-building helpers use are left alone; these scales replace them on the
+# objects this figure assembles, so nothing below is fed back into
+# figS-multisector-shipping-comparison or into the standalone SI PNGs.
+
+# Both panels carry the same two GFW series, and the helpers that build them
+# colour them differently - panel a's palette makes the fused series mid-blue
+# and the AIS-based one gold, panel b's makes them navy and mid-blue. Side by
+# side that reads as an error, and the worse half of it is that panel b's
+# mid-blue is panel a's fused series. Panel b's ramp wins for both: same source,
+# darker as the scope widens, which is the convention multisector_colors() sets.
+#
+# The colours themselves live in inventory_comparison_colors(), because
+# figS-inventory-comparison-all-sources draws the same series on relative axes
+# and reads the same key. Holding them in one place is what stops a reader
+# meeting the same inventory in two colours across the main text and the SI,
+# which is exactly what the two panels here did to each other before.
+fig4_colors <- inventory_comparison_colors()
+
+# The legend moves inside, to the bottom right, in the style panel a of the
+# by-ocean supplementary figure uses: vertical, untitled, white with a grey
+# frame. Both panels run 0 to 1.75 B with the data in the top half, so the
+# bottom right is empty in each. justification anchors the legend's own bottom
+# right corner to the panel's, rather than leaving the fit to a guessed centre.
+fig4_legend_theme <- function() {
+  ggplot2::theme(
+    legend.position = "inside",
+    legend.position.inside = c(0.95, 0.05),
+    legend.justification = c(1, 0),
+    legend.direction = "vertical",
+    legend.title = ggplot2::element_blank(),
+    legend.background = ggplot2::element_rect(fill = "white", color = "gray"),
+    legend.margin = ggplot2::margin(4, 6, 4, 4),
+    legend.text = ggplot2::element_text(size = 9),
+    legend.key.height = ggplot2::unit(0.85, "lines"),
+    legend.key.width = ggplot2::unit(1.4, "lines")
+  )
+}
+
+# Replacing a scale that is already on the plot, which ggplot2 announces; the
+# notebook suppresses messages, and the replacement is the point.
+fig4_panel_a <- panel_a +
+  ggplot2::scale_color_manual(name = NULL, values = fig4_colors) +
+  fig4_legend_theme()
+
+# Panel b's linetypes carry the inventory in the SI, where colour alone has to
+# separate three sources across two figures. Here there are only four series and
+# the palette above already holds them apart, so the dashes buy nothing and cost
+# the panel its readability at column width - a dotted CEDS line against a
+# dashed EDGAR one reads as noise next to panel a's solid ones. All solid, and
+# the key redrawn to match.
+fig4_panel_b_series <- series_order
+fig4_panel_b_solid <- stats::setNames(
+  rep("solid", length(fig4_panel_b_series)),
+  fig4_panel_b_series
+)
+
+fig4_panel_b <- shipping_plot +
+  ggplot2::scale_color_manual(name = NULL, values = fig4_colors) +
+  ggplot2::scale_linetype_manual(values = fig4_panel_b_solid, guide = "none") +
+  ggplot2::guides(
+    color = ggplot2::guide_legend(override.aes = list(linetype = "solid"))
+  ) +
+  fig4_legend_theme()
+
+# Side by side. With the legends inside there is no outer key to widen one
+# panel against the other, so align = "h" / axis = "tb" is enough to put the
+# two y axes at the same height.
+#
+# plot_grid assembles onto a transparent canvas, so set an explicit white
+# background - otherwise the saved PNG has no background at all.
+cowplot::plot_grid(
+  fig4_panel_a,
+  fig4_panel_b,
+  ncol = 2,
+  labels = c("a", "b"),
+  label_size = panel_label_size,
+  align = "h",
+  axis = "tb"
+) +
+  ggplot2::theme(
+    plot.background = ggplot2::element_rect(fill = "white", color = NA)
+  )
+```
+
 ```{r}
 #| results: 'asis'
-# The figure above as a table. Reads `shipping` and `series_order` from that
-# chunk rather than rebuilding them, so the two carry the same numbers.
+# figS-multisector-shipping-comparison as a table (the chunk two above, not the
+# figure 4 assembly directly above). Reads `shipping` and `series_order` from
+# that chunk rather than rebuilding them, so the two carry the same numbers.
 #
 # Same series order the figure's key uses, so the columns read left to right
 # in the order the legend reads top to bottom.
