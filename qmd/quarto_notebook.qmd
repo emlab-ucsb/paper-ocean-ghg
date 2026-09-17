@@ -7378,10 +7378,17 @@ inventory_comparison_all_sources_kable |>
 ```
 
 ```{r}
-#| label: figS-multisector-shipping-comparison
-#| fig-cap: "Our shipping totals against the shipping sector of the top-down EDGAR and CEDS inventories."
-#| fig-width: 9
-#| fig-height: 5.5
+#| label: multisector-shipping-panel
+#| include: false
+
+# This was the standalone SI figure figS-multisector-shipping-comparison until
+# 2026-09-17, when it moved to main-text figure 4 panel b in full and the SI
+# copy was dropped as a duplicate. The chunk still runs, and is now build-only,
+# because two things downstream read what it leaves behind: `shipping_plot` is
+# figure 4's panel b, and `shipping` and `series_order` are what the
+# multisector_shipping_comparison table is tabulated from. Displaying the plot
+# here is what emitted figures/figS-multisector-shipping-comparison-1.png, so
+# `include: false` is what stops that PNG coming back on the next render.
 
 gfw_series <- NULL
 gfw_data_sources <- c("GFW (AIS-based + S1-unmatched)", "GFW (AIS-based)")
@@ -7501,9 +7508,6 @@ shipping_plot <- ggplot2::ggplot(
     legend.key.height = ggplot2::unit(0.9, "lines"),
     plot.background = ggplot2::element_rect(fill = "white", color = NA)
   )
-
-
-shipping_plot
 ```
 
 ## Figure 4
@@ -7516,8 +7520,8 @@ shipping_plot
 
 # Main-text figure 4, drawn from the two panels the SI figures above already
 # built rather than from rebuilt copies of them: panel a is the levels panel of
-# figS-inventory-comparison-all-sources and panel b is figS-multisector-shipping-comparison
-# in full. Reusing the objects is what keeps the data and geometry of the main
+# figS-inventory-comparison-all-sources and panel b is the multisector-shipping-panel
+# plot in full. Reusing the objects is what keeps the data and geometry of the main
 # figure and the SI ones from drifting apart, and is why this chunk sits here
 # rather than up in the results section - `panel_a` and `shipping_plot` do not
 # exist until those two chunks have run.
@@ -7525,7 +7529,7 @@ shipping_plot
 # Colour and legend placement are then re-specified on top. The palettes the
 # panel-building helpers use are left alone; these scales replace them on the
 # objects this figure assembles, so nothing below is fed back into
-# figS-multisector-shipping-comparison or into the standalone SI PNGs.
+# multisector-shipping-panel or into the standalone SI PNGs.
 
 # Both panels carry the same two GFW series, and the helpers that build them
 # colour them differently - panel a's palette makes the fused series mid-blue
@@ -7609,9 +7613,10 @@ cowplot::plot_grid(
 
 ```{r}
 #| results: 'asis'
-# figS-multisector-shipping-comparison as a table (the chunk two above, not the
-# figure 4 assembly directly above). Reads `shipping` and `series_order` from
-# that chunk rather than rebuilding them, so the two carry the same numbers.
+# Main-text figure 4 panel b as a table. Reads `shipping` and `series_order`
+# from multisector-shipping-panel (the chunk two above, not the figure 4
+# assembly directly above) rather than rebuilding them, so the two carry the
+# same numbers.
 #
 # Same series order the figure's key uses, so the columns read left to right
 # in the order the legend reads top to bottom.

@@ -135,7 +135,7 @@ Our fused total (AIS-based plus S1-unmatched) sits above every other inventory a
 \begin{figure}[H]
     \centering
     \includegraphics[width=\columnwidth]{figures/fig-emissions-inventory-comparison-1.png}
-    \caption{ (a) Annual CO$_{2}$ emissions from our AIS-based and fused (AIS-based + S1-unmatched) estimates against the published bottom-up, activity-based inventories (STEAM, SEIM, MariTEAM, OECD, SAVE, and the Fourth IMO GHG Study). (b) The same two series against the shipping sector of the top-down EDGAR and CEDS inventories, which are derived from fuel statistics rather than from vessel activity.}
+    \caption{ (a) Annual CO$_{2}$ emissions from our AIS-based and fused (AIS-based + S1-unmatched) estimates against the published bottom-up, activity-based inventories (STEAM, SEIM, MariTEAM, OECD, SAVE, and the Fourth IMO GHG Study). (b) The same two series against the shipping sector of the top-down EDGAR and CEDS inventories, which are derived from fuel statistics rather than from individual vessel activity.}
     \label{fig:fig-emissions-inventory-comparison}
 \end{figure}
 
@@ -884,8 +884,7 @@ The authors used a large language model (Anthropic's Claude, through the Claude 
     \item[11.] Spatial change in CO$_{2}$ emissions between 2017 and 2025 by AIS receiver type (p.~\pageref{fig:fig-co2-emissions-change-map-by-receiver-type})
     \item[12.] Trends in our AIS-based and fused estimates against other inventories (p.~\pageref{fig:figS-inventory-comparison-all-sources})
     \item[13.] AIS carriage saturation by vessel size (p.~\pageref{fig:figS-ais-carriage-saturation-by-size})
-    \item[14.] Our shipping totals against the shipping sector of EDGAR and CEDS (p.~\pageref{fig:figS-multisector-shipping-comparison})
-    \item[15.] S1 detection density by length bin and AIS match status (p.~\pageref{fig:figS-density-by-match-status})
+    \item[14.] S1 detection density by length bin and AIS match status (p.~\pageref{fig:figS-density-by-match-status})
 \end{itemize}
 
 \subsubsection*{Supplementary Tables}
@@ -1109,14 +1108,7 @@ Our fused total (AIS-based plus S1-unmatched) sits above every other inventory a
 
 \subsubsection*{Comparing our estimates with top-down inventories}
 
-We also compared our fused estimates against two inventories derived from fuel statistics, the Emissions Database for Global Atmospheric Research (EDGAR) and the Community Emissions Data System (CEDS) (Fig. \ref{fig:fig-emissions-inventory-comparison}, panel b). EDGAR builds its shipping estimate from reported fuel sales, representing international shipping from international marine bunkers and domestic activity from domestic navigation fuel statistics, with recent years extrapolated from Energy Institute fuel oil trends \cite{guizzardiGlobalUptoDate2025}; it can therefore only count fuel that was sold and reported. CEDS starts from the same fuel statistics but treats them as systematically under-reported and scales its global shipping total to bottom-up estimates, mainly the IMO GHG Studies \cite{hoeslyHistorical17502014Anthropogenic2018, ceds_data_and_assumptions}, so it also inherits the fleet-scope limits described above. Our fused total exceeds both (Supplementary Fig. \ref{fig:figS-multisector-shipping-comparison}, tabulated in Supplementary Table \ref{tab:multisector_shipping_comparison}). The gap in magnitude and the gap in trend have different causes.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\columnwidth]{figures/figS-multisector-shipping-comparison-1.png}
-    \caption{Our shipping totals against the shipping sector of the top-down EDGAR and CEDS inventories.}
-    \label{fig:figS-multisector-shipping-comparison}
-\end{figure}
+We also compared our fused estimates against two inventories derived from fuel statistics, the Emissions Database for Global Atmospheric Research (EDGAR) and the Community Emissions Data System (CEDS). EDGAR builds its shipping estimate from reported fuel sales, representing international shipping from international marine bunkers and domestic activity from domestic navigation fuel statistics, with recent years extrapolated from Energy Institute fuel oil trends \cite{guizzardiGlobalUptoDate2025}; it can therefore only count fuel that was sold and reported. CEDS starts from the same fuel statistics but treats them as systematically under-reported and scales its global shipping total to bottom-up estimates, mainly the IMO GHG Studies \cite{hoeslyHistorical17502014Anthropogenic2018, ceds_data_and_assumptions}, so it also inherits the fleet-scope limits described above. Our fused total exceeds both (Fig. \ref{fig:fig-emissions-inventory-comparison}, panel b, tabulated in Supplementary Table \ref{tab:multisector_shipping_comparison}). The gap in magnitude and the gap in trend have different causes.
 
 \input{tables/multisector_shipping_comparison}
 \FloatBarrier
