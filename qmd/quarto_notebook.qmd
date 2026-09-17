@@ -4840,80 +4840,6 @@ writeLines(
 ## Table S4
 
 ```{r}
-#| results = 'asis'
-
-# Make and output a table summarizing end-year CO2 emissions by data source, and change in emissions over the analysis period by data source
-emissions_by_data_source_summary_tbl <- all_edgar_gfw_data_normalized |>
-  dplyr::filter(
-    data_source %in%
-      c(
-        "Other transportation sectors (EDGAR)",
-        "Marine vessels (AIS-based + S1-unmatched)",
-        "All sectors (EDGAR)"
-      )
-  ) |>
-  dplyr::filter(year == edgar_comparison_year) |>
-  dplyr::mutate(
-    emissions_co2_bmt = prettyNum(
-      signif(emissions_co2_mt / 1e9, 3),
-      big.mark = ","
-    ),
-    percent_emissions_co2_mt_normalized = emissions_co2_mt_normalized |>
-      scales::percent(accuracy = 0.01),
-  ) |>
-  dplyr::ungroup() |>
-  dplyr::select(
-    data_source,
-    emissions_co2_bmt,
-    percent_emissions_co2_mt_normalized
-  ) |>
-  knitr::kable(
-    format = "latex",
-    label = "emissions_by_data_source_summary_tbl",
-    # this table is on the EDGAR comparison year, not analysis_end_year, since the
-    # EDGAR series it is compared against stops there
-    col.names = c(
-      "Data source",
-      glue::glue("{edgar_comparison_year} emissions, billion MT"),
-      glue::glue(
-        "Change in emissions, {analysis_start_year} to {edgar_comparison_year}"
-      )
-    ),
-    caption = glue::glue(
-      "For each data source, summary of: total {edgar_comparison_year} CO$_2$ emissions (metric tonnes); and percent change in CO$_2$ emissions from {analysis_start_year} to {edgar_comparison_year}."
-    ),
-    digits = 3
-  ) |>
-  kableExtra::kable_styling(
-    # Three columns, but the row labels and headers are long enough to overrun
-    # the 31pc (372pt) text block. No "scale_down" -- see the note on
-    # top_countries_by_activity_type below. Dropping to 7bp leaves only a few
-    # points of headroom on its own, so the gutter tightening applied after
-    # this call gives it some margin.
-    font_size = 7,
-    latex_options = "hold_position"
-  )
-
-# font_size shrinks the text but not the 6 x 6pt of \tabcolsep gutter.
-# `[<-` rather than plain assignment so the knitr_kable class survives for the
-# `results = 'asis'` print below.
-emissions_by_data_source_summary_tbl[] <- stringr::str_replace(
-  emissions_by_data_source_summary_tbl,
-  stringr::fixed("\\begin{tabular}"),
-  "\\setlength{\\tabcolsep}{3pt}\n\\begin{tabular}"
-)
-
-emissions_by_data_source_summary_tbl
-
-writeLines(
-  emissions_by_data_source_summary_tbl,
-  file.path(project_root, "tables", "emissions_by_data_source_summary_tbl.tex")
-)
-```
-
-## Table S5
-
-```{r}
 #| results: 'asis'
 
 annual_sc_fishing_non_fishing_tbl <- annual_sc_fishing_non_fishing |>
@@ -4981,7 +4907,7 @@ all_inventory_data |>
   )
 ```
 
-## Table S6
+## Table S5
 
 ```{r}
 #| results: 'asis'
@@ -5082,7 +5008,7 @@ top_countries_by_activity_type_kable |>
   )
 ```
 
-## Table S7
+## Table S6
 ```{r}
 #| results: 'asis'
 all_inventory_data_kable <- all_inventory_data |>
@@ -7664,6 +7590,213 @@ multisector_shipping_comparison_kable |>
       project_root,
       "tables",
       "multisector_shipping_comparison.tex"
+    )
+  )
+```
+
+```{r}
+#| label: tbl-inventory-growth-comparison
+#| results: 'asis'
+
+# Growth across every inventory the paper compares against, in one table.
+#
+# Replaces the three-row emissions_by_data_source_summary_tbl, which could
+# report a single percent change because our fused series and the two EDGAR
+# scopes all shared the 2017-2024 window. These inventories start and end in
+# different years, so a bare percent change is not comparable across rows: a
+# ten-year window looks larger than a three-year one at the same underlying
+# rate. Hence two columns. The window is printed so every number can be
+# reproduced from the published series, and the CAGR normalizes for window
+# length so the rows can be read against each other.
+#
+# CAGR rather than mean year-over-year change: the arithmetic mean of annual
+# rates is inflated by the 2020 crash and rebound that every window here spans
+# (-15% followed by +8% averages to -3.4%, but the two-year change is -8.0%).
+# The geometric mean compounds back to the observed endpoint; the arithmetic
+# mean does not, and under it the "more than five times other transportation"
+# claim in the Results would not hold.
+growth_baseline_year <- analysis_start_year
+
+# EDGAR and CEDS each publish five scopes. The two shipping subdivisions are
+# left to Table \ref{tab:multisector_shipping_comparison}, which is about
+# shipping scope rather than growth; carrying them here would add four rows
+# without changing what the table shows, since every shipping scope in both
+# inventories is negative.
+growth_top_down_scopes <- c("All sectors", "Other transportation", "Shipping")
+
+# The Fourth IMO GHG Study ends in 2018, so anchoring it at the baseline leaves
+# a single year-on-year change (-0.75%) that is not a trend and inverts the
+# sign of the inventory's actual trajectory (+2.14 %/yr over 2015-2018).
+# Reported at its native window instead, flagged in the caption. Dropping it
+# was the alternative, but omitting the IMO study from an inventory comparison
+# in this paper would be conspicuous.
+growth_native_window <- "IMO"
+
+# The same four bins panel C of figS-inventory-comparison-all-sources uses, so
+# the segment means the same thing in both places. All vessel classes, not
+# non-fishing only: fishing is 0.1% of emissions at these lengths.
+growth_large_bins <- c("150-175m", "175-200m", "200-225m", "225m+")
+
+# EDGAR is dropped here and taken from multisector_inventory_data below, which
+# carries it at every scope; taking it from both would duplicate the shipping
+# row under two different labels.
+growth_bottom_up <- si_all_inventory_data |>
+  dplyr::filter(.data$data_source != "EDGAR") |>
+  dplyr::transmute(
+    series = .data$data_source,
+    year = as.integer(.data$year),
+    emissions_co2_mt = .data$emissions_co2_mt
+  )
+
+growth_top_down <- multisector_inventory_data |>
+  dplyr::filter(.data$scope %in% growth_top_down_scopes) |>
+  dplyr::transmute(
+    series = paste(.data$data_source, "-", .data$scope),
+    year = as.integer(.data$year),
+    emissions_co2_mt = .data$emissions_co2_mt
+  )
+
+growth_large_vessels <- annual_ais_activity_summary_cheap |>
+  dplyr::filter(.data$length_bin %in% growth_large_bins) |>
+  dplyr::group_by(year = as.integer(.data$year)) |>
+  dplyr::summarise(
+    emissions_co2_mt = sum(.data$emissions_co2_mt, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  dplyr::mutate(series = "GFW (AIS-based, >=150 m)")
+
+growth_summary <- dplyr::bind_rows(
+  growth_bottom_up,
+  growth_top_down,
+  growth_large_vessels
+) |>
+  dplyr::filter(
+    .data$year >= growth_baseline_year | .data$series %in% growth_native_window
+  ) |>
+  dplyr::filter(!is.na(.data$emissions_co2_mt)) |>
+  dplyr::group_by(.data$series) |>
+  dplyr::arrange(.data$year, .by_group = TRUE) |>
+  dplyr::summarise(
+    first_year = dplyr::first(.data$year),
+    last_year = dplyr::last(.data$year),
+    first_value = dplyr::first(.data$emissions_co2_mt),
+    last_value = dplyr::last(.data$emissions_co2_mt),
+    .groups = "drop"
+  ) |>
+  dplyr::mutate(
+    n_years = .data$last_year - .data$first_year,
+    total_change = dplyr::if_else(
+      .data$n_years > 0,
+      (.data$last_value / .data$first_value - 1) * 100,
+      NA_real_
+    ),
+    cagr = dplyr::if_else(
+      .data$n_years > 0,
+      ((.data$last_value / .data$first_value)^(1 / .data$n_years) - 1) * 100,
+      NA_real_
+    )
+  )
+
+# Declaration order is the table order, and the group headings below are
+# derived from it, so adding a series here places it in the table and under its
+# heading at once.
+growth_row_spec <- tibble::tribble(
+  ~group, ~series, ~label,
+  "Ours", "GFW (AIS-based + S1-unmatched)", "GFW (AIS-based + S1-unmatched)",
+  "Ours", "GFW (AIS-based)", "GFW (AIS-based)",
+  "Ours", "GFW (AIS-based, >=150 m)", "GFW (AIS-based, $\\geq$150 m)",
+  "Bottom-up", "IMO", "IMO",
+  "Bottom-up", "OECD", "OECD",
+  "Bottom-up", "ICCT", "ICCT (SAVE)",
+  "Bottom-up", "CAMS-GLOB-SHIP (STEAM)", "CAMS-GLOB-SHIP (STEAM)",
+  "Bottom-up", "SEIM", "SEIM",
+  "Bottom-up", "MariTEAM", "MariTEAM",
+  "EDGAR", "EDGAR - All sectors", "All sectors",
+  "EDGAR", "EDGAR - Other transportation", "Other transportation",
+  "EDGAR", "EDGAR - Shipping", "Shipping",
+  "CEDS", "CEDS - All sectors", "All sectors",
+  "CEDS", "CEDS - Other transportation", "Other transportation",
+  "CEDS", "CEDS - Shipping", "Shipping"
+)
+
+growth_missing <- setdiff(growth_row_spec$series, growth_summary$series)
+if (length(growth_missing) > 0) {
+  stop(
+    "No data for: ",
+    paste(growth_missing, collapse = ", "),
+    ". The inventory targets and growth_row_spec have drifted apart."
+  )
+}
+
+# Explicitly signed, so a reader sees that -0.34 and +0.47 differ in sign
+# without hunting for the hyphen; two decimals because several CAGRs sit
+# between -1 and +1 and one decimal would collapse them. Em dash where a
+# single-year inventory admits no rate at all.
+growth_fmt <- function(x) {
+  dplyr::if_else(is.na(x), "---", sprintf("%+.2f", x))
+}
+
+inventory_growth_comparison_data <- growth_row_spec |>
+  dplyr::left_join(growth_summary, by = "series") |>
+  dplyr::mutate(
+    window = dplyr::if_else(
+      .data$n_years > 0,
+      sprintf("%d--%d", .data$first_year, .data$last_year),
+      as.character(.data$first_year)
+    ),
+    total_change = growth_fmt(.data$total_change),
+    cagr = growth_fmt(.data$cagr)
+  )
+
+# count() sorts alphabetically; restore declaration order so the headings run
+# Ours, Bottom-up, EDGAR, CEDS
+growth_group_sizes <- inventory_growth_comparison_data |>
+  dplyr::count(group) |>
+  dplyr::arrange(
+    match(.data$group, unique(inventory_growth_comparison_data$group))
+  )
+
+inventory_growth_comparison_kable <- inventory_growth_comparison_data |>
+  dplyr::select("label", "window", "total_change", "cagr") |>
+  knitr::kable(
+    format = "latex",
+    label = "inventory_growth_comparison",
+    escape = FALSE,
+    align = c("l", "c", "r", "r"),
+    col.names = c("Series", "Time window", "Total \\% change", "CAGR (\\%/yr)"),
+    # Wording follows the hand-edited caption in
+    # tables/inventory_growth_comparison.tex; keep the two in step if it is
+    # revised again, since this chunk overwrites that file.
+    caption = glue::glue(
+      "Growth in CO$_2$ emissions for our estimates and for every inventory ",
+      "compared in Supplementary Notes \\ref{{sec:inventory-comparison}}. ",
+      "Because the inventories begin and end in different years, each series ",
+      "is summarized over its own window and growth is reported two ways: ",
+      "the total percent change between the first and last year, and the ",
+      "compound annual growth rate (CAGR). All series are anchored at ",
+      "{growth_baseline_year} where they extend that far back. The Fourth ",
+      "IMO GHG Study ends in 2018 and is therefore reported over its native ",
+      "2015-2018 window, since anchoring it at {growth_baseline_year} would ",
+      "leave a single year-on-year change. MariTEAM is a single-year ",
+      "inventory and admits no growth rate. EDGAR and CEDS changes are shown ",
+      "for All sectors, Other transportation and Shipping scopes."
+    )
+  ) |>
+  kableExtra::kable_styling(font_size = 8, latex_options = "hold_position") |>
+  kableExtra::pack_rows(
+    index = stats::setNames(growth_group_sizes$n, growth_group_sizes$group),
+    bold = TRUE,
+    latex_gap_space = "0.4em"
+  )
+
+inventory_growth_comparison_kable
+
+inventory_growth_comparison_kable |>
+  writeLines(
+    file.path(
+      project_root,
+      "tables",
+      "inventory_growth_comparison.tex"
     )
   )
 ```
