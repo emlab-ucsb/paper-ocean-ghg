@@ -3093,8 +3093,11 @@ double_counting_summary_tbl <- double_counting_summary |>
   # off the page; 7cm + 4cm plus gutters fits the 31pc text block.
   kableExtra::column_spec(2, width = "4cm") |>
   kableExtra::kable_styling(
+    # No "scale_down" -- see the note on top_countries_by_activity_type below.
+    # The 7cm + 4cm column widths above already bring this inside the text
+    # block on their own, so the resizebox was redundant as well as fatal.
     font_size = 8,
-    latex_options = c("hold_position", "scale_down")
+    latex_options = "hold_position"
   )
 
 double_counting_summary_tbl
@@ -3408,7 +3411,10 @@ data_sources_table <- data_sources |>
     label = "data_sources"
   ) |>
   kableExtra::kable_styling(
-    latex_options = c("hold_position", "scale_down"),
+    # No "scale_down" -- see the note on top_countries_by_activity_type below.
+    # The \tabcolsep tightening applied after this call already brings the
+    # eleven columns inside the text block.
+    latex_options = "hold_position",
     font_size = 4
   )
 
@@ -4803,10 +4809,25 @@ emissions_by_ocean_summary_tbl <- emissions_by_ocean_summary_tbl |>
     digits = 3
   ) |>
   kableExtra::kable_styling(
-    # Six columns of long row labels overrun the 31pc text block; scale_down
-    # keeps the table inside it (and is a no-op once it already fits).
-    latex_options = c("hold_position", "scale_down")
+    # Six columns of long row labels overrun the 31pc (372pt) text block at the
+    # class's 8bp table font. No "scale_down" -- see the note on
+    # top_countries_by_activity_type below. font_size alone is not enough here:
+    # it shrinks the text but not the 12 x 6pt of \tabcolsep gutter, which
+    # leaves the table a couple of points over. The gutter tightening applied
+    # after this call covers the rest.
+    font_size = 7,
+    latex_options = "hold_position"
   )
+
+# Six columns means \tabcolsep accounts for 72pt of the 372pt text block, which
+# font_size cannot reach. Halving the gutters closes the remaining overrun.
+# `[<-` rather than plain assignment so the knitr_kable class survives for the
+# `results = 'asis'` print below.
+emissions_by_ocean_summary_tbl[] <- stringr::str_replace(
+  emissions_by_ocean_summary_tbl,
+  stringr::fixed("\\begin{tabular}"),
+  "\\setlength{\\tabcolsep}{3pt}\n\\begin{tabular}"
+)
 
 emissions_by_ocean_summary_tbl
 
@@ -4864,9 +4885,23 @@ emissions_by_data_source_summary_tbl <- all_edgar_gfw_data_normalized |>
     digits = 3
   ) |>
   kableExtra::kable_styling(
-    font_size = 8,
-    latex_options = c("hold_position", "scale_down")
+    # Three columns, but the row labels and headers are long enough to overrun
+    # the 31pc (372pt) text block. No "scale_down" -- see the note on
+    # top_countries_by_activity_type below. Dropping to 7bp leaves only a few
+    # points of headroom on its own, so the gutter tightening applied after
+    # this call gives it some margin.
+    font_size = 7,
+    latex_options = "hold_position"
   )
+
+# font_size shrinks the text but not the 6 x 6pt of \tabcolsep gutter.
+# `[<-` rather than plain assignment so the knitr_kable class survives for the
+# `results = 'asis'` print below.
+emissions_by_data_source_summary_tbl[] <- stringr::str_replace(
+  emissions_by_data_source_summary_tbl,
+  stringr::fixed("\\begin{tabular}"),
+  "\\setlength{\\tabcolsep}{3pt}\n\\begin{tabular}"
+)
 
 emissions_by_data_source_summary_tbl
 
