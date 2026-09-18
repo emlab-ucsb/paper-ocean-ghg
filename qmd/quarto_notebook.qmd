@@ -8131,13 +8131,12 @@ relative_plot
 
 ```{r}
 #| label: figS-fleet-growth-by-year
-#| eval: false
-# Retired from the SI on 2026-09-15 when sec:inventory-comparison was
-# streamlined; kept, not rendered, in case the figure is wanted again. Its
-# committed PNG in figures/ is the last render. Set eval back to true to redraw.
 #| fig-cap: "Growth by vessel class since 2017 in emissions, vessel count and activity."
-#| fig-width: 18
-#| fig-height: 6
+# Stacked one panel per row rather than side by side: at \columnwidth a 3:1
+# figure shrank to about 120pt tall and took the axis labels down with it. Same
+# width as figS-passenger-size-panels so the two scale to the page identically.
+#| fig-width: 7.6
+#| fig-height: 9.5
 
 fleet_growth_data <- fleet_growth_by_year_data
 
@@ -8198,11 +8197,12 @@ panels <- cowplot::plot_grid(
   panel("vessels_change", "AIS-broadcasting fleet size"),
   panel("pings_change", "AIS position messages"),
   panel("emissions_change", expression(bold("CO"[2] * " emissions"))),
-  nrow = 1,
+  ncol = 1,
   labels = c("a", "b", "c"),
   label_size = panel_label_size,
-  align = "h",
-  axis = "tb"
+  # Stacked, so it is the left edges that have to line up, not the top ones
+  align = "v",
+  axis = "lr"
 )
 
 legend <- cowplot::get_plot_component(
@@ -8215,29 +8215,36 @@ legend <- cowplot::get_plot_component(
   return_all = TRUE
 )
 
-growth_plot <- cowplot::plot_grid(
-  panels,
-  legend,
-  nrow = 1,
-  # Narrower than the two-panel version's 0.17: this is a fraction of the
-  # panel block, which now holds three panels instead of two, and the legend
-  # itself is no wider than before
-  rel_widths = c(1, 0.115)
-) +
-  ggplot2::theme(
-    plot.background = ggplot2::element_rect(fill = "white", color = NA)
-  )
-
 # One shared y-axis title, since all three panels are the same quantity
-# against the same baseline
-growth_plot <- cowplot::ggdraw(growth_plot) +
+# against the same baseline. It gets a column of its own rather than being
+# drawn over the finished plot: at this width an overlaid label lands on top
+# of the axis numbers instead of outside them.
+y_title <- cowplot::ggdraw() +
   cowplot::draw_label(
     paste0("Relative change from ", baseline_year, " baseline"),
-    x = 0.005,
-    y = 0.5,
     angle = 90,
     fontface = "bold",
     size = 12
+  )
+
+body <- cowplot::plot_grid(
+  y_title,
+  panels,
+  nrow = 1,
+  rel_widths = c(0.04, 1)
+)
+
+growth_plot <- cowplot::plot_grid(
+  body,
+  legend,
+  nrow = 1,
+  # A fraction of the body block, which is now one panel wide rather than
+  # three, so the same ~1.8in of legend costs a much larger share than the
+  # side-by-side version's 0.115
+  rel_widths = c(1, 0.32)
+) +
+  ggplot2::theme(
+    plot.background = ggplot2::element_rect(fill = "white", color = NA)
   )
 
 
