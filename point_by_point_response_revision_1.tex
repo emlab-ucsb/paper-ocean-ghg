@@ -445,24 +445,38 @@ However, our methodology is specifically designed to overcome this orbital limit
 \begin{refquote}\itshape
 EDGAR 2025 is a multi-sector emission inventory and shows noticeable differences in total emissions of various pollutants compared with specialized ship emission models. Using EDGAR as the sole or primary benchmark is therefore not sufficient. The authors are advised to include comparisons with additional shipping-focused inventories and models.
 \end{refquote}
-\response
-\changes
+\response We fully agree, and thank the reviewer for pushing us on this. Benchmarking only against a multi-sector top-down inventory was indeed insufficient, and it also left the comparison uninformative about the thing our paper actually claims. We have therefore replaced the single EDGAR benchmark with a systematic comparison against the six global bottom-up, AIS-based shipping inventories (STEAM, SEIM, MariTEAM, the OECD bottom-up model, the ICCT's SAVE model, and the model used for the Fourth IMO GHG Study) and we retain the top-down inventories as a separate, clearly labeled second comparison, to which we have added CEDS alongside EDGAR. This comparison has its own paragraph in the Results, a new main-text figure, its own paragraph in the Discussion, and two new extensive Supplementary Notes, supported by three new Supplementary Figures, three new Supplementary Tables, and three Supplementary Data files.
+
+Two points of clarification on how we have structured this. First, given its length, all the details and extensive text on this topic are included in the Supplement. Supplementary Note 2 compares methods and input data against the six shipping-focused inventories (this is the comparison the reviewer asks for in R3.1 as well). Supplementary Note 3, which is the direct answer to this comment, compares our estimated magnitudes and trends against those same six inventories first, and against EDGAR and CEDS. Second, the main highlights are summarized in the main text in the Results and Discussion, with the relevant notes and supplementary materials referenced.
+
+The comparison is also considerably more informative than the original EDGAR benchmark, and we believe it substantially strengthens the paper. Our AIS-based estimates agree closely with the shipping-focused inventories over the early years of our study period and diverge in later years, and the new analysis identifies why: global AIS-based emissions are likely understated whenever heavy reliance on registry-defined fleets leaves low-information vessels out of scope. The vessels in our analysis are not limited to only those that are registered, but rather includes all vessels observed by AIS; it thus expands with both improvements in AIS technology along with the increasing uptake of AIS among vessels, with our estimated emissions growth mostly carried by low-information vessels. This indicates that the other bottom-up inventories, and our own early years, likely miss part of the global fleet. We also now report explicitly that this cuts both ways: because our fleet is strongly influenced by AIS observation, part of our total measured growth reflects expanding AIS carriage rather than rising activity at sea, and we say so in the Results, the Discussion and Supplementary Note 3. 
+
+Finally, on the reviewer's specific point about EDGAR: our fused total does exceed both EDGAR and CEDS, and we now explain the three mechanisms responsible rather than simply reporting the gap. Fishing largely falls outside the shipping sector in both; small coastal and inland vessels are only partly covered; and neither inventory can capture fuel that never passes through reported channels.
+\changes This comment prompted the following additions:
+
+1. A new Results paragraph and a new main-text figure. The Results now include a dedicated paragraph benchmarking our estimates against the shipping-focused inventories first and the multi-sector inventories second, supported by new Fig. The new figure plots our AIS-based and fused annual CO$_{2}$ series against all six bottom-up, AIS-based inventories (panel a) and against the EDGAR and CEDS shipping sectors (panel b), so that the shipping-focused benchmarks are now the primary comparison and the multi-sector ones are clearly separated as a secondary check.
+
+2. A new Discussion paragraph interpreting the comparison, and stating plainly what it does and does not establish:
+
+3. Two new Supplementary Notes. Supplementary Note 3, `Systematic comparison of our emissions magnitude and trend estimates to other inventories' is the full version of this comparison. Supplementary Note 2, `Systematic comparison of our AIS-based emissions modeling methodology to other AIS-based inventories', provides the methodological counterpart that makes the results comparison interpretable. We describe this Note more fully in our response to R3.1.
+
+4. Three new Supplementary Figures supporting the comparison.
+5. Three new Supplementary Tables tabulating values discussed in the comparison.
+6. Three new Supplementary Data files giving the full attribute-by-attribute comparison of methods, inputs and outputs against all six inventories bottom-up, one column per inventory: \path{bottom-up_inventory_comparison_methods.csv} (Supplementary Data 1), \path{bottom-up_inventory_comparison_inputs.csv} (Supplementary Data 2), and \path{bottom-up_inventory_comparison_outputs.csv} (Supplementary Data 3).
+
 
 \point{R3.8}
 % category: writing/minor | assignee: Zihan
 % Intro line 131: explain what S1 SAR is and why it complements non-broadcasting.
 \begin{refquote}\itshape
-Introduction, line 131: when Sentinel-1 (S1) Synthetic Aperture Radar (SAR) is
-first introduced, the authors should briefly explain what this dataset is and why
-it can be used to complement emissions from non-broadcasting vessels. This will
-help readers who are not familiar with SAR to understand the rationale of the
-approach.
+Introduction, line 131: when Sentinel-1 (S1) Synthetic Aperture Radar (SAR) is first introduced, the authors should briefly explain what this dataset is and why it can be used to complement emissions from non-broadcasting vessels. This will help readers who are not familiar with SAR to understand the rationale of the approach.
 \end{refquote}
-\response We thank the reviewer for the suggestion. We added a brief description of the S1 imagery dataset, including the resolution, the all-weather imaging ability, and the revisit frequency.
-\changes We added a brief description of the imagery after mentioning the S1 SAR imagery, as suggested by the reviewer. In Lines XX-YY of the introduction, we now say:
+\response We thank the reviewer for the suggestion. In the introduction when we first introduce S1 SAR, we added a brief description of the S1 imagery dataset, including the resolution, the all-weather imaging ability, and the revisit frequency.
+
+\changes We added a the following description to the introduction where we first introduce S1 SAR:
 
 \begin{quote}
-The 20m-resolution S1 SAR imagery allows us to detect and estimate the lengths of most vessels larger than 15 m regardless of whether they broadcast AIS, cloud cover, weather conditions, or solar illumination (Paolo et al. 2024). The two S1 satellites active during our study period (full period for S1A, 2017-2021 for S1B) operate in a polar, sun-synchronous orbit, providing a global revisit frequency of 6 to 12 days.
+\textcolor{red}{Lines 139-148:} Here we develop a method to estimate high-resolution marine vessel emissions globally from 2017 through 2025 by fusing AIS data from broadcasting vessels with Sentinel-1 (S1) Synthetic Aperture Radar (SAR) detections of vessels that are not broadcasting AIS. The 20m-resolution S1 SAR imagery allows us to detect and estimate the lengths of most vessels larger than 15 m regardless of whether they broadcast AIS, cloud cover, weather conditions, or solar illumination. The two S1 satellites active during our study period (full period for S1A, 2017-2021 for S1B) operate in a polar, sun-synchronous orbit, providing a global revisit frequency of 6 to 12 days. S1 SAR therefore allows us to capture vessel activity completely absent from AIS. 
 \end{quote}
 
 \point{R3.9}
