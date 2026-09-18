@@ -303,23 +303,36 @@ of ``dark ships'', which is not presented in an objective manner.
 \point{R3.1}
 
 \begin{refquote}\itshape
-The manuscript develops a global ship emission inventory by integrating SAR and
-AIS data. The comparisons with a confidential test database containing
-``measured fuel consumption'' for more than 15,000 ships and with the EU MRV
-annual CO\textsubscript{2} emissions reports are essentially validations at the
-individual ship level, and cannot by themselves support conclusions about global
-ship emissions. Given that many global ship emission inventory models based on
-AIS data already exist, such as SEIM, STEAM, MariTEAM, etc., the authors should
-provide a systematic comparison of their method, data (both quantity and
-quality), and results with existing methods, datasets, and inventories. This is
-necessary to demonstrate the added value and contribution of their new approach.
-In addition, the robustness of the method and the quality of the underlying data
-should be emphasized and discussed more clearly in the main text.
+The manuscript develops a global ship emission inventory by integrating SAR and AIS data. The comparisons with a confidential test database containing ``measured fuel consumption'' for more than 15,000 ships and with the EU MRV annual CO\textsubscript{2} emissions reports are essentially validations at the individual ship level, and cannot by themselves support conclusions about global ship emissions. Given that many global ship emission inventory models based on AIS data already exist, such as SEIM, STEAM, MariTEAM, etc., the authors should provide a systematic comparison of their method, data (both quantity and quality), and results with existing methods, datasets, and inventories. This is necessary to demonstrate the added value and contribution of their new approach. In addition, the robustness of the method and the quality of the underlying data should be emphasized and discussed more clearly in the main text.
 \end{refquote}
 
-\response \textcolor{red}{Pol to draft}
+\response We thank the reviewer for this comment. Validation against measured fuel consumption and against EU MRV tests whether our model estimates emissions correctly at the individual ship level. However, it says nothing about whether the modeled fleet is complete, and therefore cannot on its own support a claim about global totals. We have retained those vessel-level validations, but we now frame them explicitly as tests of the emissions model rather than of the inventory, and we have added the fleet-completeness test the reviewer rightly asks for: a systematic comparison of our methods, our input data, and our results against the six most recent and representative global bottom-up, AIS-based inventories (STEAM, SEIM, MariTEAM, the OECD bottom-up model, the ICCT's SAVE model, and the model used for the Fourth IMO GHG Study).
 
-\changes \textcolor{red}{Pol to draft}
+We have structured this along exactly the three axes the reviewer names.
+
+1. Method. Every AIS-based inventory is assembled from four components: the AIS record, a vessel-characteristics dataset, an engine model, and fuel consumption and emission factors. We compare ours against all six inventories on each. The comparison is transparent about both our limitations and the advantages of our broader scope. On the engine model, we use a load-based formulation, as do SEIM, SAVE, OECD and the Fourth IMO GHG Study, while STEAM and MariTEAM are resistance-based; we explain why the load-based choice is the appropriate one given that we model a fleet dominated by low information vessels, and we address the reported tendency of load-based models to yield higher fleet-level emissions than resistance-based. On fuel and policy treatment we are explicitly narrower than several of the others: we do not model fuel type at vessel level, we exclude LNG, and some specific emissions limits are assigned by engine Tier but not resolved spatially by ECA boundaries.
+
+2. Data quantity and quality. On quantity, restricting the comparison to vessels explicitly modeled from observed AIS activity, we model 864,738 unique vessels, an average of 396,221 per year, which exceeds the AIS-modeled fleet of the Fourth IMO GHG Study, OECD, SAVE, MariTEAM and SEIM. Our fleet is comparable only to STEAM, though STEAM only reports fleet size for 2015. Our AIS record comprises approximately 125 billion positions over the study period after cleaning, which is only directly comparable with the yearly AIS messages used for STEAM, although STEAM reports message counts only for 2015. Part of the higher density in our later-period data comes from Dynamic AIS (D-AIS, or shipborne AIS), whereas other inventories only report the use of conventional AIS data. On quality, the most direct evidence is a like-for-like comparison of validation. The recent STEAM ambient-conditions update validates modeled fuel consumption against 6,445 vessel-year records in EU MRV. We validate against 20,432 vessel-years of the same benchmark. Both achieving similar performances. We also compare how every other inventory has been validated, which is mostly against aggregate statistics (IEA, UNCTAD, EMEP, national Air Emission Accounts) or against other inventories. We validate our aggregate results against all six bottom-up inventories and two top-down inventories (see response to R3.7).
+
+3. Results. We compare our estimated magnitudes and trends against all six inventories, and separately against the fuel-statistics-derived EDGAR and CEDS. This is the comparison the reviewer asks for in R3.7, and we describe it in full there. We also discuss the spatial and temporal resolution of other inventories and their availability relative to ours.
+
+On the added value of the approach, the contribution of our inventory lies in specific features of its scope and methodology. Existing inventories largely rest on a registry-matched core of large vessels that accounts for most emissions. They differ in how much of the low-information tail beyond this core they include, how they characterize these vessels, and how they treat vessels absent from AIS. Our AIS-based fleet is defined by AIS observations rather than registry coverage, allowing us to model emissions across a larger number of observed vessels, whereas, with some exceptions, other inventories remain largely bounded by a registry-defined core. We further contribute by estimating emissions for vessels that appear in neither registries nor the AIS record, using Sentinel-1 SAR detections that cannot be matched to an AIS broadcast. To our knowledge, this is the first global shipping inventory to do so.
+
+\changes We have added the following.
+
+1. Supplementary Note 2, `Systematic comparison of our AIS-based emissions modeling methodology to other AIS-based inventories'. This is the principal new material responding to this comment. It opens by situating the two methodological families (top-down fuel-based and bottom-up activity-based) and identifying the six inventories compared, then proceeds through: scope of the comparison and modeling approaches; activity and vessel-characteristics data (AIS coverage, fleet size, message volume, temporal coverage, how each inventory sources and gap-fills vessel characteristics, and how each treats vessels absent from AIS); the engine and emissions model (load-based versus resistance-based, main engine load corrections, SFOC, auxiliary and boiler decomposition, fuel types, and ECA and NOx Tier treatment); and differences in validation.
+
+2. Supplementary Data 1, 2 and 3 (CSV files), giving the full attribute-by-attribute comparison with one column per inventory, so that readers can audit the comparison rather than take our summary of it:
+\begin{itemize}
+\item Supplementary Data 1, \path{bottom-up_inventory_comparison_methods.csv} --- main engine power and engine types, fuel types, main engine correction factors, specific fuel oil consumption, low-load adjustment, auxiliary engine and boiler power, emission control areas, imputation for vessels without AIS data, and validation.
+\item Supplementary Data 2, \path{bottom-up_inventory_comparison_inputs.csv} --- AIS receiver types, vessel-characteristics sources, spatial and temporal coverage, number of vessels, and number of AIS messages after processing.
+\item Supplementary Data 3, \path{bottom-up_inventory_comparison_outputs.csv} --- pollutants and other outputs, spatial and temporal resolution, disaggregation dimensions, and data access.
+\end{itemize}
+
+3. Supplementary Note 3 and the accompanying new main-text figure (Fig. 4), Results paragraph and Discussion paragraph, which carry the comparison of results. These are described in our response to R3.7.
+
+4. Robustness and data quality in the main text. Addressing the reviewer's closing point, the main text now incorporates this material rather than leaving it to the Supplementary Information. The Results contain a dedicated paragraph benchmarking our estimates against other inventories, while the Discussion contains a paragraph interpreting the comparison and clarifying what it does and does not establish. In addition to the validation section within Methods, the main text now also reports details on the data sources, data quality, and inference of vessel characteristics. We have also added a new Methods section quantifying potential double-counting between our AIS-based and S1-unmatched components, as well as a new Supplementary Note 1 on trends in AIS receiver types.
+
 
 \point{R3.2}
 % category: MAJOR / analysis+framing | assignee: Anna
@@ -558,16 +571,23 @@ ship-type analysis.
 % Figure 3a: compare ship-type contributions to other inventories (container vs
 % bulk expectation); if driven by S1, analyse S1 ship-type composition. Ties R3.1.
 \begin{refquote}\itshape
-Figure 3a: previous studies generally indicate that container ships are the
-largest contributors to global ship CO\textsubscript{2} emissions, followed by
-bulk carriers. The authors should compare their ship-type contributions with
-other inventories and explain the reasons for any discrepancies. If the
-differences are primarily driven by the inclusion of S1 data, then the ship-type
-composition of S1-derived emissions should be analyzed and discussed more
-explicitly.
+Figure 3a: previous studies generally indicate that container ships are the largest contributors to global ship CO\textsubscript{2} emissions, followed by bulk carriers. The authors should compare their ship-type contributions with other inventories and explain the reasons for any discrepancies. If the differences are primarily driven by the inclusion of S1 data, then the ship-type composition of S1-derived emissions should be analyzed and discussed more explicitly.
 \end{refquote}
-\response
-\changes
+\response We thank the reviewer for this comment.
+
+First, a clarification that resolves the second half of the comment: the differences in ship-type contributions are not driven by the inclusion of S1 data. Figure 3 reports AIS-based emissions only. This is a limitation of the S1 data rather than a choice. S1 detections support disaggregation only between fishing and non-fishing vessels, not into the 37 vessel classes of our AIS-based inventory, and we have now stated this explicitly in the figure caption and in the accompanying text, since the original figure did not make it clear. The ship-type composition in Figure 3 therefore reflects our AIS-based fleet alone, and any departure from other inventories must be explained by the AIS-based model, not by data fusion.
+
+Second, on the comparison itself: within the cargo and tanker families our ranking agrees with previous studies. Container ships and bulk carriers are the highest-emitting cargo classes in our inventory, and oil tankers the highest-emitting tanker type, consistent with STEAM, MariTEAM, SEIM and SAVE. We now say so in the text, with citations, rather than reporting our ranking in isolation. The main discrepancy between our inventory and the other inventories is that, in 2025, passenger vessels rather than container ships constitute the largest single emitting group. We have two explanations for this, and both are now in the manuscript. The first concerns how we define this class in our model. `Passenger' is a highly aggregated category in our vessel classification, comprising ferries, cruise ships, Ro-Pax and yachts, which are treated as separate classes or excluded entirely in other inventories. This aggregation makes passenger the most numerous class in our fleet and consequently the largest emitting group. The second is fleet coverage, and it is the same mechanism that explains our divergence from other inventories in total emissions (R3.7): vessels below 25 m account for most passenger emissions in our inventory. These are small, largely coastal vessels that registries cover poorly, and registry-anchored inventories cannot represent. The same is true of fishing vessels, which are our second-largest class by vessel count and which most global shipping inventories exclude or underrepresent.
+
+
+\changes We have revised the relevant Results paragraph, the caption of Figure 3, and added supporting supplementary material.
+
+1. The Results paragraph on vessel classes now makes the comparison with other inventories explicit and explains the discrepancy.
+
+2. The caption of Figure 3 now states that the figure reports AIS-broadcasting emissions only, and the panels themselves are labelled accordingly, so that no reader can attribute the vessel-class composition to the S1 component.
+
+3. Two supplementary figures supporting the explanation: Supplementary Fig. 7, passenger vessels by length bin for 2017 against 2025, which shows the growth and the emissions concentrated in the smallest sizes; and Supplementary Fig. 8, fleet composition in 2025, giving each vessel class's share of the fleet against its share of CO$_{2}$, which shows directly that passenger's position is a function of vessel count.
+
 
 \point{R3.14}
 % category: writing/analysis | assignee: Gavin
