@@ -7769,17 +7769,17 @@ inventory_growth_comparison_kable <- inventory_growth_comparison_data |>
     # revised again, since this chunk overwrites that file.
     caption = glue::glue(
       "Growth in CO$_2$ emissions for our estimates and for every inventory ",
-      "compared in Supplementary Notes \\ref{{sec:inventory-comparison}}. ",
-      "Because the inventories begin and end in different years, each series ",
-      "is summarized over its own window and growth is reported two ways: ",
-      "the total percent change between the first and last year, and the ",
-      "compound annual growth rate (CAGR). All series are anchored at ",
-      "{growth_baseline_year} where they extend that far back. The Fourth ",
-      "IMO GHG Study ends in 2018 and is therefore reported over its native ",
-      "2015-2018 window, since anchoring it at {growth_baseline_year} would ",
-      "leave a single year-on-year change. MariTEAM is a single-year ",
-      "inventory and admits no growth rate. EDGAR and CEDS changes are shown ",
-      "for All sectors, Other transportation and Shipping scopes."
+      "compared in Supplementary Note \\ref{{sec:inventory-comparison}}. All ",
+      "series are anchored at {growth_baseline_year} where they extend that ",
+      "far back, and because the inventories end in different years each is ",
+      "summarized to its own end year. Growth is reported two ways: the ",
+      "total percent change between the first and last year, and the ",
+      "compound annual growth rate (CAGR). The Fourth IMO GHG Study ends in ",
+      "2018 and is therefore reported over its native 2015-2018 window, ",
+      "since anchoring it at {growth_baseline_year} would leave a single ",
+      "year-on-year change. MariTEAM is a single-year inventory and admits ",
+      "no growth rate. EDGAR and CEDS changes are shown for All sectors, ",
+      "Other transportation and Shipping scopes."
     )
   ) |>
   kableExtra::kable_styling(font_size = 8, latex_options = "hold_position") |>
