@@ -370,9 +370,18 @@ framework and available AIS datasets. This point should be acknowledged and
 discussed.
 \end{refquote}
 
-\response \textcolor{red}{Pol to draft}
+\response We have documented the AIS sourcing and processing in the Methods. Our original text described GFW's AIS inputs in a single sentence, which was not adequate given how much the reviewer rightly says rests on it. Section 4.1.1 (AIS data description) now names the provider of our terrestrial, satellite and dynamic AIS, states that the feed covers both Class A and Class B transponders, distinguishes position messages from static and voyage messages, and describes the removal of invalid, duplicated and physically implausible positions before any downstream processing. It then describes how the retained pings are grouped into segments, which determines the time interval each ping represents and therefore the activity over which emissions are estimated \cite{kroodsma2018tracking}. We have also included a Supplementary Note 1, where we decompose and discuss our emissions, message volume and vessel counts by receiver type across the study period.
 
-\changes \textcolor{red}{Pol to draft}
+We have also compared our AIS inputs against the other bottom-up inventories as far as their reporting allowed. Supplementary Note 2 and Supplementary Data 2 set our AIS record against all six on the attributes the others report.
+
+\changes We have made the following additions.
+
+1. An expanded description of the AIS data and processing in the Methods, Section 4.1.1 "AIS data description". 
+
+2. Supplementary Note 1, `Trends in AIS receiver types', with three supporting supplementary figures.
+
+3. A comparison of our AIS inputs against the other inventories, in
+Supplementary Note 2 and Supplementary Data 2 (\path{bottom-up_inventory_comparison_inputs.csv}).
 
 \point{R3.4}
 % category: MAJOR / analysis+framing | assignee: Zihan and David
