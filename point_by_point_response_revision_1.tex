@@ -76,9 +76,8 @@ Before turning to the point-by-point responses to the referee comments, we would
 
 \response We have reordered the manuscript to follow the required structure. 
 
-\todo{Two items in this list still need author text, and are flagged in the .tex:
-(i) the Acknowledgements section is empty;
-(ii) the Author Contributions statement is still the CRediT-style list and needs rewriting as one paragraph of descriptive sentences, as the editor asks}
+\todo{One item in this list still need author text, and are flagged in the .tex:
+the Author Contributions statement is still the CRediT-style list and needs rewriting as one paragraph of descriptive sentences, as the editor asks}
 
 \point{E2 --- Supplementary Information as a separate PDF}
 % category: formatting | assignee: Gavin
@@ -154,15 +153,17 @@ operational behavior). The authors could strengthen the justification by
 conducting sensitivity analyses of different condition, and show potential bias
 direction and magnitude more explicitly.
 \end{refquote}
+
 \response We thank the reviewer for bringing up this important point to clarify. We believe our model framework already addresses the majority of the reviewer's concern, and we appreciate the opportunity to clarify this for the reviewer and for future readers of the manuscript. For vessel sizes, we already bin the vessels and detections into fine length groups and drop small S1-unmatched detections below the smallest observed AIS-broadcasting vessel length, so we are not imposing this assumption to vessels of very different lengths. For operational behavior, our detections are already classified as fishing and non-fishing vessels, which is major factor determining operational behavior and emissions factors. For vessels of the same size and type, the fact that we are using Sentinel-1 imagery further helps reduce the variability inside each group, because SAR has limited ability of detecting wooden and fiberglass vessels. This means we are not applying the emission behavior of a small industrial fishing boat observed in the AIS data to a wooden small-scale fishing boat or fiberglass recreational fishing boat of similar size.
 
-In addition, S1 vessel detections unmatched with AIS could correspond to \textit{either} vessels that do not carry an AIS transponder at all; \textit{or} to vessels that carry AIS transponders but temporarily non-broadcasting or whose signal was not received. Therefore, AIS-broadcasting vessels and unmatched vessel detections are not necessarily two distinct fleets, but can be two transient states. In these cases, the `relationship between SAR-detected vessel density and emissions' is exactly the same between the two transient states, because the two states represent the exact same set of vessels.
+In addition, S1 vessel detections unmatched with AIS could correspond to \textit{either} vessels that do not carry an AIS transponder at all; \textit{or} to vessels that carry AIS transponders but are temporarily not broadcasting or whose signal was not received. Therefore, AIS-broadcasting vessels and unmatched vessel detections are not necessarily two distinct fleets, but can be two transient states. In these cases, the `relationship between SAR-detected vessel density and emissions' is exactly the same between the two transient states, because the two states represent the exact same set of vessels.
 
 Finally, because our S1-unmatched model estimates emissions by space (1x1 degree pixels) and time (month) using AIS-broadcasting emissions data from the same space and time, the assumption is only applied to vessels operating in the same space and time. If vessels operating concurrently have similar characteristics, the assumption will hold. We do not use information from AIS-broadcasting vessels to infer S1-unmatched emissions in other places or times.
 
-Nevertheless, we do still acknowledge there may be situations where the assumption breaks down.  This may be particularly the case when the emissions factors of non-broadcasting vessels are significantly different from the average emissions factors that form the basis of the 2020 Fourth IMO GHG report. For non-broadcasting vessels with newer technology that is significantly more efficient and less carbon intensive, this could bias our S1-unmatched emissions estimates too high. It is highly likely, however, that newer vessels with this improved technology would carry AIS transponders. For older non-broadcasting vessels that have outdated and more carbon intensive technology, this could bias our S1-unmatched emissions estimates too low. 
+Nevertheless, we do still acknowledge there may be situations where the assumption breaks down.  This may be particularly the case when the emissions factors of fully non-broadcasting vessels are significantly different from the average emissions factors that form the basis of the 2020 Fourth IMO GHG report. For non-broadcasting vessels with newer technology that is significantly more efficient and less carbon intensive, this could bias our S1-unmatched emissions estimates too high. It is highly likely, however, that newer vessels with this improved technology would carry AIS transponders. For older non-broadcasting vessels that have outdated and more carbon intensive technology, this could bias our S1-unmatched emissions estimates too low. 
 
-\changes We explicitly address this assumption, and why we believe it is largely valid, as its own paragraph in the discussion.
+\changes 
+We explicitly address this assumption, and why we believe it is largely valid, as its own paragraph in the discussion.
 
 \begin{quote}
 \textcolor{red}{Lines 677-695}: Several methodological limitations remain. One key assumption is that S1-unmatched emissions can be inferred from the relationship between S1 detections and AIS-based emissions for matched vessels. We believe this is a reasonable assumption for several reasons.  First, many unmatched S1 detections likely correspond to AIS-broadcasting vessels that are not observed in the AIS data because of transmission gaps or poor reception quality. In these cases, the relationship between S1 vessel detections and emissions would hold perfectly since these unmatched vessels are in fact just AIS-broadcasting vessels that happen to not be observed by AIS at a given point in time. Second, our model accounts for vessel length, a proxy for main engine power that is one of the primary determinants of emissions in AIS-based models and is applicable to virtually all vessels powered by internal combustion engines. Third, since fishing and non-fishing vessels are known to have different emissions factors, we account for this by differentiating detections between fishing and non-fishing vessels. Finally, our model incorporates spatiotemporal features that allow the relationship between detections and emissions to vary across space and time. Consequently, if broadcasting and non-broadcasting vessels operating in a given place and time have similar characteristics, the relationship between detections and emissions is expected to be similar as well. 
@@ -184,11 +185,11 @@ practice, this approach does not capture heterogeneity in fuel types and engine
 technologies. Please clarify the implications of this assumption and discuss how
 future work could incorporate vessel-specific fuel and engine data.
 \end{refquote}
+
 \response
 Thank you for this clarifying comment. Since the initial submission, we have developed new machine learning models to predict engine type (oil, gas, or turbine), construction year, and engine speed (RPM) for each AIS-broadcasting vessel. This allows us to now more precisely assign emissions factors, including the ability to assign factors for different IMO NOx tiers and engine speeds. When a vessel's engine type cannot be resolved to a single emissions factor, we now use the predicted engine type to narrow the applicable emission factor columns and average across them. Although we attempted to develop a machine learning model to predict fuel type as well, we were unable to achieve reasonable predictive performance using the proprietary vessel registry we had access to. We now also discuss in the text how future research should be targeted at refining vessel-specific fuel and engine data.
 
 \changes
-
 We’ve added this new information in Section 4.1.2 in the following paragraphs:
 
 \begin{quote}
@@ -239,6 +240,7 @@ We also made minor adjustments to the main text to point readers towards the new
 The authors can provide more precise the definition of ``non-broadcasting
 vessels''.
 \end{refquote}
+
 \response Thank you for this suggestion. In reading through the suggestions from both reviewers, it has become clear to us that our terminology for specifying the two components of our emissions data fusion approach was confusing and imprecise. We have fully revised the text, and all figures and tables, to use a more clear set of terminologies: we now label emissions as either coming from either: 1) `AIS-broadcasting' vessels, or 2) `S1-unmatched vessels. Our use of the term 
 `non-broadcasting vessels' was not clear or technically correct; this is because an S1 vessel detection that could not be matched to an AIS-broadcasting vessels  may correspond to \textit{either} a vessel not equipped with AIS, \textit{or} to a vessel equipped with AIS but experiencing a transmission gap.
 
@@ -272,13 +274,14 @@ and clearer separation between AIS-based and SAR-based components
 \changes The completely revised schematic can now be found in Fig. \textcolor{red}{5}.
 
 \point{R2.6}
-% category: figure | assignee: Gavin
-% New figure: AIS-only vs fused estimates. Cross-ref R3.11 (spatial S1 map).
+
 \begin{refquote}\itshape
 A plot highlighting the differences of AIS-only vs fused estimates can improve
 the quality of the paper.
 \end{refquote}
-\response Thank you for this comment and the opportuntity to improve our figures. In terms of annual temporal differences, Figure 1 panels A and B both show annual AIS-only emissions estimates (labeled `AIS-based'), estimates only from unmatched S1 detections (labeled `S1-unmatched'), and total fused estimates (labeled `AIS-based + S1-unmatched'). This figure shows how the data fusion approach increases the estimated magnitude of emissions relative to the AIS-only approach (panel A), while also dampening the increasing trend compared to the AIS-only approach (panel B). Similarly, the newly revised Figure 2 panel shows monthly AIS-only emissions estimates (labeled `AIS-based'), estimates only from unmatched S1 detections (labeled `S1-unmatched'), and total fused estimates (the stack of the two time series).
+
+\response Thank you for this comment and the opportunity to improve our figures. In terms of annual temporal differences, Figure 1 panels A and B both show annual AIS-only emissions estimates (labeled `AIS-based'), estimates only from unmatched S1 detections (labeled `S1-unmatched'), and total fused estimates (labeled `AIS-based + S1-unmatched'). This figure shows how the data fusion approach increases the estimated magnitude of emissions relative to the AIS-only approach (panel A), while also dampening the increasing trend compared to the AIS-only approach (panel B). Similarly, the newly revised Figure 2 panel shows monthly AIS-only emissions estimates (labeled `AIS-based'), estimates only from unmatched S1 detections (labeled `S1-unmatched'), and total fused estimates (the stack of the two time series).
+
 In terms of spatial differences, your comment also inspired us to revise Figure 2 to include a new Panel C that has spatial maps of AIS-only emissions estimates (top map, labeled `AIS-based'), estimates only from unmatched S1 detections (middle map, labeled `S1-unmatched'), and total fused estimates (bottom map, labeled `AIS-based + S1-unmatched'). We also have fully revised a companion figure to Figure 2, Figure S1, which is similar to Figure 2, but disaggregates temporal and spatial AIS-based, S1-unmatched, and fused emissions activity between non-fishing and fishing vessels. Taken together, Figures 1, 2, and S1 now clearly highlight both the temporal and spatial differences of AIS-only versus fused emissions estimates.
 
 \changes Figures 1, 2, and \textcolor{red}{S1} have been revised.
@@ -298,6 +301,7 @@ and comparison with AIS-based methods. This leads to several potentially serious
 misinterpretations for the research community, such as the estimated proportion
 of ``dark ships'', which is not presented in an objective manner.
 \end{refquote}
+
 \response We thank the reviewer for these substantive comments. We address the overarching concern --- a fair, quantitative comparison with existing AIS-based inventories --- centrally in our responses to R3.1, R3.4 and R3.7. This comparison to other AIS-based inventories is now a central feature of our results, including its own paragraph and a new figure. It is also described in much more detail in a new extensive SI section. We believe this is an extremely important addition to the manuscript, and are grateful for your suggestions to incorporate this.
 
 \point{R3.1}
@@ -355,12 +359,12 @@ to registry data, and another $\sim$6\% are matched via public ship databases
 (non-IMO registered). This seems to reflect limitations of the authors' specific
 implementation rather than an inherent flaw of AIS-based methods.
 \end{refquote}
+
 \response We apologize for the lack of clarity in our original text. To clarify, we successfully matched virtually all IMO-registered vessels to registry data (not 10\% as suggested). What we meant to say is that only roughly 13\% of vessels analyzed are IMO registered (~113,000 out of ~865,000) and therefore we were able to find at least some characteristic information about them in S\&P Global Market's Ship Dataset or other open registries. We were able to find characteristic information for an additional ~48,000 vessels that were not IMO registered. 
 \changes We have rewritten the relevant text for clarity and added a supplementary table breaking down the registry coverage by characteristic. 
 
 \point{R3.3}
-% category: discussion/framing | assignee: David
-% Acknowledge + discuss impact of AIS provider/pipeline choice (GFW-only).
+
 \begin{refquote}\itshape
 The authors use only the GFW AIS dataset. In practice, the choice of AIS data
 provider and processing pipeline has a substantial impact on data quality and
@@ -370,18 +374,37 @@ framework and available AIS datasets. This point should be acknowledged and
 discussed.
 \end{refquote}
 
-\response We have documented the AIS sourcing and processing in the Methods. Our original text described GFW's AIS inputs in a single sentence, which was not adequate given how much the reviewer rightly says rests on it. Section 4.1.1 (AIS data description) now names the provider of our terrestrial, satellite and dynamic AIS, states that the feed covers both Class A and Class B transponders, distinguishes position messages from static and voyage messages, and describes the removal of invalid, duplicated and physically implausible positions before any downstream processing. It then describes how the retained pings are grouped into segments, which determines the time interval each ping represents and therefore the activity over which emissions are estimated \cite{kroodsma2018tracking}. We have also included a Supplementary Note 1, where we decompose and discuss our emissions, message volume and vessel counts by receiver type across the study period.
+\response We have now more thoroughly document our AIS data provider and data processing pipeline in the Methods. Our original text described GFW's AIS inputs in a single sentence, which was not adequate given how much the reviewer rightly says rests on it. Section 4.1.1 (AIS data description) now names the provider of our terrestrial, satellite and dynamic AIS, states that the feed covers both Class A and Class B transponders, distinguishes position messages from static and voyage messages, and describes the removal of invalid, duplicated and physically implausible positions before any downstream processing. It then describes how the retained pings are grouped into segments, which determines the time interval each ping represents and therefore the activity over which emissions are estimated \cite{kroodsma2018tracking}. We have also included a Supplementary Note 1, where we decompose and discuss our emissions, message volume and vessel counts by receiver type across the study period.
 
 We have also compared our AIS inputs against the other bottom-up inventories as far as their reporting allowed. Supplementary Note 2 and Supplementary Data 2 set our AIS record against all six on the attributes the others report.
 
-\changes We have made the following additions.
+\changes We now provide an expanded description of the AIS data and processing in the Methods, Section\textcolor{red}{4.1.1} AIS data description: 
 
-1. An expanded description of the AIS data and processing in the Methods, Section 4.1.1 "AIS data description". 
+\begin{quote}
+\textcolor{red}{Lines 815-822:}
+We use individual AIS messages (pings) from the latest version of GFW’s AIS pipeline (`Version 5'), which parses, cleans, and augments raw AIS data. GFW sources raw AIS from commercial providers of terrestrial, satellite and, from 2022, dynamic AIS (Spire Global), covering both Class A and Class B transponders. Raw broadcasts are parsed and decoded from their encoded format into position messages, carrying location, speed and course, and static and voyage messages, carrying the identifiers and attributes a vessel reports about itself. Positions that are invalid, duplicated, or physically implausible are removed before any downstream processing.
+\end{quote}
+ 
 
 2. Supplementary Note 1, `Trends in AIS receiver types', with three supporting supplementary figures.
 
 3. A comparison of our AIS inputs against the other inventories, in
 Supplementary Note 2 and Supplementary Data 2 (\path{bottom-up_inventory_comparison_inputs.csv}).
+
+
+We do still want to also clarify that even with the most advanced AIS data processing, any emissions estimates based on AIS are still fundamentally are limited by the fact that not all vessels use AIS, and that AIS coverage is inconsistent over space and time.
+
+\begin{quote}
+\textcolor{red}{Lines 132-137:} 
+Advanced AIS-based inventories mitigate several of these issues through data cleaning, registry enrichment, and trajectory reconstruction, and we adopt these practices here \cite{kroodsma2018tracking, park2023tracking}. However, such corrections operate on vessels that broadcast at least intermittently, and their performance itself depends on AIS coverage — which is not constant over space or time.
+\end{quote}
+
+We also now expand on this further in the discussion:
+
+\begin{quote}
+\textcolor{red}{Lines 652-665:}
+Our approach is complementary to, rather than a replacement for, efforts to improve AIS data quality. Any AIS-derived inventory faces two distinct gaps: 1) vessels that do not use AIS; and 2) vessels that use AIS, but whose signals are not received. Trajectory reconstruction addresses the second but cannot address the first. Reconstruction also cannot resolve the confound between monitoring and activity: because reconstruction methods are calibrated on observed AIS, discrete shifts in coverage — such as the 2022 adoption of D-AIS or the 2021 loss of terrestrial reception in Chinese waters (Supplementary Note \textcolor{red}{1}: Trends in AIS receiver types) — propagate into reconstructed trajectories. S1 observation effort is independent of AIS coverage, which is what allows our estimates of the emissions trend to be robust to it. The value of our framework is therefore that it tolerates incomplete AIS: unmatched detections absorb emissions from both never-broadcasting vessels and broadcasting vessels with unreceived signals, so comprehensive emissions can be recovered without first achieving a `perfect' AIS reconstruction.
+\end{quote}
 
 \point{R3.4}
 % category: MAJOR / analysis+framing | assignee: Zihan and David
@@ -400,16 +423,14 @@ are strongly encouraged to conduct an objective and detailed data-based
 comparison with existing global ship emission inventories.
 \end{refquote}
 
-\response Estimating emission from only AIS misses contributions from both truly non-broadcasting vessels and broadcasting but signal-not-received vessels. In theory, if we can reconstruct all the AIS activities of the latter, we can improve the AIS-derived emissions and get closer to the ``truth''. In practice, however, no publicly reproducible pipeline can truly collect, clean and reconstruct all the AIS activities, especially from publicly available data. By using processed AIS data from different providers, one can get different results. Regardless of the choices of reconstruction methods and AIS data providers, there will be bias in the AIS-based emission estimation. This bias and the missing contribution from truly non-broadcasting fleets together form the gap between comprehensive marine vessel emissions and any AIS-derived emissions.
+\response Estimating emission from only AIS misses contributions from both truly non-broadcasting vessels and broadcasting but signal-not-received vessels. In theory, if we can reconstruct all the AIS activities of the latter, we can improve the AIS-derived emissions and get closer to the ``truth''. In practice, however, no publicly reproducible pipeline can truly collect, clean and reconstruct all the AIS activities, especially from publicly available data. By using processed AIS data from different providers, one can get different results. Regardless of the choices of reconstruction methods and AIS data providers, there will be bias in the AIS-based emission estimation. This bias and the missing contribution from truly non-broadcasting vessels together form the gap between comprehensive marine vessel emissions and any AIS-derived emissions.
 
 We argue that the major value of approach is to provide a flexible solution for this challenge - it tolerates incomplete AIS data. The contribution by the unmatched vessel detections captures the emissions by both truly non-broadcasting vessels and broadcasting vessels with missing AIS data. Our model framework bypasses the requirement for the ``perfect'' AIS-derived emissions and directly leads to comprehensive marine vessel emissions.
 
 \changes In both Introduction and Discussion sections, we added that AIS-based emission inventories can mitigate AIS data issues through data cleaning, registry enrichment, and trajectory reconstruction, but the limitation of non-broadcasting vessels and AIS coverage remain. We added discussion that the major value of approach is to provide a flexible solution for this challenge - it tolerates incomplete AIS data.
 
 \point{R3.5}
-% category: analysis/uncertainty | assignee: Zihan and Anna
-% Line 410: non-vessel AIS signals in unmatched data; quantify or acknowledge.
-% Cross-ref R2.4 (definition of non-broadcasting vessels).
+
 \begin{refquote}\itshape
 Line 410: AIS data contain many non-vessel signals, such as those from fishing
 gear, aids to navigation, lighthouses, and other stationary objects. Therefore,
@@ -440,9 +461,7 @@ In Section \textcolor{red}{4.2.1 Sentinel-1 SAR data description}, where we desc
 \end{quote}
 
 \point{R3.6}
-% category: MAJOR / analysis | assignee: Zihan
-% S1 orbital/temporal sampling biases vs dynamic ship activity; monthly aggregates.
-% Editor's flagged "robustness" concern.
+
 \begin{refquote}\itshape
 The orbital characteristics of Sentinel-1 and the sampling properties of the SAR
 data require further discussion. SAR observations are highly dependent on the
@@ -454,11 +473,16 @@ assess and discuss the potential biases and uncertainties introduced by this
 temporal sampling, particularly for reconstructing ship trajectories and
 estimating emissions.
 \end{refquote}
+
 \response We thank the reviewer for highlighting the fundamental mismatch between the sparse temporal sampling of Sentinel-1 and the highly dynamic nature of vessel movements. If we were applying a naive linear scaling (e.g., multiplying instantaneous SAR counts by the hours in a month), this temporal sparsity would indeed introduce severe biases.
 
-However, our methodology is specifically designed to overcome this orbital limitation through our multi-model framework described in section 4.2.2. By training the model to predict AIS-broadcasting emissions using matched detection density, the model intrinsically learns to account for Sentinel-1’s revisit frequency and diurnal sampling biases. Consequently, when predicting emissions for non-broadcasting vessels, the model does not assume a steady-state temporal density from a single snapshot; rather, it applies the empirical temporal scaling learned from the continuous behavior of the AIS-broadcasting fleet. This model design is also described in the Introduction section.
+However, our methodology is specifically designed to overcome this orbital limitation through our multi-model framework described in section 4.2.2. By training the model to predict AIS-broadcasting emissions using matched detection density, the model intrinsically learns to account for Sentinel-1’s revisit frequency and diurnal sampling biases. Consequently, when predicting emissions for S1-unmatched vessels, the model does not assume a steady-state temporal density from a single snapshot; rather, it applies the empirical temporal scaling learned from the continuous behavior of the AIS-broadcasting fleet. This model design is also described in the Introduction section.
 
-\changes At the beginning of section 4.2.2, we have added explicit description of the potential bias that the Sentinel-1 sampling could introduce, which is a reason for developing our model framework.
+\changes At the beginning of section 4.2.2, we have added explicit description of the potential bias that the Sentinel-1 sampling could introduce, which is a reason for developing our model framework:
+
+\begin{quote}
+\textcolor{red}{Lines 1795-1802:} A common limitation in SAR-derived inventories is the sparse temporal coverage of Low Earth Orbit satellites, where dynamic vessel movements are inadequately captured by discrete, fixed-time overpasses. To directly addresses this spatial-temporal mismatch, we avoid assuming a steady-state temporal vessel activities from snapshots of imagery. Instead, we estimate S1-unmatched emissions using a multi-model framework that uses a combination of AIS-derived emissions, S1 vessel detections, and additional spatiotemporal model features based on an observational unit of 1x1 degree pixel-months.
+\end{quote}
 
 \point{R3.7}
 % category: analysis | assignee: Pol
@@ -488,10 +512,10 @@ Finally, on the reviewer's specific point about EDGAR: our fused total does exce
 
 
 \point{R3.8}
-% category: writing/minor | assignee: Zihan
-% Intro line 131: explain what S1 SAR is and why it complements non-broadcasting.
+
 \begin{refquote}\itshape
 Introduction, line 131: when Sentinel-1 (S1) Synthetic Aperture Radar (SAR) is first introduced, the authors should briefly explain what this dataset is and why it can be used to complement emissions from non-broadcasting vessels. This will help readers who are not familiar with SAR to understand the rationale of the approach.
+
 \end{refquote}
 \response We thank the reviewer for the suggestion. In the introduction when we first introduce S1 SAR, we added a brief description of the S1 imagery dataset, including the resolution, the all-weather imaging ability, and the revisit frequency.
 
@@ -502,12 +526,12 @@ Introduction, line 131: when Sentinel-1 (S1) Synthetic Aperture Radar (SAR) is f
 \end{quote}
 
 \point{R3.9}
-% category: writing/minor | assignee: Gavin
-% Line 160: define "S1 footprint".
+
 \begin{refquote}\itshape
 Line 160: the term ``S1 footprint'' should be clearly defined. Does it refer to
 the spatial coverage of a single S1 acquisition, the union of all acquisitions
 over a certain period, or something else?
+
 \end{refquote}
 \response Thank you for this comment, and for the opportunity to clarify our methods. We now explicitly define the `S1 footprint' as the spatial union of all S1 scenes during our 2017 -- 2025 study period. We have also further clarified the text around the spatiotemporal hetreogeneity of S1 coverage and how we account for this explicitly in our modeling framework. For example, each pixel is imaged by S1 by varying amounts of observation effort each month due to differing rates of satellite overpass frequency and pixel coverage, so we create a normalized S1 observation effort metric that accounts for this to consistently measure vessel density across all pixel-months.
 
@@ -518,8 +542,7 @@ over a certain period, or something else?
 \end{quote}
 
 \point{R3.10}
-% category: writing/analysis | assignee: Zihan and David
-% Figure 1: explain why S1-derived contribution is flat after 2020.
+
 \begin{refquote}\itshape
 Figure 1: The main text should explain why the S1-derived contribution remains
 unchanged after 2020. Is this due to data-quality or data-availability issues,
@@ -531,7 +554,7 @@ point is critical for interpreting the temporal evolution in the figure.
 
 During the 2017-2025 study period, especially after 2020, global AIS adoption and reception quality has significantly increased, as shown by Global Fishing Watch's study: \url{https://globalfishingwatch.org/2025-one-ocean-science-congress-poster-rise-in-public-vessel-tracking/}. As a result, the fraction of S1 detections matched with AIS-broadcasting steadily increases after 2020 but shows much less change across 2017-2020 (see Fig. 11). From 2022 to 2023, the increase rate of matched fraction is 6.3\% and exceeds the increase rate of total vessel activities 5.0\%. As a result, the emission contributed by unmatched detections decreases from 2022 to 2023 while the total emission increases.
 
-After 2020, although the AIS-derived emission steadily increases while S1-derived emission fluctuates, this does not mean that emissions from non-broadcasting vessels no longer increase and that all additional emissions come from broadcasting vessels. One of the factors driving increase in AIS activities (thus AIS-derived emissions) is the increasing AIS adoption, i.e., non-broadcasting vessels start broadcasting. However, another major factor is the improving AIS reception via both improvement in satellite reception quality and the advent of dynamic-AIS, which makes more activities by AIS-broadcasting vessels visible in AIS data. The latter scenario essentially moves part of the S1-derived emission to AIS-derived emission while not affecting the total estimated emission.
+After 2020, although the AIS-derived emission steadily increases while S1-derived emission fluctuates, this does not mean that emissions from S1-unmatched vessels no longer increase and that all additional emissions come from broadcasting vessels. One of the factors driving increase in AIS activities (thus AIS-based emissions) is the increasing AIS adoption, i.e., non-broadcasting vessels start broadcasting. However, another major factor is the improving AIS reception via both improvement in satellite reception quality and the advent of dynamic-AIS, which makes more activities by AIS-broadcasting vessels visible in AIS data. The latter scenario essentially moves part of the S1-derived emission to AIS-derived emission while not affecting the total estimated emission.
 \changes We have clarified this in numerous places throughout the text. We clarified the caption for Figure 1 (Lines XX-YY) with the following text:
 
 \begin{quote}
@@ -545,9 +568,7 @@ We clarified the caption for Figure 2 (Lines XX-YY) with the following text:
 \end{quote}
 
 \point{R3.11}
-% category: figure | assignee: Gavin
-% New/added figure: spatial distribution of S1-derived emissions.
-% Cross-ref R2.6.
+
 \begin{refquote}\itshape
 The spatial distribution of ship emissions derived from S1 data is not presented.
 Showing such a distribution, at least in aggregated form, would be very
@@ -555,13 +576,13 @@ informative and could be considered for inclusion (either in Figure 1 or as an
 additional figure). This would also help readers understand where
 non-broadcasting emissions are concentrated.
 \end{refquote}
-\response This is an excellent suggestion. We made a revised version of Figure 2 which now explicitly shows the spatial distribution of ship emissions derived from S1 data (middle map of panel C). To go along with this map, we also highlight in the text the areas where non-broadcasting emissions are concentrated. We also added a new Figure S1, which is similar to Figure 2, but faceted to show the differences between non-fishing and fishing vessels, the finest level of vessel class categorization detail possible with the S1 data.
+
+\response This is an excellent suggestion. We have made a revised version of Figure 2 which now explicitly shows the spatial distribution of ship emissions derived from S1 data (middle map of panel C). To go along with this map, we also highlight in the text the areas where S1-unmatched emissions are concentrated. We also added a new Figure S1, which is similar to Figure 2, but faceted to show the differences between non-fishing and fishing vessels, the finest level of vessel class categorization detail possible with the S1 data.
+
 \changes We revised Figure 2, and also updated the corresponding results paragraph text (Lines XX-YY). We also added a new Figure S1.
 
 \point{R3.12}
-% category: analysis/figure | assignee: Gavin (and anyone else with thoughts)
-% Ship-type analysis: show added value of new dataset (distributions by type/
-% region, broadcasting vs non-broadcasting). Cross-ref R3.13, R3.14.
+
 \begin{refquote}\itshape
 The analysis by ship type is rather confusing. Since the study introduces a new
 dataset and methodology, readers would naturally expect to see how this new
@@ -572,7 +593,9 @@ instead on the composition of non-fishing and fishing vessels in two separate
 figures, without clearly demonstrating the added value of the new dataset for
 ship-type analysis.
 \end{refquote}
-\response We greatly appreciate your comment, and the opportunity to make our ship type analysis more clear and insightful. We have completely revised Figure 3. Figure 3A now shows ranked emissions by vessel class within four different families of vessels (cargo, tanker, service and passenger, and fishing), allowing the reader to quickly see differences between vessel classes of a particular family. These bar charts still have colors for international trips, domestic trips, and port visits, allowing the reader to see how emissions vary across these different activity types. Panel 3B is completely new, and shows the spatial distribution of emissions for each vessel class family, allowing the reader to quickly see differences in the regional patterns across these vessel types. We would also like to clarify that Figure 3 focuses only on AIS-broadcasting emissions, since we are only able to disaggregate vessel classes to this level of detail using our AIS data. Our non-broadcasting emissions data derived from S1 only allows us to disaggregate between non-fishing and fishing vessels, which as you rightly point out is not as valuable as having more refined vessel class information. We have clarified in the figure caption and throughout the figure panels themselves that these data focus only on AIS-based emissions.
+
+\response We greatly appreciate your comment, and the opportunity to make our ship type analysis more clear and insightful. We have completely revised Figure 3. Figure 3A now shows ranked emissions by vessel class within four different families of vessels (cargo, tanker, service and passenger, and fishing), allowing the reader to quickly see differences between vessel classes of a particular family. These bar charts still have colors for international trips, domestic trips, and port visits, allowing the reader to see how emissions vary across these different activity types. Panel 3B is completely new, and shows the spatial distribution of emissions for each vessel class family, allowing the reader to quickly see differences in the regional patterns across these vessel types. We would also like to clarify that Figure 3 focuses only on AIS-broadcasting emissions, since we are only able to disaggregate vessel classes to this level of detail using our AIS data. Our S1-unmatched emissions data only allows us to disaggregate between non-fishing and fishing vessels, which as you rightly point out is not as valuable as having more refined vessel class information. We have clarified in the figure caption and throughout the figure panels themselves that these data focus only on AIS-based emissions.
+
 \changes We have completely revised Figure 3, as well as the accompanying text in the results section (Lines XX-YY).
 
 \point{R3.13}
@@ -599,8 +622,7 @@ Second, on the comparison itself: within the cargo and tanker families our ranki
 
 
 \point{R3.14}
-% category: writing/analysis | assignee: Gavin
-% Fishing vessels international vs domestic framing: reconsider or justify.
+
 \begin{refquote}\itshape
 The discussion of fishing vessels in terms of international versus domestic trips
 is not very meaningful. Fishing vessels are not transport vessels; their typical
@@ -610,14 +632,17 @@ trips is therefore of limited relevance and may be misleading. The authors shoul
 reconsider whether this analysis is necessary and, if retained, justify its
 relevance more clearly.
 \end{refquote}
-\response Thank you for this insightful comment. Since fishing vessels are not transport vessels, at your suggestion we have removed this description in the text. We therefore no longer describe how much fishing vessel emissions occurs during certain types of trips. We now simply say `Most emissions for cargo and tanker vessel classes occur during international trips.'
-\changes
+
+\response Thank you for this insightful comment. Since fishing vessels are not transport vessels, at your suggestion we have removed this description in the text. We therefore no longer describe how much fishing vessel emissions occurs during certain types of trips. We now simply say `Most emissions for cargo and tanker vessels occur during international trips, while most service and passenger vessel emissions occur within ports.' For completeness and consistency, our revised version of Figure 3 does still show the percentage of emissions that occurred during different activities for each vessel type group (cargo, tanker, service and passenger, and fishing) - but we do not highlight any statistics for fishing vessels from this in the text itself.
+
+\changes The results now simply read:
+
+\begin{quote}
+ \textcolor{red}{Lines 402-406}: Most emissions for cargo and tanker vessels occur during international trips, while most service and passenger vessel emissions occur within ports
+\end{quote}
 
 \point{R3.15}
-% category: writing | assignee: Chris and Olivier
-% Discussion reorg: move literature-review paragraphs to Intro; focus Discussion
-% on implications/policy/limitations/future work. Coordinate with E1 (Discussion
-% has no subheading).
+
 \begin{refquote}\itshape
 Discussion section: parts of the Discussion, especially the first two paragraphs,
 read more like a literature review and would be more appropriate in the
@@ -626,7 +651,9 @@ results, including policy relevance, methodological limitations, and concrete
 directions for future research. Reorganizing this section would improve the
 clarity and impact of the manuscript.
 \end{refquote}
-\response We agree with this and have revised the entire discussion section along the lines of your suggestion.
-\changes The discussion now focuses on policies that are supported by this work, externality costs that can be calculated, and temporal trends that can now be understood. We then turn to a discussion of limitations of the work and possibilities for overcoming them, including for future research.  
+
+\response We agree with this and have revised the entire discussion section along the lines of your suggestion. The discussion now focuses on policies that are supported by this work, externality costs that can be calculated, and temporal trends that can now be understood. We then turn to a discussion of limitations of the work and possibilities for overcoming them, including for future research. 
+
+\changes
 
 \end{document}
