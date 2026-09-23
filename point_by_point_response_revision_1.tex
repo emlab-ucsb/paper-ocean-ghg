@@ -9,11 +9,6 @@
 %   - Manuscript changes: green "Changes in manuscript:" label.
 %   - Page/line references point to the track-changes (latexdiff) PDF.
 %
-%  WORKFLOW NOTE: keep the assignment/status bookkeeping in the Google Sheets tracker
-%  sheet (https://docs.google.com/spreadsheets/d/1hIXrMYa4PrrSaBtfAJ_X6QiJfIspgWiX2U39bFFANgQ/edit?gid=0#gid=0); 
-% this .tex file is the deliverable.
-%  Each \point has a % category / % assignee / % bundled-subparts note
-%  to help you triage against the sheet.
 % =====================================================================
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
@@ -355,27 +350,33 @@ to registry data, and another $\sim$6\% are matched via public ship databases
 (non-IMO registered). This seems to reflect limitations of the authors' specific
 implementation rather than an inherent flaw of AIS-based methods.
 \end{refquote}
-\response Thank you for raising this issue, and for providing us an opportunity to clarify what we've done and revise the manuscript accordingly. The premise we should correct first is the suggestion that we did not obtain or use dedicated ship databases. We did, and our original text simply failed to say so, citing a single reference for the whole enterprise. Vessel characteristics in this analysis are drawn from the IMO's Global Integrated Shipping Information System (GISIS); S\&P Global Market Intelligence's Ships Dataset; the national vessel registries of 19 flag states (the United States, Canada, Australia, Russia, the Republic of Korea, Norway, Indonesia, Iceland, Taiwan, the Faroe Islands, Spain, Panama, Peru, Ecuador, Seychelles, Malaysia, Belize, Papua New Guinea and Madagascar); the EU fleet register and FAO records; and the authorized-vessel lists of thirteen regional fisheries management organizations (ICCAT, IOTC, WCPFC, IATTC, SPRFMO, CCSBT, NEAFC, NPFC, GFCM, NAFO, SIOFA, CCAMLR and SEAFO). This enumeration is now in the Methods.
 
-Where a vessel matches one of these sources, we use its registered characteristics rather than inferring them. Of the 775,358 AIS-broadcasting vessels in the current analysis, 93,379 (12.0\%) are registered in GISIS, a further 45,743 (5.9\%) appear in at least one other registry, and 139,122 (18\%) are matched in total. We should also correct an error of our own, which the reviewer has rightly caught: the 84\% came from a field recording whether a vessel appears in any registry at all, and we presented it as though it measured whether main engine power and design speed had to be inferred. Those are different quantities, and the per-characteristic figures are in fact lower rather than higher: main engine power is available from a registry or a commercial database for 7.5\% of vessels, and design speed for 1.8\%. We have replaced the single 84\% figure with a table reporting availability for each characteristic the model requires. (On one smaller point, the 10\% in the submitted text was the share of all AIS-broadcasting vessels carrying an IMO entry, not the share of IMO-registered vessels we were able to match, which is essentially complete.)
+\response Thank you for raising these related issues, and for providing us an opportunity to clarify what we've done and revise the manuscript accordingly. We would first like to clarify that we did indeed obtain and leverage a wide variety of dedicated vessel registry databases to inform our vessel characteristics parameters. Vessel characteristics in this analysis are drawn from the IMO's Global Integrated Shipping Information System (GISIS); S\&P Global Market Intelligence's Ships Dataset; the national vessel registries of 19 flag states (the United States, Canada, Australia, Russia, the Republic of Korea, Norway, Indonesia, Iceland, Taiwan, the Faroe Islands, Spain, Panama, Peru, Ecuador, Seychelles, Malaysia, Belize, Papua New Guinea and Madagascar); the EU fleet register and FAO records; and the authorized-vessel lists of thirteen regional fisheries management organizations (ICCAT, IOTC, WCPFC, IATTC, SPRFMO, CCSBT, NEAFC, NPFC, GFCM, NAFO, SIOFA, CCAMLR and SEAFO). We have also now clarified this in the Methods.
 
-For the remainder we must infer characteristics, and the vessels concerned are of particular types rather than a random cross-section of the fleet. The 636,236 vessels we cannot match lie largely outside the IMO-registered merchant fleet that commercial databases are built around: on our classification roughly 43\% are passenger craft, a deliberately broad class spanning yachts, small ferries and Ro-Pax, 24\% are fishing vessels, and 9\% are tugs. Those databases cover the merchant fleet excellently, which is precisely why we match it essentially completely; they do not systematically enumerate vessels of these other types, and acquiring further databases would not materially change that.
+Where a vessel matches one of these sources, we use any of the registered vessel characteristics within these databases rather than inferring them. Of the 775,358 AIS-broadcasting vessels in the current analysis (now representing all AIS-broadcasting vessels from 2017-2025), 93,379 (12.0\%) are registered in the IMO's GISIS, a further 45,743 (5.9\%) appear in at least one other registry, and therefore 139,122 (18\%) are matched in total. We should also correct an error of our own, which the reviewer has rightly caught: the 84\% came from a field recording whether a vessel appears in any registry at all, and we presented it as though it measured whether main engine power and design speed had to be inferred. Those are different things, and the per-characteristic numbers are in fact lower: main engine power is only available from a registry or a commercial database for 7.5\% of vessels, and design speed is only available for 1.8\%. We have replaced the single 84\% number with a new table reporting availability for each characteristic the model requires (Table \textcolor{red}{3}). For each vessel characteristic necessary for the AIS-based emissions model (vessel class, gross tonnage, length, main engine power, engine type, year of build, engine speed, and design speed), the table lists the percentage of vessels in our analysis for which we had information from public sources, from private sources, and those for which we needed to infer the characteristic using a machine learning model. The 636,236 vessels that we could not match to any of our included vessel registries are concentrated in several specific vessel class types: 43\% are passenger craft (a broad class spanning yachts, small ferries and Ro-Pax), 24\% are fishing vessels, and 9\% are tugs. On one smaller point, the 10\% in the submitted text was the share of all AIS-broadcasting vessels carrying an IMO entry, not the share of IMO-registered vessels we were able to match -- which is essentially complete.
 
-This is becoming more consequential over time rather than less. The registry-matched share of AIS-broadcasting vessels falls from 30\% in 2017 to 17\% in 2025, because AIS carriage is spreading fastest among exactly those vessels that no major registry lists. Each year, a larger share of the observable fleet can only be characterized by inference, which is why we regard the vessel-characteristics models as a contribution of this work rather than a workaround for missing data. We now report this trend in the Results.
+Being able to infer vessel characteristics that are not available in registries is becoming increasingly important over time. The registry-matched share of AIS-broadcasting vessels falls from 30\% in 2017 to 17\% in 2025, because AIS adoption is spreading fastest among exactly those vessel types that are underrepresented in these registries. Each year, a larger share of the observable AIS-broadcast fleet can only be characterized by inferring their vessel characteristics, which is why we regard the vessel-characteristics models as a significant contribution of this work rather than just a workaround for missing data. We now report this trend in the Results.
 
-We would close on the distinction we think matters most here. Our AIS-based fleet is defined by AIS observation, not by registry membership: every AIS-broadcasting vessel enters our analysis regardless of whether any registry lists it. Additional registries would therefore improve the precision of the characteristics we assign to some vessels, but they would not add a single vessel to our fleet, and so would not change our coverage. And no registry, however comprehensive, can reach vessels that do not broadcast AIS at all. That gap is what our S1-unmatched model addresses, and it is the source of the 21\% figure, which concerns vessels absent from AIS rather than vessels absent from registries. However the registry question is resolved, it leaves that contribution untouched. We have restated the fleet-scope argument explicitly in the Discussion and no longer imply that limited registry coverage is an inherent flaw of AIS-based methods. This connects to our response to R3.3 on the choice of AIS provider and pipeline.
+We would close on the distinction we think matters most here. Our AIS-based fleet is defined by AIS observation, not by registry membership: every AIS-broadcasting vessel enters our analysis, and therefore our AIS-based emissions estimates, regardless of whether any registry lists it. Additional registries would therefore improve the precision of the characteristics we assign to some vessels, but they would not add any vessels to our fleet, and so would not change our coverage. And no registry, however comprehensive, can be used for vessels that do not broadcast AIS at all. That gap is part of what our S1-unmatched model addresses, and it is the source of one of our headline conclusions: ` AIS-only approaches underestimate the magnitude of 2025 emissions by 21\%'. This 21\% represents vessels absent from AIS, rather than vessels absent from registries. However the registry question is resolved, it leaves that contribution untouched. We have restated the fleet-scope argument explicitly in the Discussion and no longer imply that limited registry coverage is an inherent flaw of AIS-based methods.
 
-\changes We have rewritten the registry-coverage passage in the Results, added the per-characteristic availability table to the Methods (``Availability of vessel characteristics used in emissions modeling, by source'') together with the enumeration of registry and database sources above, added the within-year coverage range, and labeled each of the three fleet counts used in the paper (775,358 vessels emitting over 2017--2025; 864,738 vessels modeled over 2015--2025 in the inventory comparison; 1.8M MMSIs scored by the vessel class model) so that they can no longer be read against one another. The revised Results passage reads:
+\changes We have rewritten the registry-coverage passage in the Results, added the per-characteristic availability table to the Methods (Table \textcolor{red}{3}) together with the enumeration of registry and database sources above, added the within-year coverage range, and labeled each of the three fleet counts used in the paper (775,358 vessels emitting over 2017--2025; 864,738 vessels modeled over 2015--2025 in the inventory comparison; 1.8M MMSIs scored by the vessel class model). The revised Results passage reads:
 
 \begin{quote}
-Of the roughly 775,000 AIS-broadcasting vessels in our analysis (every vessel emitting at any point during our 2017--2025 study period), we matched 139,000 (18\%) to public registries or proprietary databases, the majority of which (93,400) were IMO-registered. This allowed us to leverage vessel characteristics provided for these vessels from these databases. However, the vast majority of AIS-broadcasting vessels were not present in these registries, meaning that we needed to use model-derived vessel characteristics for between 83\% and 92\% of vessels, depending on the characteristic. Because this count pools the full study period, and because registered vessels broadcast persistently while unregistered vessels appear intermittently, it is not the coverage of the fleet in any one year: the registry-matched share of broadcasting vessels falls from 30\% in 2017 to 17\% in 2025, as the AIS-observed fleet grows faster than the registered fleet.
+\textcolor{red}{Lines 510-527}
+Of the roughly 775,000 AIS-broadcasting vessels in our analysis (every vessel emitting at any point during our 2017--2025 study period), we matched 139,000 (18\%) to public registries or proprietary databases, the majority of which (93,400) were IMO-registered. This allowed us to leverage vessel characteristics provided for these vessels from these databases. However, the vast majority of AIS-broadcasting vessels were not present in these registries, meaning that we needed to use model-derived vessel characteristics for between 83\% and 92\% of vessels, depending on the characteristic (Table \ref{tab:characteristic-availability}). And in fact, the registry-matched share of AIS-broadcasting vessels falls from 30\% in 2017 to 17\% in 2025, as the AIS-broadcasting fleet has grown faster than the fleet listed in these registries. Accurate inference of missing vessel characteristics therefore becomes more important over time rather than less: each year, a larger share of the observable fleet consists of vessels that carry AIS but appear in no major registry, and an inventory that depends on registry lookup describes a shrinking fraction of the vessels actually at sea. Because many large vessels are already listed with the IMO, the majority of our total CO$_{2}$ emissions come from these vessels (39\%); 19\% come from vessels listed on other registries; and 42\% come from vessels with no public registry information and which rely entirely on modeled vessel characteristics.
 \end{quote}
-\todo{Fill in the compiled line numbers for the quoted Results passage, and insert the Methods table number (expected Table 3, after the message-hour-threshold and model-summary tables) once Overleaf has rebuilt.}
 
+The methods, under Section \textcolor{red}{4.1.1 AIS data description} and the `Vessel characteristics data` subsection, now read:
+
+\begin{quote}
+\textcolor{red}{Lines 911-926}
+A key contribution of this work was therefore to refine and expand GFW's vessel characteristics database to include accurate estimates of these attributes for all 775,000 AIS-broadcasting vessels included in our analysis. For each vessel, this information comes from: (1) official registry information when available, or (2) when registry data are unavailable, machine learning vessel characteristics models. Registry information is aggregated across a range of public and proprietary sources: IMO's GISIS; S\&P Global Market Intelligence's Ships Dataset; the national vessel registries of 19 flag states (the United States, Canada, Australia, Russia, the Republic of Korea, Norway, Indonesia, Iceland, Taiwan, the Faroe Islands, Spain, Panama, Peru, Ecuador, Seychelles, Malaysia, Belize, Papua New Guinea and Madagascar); the EU fleet register and FAO records; and the authorized-vessel lists of thirteen regional fisheries management organizations (ICCAT, IOTC, WCPFC, IATTC, SPRFMO, CCSBT, NEAFC, NPFC, GFCM, NAFO, SIOFA, CCAMLR and SEAFO).
+\end{quote}
+
+The brand new methods section \textcolor{red}{4.1.2: Vessel class and characteristics models} contains the new Table \textcolor{red}{3} detailing the percentage of vessel for which the source of each vessel characteristic is from public source, private sources, or inferred using our machine learning models. 
 
 \point{R3.3}
-% category: discussion/framing | assignee: David
-% Acknowledge + discuss impact of AIS provider/pipeline choice (GFW-only).
+
 \begin{refquote}\itshape
 The authors use only the GFW AIS dataset. In practice, the choice of AIS data
 provider and processing pipeline has a substantial impact on data quality and
@@ -455,9 +456,7 @@ In Section \textcolor{red}{4.2.1 Sentinel-1 SAR data description}, where we desc
 \end{quote}
 
 \point{R3.6}
-% category: MAJOR / analysis | assignee: Zihan
-% S1 orbital/temporal sampling biases vs dynamic ship activity; monthly aggregates.
-% Editor's flagged "robustness" concern.
+
 \begin{refquote}\itshape
 The orbital characteristics of Sentinel-1 and the sampling properties of the SAR
 data require further discussion. SAR observations are highly dependent on the
@@ -469,6 +468,7 @@ assess and discuss the potential biases and uncertainties introduced by this
 temporal sampling, particularly for reconstructing ship trajectories and
 estimating emissions.
 \end{refquote}
+
 \response We thank the reviewer for highlighting the fundamental mismatch between the sparse temporal sampling of Sentinel-1 and the highly dynamic nature of vessel movements. If we were applying a naive linear scaling (e.g., multiplying instantaneous SAR counts by the hours in a month), this temporal sparsity would indeed introduce severe biases.
 
 However, our methodology is specifically designed to overcome this orbital limitation through our multi-model framework described in section 4.2.2. By training the model to predict AIS-broadcasting emissions using matched detection density, the model intrinsically learns to account for Sentinel-1’s revisit frequency and diurnal sampling biases. Consequently, when predicting emissions for non-broadcasting vessels, the model does not assume a steady-state temporal density from a single snapshot; rather, it applies the empirical temporal scaling learned from the continuous behavior of the AIS-broadcasting fleet. This model design is also described in the Introduction section.
@@ -476,12 +476,11 @@ However, our methodology is specifically designed to overcome this orbital limit
 \changes At the beginning of section 4.2.2, we have added explicit description of the potential bias that the Sentinel-1 sampling could introduce, which is a reason for developing our model framework.
 
 \point{R3.7}
-% category: analysis | assignee: Pol
-% EDGAR as sole benchmark insufficient; add shipping-focused inventories.
-% Ties directly to R3.1 -- same comparison exercise, different benchmark.
+
 \begin{refquote}\itshape
 EDGAR 2025 is a multi-sector emission inventory and shows noticeable differences in total emissions of various pollutants compared with specialized ship emission models. Using EDGAR as the sole or primary benchmark is therefore not sufficient. The authors are advised to include comparisons with additional shipping-focused inventories and models.
 \end{refquote}
+
 \response We fully agree, and thank the reviewer for pushing us on this. Benchmarking only against a multi-sector top-down inventory was indeed insufficient, and it also left the comparison uninformative about the thing our paper actually claims. We have therefore replaced the single EDGAR benchmark with a systematic comparison against the six global bottom-up, AIS-based shipping inventories (STEAM, SEIM, MariTEAM, the OECD bottom-up model, the ICCT's SAVE model, and the model used for the Fourth IMO GHG Study) and we retain the top-down inventories as a separate, clearly labeled second comparison, to which we have added CEDS alongside EDGAR. This comparison has its own paragraph in the Results, a new main-text figure, its own paragraph in the Discussion, and two new extensive Supplementary Notes, supported by three new Supplementary Figures, three new Supplementary Tables, and three Supplementary Data files.
 
 Two points of clarification on how we have structured this. First, given its length, all the details and extensive text on this topic are included in the Supplement. Supplementary Note 2 compares methods and input data against the six shipping-focused inventories (this is the comparison the reviewer asks for in R3.1 as well). Supplementary Note 3, which is the direct answer to this comment, compares our estimated magnitudes and trends against those same six inventories first, and against EDGAR and CEDS. Second, the main highlights are summarized in the main text in the Results and Discussion, with the relevant notes and supplementary materials referenced.
@@ -498,16 +497,18 @@ Finally, on the reviewer's specific point about EDGAR: our fused total does exce
 3. Two new Supplementary Notes. Supplementary Note 3, `Systematic comparison of our emissions magnitude and trend estimates to other inventories' is the full version of this comparison. Supplementary Note 2, `Systematic comparison of our AIS-based emissions modeling methodology to other AIS-based inventories', provides the methodological counterpart that makes the results comparison interpretable. We describe this Note more fully in our response to R3.1.
 
 4. Three new Supplementary Figures supporting the comparison.
+
 5. Three new Supplementary Tables tabulating values discussed in the comparison.
+
 6. Three new Supplementary Data files giving the full attribute-by-attribute comparison of methods, inputs and outputs against all six inventories bottom-up, one column per inventory: \path{bottom-up_inventory_comparison_methods.csv} (Supplementary Data 1), \path{bottom-up_inventory_comparison_inputs.csv} (Supplementary Data 2), and \path{bottom-up_inventory_comparison_outputs.csv} (Supplementary Data 3).
 
 
 \point{R3.8}
-% category: writing/minor | assignee: Zihan
-% Intro line 131: explain what S1 SAR is and why it complements non-broadcasting.
+
 \begin{refquote}\itshape
 Introduction, line 131: when Sentinel-1 (S1) Synthetic Aperture Radar (SAR) is first introduced, the authors should briefly explain what this dataset is and why it can be used to complement emissions from non-broadcasting vessels. This will help readers who are not familiar with SAR to understand the rationale of the approach.
 \end{refquote}
+
 \response We thank the reviewer for the suggestion. In the introduction when we first introduce S1 SAR, we added a brief description of the S1 imagery dataset, including the resolution, the all-weather imaging ability, and the revisit frequency.
 
 \changes We added a the following description to the introduction where we first introduce S1 SAR:
@@ -517,13 +518,13 @@ Introduction, line 131: when Sentinel-1 (S1) Synthetic Aperture Radar (SAR) is f
 \end{quote}
 
 \point{R3.9}
-% category: writing/minor | assignee: Gavin
-% Line 160: define "S1 footprint".
+
 \begin{refquote}\itshape
 Line 160: the term ``S1 footprint'' should be clearly defined. Does it refer to
 the spatial coverage of a single S1 acquisition, the union of all acquisitions
 over a certain period, or something else?
 \end{refquote}
+
 \response Thank you for this comment, and for the opportunity to clarify our methods. We now explicitly define the `S1 footprint' as the spatial union of all S1 scenes during our 2017 -- 2025 study period. We have also further clarified the text around the spatiotemporal hetreogeneity of S1 coverage and how we account for this explicitly in our modeling framework. For example, each pixel is imaged by S1 by varying amounts of observation effort each month due to differing rates of satellite overpass frequency and pixel coverage, so we create a normalized S1 observation effort metric that accounts for this to consistently measure vessel density across all pixel-months.
 
 \changes The introduction now reads:
@@ -560,9 +561,7 @@ We clarified the caption for Figure 2 (Lines XX-YY) with the following text:
 \end{quote}
 
 \point{R3.11}
-% category: figure | assignee: Gavin
-% New/added figure: spatial distribution of S1-derived emissions.
-% Cross-ref R2.6.
+
 \begin{refquote}\itshape
 The spatial distribution of ship emissions derived from S1 data is not presented.
 Showing such a distribution, at least in aggregated form, would be very
@@ -570,6 +569,7 @@ informative and could be considered for inclusion (either in Figure 1 or as an
 additional figure). This would also help readers understand where
 non-broadcasting emissions are concentrated.
 \end{refquote}
+
 \response This is an excellent suggestion. We made a revised version of Figure 2 which now explicitly shows the spatial distribution of ship emissions derived from S1 data (middle map of panel C). To go along with this map, we also highlight in the text the areas where non-broadcasting emissions are concentrated. We also added a new Figure S1, which is similar to Figure 2, but faceted to show the differences between non-fishing and fishing vessels, the finest level of vessel class categorization detail possible with the S1 data.
 \changes We revised Figure 2, and also updated the corresponding results paragraph text (Lines XX-YY). We also added a new Figure S1.
 
@@ -587,6 +587,7 @@ instead on the composition of non-fishing and fishing vessels in two separate
 figures, without clearly demonstrating the added value of the new dataset for
 ship-type analysis.
 \end{refquote}
+
 \response We greatly appreciate your comment, and the opportunity to make our ship type analysis more clear and insightful. We have completely revised Figure 3. Figure 3A now shows ranked emissions by vessel class within four different families of vessels (cargo, tanker, service and passenger, and fishing), allowing the reader to quickly see differences between vessel classes of a particular family. These bar charts still have colors for international trips, domestic trips, and port visits, allowing the reader to see how emissions vary across these different activity types. Panel 3B is completely new, and shows the spatial distribution of emissions for each vessel class family, allowing the reader to quickly see differences in the regional patterns across these vessel types. We would also like to clarify that Figure 3 focuses only on AIS-broadcasting emissions, since we are only able to disaggregate vessel classes to this level of detail using our AIS data. Our non-broadcasting emissions data derived from S1 only allows us to disaggregate between non-fishing and fishing vessels, which as you rightly point out is not as valuable as having more refined vessel class information. We have clarified in the figure caption and throughout the figure panels themselves that these data focus only on AIS-based emissions.
 \changes We have completely revised Figure 3, as well as the accompanying text in the results section (Lines XX-YY).
 
@@ -614,8 +615,7 @@ Second, on the comparison itself: within the cargo and tanker families our ranki
 
 
 \point{R3.14}
-% category: writing/analysis | assignee: Gavin
-% Fishing vessels international vs domestic framing: reconsider or justify.
+
 \begin{refquote}\itshape
 The discussion of fishing vessels in terms of international versus domestic trips
 is not very meaningful. Fishing vessels are not transport vessels; their typical
@@ -625,14 +625,12 @@ trips is therefore of limited relevance and may be misleading. The authors shoul
 reconsider whether this analysis is necessary and, if retained, justify its
 relevance more clearly.
 \end{refquote}
+
 \response Thank you for this insightful comment. Since fishing vessels are not transport vessels, at your suggestion we have removed this description in the text. We therefore no longer describe how much fishing vessel emissions occurs during certain types of trips. We now simply say `Most emissions for cargo and tanker vessel classes occur during international trips.'
 \changes
 
 \point{R3.15}
-% category: writing | assignee: Chris and Olivier
-% Discussion reorg: move literature-review paragraphs to Intro; focus Discussion
-% on implications/policy/limitations/future work. Coordinate with E1 (Discussion
-% has no subheading).
+
 \begin{refquote}\itshape
 Discussion section: parts of the Discussion, especially the first two paragraphs,
 read more like a literature review and would be more appropriate in the
@@ -641,7 +639,7 @@ results, including policy relevance, methodological limitations, and concrete
 directions for future research. Reorganizing this section would improve the
 clarity and impact of the manuscript.
 \end{refquote}
-\response We agree with this and have revised the entire discussion section along the lines of your suggestion.
-\changes The discussion now focuses on policies that are supported by this work, externality costs that can be calculated, and temporal trends that can now be understood. We then turn to a discussion of limitations of the work and possibilities for overcoming them, including for future research.  
+
+\response We agree with this and have revised the entire discussion section along the lines of your suggestion. The discussion now focuses on policies that are supported by this work, externality costs that can be calculated, and temporal trends that can now be understood. We then turn to a discussion of limitations of the work and possibilities for overcoming them, including for future research.  
 
 \end{document}
