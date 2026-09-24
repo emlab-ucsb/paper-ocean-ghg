@@ -84,6 +84,7 @@ edgar_comparison_year <- 2024
 targets::tar_load(
   c(
     "n_unique_vessels",
+    "n_unique_vessels_activity_window",
     "n_ais_messages",
     "fraction_vessels_emissions_by_registry_info",
     "n_s1_detections",
@@ -1761,7 +1762,7 @@ may be more susceptible to AIS adoption biases.
 
 ## Supplementary Information
 
-- Restricting the comparison to vessels explicitly modeled from observed AIS activity, we model an average of `r scales::comma(mean(ais_activity_by_year$n_unique_vessels))` vessels per year, rising from `r scales::comma(ais_activity_in(ais_activity_first_year, "n_unique_vessels"))` in `r ais_activity_first_year` to `r scales::comma(ais_activity_in(analysis_end_year, "n_unique_vessels"))` in `r analysis_end_year`.
+- Restricting the comparison to vessels explicitly modeled from observed AIS activity, we model `r scales::comma(n_unique_vessels_activity_window$n_unique_vessels)` unique vessels over `r ais_activity_first_year`--`r analysis_end_year` (a wider window, and so a larger fleet, than the `r scales::comma(n_unique_vessels$n_unique_vessels)` vessels emitting during the `r analysis_start_year`--`r analysis_end_year` study period used elsewhere in this paper), an average of `r scales::comma(mean(ais_activity_by_year$n_unique_vessels))` vessels per year, rising from `r scales::comma(ais_activity_in(ais_activity_first_year, "n_unique_vessels"))` in `r ais_activity_first_year` to `r scales::comma(ais_activity_in(analysis_end_year, "n_unique_vessels"))` in `r analysis_end_year`.
 
 - Our `r ais_activity_first_year` dataset holds approximately `r signif(ais_activity_in(ais_activity_first_year, "n_pings") / 1e9, 2)` billion AIS positions after data cleaning. Our own message volume increases to approximately `r round(ais_activity_in(analysis_end_year, "n_pings") / 1e9, 1)` billion positions by `r analysis_end_year`, totaling approximately `r round(sum(ais_activity_by_year$n_pings) / 1e9)` billion positions over the study period (an average of `r round(mean(ais_activity_by_year$n_pings) / 1e9, 1)` billion per year).
 

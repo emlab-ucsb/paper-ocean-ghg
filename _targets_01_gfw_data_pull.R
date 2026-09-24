@@ -612,6 +612,30 @@ list(
     name = activity_summary_start_year,
     command = 2015
   ),
+  # Unique vessels over the activity summary window, the fleet size the
+  # inventory comparison reports. Same query as n_unique_vessels, over the
+  # longer window: a vessel active in several years is counted once, which the
+  # per-year counts in the activity summaries cannot give. Scans ~113 GB, the
+  # same as n_unique_vessels, because the date filter does not prune the table.
+  tar_file_read(
+    name = n_unique_vessels_activity_window,
+    command = file.path("sql", "n_unique_vessels.sql"),
+    read = download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_ais = run_version_ais,
+          analysis_start_year = activity_summary_start_year,
+          analysis_end_year = analysis_end_year
+        ),
+      file_path = file.path(
+        "data",
+        "gfw",
+        "n_unique_vessels_activity_window.csv"
+      )
+    ),
+    format = "file"
+  ),
   tar_file_read(
     name = annual_ais_activity_summary,
     command = file.path("sql", "annual_ais_activity_summary.sql"),

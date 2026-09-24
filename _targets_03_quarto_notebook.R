@@ -16,6 +16,13 @@ list(
     command = file.path("data", "gfw", "n_unique_vessels.csv"),
     read = readr::read_csv(!!.x)
   ),
+  # Unique vessels over the longer activity-summary window (2015 onward), the
+  # fleet size the inventory comparison reports
+  tar_file_read(
+    name = n_unique_vessels_activity_window,
+    command = file.path("data", "gfw", "n_unique_vessels_activity_window.csv"),
+    read = readr::read_csv(!!.x)
+  ),
   tar_file_read(
     name = n_ais_messages,
     command = file.path("data", "gfw", "n_ais_messages.csv"),
