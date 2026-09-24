@@ -8256,11 +8256,13 @@ relative_plot
 ```{r}
 #| label: figS-fleet-growth-by-year
 #| fig-cap: "Growth by vessel class since 2017 in emissions, vessel count and activity."
+#| fig-width: 7.6
+#| fig-height: 9.5
 # Stacked one panel per row rather than side by side: at \columnwidth a 3:1
 # figure shrank to about 120pt tall and took the axis labels down with it. Same
 # width as figS-passenger-size-panels so the two scale to the page identically.
-#| fig-width: 7.6
-#| fig-height: 9.5
+# The #| options have to stay above this comment: knitr stops reading chunk
+# options at the first ordinary line, so options below it are silently ignored.
 
 fleet_growth_data <- fleet_growth_by_year_data
 
@@ -8301,7 +8303,6 @@ panel <- function(measure, panel_title) {
   ) +
     ggplot2::geom_hline(yintercept = 0, linetype = 2) +
     ggplot2::geom_line(linewidth = 1) +
-    ggplot2::geom_point(size = 1.5) +
     ggplot2::scale_x_continuous(breaks = sort(unique(plot_data$year))) +
     ggplot2::scale_y_continuous(labels = scales::percent) +
     ggplot2::scale_color_manual(
