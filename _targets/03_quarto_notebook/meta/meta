@@ -112,7 +112,7 @@ fishing_vessel_classes|function|9971df3aa5284378
 reefer_vessel_classes|function|3f594d3b2dffefa6
 cams_axis_name|function|02d8c48a4c402cd6
 multisector_colors|function|ed53c31b4ab83a1a
-.Random.seed|object|57266a72e9d5f847
+.Random.seed|object|510c23dff69a67ba
 ceds_marine_sectors|function|7f0d77ad9523cf8d
 assert_s1_coverage_phi|function|4397e713aadff681
 download_gfw_data|function|1deafc002bb04b7c
@@ -152,4 +152,4 @@ fleet_emissions_and_size_by_year|function|70578a6a109ba74e
 fleet_growth_by_year|function|75a0b26f7a9d0e2b
 sum_cams_nc_to_tonnes|function|0d062ccd5c250ada
 summarize_cams_ship_co2|function|5ba11ed7029b8e0d
-quarto_notebook|stem|d5921e053ce9ebba|4722d685df87a451|49536888a6686a0b|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20720.7215906116s|s16415077b|16415077|file|local|vector|||1131.864||
+quarto_notebook|stem|c2a682a7a02139c4|4722d685df87a451|49536888a6686a0b|2023506846|qmd/quarto_notebook.pdf*qmd/quarto_notebook.qmd|t20720.7706473183s|s16421578b|16421578|file|local|vector|||1156.936||
