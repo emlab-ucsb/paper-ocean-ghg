@@ -1654,11 +1654,166 @@ registry_stat <- function(registry_year, matched, column) {
     dplyr::filter(year == registry_year, registry_matched == matched) |>
     dplyr::pull(column)
 }
+```
 
-registry_emissions_growth <- function(matched) {
-  registry_stat(analysis_end_year, matched, "emissions_co2_mt") /
-    registry_stat(analysis_start_year, matched, "emissions_co2_mt")
+```{r}
+#| label: growth-by-family-and-length
+# Growth in AIS-based CO2 between the first and last analysis years, split by
+# the vessel class families of Figure 3 and by three length bands. Table S2
+# gives each cell's share of the total change, and Table S3 decomposes each
+# cell's change into vessel count, distance per vessel and CO2 per nautical
+# mile. Computed here rather than beside the tables because the Discussion and
+# Supplementary Information bullets below quote it, and inline code is
+# evaluated in document order.
+
+# The activity extract bins length in 25 m steps, so a band edge can only fall
+# on a multiple of 25 m. Growth splits between vessels under 50 m and those
+# 150 m and over wherever the upper edge goes: moving it to 200 m only moves a
+# few points between the upper two bands, which the Table S2 caption reports.
+growth_length_edges <- c(50, 150)
+growth_length_labels <- c("$<$50 m", "50--150 m", "$\\geq$150 m")
+
+# Plain-text versions for the figures (the timeline and panel d of the
+# inventory comparison), derived from the LaTeX ones so the two cannot drift
+# apart
+growth_length_plot_labels <- growth_length_labels |>
+  stringr::str_replace_all(stringr::fixed("$<$"), "<") |>
+  stringr::str_replace_all(stringr::fixed("$\\geq$"), "≥") |>
+  stringr::str_replace_all(stringr::fixed("--"), "–")
+
+growth_activity <- annual_ais_activity_summary_cheap |>
+  dplyr::filter(year %in% c(analysis_start_year, analysis_end_year)) |>
+  dplyr::mutate(
+    period = ifelse(year == analysis_start_year, "start", "end"),
+    vessel_class_family = factor(
+      vessel_class_family(vessel_class),
+      levels = vessel_family_order
+    ),
+    # Lower edge of the 25 m bin: "0-25m" -> 0, "225m+" -> 225
+    length_lower_m = as.numeric(stringr::str_extract(length_bin, "^\\d+")),
+    length_band = cut(
+      length_lower_m,
+      breaks = c(-Inf, growth_length_edges, Inf),
+      labels = growth_length_labels,
+      right = FALSE
+    )
+  )
+
+# Vessels of unknown length would silently drop out of both tables, so their
+# absence is checked rather than assumed
+if (any(is.na(growth_activity$length_band))) {
+  stop(
+    "Vessels of unknown length in the growth tables' years; ",
+    "decide which band they belong to.",
+    call. = FALSE
+  )
 }
+
+# Each vessel has one class, registry type and length bin, so summing the
+# per-row distinct counts within a year gives a true distinct count
+growth_cells <- growth_activity |>
+  dplyr::summarise(
+    emissions = sum(emissions_co2_mt) / 1e6,
+    vessels = sum(n_unique_vessels),
+    distance_nm = sum(distance_travelled_nm),
+    .by = c(vessel_class_family, length_band, period)
+  ) |>
+  tidyr::pivot_wider(
+    names_from = period,
+    values_from = c(emissions, vessels, distance_nm)
+  ) |>
+  dplyr::arrange(vessel_class_family, length_band) |>
+  dplyr::mutate(emissions_change = emissions_end - emissions_start)
+
+# The decomposition takes logs of every factor, so an empty cell in either year
+# has to be dealt with explicitly rather than turning into -Inf
+if (
+  nrow(growth_cells) !=
+    length(vessel_family_order) * length(growth_length_labels) ||
+    any(is.na(growth_cells)) ||
+    any(dplyr::select(growth_cells, -emissions_change, -vessel_class_family,
+                      -length_band) <= 0)
+) {
+  stop(
+    "A family-by-length cell is empty in ", analysis_start_year, " or ",
+    analysis_end_year, "; the growth tables need a rule for it.",
+    call. = FALSE
+  )
+}
+
+growth_total_change <- sum(growth_cells$emissions_change)
+growth_start_total <- sum(growth_cells$emissions_start)
+growth_end_total <- sum(growth_cells$emissions_end)
+
+# For the Table S2 caption: the passenger class's part of its family's share,
+# and how much of the total the 150-200 m bins carry (the points that would
+# move between bands if the upper edge were 200 m instead of 150 m)
+growth_change_where <- function(keep) {
+  growth_activity |>
+    dplyr::filter({{ keep }}) |>
+    dplyr::summarise(
+      change = sum(emissions_co2_mt[period == "end"]) -
+        sum(emissions_co2_mt[period == "start"])
+    ) |>
+    dplyr::pull(change) / 1e6 / growth_total_change
+}
+growth_passenger_share <- growth_change_where(vessel_class == "passenger")
+growth_service_passenger_share <- growth_change_where(
+  vessel_class_family == "Service and passenger"
+)
+growth_150_to_200_share <- growth_change_where(
+  length_lower_m >= 150 & length_lower_m < 200
+)
+
+# Log-mean Divisia index (LMDI) decomposition. Each cell's emissions are the
+# product of three factors,
+#   emissions = vessels x (distance / vessels) x (emissions / distance),
+# so log(end / start) of emissions is the sum of the three factors' log
+# changes. Weighting each by the logarithmic mean of the start and end
+# emissions turns those log changes into additive contributions that sum
+# exactly to the cell's change, with no residual (Ang 2005).
+log_mean <- function(a, b) ifelse(a == b, a, (a - b) / (log(a) - log(b)))
+
+growth_decomposition <- growth_cells |>
+  dplyr::mutate(
+    weight = log_mean(emissions_end, emissions_start),
+    from_vessels = weight * log(vessels_end / vessels_start),
+    from_distance_per_vessel = weight *
+      log((distance_nm_end / vessels_end) / (distance_nm_start / vessels_start)),
+    from_emissions_per_nm = weight *
+      log((emissions_end / distance_nm_end) / (emissions_start / distance_nm_start))
+  )
+
+stopifnot(isTRUE(all.equal(
+  growth_decomposition$from_vessels +
+    growth_decomposition$from_distance_per_vessel +
+    growth_decomposition$from_emissions_per_nm,
+  growth_decomposition$emissions_change
+)))
+
+# Values the in-line bullets quote. Shares are of the total change; a cell is
+# picked out by family and by its position among the length bands.
+growth_cell <- function(family, band) {
+  growth_decomposition |>
+    dplyr::filter(
+      vessel_class_family == family,
+      length_band == growth_length_labels[band]
+    )
+}
+growth_small_share <- growth_change_where(length_lower_m < growth_length_edges[1])
+growth_large_share <- growth_change_where(length_lower_m >= growth_length_edges[2])
+growth_small_passenger_share <- growth_change_where(
+  vessel_class == "passenger" & length_lower_m < growth_length_edges[1]
+)
+growth_small_fishing_share <- growth_change_where(
+  vessel_class_family == "Fishing" & length_lower_m < growth_length_edges[1]
+)
+growth_small_service_passenger <- growth_cell("Service and passenger", 1)
+growth_small_fishing <- growth_cell("Fishing", 1)
+growth_small_fishing_distance_change <- with(
+  growth_small_fishing,
+  (distance_nm_end / vessels_end) / (distance_nm_start / vessels_start) - 1
+)
 ```
 
 ## Abstract
@@ -1741,6 +1896,9 @@ may be more susceptible to AIS adoption biases.
     
 - For fishing vessels, the total social cost of CO$_{2}$, CH$_{4}$, and N$_{2}$O emissions in 2022 was `r annual_sc_fishing_non_fishing |> dplyr::filter(fishing == "Fishing",year=="Total") |> dplyr::pull(sc_billion_usd) |> round()` billion USD. This represents about `r scales::percent((annual_sc_fishing_non_fishing |> dplyr::filter(fishing == "Fishing",year=="Total") |> dplyr::pull(sc_billion_usd))/159)` of the total value of all wild capture fisheries (using 159 billion USD as the 2022 value of wild capture fisheries).
 
+- For our AIS-based results, `r scales::percent(growth_small_share)` of the `r analysis_start_year`--`r analysis_end_year` increase comes from vessels under `r growth_length_edges[1]` m, led by small passenger vessels (`r scales::percent(growth_small_passenger_share)` of the increase) and small fishing vessels (`r scales::percent(growth_small_fishing_share)`), segments that our inventory uniquely captures compared to other inventories and that have grown fastest in both number of vessels and emissions. Most of the rest (`r scales::percent(growth_large_share)`) comes from vessels of `r growth_length_edges[2]` m and over, nearly all of them cargo vessels and tankers.
+
+
 ## Methods
 
 - The time between pings is typically small (the mean value is `r round(ping_level_hours_distribution$mean_hours, 3)` hours and the median value is `r round(ping_level_hours_distribution$median_hours, 3)` hours, or about `r round(ping_level_hours_distribution$mean_hours*60)` minutes and `r round(ping_level_hours_distribution$median_hours*60)` minutes respectively), while the maximum value for this across our dataset is `r round(ping_level_hours_distribution$max_hours)` hours (meaning this is the most amount of time over which we will estimate emissions for a single message).
@@ -1768,9 +1926,11 @@ may be more susceptible to AIS adoption biases.
 
 - In our inventory, registry-matched vessels likewise produced `r scales::percent(registry_stat(analysis_start_year, TRUE, "share_emissions"))` of AIS-based CO$_{2}$ in `r analysis_start_year` while making up `r scales::percent(registry_stat(analysis_start_year, TRUE, "share_vessels"))` of broadcasting vessels.
 
-- The growth is carried entirely by vessels that cannot be matched to a registry: their AIS-based emissions increased `r sprintf("%.2f", registry_emissions_growth(FALSE))`-fold (nearly quadrupled) between `r analysis_start_year` and `r analysis_end_year` while emissions from registry-matched vessels fell by `r scales::percent(1 - registry_emissions_growth(TRUE))`, so that unmatched vessels went from `r scales::percent(registry_stat(analysis_start_year, FALSE, "share_emissions"))` to `r scales::percent(registry_stat(analysis_end_year, FALSE, "share_emissions"))` of our AIS-based CO$_{2}$.
+- Of the `r round(growth_small_service_passenger$emissions_change)` million tonne increase from service and passenger vessels under `r growth_length_edges[1]` m, `r round(growth_small_service_passenger$from_vessels)` million tonnes came from the change in vessel count.
 
 - AIS positions received increased `r sprintf("%.2f", ais_activity_growth("n_pings"))`-fold (more than doubled) between `r dais_baseline_year` and `r analysis_end_year` while observed distance traveled and AIS-based emissions rose together by only `r scales::percent(ais_activity_growth("distance_travelled_nm") - 1)` and `r scales::percent(ais_activity_growth("emissions_co2_mt") - 1)`, respectively.
+
+- The exception is small fishing vessels: their distance per vessel rose `r scales::percent(growth_small_fishing_distance_change)` between `r analysis_start_year` and `r analysis_end_year`, accounting for `r round(growth_small_fishing$from_distance_per_vessel)` of their `r round(growth_small_fishing$emissions_change)` million tonne increase.
 
 
 # Results
@@ -4848,6 +5008,156 @@ writeLines(
 
 ```{r}
 #| results = 'asis'
+# Whole percentages, except that a cell that grew by less than half a percent
+# reads "<1%" rather than a "0%" a reader would take for no change at all
+format_growth_share <- function(share) {
+  ifelse(
+    share > 0 & share < 0.005,
+    "$<$1\\%",
+    scales::percent(share, accuracy = 1, suffix = "\\%")
+  )
+}
+
+growth_share_wide <- growth_cells |>
+  dplyr::mutate(
+    vessel_class_family = as.character(vessel_class_family),
+    share = emissions_change / growth_total_change
+  ) |>
+  dplyr::select(vessel_class_family, length_band, share) |>
+  tidyr::pivot_wider(names_from = length_band, values_from = share) |>
+  # Row and column totals come from the unrounded shares, so a row can differ
+  # by a point from the sum of its rounded cells; the caption says so
+  dplyr::mutate(
+    Total = rowSums(dplyr::across(dplyr::all_of(growth_length_labels)))
+  )
+
+growth_share_tbl <- growth_share_wide |>
+  dplyr::bind_rows(
+    growth_share_wide |>
+      dplyr::summarise(dplyr::across(-vessel_class_family, sum)) |>
+      dplyr::mutate(vessel_class_family = "Total")
+  ) |>
+  dplyr::mutate(dplyr::across(-vessel_class_family, format_growth_share)) |>
+  knitr::kable(
+    format = "latex",
+    label = "growth_share_by_family_length",
+    booktabs = TRUE,
+    align = c("l", "r", "r", "r", "r"),
+    col.names = c("Vessel class family", growth_length_labels, "Total"),
+    escape = FALSE,
+    # A rule above the Total row only
+    linesep = c(rep("", length(vessel_family_order) - 1), "\\midrule"),
+    caption = glue::glue(
+      "Share of the {analysis_start_year}--{analysis_end_year} growth in ",
+      "AIS-based CO$_{{2}}$ emissions contributed by each vessel class family ",
+      "and length band. Each cell is that group's change in emissions as a ",
+      "share of the total change of ",
+      "{scales::comma(growth_total_change, accuracy = 1)} million metric tonnes ",
+      "(from {scales::comma(growth_start_total, accuracy = 1)} to ",
+      "{scales::comma(growth_end_total, accuracy = 1)} million), so the cells ",
+      "sum to 100\\%. Vessel class families are as in Fig. ",
+      "\\ref{{fig:fig-ais-data-richness}}; passenger vessels account for ",
+      "{round(100 * growth_passenger_share)} of the ",
+      "{round(100 * growth_service_passenger_share)} percentage points of the ",
+      "service and passenger family. Moving the upper length cutoff from 150 m ",
+      "to 200 m would shift {round(100 * growth_150_to_200_share)} percentage ",
+      "points from the largest band to the middle band and leave the $<$50 m ",
+      "share unchanged. Percentages may not sum to totals because of rounding."
+    )
+  ) |>
+  kableExtra::kable_styling(font_size = 7, latex_options = "hold_position")
+
+growth_share_tbl
+
+writeLines(
+  growth_share_tbl,
+  file.path(project_root, "tables", "growth_share_by_family_length.tex")
+)
+```
+
+## Table S3
+
+```{r}
+#| results = 'asis'
+# Signed to one decimal, with anything that rounds to zero shown unsigned
+format_contribution <- function(x) {
+  ifelse(abs(x) < 0.05, "0.0", sprintf("%+.1f", x))
+}
+
+growth_decomposition_tbl <- growth_decomposition |>
+  dplyr::mutate(
+    # The family is named once, on the first of its three rows
+    vessel_class_family = ifelse(
+      duplicated(vessel_class_family),
+      "",
+      as.character(vessel_class_family)
+    ),
+    dplyr::across(
+      c(emissions_change, from_vessels, from_distance_per_vessel,
+        from_emissions_per_nm),
+      format_contribution
+    )
+  ) |>
+  dplyr::select(
+    vessel_class_family, length_band, emissions_change, from_vessels,
+    from_distance_per_vessel, from_emissions_per_nm
+  ) |>
+  knitr::kable(
+    format = "latex",
+    label = "growth_decomposition_by_family_length",
+    booktabs = TRUE,
+    align = c("l", "l", "r", "r", "r", "r"),
+    col.names = c(
+      "Vessel class family",
+      "Length",
+      stacked_head("Emissions", "change"),
+      stacked_head("Vessel", "count"),
+      stacked_head("nm per", "vessel"),
+      stacked_head("CO$_{2}$", "per nm")
+    ),
+    escape = FALSE,
+    # Space between families
+    linesep = c(rep("", length(growth_length_labels) - 1), "\\addlinespace"),
+    caption = glue::glue(
+      "Decomposition of the {analysis_start_year}--{analysis_end_year} change ",
+      "in AIS-based CO$_{{2}}$ emissions in each vessel class family and ",
+      "length band of Supplementary Table ",
+      "\\ref{{tab:growth_share_by_family_length}}, in million metric tonnes. ",
+      "A cell's emissions are the product of its vessel count, the distance ",
+      "each vessel traveled (nm per vessel), and its emissions per nautical ",
+      "mile. The log-mean Divisia index \\cite{{angLMDIApproachDecomposition2005}} ",
+      "splits the change in emissions exactly into a contribution from the ",
+      "change in each factor, so the three contributions in a row sum to its ",
+      "emissions change. Vessel count is the number of distinct AIS ",
+      "identities (MMSIs), so its change reflects fleet growth, the expansion ",
+      "of AIS carriage, and vessels changing MMSI. Among vessels of 150 m and ",
+      "over, MMSI changes make identities grow faster than physical hulls, so ",
+      "part of their vessel count contribution belongs to distance per vessel. ",
+      "Distance per vessel is observed distance, ",
+      "which also rises when improved AIS reception fills gaps in vessel tracks. ",
+      "Emissions per nautical mile include auxiliary engine and at-berth ",
+      "emissions, which accrue with time rather than distance, so this factor ",
+      "is not a measure of fuel efficiency alone."
+    )
+  ) |>
+  kableExtra::add_header_above(
+    c(" " = 3, "Contribution from change in:" = 3)
+  ) |>
+  kableExtra::kable_styling(font_size = 7, latex_options = "hold_position") |>
+  tighten_table_columns()
+
+growth_decomposition_tbl
+
+writeLines(
+  growth_decomposition_tbl,
+  file.path(project_root, "tables", "growth_decomposition_by_family_length.tex")
+)
+```
+
+## Table S4
+
+```{r}
+#| results = 'asis'
 pollutant_ais_underestimation_overestimation_summary_tbl <- pollutant_ais_underestimation_overestimation_summary |>
   dplyr::mutate(
     pollutant = stringr::str_to_upper(pollutant) |>
@@ -4884,7 +5194,7 @@ writeLines(
 )
 ```
 
-## Table S3
+## Table S5
 
 ```{r}
 #| results = 'asis'
@@ -4961,7 +5271,7 @@ writeLines(
 )
 ```
 
-## Table S4
+## Table S6
 
 ```{r}
 #| results: 'asis'
@@ -5031,7 +5341,7 @@ all_inventory_data |>
   )
 ```
 
-## Table S5
+## Table S7
 
 ```{r}
 #| results: 'asis'
@@ -5132,7 +5442,7 @@ top_countries_by_activity_type_kable |>
   )
 ```
 
-## Table S6
+## Table S8
 ```{r}
 #| results: 'asis'
 all_inventory_data_kable <- all_inventory_data |>
@@ -6914,7 +7224,7 @@ multisector_plot <- trend_plot +
 
 ```{r}
 #| label: figS-inventory-comparison-all-sources
-#| fig-cap: "Trends in our AIS-based and fused estimates against other inventories. Panels a and b show change relative to 2017 and 2019 against the published bottom-up, activity-based inventories. Panel c shows change relative to 2017 against the top-down EDGAR and CEDS inventories, for marine vessels, all other transportation modes, and all sectors. Panel d splits our AIS-based series by registry status, with the 150 m and above fragment for comparison."
+#| fig-cap: "Trends in our AIS-based and fused estimates against other inventories. Panels a and b show change relative to 2017 and 2019 against the published bottom-up, activity-based inventories. Panel c shows change relative to 2017 against the top-down EDGAR and CEDS inventories, for marine vessels, all other transportation modes, and all sectors. Panel d splits our AIS-based series by vessel length."
 #| fig-width: 16
 #| fig-height: 11
 
@@ -6991,57 +7301,47 @@ panel_d <- plot_inventory_relative_change(
   source_order = source_order
 )
 
-# Panel C: our AIS-based series split by registry status, relative to 2017,
-# with the size-restricted (>= 150 m) fragment for comparison. The same panel
-# is drawn standalone as figS-registry-split-comparison further down (kept for
-# reference, not placed in main.tex); folded in here because the SI text reads
-# it directly against the inventory trends in panels B and D. Objects are
-# prefixed registry_ so as not to clobber all_inventory_data or source_order,
-# which the table chunk below reads back.
-registry_series <- gfw_registry_emissions
-large_bins <- c("150-175m", "175-200m", "200-225m", "225m+")
-large_label <- "GFW (AIS-based, ≥150 m)"
+# Panel C (drawn as d): our AIS-based series split by vessel length, relative to
+# 2017, in the same bands as Tables S2 and S3. It used to split the series by
+# registry status, but registry matching in vessel_info effectively stops for
+# MMSIs first seen after 2018, so the registered half shrank and the unmatched
+# half grew for reasons that had little to do with the fleet. Length carries no
+# such drift, and it is what the SI argument rests on: carriage among vessels of
+# 150 m and over was already settled in 2017. Objects are prefixed size_ so as
+# not to clobber all_inventory_data or source_order, which the table chunk
+# below reads back.
+size_series_label <- function(band) paste0("GFW (AIS-based, ", band, ")")
 
-# One registered line rather than a per-register breakdown: what bounds a
-# registry-derived inventory is whether a vessel is registered anywhere at all.
-# gfw_registry_series() already sums the two registers into "any registry", so
-# take that row rather than re-summing the fragments.
-registry_split <- registry_series |>
-  dplyr::select(dplyr::all_of(c("data_source", "year", "emissions_co2_mt"))) |>
-  dplyr::filter(
-    .data$data_source %in%
-      c("GFW (AIS-based, any registry)", "GFW (AIS-based, no registry)")
-  ) |>
+size_bands <- annual_ais_activity_summary_cheap |>
   dplyr::mutate(
-    year = as.integer(.data$year),
-    data_source = ifelse(
-      .data$data_source == "GFW (AIS-based, any registry)",
-      "GFW (AIS-based, registry)",
-      .data$data_source
+    length_lower_m = as.numeric(stringr::str_extract(.data$length_bin, "^\\d+")),
+    length_band = cut(
+      .data$length_lower_m,
+      breaks = c(-Inf, growth_length_edges, Inf),
+      labels = growth_length_plot_labels,
+      right = FALSE
     )
-  )
+  ) |>
+  # Unknown lengths drop out of the bands but stay in the total below; the
+  # growth tables stop if any fall inside the analysis years
+  dplyr::filter(!is.na(.data$length_band)) |>
+  dplyr::group_by(year = as.integer(.data$year), .data$length_band) |>
+  dplyr::summarise(
+    emissions_co2_mt = sum(.data$emissions_co2_mt, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  dplyr::mutate(data_source = size_series_label(.data$length_band)) |>
+  dplyr::select(-"length_band")
 
-# The two halves partition the AIS total, so summing them reconstructs it.
-registry_total <- registry_split |>
-  dplyr::group_by(.data$year) |>
+size_total <- annual_ais_activity_summary_cheap |>
+  dplyr::group_by(year = as.integer(.data$year)) |>
   dplyr::summarise(
     emissions_co2_mt = sum(.data$emissions_co2_mt, na.rm = TRUE),
     .groups = "drop"
   ) |>
   dplyr::mutate(data_source = "GFW (AIS-based)")
 
-# Added after the total: this fragment overlaps both halves. All vessel
-# classes, not non-fishing only - fishing is 0.1 % of emissions at these lengths.
-large_series <- annual_ais_activity_summary_cheap |>
-  dplyr::filter(.data$length_bin %in% large_bins) |>
-  dplyr::group_by(year = as.integer(.data$year)) |>
-  dplyr::summarise(
-    emissions_co2_mt = sum(.data$emissions_co2_mt, na.rm = TRUE),
-    .groups = "drop"
-  ) |>
-  dplyr::mutate(data_source = large_label)
-
-registry_relative <- dplyr::bind_rows(registry_split, registry_total, large_series) |>
+size_relative <- dplyr::bind_rows(size_bands, size_total) |>
   dplyr::filter(.data$year >= baseline_year) |>
   dplyr::group_by(.data$data_source) |>
   dplyr::arrange(.data$year, .by_group = TRUE) |>
@@ -7052,47 +7352,40 @@ registry_relative <- dplyr::bind_rows(registry_split, registry_total, large_seri
   dplyr::ungroup() |>
   dplyr::filter(!is.na(.data$relative_change))
 
-# Ordered from the half that grows most to the one that grows least, so the
-# legend reads down in the same order the lines end.
-registry_levels <- c(
-  "GFW (AIS-based, no registry)",
-  "GFW (AIS-based)",
-  large_label,
-  "GFW (AIS-based, registry)"
-)
-registry_relative <- registry_relative |>
-  dplyr::mutate(
-    data_source = factor(
-      .data$data_source,
-      levels = intersect(registry_levels, unique(.data$data_source))
-    )
-  )
-registry_present <- levels(registry_relative$data_source)
+# Ordered from the series that grows most to the one that grows least, so the
+# legend reads down in the same order the lines end
+size_levels <- size_relative |>
+  dplyr::filter(.data$year == max(.data$year)) |>
+  dplyr::arrange(dplyr::desc(.data$relative_change)) |>
+  dplyr::pull(.data$data_source)
+size_relative <- size_relative |>
+  dplyr::mutate(data_source = factor(.data$data_source, levels = size_levels))
+size_present <- levels(size_relative$data_source)
 
 # Percent change only: the panel is half the width of the standalone figure,
 # and the "(1,189 Mt)" suffix the standalone version carries was clipped at the
 # panel edge. Levels are read from panel A and the table. Labels are walked
 # apart where series end close together.
-registry_end_labels <- registry_relative |>
+size_end_labels <- size_relative |>
   dplyr::group_by(.data$data_source) |>
   dplyr::filter(.data$year == max(.data$year)) |>
   dplyr::ungroup() |>
   dplyr::mutate(
     label = sprintf("%+.0f%%", 100 * .data$relative_change)
   )
-registry_label_gap <- 0.06 * diff(range(registry_relative$relative_change))
-registry_label_order <- order(registry_end_labels$relative_change)
-registry_stacked <- registry_end_labels$relative_change[registry_label_order]
-for (i in seq_along(registry_stacked)[-1]) {
-  if (registry_stacked[i] - registry_stacked[i - 1] < registry_label_gap) {
-    registry_stacked[i] <- registry_stacked[i - 1] + registry_label_gap
+size_label_gap <- 0.06 * diff(range(size_relative$relative_change))
+size_label_order <- order(size_end_labels$relative_change)
+size_stacked <- size_end_labels$relative_change[size_label_order]
+for (i in seq_along(size_stacked)[-1]) {
+  if (size_stacked[i] - size_stacked[i - 1] < size_label_gap) {
+    size_stacked[i] <- size_stacked[i - 1] + size_label_gap
   }
 }
-registry_end_labels$label_y <- NA_real_
-registry_end_labels$label_y[registry_label_order] <- registry_stacked
+size_end_labels$label_y <- NA_real_
+size_end_labels$label_y[size_label_order] <- size_stacked
 
 panel_c <- ggplot2::ggplot(
-  registry_relative,
+  size_relative,
   ggplot2::aes(
     x = .data$year,
     y = .data$relative_change,
@@ -7108,7 +7401,7 @@ panel_c <- ggplot2::ggplot(
   # together near the baseline. Dropping the layer also takes the dots out of
   # the key, which is what lets the dash patterns there be read at a glance.
   ggplot2::geom_text(
-    data = registry_end_labels,
+    data = size_end_labels,
     ggplot2::aes(
       x = .data$year + 0.12,
       y = .data$label_y,
@@ -7124,10 +7417,10 @@ panel_c <- ggplot2::ggplot(
     show.legend = FALSE,
     inherit.aes = FALSE
   ) +
-  ggplot2::scale_color_manual(values = registry_fragment_colors(registry_present)) +
-  ggplot2::scale_linetype_manual(values = inventory_linetypes(registry_present)) +
+  ggplot2::scale_color_manual(values = inventory_comparison_palette(size_present)) +
+  ggplot2::scale_linetype_manual(values = inventory_linetypes(size_present)) +
   ggplot2::scale_x_continuous(
-    breaks = sort(unique(registry_relative$year)),
+    breaks = sort(unique(size_relative$year)),
     # Right-hand room for the end labels.
     expand = ggplot2::expansion(mult = c(0.02, 0.20))
   ) +
@@ -7169,7 +7462,7 @@ panel_c <- ggplot2::ggplot(
 #   a  bottom-up inventories, relative to 2017   (panel_b)
 #   b  bottom-up inventories, relative to 2019   (panel_d)
 #   c  top-down EDGAR and CEDS, relative to 2017 (multisector_plot)
-#   d  our own AIS series split by registry      (panel_c)
+#   d  our own AIS series split by length        (panel_c)
 #
 # a and b are the same sources on two baselines, c is the same question asked
 # of the fuel-statistics inventories, and d is the disaggregation that explains
@@ -7288,7 +7581,7 @@ panel_c_final <- multisector_plot +
 # key below the first, so the linetype guide is suppressed and its patterns are
 # drawn into the colour key instead - the same way plot_inventory_levels() and
 # the multisector panel already do it. Dropping the guide outright is not an
-# option: the dashes are what mark the three registry fragments as parts of our
+# option: the dashes are what mark the three length bands as parts of our
 # own total rather than estimates standing on their own.
 panel_d_linetypes <- inventory_linetypes(si_panel_series(panel_c, "data_source"))
 
@@ -8374,6 +8667,106 @@ growth_plot <- cowplot::plot_grid(
 
 
 growth_plot
+```
+
+```{r}
+#| label: figS-growth-timeline-by-family-length
+#| fig-cap: "Change in AIS-based CO2 emissions since the first analysis year, by vessel class family and length."
+#| fig-width: 7.6
+#| fig-height: 3.4
+# The year-by-year path to the changes in Tables S2 and S3: the same families,
+# in Figure 3's order, and the same length bands, so each line ends at that
+# cell's emissions change in Table S3. The tables give how much each segment
+# grew; this shows when.
+
+growth_timeline <- annual_ais_activity_summary_cheap |>
+  dplyr::filter(year >= analysis_start_year, year <= analysis_end_year) |>
+  dplyr::mutate(
+    vessel_class_family = factor(
+      vessel_class_family(vessel_class),
+      levels = vessel_family_order
+    ),
+    length_lower_m = as.numeric(stringr::str_extract(length_bin, "^\\d+")),
+    length_band = cut(
+      length_lower_m,
+      breaks = c(-Inf, growth_length_edges, Inf),
+      labels = growth_length_plot_labels,
+      right = FALSE
+    )
+  )
+
+# The tables' check covers only their two years; the lines use every year
+if (any(is.na(growth_timeline$length_band))) {
+  stop(
+    "Vessels of unknown length between ", analysis_start_year, " and ",
+    analysis_end_year, "; decide which band they belong to.",
+    call. = FALSE
+  )
+}
+
+growth_timeline <- growth_timeline |>
+  dplyr::summarise(
+    emissions = sum(emissions_co2_mt) / 1e6,
+    .by = c(vessel_class_family, length_band, year)
+  ) |>
+  dplyr::mutate(
+    change = emissions - emissions[year == analysis_start_year],
+    .by = c(vessel_class_family, length_band)
+  )
+
+# Three steps around the AIS-based orange, light to dark with length, so the
+# bands read as an ordered scale in the color every AIS-based series carries.
+# The lightest step is deep enough to hold up as a line on white.
+growth_band_colors <- stats::setNames(
+  c("#EDB23F", "#C27F00", "#6B4000"),
+  growth_length_plot_labels
+)
+
+growth_timeline_plot <- ggplot2::ggplot(
+  growth_timeline,
+  ggplot2::aes(x = year, y = change, color = length_band)
+) +
+  ggplot2::geom_hline(yintercept = 0, color = "grey50", linewidth = 0.3) +
+  ggplot2::geom_line(linewidth = 1) +
+  ggplot2::facet_wrap(ggplot2::vars(vessel_class_family), nrow = 1) +
+  ggplot2::scale_color_manual(values = growth_band_colors, name = "Vessel length") +
+  # First, middle and last year only: with four panels side by side, a tick
+  # every other year runs one panel's last label into the next panel's first
+  ggplot2::scale_x_continuous(
+    breaks = c(
+      analysis_start_year,
+      round(mean(c(analysis_start_year, analysis_end_year))),
+      analysis_end_year
+    ),
+    expand = ggplot2::expansion(mult = c(0.03, 0.05))
+  ) +
+  ggplot2::scale_y_continuous(
+    labels = function(x) paste0(ifelse(x > 0, "+", ""), x)
+  ) +
+  ggplot2::labs(
+    x = NULL,
+    y = bquote(
+      # plotmath leaves a bare number unbolded, hence as.character()
+      bold("Change in CO"[2] ~ "since" ~ .(as.character(analysis_start_year)) ~
+        "(million MT)")
+    )
+  ) +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(
+    axis.title.y = ggplot2::element_text(size = 10),
+    axis.text.x = ggplot2::element_text(size = 8),
+    strip.text = ggplot2::element_text(face = "bold", size = 10, hjust = 0),
+    # "Service and passenger" is wider than its panel at this size
+    strip.clip = "off",
+    panel.grid.minor = ggplot2::element_blank(),
+    panel.spacing.x = ggplot2::unit(18, "pt"),
+    legend.position = "top",
+    legend.justification = "left",
+    legend.box.spacing = ggplot2::unit(2, "pt"),
+    plot.background = ggplot2::element_rect(fill = "white", color = NA)
+  )
+
+growth_timeline_plot
 ```
 
 ```{r}

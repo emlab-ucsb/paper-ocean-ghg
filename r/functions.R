@@ -1106,6 +1106,10 @@ inventory_linetypes <- function(data_sources) {
   linetypes[startsWith(names(linetypes), "GFW (AIS-based, ")] <- "22"
   linetypes[startsWith(names(linetypes), "GFW (AIS-based, IMO")] <- "42"
   linetypes[startsWith(names(linetypes), "GFW (AIS-based, other")] <- "12"
+  # The length bands of the SI's panel d follow the same rule: all dashed, each
+  # with its own pattern, so they separate without colour
+  linetypes[startsWith(names(linetypes), "GFW (AIS-based, <")] <- "12"
+  linetypes[startsWith(names(linetypes), "GFW (AIS-based, 50")] <- "42"
   linetypes
 }
 
@@ -2005,31 +2009,25 @@ inventory_comparison_colors <- function() {
     "CEDS - Other transportation" = "#5CBF7E",
     "CEDS - Shipping" = "#117733",
 
-    # The AIS-based total split by registry status, in the SI's panel d. Every
-    # series there is our own AIS total or a piece of it, so the whole panel
-    # stays inside the Blues ramp the GFW entries above are drawn from - no
-    # series in it comes from anywhere else, and a contrasting hue would claim
-    # otherwise.
+    # The AIS-based total split by vessel length, in the SI's panel d (it was
+    # split by registry status until registry matching turned out to stop for
+    # MMSIs first seen after 2018). Every series there is our own AIS total or a
+    # piece of it, so the whole panel stays inside the Blues ramp the GFW entries
+    # above are drawn from - a contrasting hue would claim a series came from
+    # somewhere else.
     #
-    # What one blue ramp cannot also do here is encode nesting by lightness. The
-    # panel needs four separable steps and the total is pinned to the main
-    # text's #2171B5, which sits mid-ramp, so a fragment ends up darker than the
-    # aggregate whatever the assignment. Lightness is spent on separation
-    # instead, and the ordering claim it would otherwise carry is dropped.
+    # Lightness runs with length, dark for the smallest band and light for the
+    # largest, so the bands read as an ordered scale. The total is the panel's
+    # one solid line and every band is dashed, so linetype separates it from
+    # all three and it can keep the main text's #2171B5 even though that sits
+    # between two band steps.
     #
-    # Only the three fragments have to be told apart by colour: the total is the
-    # panel's one solid line and every fragment is dashed, so linetype already
-    # separates it from all three. That frees the fragments to take the ramp's
-    # ends and middle - 23 L* apart each way - rather than being squeezed into
-    # whatever is left over once the total has taken a step of its own.
-    #
-    # #08306B is left out even though it would spread them further: it is the
-    # fused series in panels a to c, and a reader carrying it into panel d would
-    # read the unregistered half as that series. #C6DBEF is left out at the
-    # other end for a plainer reason - a 1 pt line that pale is barely visible
-    # on white, which is how the size cut first came out here.
-    "GFW (AIS-based, no registry)" = "#08519C",
-    "GFW (AIS-based, registry)" = "#4292C6",
+    # #08306B is left out even though it would spread the bands further: it is
+    # the fused series in panels a to c, and a reader carrying it into panel d
+    # would read a band as that series. #C6DBEF is left out at the other end
+    # because a 1 pt line that pale is barely visible on white.
+    "GFW (AIS-based, <50 m)" = "#08519C",
+    "GFW (AIS-based, 50–150 m)" = "#4292C6",
     "GFW (AIS-based, ≥150 m)" = "#9ECAE1"
   )
 }
