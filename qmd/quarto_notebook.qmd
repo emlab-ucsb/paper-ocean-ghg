@@ -617,6 +617,43 @@ percent_increase_to_edgar_year <- all_edgar_gfw_data_normalized |>
       accuracy = 1
     )
   )
+
+# Marine vessels' share of global and of transportation CO2 in the multisector
+# comparison year, against both top-down inventories (CEDS and EDGAR). As with
+# the EDGAR shares above, each inventory's own shipping estimate is replaced by
+# our fused estimate in the denominator, so marine emissions are not
+# double-counted. 2022 is the year of the EMSA figure (14.2% of EU
+# transportation emissions) the manuscript sets these shares beside.
+multisector_share_year <- 2022
+
+fused_co2_multisector_share_year <- annual_emissions |>
+  dplyr::filter(
+    pollutant == "co2",
+    fleet == "Total",
+    year == multisector_share_year
+  ) |>
+  dplyr::pull(emissions_mt)
+
+marine_shares_multisector <- multisector_inventory_data |>
+  dplyr::filter(
+    year == multisector_share_year,
+    scope %in% c("All sectors", "Other transportation", "Shipping")
+  ) |>
+  dplyr::select(data_source, scope, emissions_co2_mt) |>
+  tidyr::pivot_wider(names_from = scope, values_from = emissions_co2_mt) |>
+  dplyr::mutate(
+    share_global = fused_co2_multisector_share_year /
+      (`All sectors` - Shipping + fused_co2_multisector_share_year),
+    share_transportation = fused_co2_multisector_share_year /
+      (`Other transportation` + fused_co2_multisector_share_year)
+  )
+
+# Low-high range across the two inventories, in the manuscript's "3.2-3.3%"
+# form, collapsing to a single value when both round the same
+format_share_range <- function(shares) {
+  ends <- unique(sprintf("%.1f", 100 * range(shares)))
+  paste0(paste(ends, collapse = "-"), "%")
+}
 ```
 
 
@@ -1635,6 +1672,8 @@ may be more susceptible to AIS adoption biases.
     times faster than the growth rate of other transportation
     emissions, and `r round(   (percent_increase_to_edgar_year |>     dplyr::filter(data_source == "Marine vessels (AIS-based + S1-unmatched)") |>     dplyr::pull(emissions_co2_mt_normalized)) /     (percent_increase_to_edgar_year |>       dplyr::filter(data_source == "All sectors (EDGAR)") |>       dplyr::pull(emissions_co2_mt_normalized)) )` faster than the growth rate of total global emissions across all sectors.
 
+- Looked at more broadly, our total fused marine vessel emissions accounted for roughly `r format_share_range(marine_shares_multisector$share_global)` of all emissions globally in `r multisector_share_year` (according to the CEDS and EDGAR global inventories), and `r format_share_range(marine_shares_multisector$share_transportation)` of all transportation-related CO$_{2}$ emissions.
+
 
 ## Discussion
 
@@ -1676,6 +1715,21 @@ co2_axis_max <- annual_emissions |>
   max()
 co2_axis_max <- ceiling(co2_axis_max / 0.25e9) * 0.25e9
 
+# The legend sits in the lower right, in the gap between the S1-unmatched line
+# along the bottom and the AIS-based line, which is highest at the right end.
+# Its bottom edge is placed just above the S1-unmatched line, converted to the
+# panel's npc units: the y scale is expanded 5% beyond each limit, so the panel
+# spans 1.1 x co2_axis_max. Computed rather than hardcoded because the axis top
+# moves with the data - a fixed top-left position ended up on the
+# AIS-based + S1-unmatched line when the 2026-09-24 re-freeze lowered the axis
+# from 1.75B to 1.5B.
+s1_unmatched_max <- annual_emissions |>
+  dplyr::filter(pollutant == "co2", fleet == "Non-broadcasting") |>
+  dplyr::pull(emissions_mt) |>
+  max()
+co2_legend_bottom <- (s1_unmatched_max + 0.05 * co2_axis_max) /
+  (1.1 * co2_axis_max) + 0.04
+
 total_annual_emissions_by_fleet_fig <- annual_emissions |>
   dplyr::filter(pollutant == "co2") |>
   dplyr::mutate(
@@ -1708,18 +1762,11 @@ total_annual_emissions_by_fleet_fig <- annual_emissions |>
   theme(
     panel.grid.minor = element_blank(),
     legend.position = "inside",
-    # Top-left corner, which is the only region of this panel no series passes
-    # through: the highest line (AIS-based + S1-unmatched) starts at ~1.11B against a 1.75B
-    # axis. Floating it in the gap between the S1 and AIS lines meant the box
-    # struck through the S1 line. legend.justification.inside anchors the
-    # legend's own top-left corner at this point rather than its center, so it
-    # cannot spill outside the panel. The x inset is small on purpose: the
-    # AIS-based + S1-unmatched line rises left to right, so the further left the
-    # box sits the lower that line is beneath it. At 0.08 the box's
-    # bottom-right corner met the line around 2021-2022; 0.02 clears it while
-    # still standing off the panel edge.
-    legend.position.inside = c(0.02, 0.99),
-    legend.justification.inside = c(0, 1),
+    # Anchored by its own bottom-right corner (see co2_legend_bottom above), so
+    # the box grows up and to the left, into the gap, and cannot spill outside
+    # the panel
+    legend.position.inside = c(0.98, co2_legend_bottom),
+    legend.justification.inside = c(1, 0),
     legend.background = element_rect(fill = "white", color = "gray"),
     legend.title = element_blank(),
     # Tightened so all three keys clear the AIS-based + S1-unmatched line at its left end
@@ -1776,7 +1823,11 @@ normalized_annual_emissions_by_fleet_fig <- annual_emissions |>
   theme(
     panel.grid.minor = element_blank(),
     legend.position = "inside",
-    legend.position.inside = c(0.25, 0.85),
+    # Top-left, where every series is still near its 2017 baseline. Anchored
+    # by the legend's own top-left corner so the box stays inside the panel:
+    # centered at x = 0.25 it spilled left over the y-axis tick labels.
+    legend.position.inside = c(0.02, 0.98),
+    legend.justification.inside = c(0, 1),
     legend.background = element_rect(fill = "white", color = "gray"),
     legend.title = element_blank()
   )
