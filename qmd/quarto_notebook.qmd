@@ -1814,6 +1814,29 @@ growth_small_fishing_distance_change <- with(
   growth_small_fishing,
   (distance_nm_end / vessels_end) / (distance_nm_start / vessels_start) - 1
 )
+
+# For the Results sentences on registry coverage by size. Registry matching is
+# read in the first analysis year only: vessel_info's match effectively stops
+# for MMSIs first seen after about 2018, so a later year's unmatched share
+# mixes fleet change with that lag, while the first year predates it.
+growth_unmatched_vessel_share <- function(band) {
+  growth_activity |>
+    dplyr::filter(period == "start", length_band == growth_length_labels[band]) |>
+    dplyr::summarise(
+      share = sum(n_unique_vessels[registry_type == "no_registry"]) /
+        sum(n_unique_vessels)
+    ) |>
+    dplyr::pull(share)
+}
+growth_small_emissions_share <- function(which_period) {
+  growth_activity |>
+    dplyr::filter(period == which_period) |>
+    dplyr::summarise(
+      share = sum(emissions_co2_mt[length_lower_m < growth_length_edges[1]]) /
+        sum(emissions_co2_mt)
+    ) |>
+    dplyr::pull(share)
+}
 ```
 
 ## Abstract
@@ -1869,9 +1892,10 @@ R2 = `r all_performance_metrics |> dplyr::filter(metric == "rsq_trad",model=="de
 
 - Of the roughly `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "Total") |> dplyr::pull(n_unique_vessels) |> signif(3) |> prettyNum(big.mark=",")` AIS-broadcasting vessels in our analysis, we matched `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type %in% c("imo","other_registry")) %>% .$n_unique_vessels |> sum() |> signif(3) |> prettyNum(big.mark=",")` (`r (fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type %in% c("imo","other_registry")) %>% .$n_unique_vessels |> sum() / fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type %in% c("Total")) %>% .$n_unique_vessels) |> scales::percent()`) to public registries or proprietary databases, the majority of which (`r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "imo") |> dplyr::pull(n_unique_vessels) |> signif(3) |> prettyNum(big.mark=",")`) were IMO registered.
 
-- Because many large vessels are already listed with the IMO, the majority of our total CO$_2$ emissions come from these vessels (`r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "imo") |> dplyr::pull(fraction_emissions_co2_mt) |> scales::percent()`); `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "other_registry") |> dplyr::pull(fraction_emissions_co2_mt) |> scales::percent()` come from vessels listed on other registries; and `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "no_registry") |> dplyr::pull(fraction_emissions_co2_mt) |> scales::percent()` come from vessels with no public registry information and which rely entirely on modeled vessel characteristics.
+- Registry coverage is weakest among small vessels: in `r analysis_start_year`, `r scales::percent(growth_unmatched_vessel_share(1), accuracy = 1)` of AIS-broadcasting vessels under `r growth_length_edges[1]` m had no registry match, against `r scales::percent(growth_unmatched_vessel_share(3), accuracy = 1)` of those `r growth_length_edges[2]` m and over. Those small vessels are also the fastest-growing part of our AIS-based inventory, rising from `r scales::percent(growth_small_emissions_share("start"), accuracy = 1)` of AIS-based CO$_{2}$ in `r analysis_start_year` to `r scales::percent(growth_small_emissions_share("end"), accuracy = 1)` in `r analysis_end_year`.
 
-- And in fact, the registry-matched share of AIS-broadcasting vessels falls from `r scales::percent(registry_stat(analysis_start_year, TRUE, "share_vessels"))` in `r analysis_start_year` to `r scales::percent(registry_stat(analysis_end_year, TRUE, "share_vessels"))` in `r analysis_end_year`, as the AIS-broadcasting fleet has grown faster than the fleet listed in these registries.
+- Because many large vessels are already listed with the IMO, the largest share of our total CO$_2$ emissions comes from these vessels (`r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "imo") |> dplyr::pull(fraction_emissions_co2_mt) |> scales::percent()`); `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "other_registry") |> dplyr::pull(fraction_emissions_co2_mt) |> scales::percent()` come from vessels listed on other registries; and `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "no_registry") |> dplyr::pull(fraction_emissions_co2_mt) |> scales::percent()` come from vessels not matched to any registry, whose emissions rest entirely on modeled vessel characteristics.
+
 
 - Using the vessel characteristic values that are derived from our machine learning models, we achieve an out-of-sample model performance of `r r2_labels |> dplyr::filter(stringr::str_detect(Model, "ML-derived")) |> dplyr::pull(.estimate) |> round(2)` traditional R$^{2}$ when comparing our daily vessel-specific CO$_{2}$ emissions estimates against those derived from a proprietary vessel registry dataset of over `r prettyNum(floor(nrow(registered_validation_data) / 1e3) * 1e3, big.mark = ",")` vessel-specific fuel consumption values that were measured during at-sea trials. If we were to instead estimate emissions with our model using only currently available public vessel characteristic data, we would only achieve a predictive performance value of `r r2_labels |> dplyr::filter(Model == "IMO report lookup table") |> dplyr::pull(.estimate) |> round(2)` traditional R$^{2}$. Using a set of over `r prettyNum(floor(best_performance$n_observations / 1e3) * 1e3, big.mark = ",")` matched vessel-specific annual emissions estimates from the MRV database, we found a performance value of `r signif(best_performance$rsq_trad, 2)` traditional R$^{2}$.
 
@@ -7384,6 +7408,18 @@ for (i in seq_along(size_stacked)[-1]) {
 size_end_labels$label_y <- NA_real_
 size_end_labels$label_y[size_label_order] <- size_stacked
 
+# The end labels take their line's colour, but the palest band's blue is a line
+# colour, not a text colour: at 1.8:1 against white its percentage could barely
+# be read. Any label under 3:1, the contrast floor for large bold text, is drawn
+# in a darker shade of its own blue instead, so it still names its line.
+size_label_colors <- inventory_comparison_palette(as.character(size_end_labels$data_source))
+size_label_contrast <- 1.05 / (relative_luminance(size_label_colors) + 0.05)
+size_end_labels$label_color <- ifelse(
+  size_label_contrast < 3,
+  grDevices::rgb(t(0.55 * grDevices::col2rgb(size_label_colors) / 255)),
+  unname(size_label_colors)
+)
+
 panel_c <- ggplot2::ggplot(
   size_relative,
   ggplot2::aes(
@@ -7405,9 +7441,9 @@ panel_c <- ggplot2::ggplot(
     ggplot2::aes(
       x = .data$year + 0.12,
       y = .data$label_y,
-      label = .data$label,
-      color = .data$data_source
+      label = .data$label
     ),
+    color = size_end_labels$label_color,
     hjust = 0,
     # Larger than the 3.1 this panel drew them at: these four percentages are
     # the numbers the panel is read for, and at 3.1 they came out smaller than
