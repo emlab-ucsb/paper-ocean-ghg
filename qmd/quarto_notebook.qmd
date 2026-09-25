@@ -1428,11 +1428,15 @@ double_counting_summary <- tibble::tibble(
 
 # In-line manuscript statistics
 
+Every number in the manuscript's prose is computed in this section. The bullets under each heading mirror the manuscript's sentences, in the order they appear in the manuscript, with each number written as inline code. A few bullets, marked "Response to reviewers", give numbers cited only in the response letter; each sits next to the manuscript text it relates to. The chunks immediately below compute the values the bullets quote.
+
 ```{r}
+#| label: inline-validation-statistics
 # Validation performance metrics
 # These are computed here, ahead of the narrative sections, so the statistics
-# bullets below can cite the same numbers that the validation figures (Figure 6
-# and Figure 7) and the hours-at-sea tolerance table report.
+# bullets below can cite the same numbers that the validation figures (the
+# registered-data and EU MRV comparisons) and the hours-at-sea tolerance table
+# report.
 
 # Registered data validation ----
 model_levels <- c(
@@ -1599,10 +1603,13 @@ filtered_df <- filtered_hours_df |>
 ```
 
 ```{r}
-#| label: inline-supplementary-statistics
-# Numbers for the Results sentences on registry coverage and for the
-# Supplementary Information's inventory comparison, computed here so that every
-# number in the manuscript comes out of this notebook.
+#| label: inline-registry-and-ais-activity-statistics
+# Numbers on registry coverage and AIS activity: AIS activity by year and the
+# registry-matched shares for the Supplementary Information bullets, the class
+# composition of the vessels not matched to any registry for the response to
+# reviewers (R3.2), and the "less than" formatting used by the Results bullets.
+# Computed here so that every number in the manuscript and the response comes
+# out of this notebook.
 
 # Shares smaller than the precision reported are written as "less than" that
 # precision, as in the manuscript, rather than printing as 0.00%
@@ -1656,6 +1663,27 @@ registry_stat <- function(registry_year, matched, column) {
   registry_matched_by_year |>
     dplyr::filter(year == registry_year, registry_matched == matched) |>
     dplyr::pull(column)
+}
+
+# Vessel counts by registry type over the study period, including the Total row
+registry_count <- function(type) {
+  fraction_vessels_emissions_by_registry_info_expanded$n_unique_vessels[
+    fraction_vessels_emissions_by_registry_info_expanded$registry_type == type
+  ]
+}
+
+# Vessel class composition of the vessels not matched to any registry. The
+# class extract has to add up to the registry extract it splits.
+no_registry_classes <- vessels_emissions_by_registry_info_and_class |>
+  dplyr::filter(registry_type == "no_registry")
+stopifnot(
+  sum(no_registry_classes$n_unique_vessels) == registry_count("no_registry")
+)
+no_registry_share <- function(classes) {
+  sum(no_registry_classes$n_unique_vessels[
+    no_registry_classes$vessel_class %in% classes
+  ]) /
+    sum(no_registry_classes$n_unique_vessels)
 }
 ```
 
@@ -1842,133 +1870,46 @@ growth_small_emissions_share <- function(which_period) {
 }
 ```
 
-## Abstract
-
--  We found that vessels emitted approximately `r signif((total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS-based + S1-unmatched", pollutant == "co2") |> dplyr::pull(end_col))/1e9,3)` billion metric tonnes of CO$_{2}$ in `r analysis_end_year`. In `r edgar_comparison_year`, the most recent year for which EDGAR data are available, marine vessels accounted for `r percent_transportation_emmissions_from_marine_edgar` of global fossil fuel emissions from the transportation sector, and `r percent_global_emissions_from_marine_edgar` of global fossil fuel emissions across all sectors.
-
-- Current AIS-only approaches underestimate the magnitude of `r analysis_end_year` emissions by `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(ais_underestimation)`. Meanwhile, because AIS coverage has generally been increasing over time, current AIS-only approaches overestimate the increasing emissions trend by `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(trend_overestimation)` (from `r analysis_start_year` to `r analysis_end_year`).
-
-## Introduction
-
-- Climate change mitigation requires accurate accounting across sectors; while the transportation sector as a whole was responsible for `r fraction_co2_from_transportation` of all global CO$_{2}$ emissions in `r edgar_comparison_year`, fundamental gaps remain in understanding the contribution by marine vessels. 
-
-- For over  `r scales::comma(signif(n_unique_vessels$n_unique_vessels,3))` AIS-broadcasting vessels, we quantify emissions for
-each vessel using precise latitude/longitude/timestamp information for over `r scales::comma(floor(n_ais_messages$n_billion_ais_messages))` billion individual AIS messages.
-
-- To account for missing emissions from non-broadcasting vessels (also sometimes known as 'dark vessels'), we develop a machine learning framework that leverages `r signif(n_s1_detections$n_million_s1_detections,3)` million vessel detections from across  more than `r prettyNum(floor(n_s1_detections$n_thousand_s1_scenes)*1000,big.mark = ",")` S1 scenes to estimate S1-unmatched emissions at a monthly global 1x1-degree gridded resolution, from `r analysis_start_year` through `r analysis_end_year`, and disaggregated by vessel type (fishing or non-fishing).
-
-## Results
-
--  Using this data fusion approach, we find that total global CO$_{2}$ emissions at sea in `r analysis_end_year` was `r signif((total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS-based + S1-unmatched", pollutant == "co2") |> dplyr::pull(end_col))/1e9,3)` billion MT, with an increase of `r scales::percent(total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS-based + S1-unmatched", pollutant == "co2") |> dplyr::pull(percent_change))` from `r analysis_start_year` to `r analysis_end_year`. If only considering emissions from vessels that broadcast AIS, in line with currently accepted state-of-the-art models, global CO$_{2}$ emissions in `r analysis_end_year` would be only `r signif((total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS-based", pollutant == "co2") |> dplyr::pull(end_col))/1e9,3)` billion MT, with a more pronounced increase from `r analysis_start_year` to `r analysis_end_year` of `r scales::percent(total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS-based", pollutant == "co2") |> dplyr::pull(percent_change))`.   
-
-- Thus using only AIS data from broadcasting vessels underestimates the magnitude of 2025 global CO$_{2}$ emissions by  `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(ais_underestimation)`, and overestimates the increasing trend for `r analysis_start_year`--`r analysis_end_year` by `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(trend_overestimation)`
-
-
--   In `r analysis_end_year`,
-    `r dark_emissions_by_fishing |> dplyr::filter(fishing) |> dplyr::pull(percent_dark)`
-    of CO$_{2}$ emissions from fishing vessels were from S1-unmatched detections, and
-    `r dark_emissions_by_fishing |> dplyr::filter(!fishing) |> dplyr::pull(percent_dark)`
-    of CO$_{2}$ emissions from non-fishing vessels were from S1-unmatched detections. For both types of vessels, the S1-unmatched share of emissions has generally been
-    declining since 2021, although it increased slightly for fishing
-    vessels in 2025.
-
-
-
-- Expressed as a share of each pixel's own total rather than as a magnitude, the S1-unmatched contribution concentrates over continental shelves and in coastal waters, while the open-ocean shipping lanes are close to zero. The brightest pixels are not where the emissions are: pixels where more than half of `r analysis_end_year` CO$_{2}$ is S1-unmatched are `r dark_share_band_pct("over_50", "share_of_pixels")` of ocean pixels but only `r dark_share_band_pct("over_50", "share_of_emissions")` of emissions, while `r dark_share_band_pct(c("5_to_25", "25_to_50"), "share_of_emissions")` of emissions occur in pixels where the S1-unmatched share is between 5% and 50%.
-
--   Across the entire `r analysis_start_year` to `r analysis_end_year`
-    time series, almost all S1-unmatched emissions (
-    `r dark_emissions_by_area |>   dplyr::filter(inside_footprint & s1_imaged) |>   dplyr::pull(percent_total)`) occurred inside the S1 footprint and in pixel-months that were imaged
-    
-- Our machine learning model for predicting these emissions directly from observed S1 detection density achieves a high out-of-sample predictive performance (traditional R2 = `r all_performance_metrics |> dplyr::filter(metric == "rsq_trad",pollutant == "co2",model=="emissions_regression",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)` and total percent error of `r all_performance_metrics |> dplyr::filter(metric == "aggregate_prediction_percent_error",pollutant == "co2",model=="emissions_regression",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)`% for CO$_2$)    
-
-- Only `r dark_emissions_by_area |>   dplyr::filter(inside_footprint & !s1_imaged) |>   dplyr::pull(percent_total)` of S1-unmatched emissions occurred inside the S1 footprint but in pixel-months that weren’t imaged by S1, requiring us to use a two-stage hurdle framework using both a classification model (F1 Score = `r all_performance_metrics |> dplyr::filter(metric == "f_meas",model=="detections_classification",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)`) and a regression model (traditional
-R2 = `r all_performance_metrics |> dplyr::filter(metric == "rsq_trad",model=="detections_regression",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)`) to predict S1 detection density before predicting emissions (traditional R2 = `r all_performance_metrics |> dplyr::filter(metric == "rsq_trad",pollutant == "co2",model=="emissions_regression",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)`). 
-
-- Only `r dark_emissions_by_area |> dplyr::filter(!inside_footprint,!s1_imaged) |> dplyr::pull(percent_total)` of S1-unmatched emissions occurred outside the S1 footprint entirely, since most vessels operating in these open ocean areas use AIS.
-
-- `r all_port_and_trip_emissions_top_3 |> dplyr::filter(type == "Domestic trips") |> dplyr::pull(country) |> glue::glue_collapse(", ", last = ", and ")` had the most CO$_{2}$ emissions during within-country domestic trips in `r analysis_end_year`. 
-
-- `r all_port_and_trip_emissions_top_3 |> dplyr::filter(type == "International trips") |> dplyr::pull(country) |> glue::glue_collapse(", ", last = ", and ")` had the most CO$_{2}$ emissions during international trips that started or ended in these countries in `r analysis_end_year` (where the emissions from each trip are partitioned equally to its departure and arrival country).
-
-- `r all_port_and_trip_emissions_top_3 |> dplyr::filter(type == "Port stays") |> dplyr::pull(country) |> glue::glue_collapse(", ", last = ", and ")` had the most CO$_{2}$ emissions during port stays.
-
-- Of the roughly `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "Total") |> dplyr::pull(n_unique_vessels) |> signif(3) |> prettyNum(big.mark=",")` AIS-broadcasting vessels in our analysis, we matched `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type %in% c("imo","other_registry")) %>% .$n_unique_vessels |> sum() |> signif(3) |> prettyNum(big.mark=",")` (`r (fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type %in% c("imo","other_registry")) %>% .$n_unique_vessels |> sum() / fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type %in% c("Total")) %>% .$n_unique_vessels) |> scales::percent()`) to public registries or proprietary databases, the majority of which (`r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "imo") |> dplyr::pull(n_unique_vessels) |> signif(3) |> prettyNum(big.mark=",")`) were IMO registered.
-
-- Registry coverage is weakest among small vessels: in `r analysis_start_year`, `r scales::percent(growth_unmatched_vessel_share(1), accuracy = 1)` of AIS-broadcasting vessels under `r growth_length_edges[1]` m had no registry match, against `r scales::percent(growth_unmatched_vessel_share(3), accuracy = 1)` of those `r growth_length_edges[2]` m and over. Those small vessels are also the fastest-growing part of our AIS-based inventory, rising from `r scales::percent(growth_small_emissions_share("start"), accuracy = 1)` of AIS-based CO$_{2}$ in `r analysis_start_year` to `r scales::percent(growth_small_emissions_share("end"), accuracy = 1)` in `r analysis_end_year`.
-
-- Because many large vessels are already listed with the IMO, the largest share of our total CO$_2$ emissions comes from these vessels (`r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "imo") |> dplyr::pull(fraction_emissions_co2_mt) |> scales::percent()`); `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "other_registry") |> dplyr::pull(fraction_emissions_co2_mt) |> scales::percent()` come from vessels listed on other registries; and `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "no_registry") |> dplyr::pull(fraction_emissions_co2_mt) |> scales::percent()` come from vessels not matched to any registry, whose emissions rest entirely on modeled vessel characteristics.
-
-
-- Using the vessel characteristic values that are derived from our machine learning models, we achieve an out-of-sample model performance of `r r2_labels |> dplyr::filter(stringr::str_detect(Model, "ML-derived")) |> dplyr::pull(.estimate) |> round(2)` traditional R$^{2}$ when comparing our daily vessel-specific CO$_{2}$ emissions estimates against those derived from a proprietary vessel registry dataset of over `r prettyNum(floor(nrow(registered_validation_data) / 1e3) * 1e3, big.mark = ",")` vessel-specific fuel consumption values that were measured during at-sea trials. If we were to instead estimate emissions with our model using only currently available public vessel characteristic data, we would only achieve a predictive performance value of `r r2_labels |> dplyr::filter(Model == "IMO report lookup table") |> dplyr::pull(.estimate) |> round(2)` traditional R$^{2}$. Using a set of over `r prettyNum(floor(best_performance$n_observations / 1e3) * 1e3, big.mark = ",")` matched vessel-specific annual emissions estimates from the MRV database, we found a performance value of `r signif(best_performance$rsq_trad, 2)` traditional R$^{2}$.
-
-- Although vessel activity in the Southern Ocean represents a very small fractions of
-the world’s marine vessel emissions (`r emissions_by_ocean_summary_tbl |> dplyr::filter(ocean=="Southern") |> dplyr::pull(percent_annual_total)`), it represents the part of the world experi-
-encing the highest growth rate of marine vessel emissions (`r emissions_by_ocean_summary_tbl |> dplyr::filter(ocean=="Southern") |> dplyr::pull(percent_emissions_co2_mt_normalized_rounded)`).
-
-- These polar estimates are primarily driven by AIS-broadcasting vessels, with only a
-negligible fraction S1-unmatched (`r emissions_by_ocean_summary_tbl |> dplyr::filter(ocean == "Southern") |> with(percent_or_less_than(emissions_co2_dark_mt / emissions_co2_mt_total))` in the Southern Ocean). 
-
-- Polar regions have extremely limited S1 coverage (only `r emissions_by_ocean_summary_tbl |> dplyr::filter(ocean=="Southern") |> dplyr::pull(fraction_n_imaged)` of
-pixel-months in the Southern Ocean were imaged by S1), meaning that trends there
-may be more susceptible to AIS adoption biases. 
-
-
-- Looked at more broadly, our total fused marine vessel emissions accounted for roughly `r format_share_range(marine_shares_multisector$share_global)` of all emissions globally in `r multisector_share_year` (according to the CEDS and EDGAR global inventories), and `r format_share_range(marine_shares_multisector$share_transportation)` of all transportation-related CO$_{2}$ emissions.
-
-
-## Discussion
-
-- For non-fishing vessels, the total social cost of CO$_{2}$, CH$_{4}$, and N$_{2}$O emissions in 2021 was `r annual_sc_fishing_non_fishing |> dplyr::filter(fishing == "Non-fishing",year=="Total") |> dplyr::pull(sc_billion_usd) |> round()` billion USD. This represents about `r scales::percent((annual_sc_fishing_non_fishing |> dplyr::filter(fishing == "Non-fishing",year=="Total") |> dplyr::pull(sc_billion_usd))/1e3/6.63)` of the total value of all goods transported by maritime trade (using 6.63 trillion USD as the 2021 value of maritime-traded goods).
-    
-- For fishing vessels, the total social cost of CO$_{2}$, CH$_{4}$, and N$_{2}$O emissions in 2022 was `r annual_sc_fishing_non_fishing |> dplyr::filter(fishing == "Fishing",year=="Total") |> dplyr::pull(sc_billion_usd) |> round()` billion USD. This represents about `r scales::percent((annual_sc_fishing_non_fishing |> dplyr::filter(fishing == "Fishing",year=="Total") |> dplyr::pull(sc_billion_usd))/159)` of the total value of all wild capture fisheries (using 159 billion USD as the 2022 value of wild capture fisheries).
-
-- For our AIS-based results, `r scales::percent(growth_small_share)` of the `r analysis_start_year`--`r analysis_end_year` increase comes from vessels under `r growth_length_edges[1]` m, led by small passenger vessels (`r scales::percent(growth_small_passenger_share)` of the increase) and small fishing vessels (`r scales::percent(growth_small_fishing_share)`), segments that our inventory uniquely captures compared to other inventories and that have grown fastest in both number of vessels and emissions. Most of the rest (`r scales::percent(growth_large_share)`) comes from vessels of `r growth_length_edges[2]` m and over, nearly all of them cargo vessels and tankers.
-
-
-## Methods
-
-- The time between pings is typically small (the mean value is `r round(ping_level_hours_distribution$mean_hours, 3)` hours and the median value is `r round(ping_level_hours_distribution$median_hours, 3)` hours, or about `r round(ping_level_hours_distribution$mean_hours*60)` minutes and `r round(ping_level_hours_distribution$median_hours*60)` minutes respectively), while the maximum value for this across our dataset is `r round(ping_level_hours_distribution$max_hours)` hours (meaning this is the most amount of time over which we will estimate emissions for a single message).
-
-- Double counting between the two estimates. The detection-AIS matching considers AIS positions up to 12 hours either side of a detection, but a hold-out experiment by GFW (detections with high-confidence matches as ground truth, AIS positions withheld within a window of the detection) shows that the probability of missing a true match rises gradually with the length of the gap in a vessel's AIS messages rather than switching on at 12 hours: `r scales::percent(miss_rate_points$s1_detection_matching_miss_rate[miss_rate_points$ais_message_gap_duration_hours == 2], accuracy = 0.1)` of true matches are missed at a 2-hour gap, `r scales::percent(miss_rate_points$s1_detection_matching_miss_rate[miss_rate_points$ais_message_gap_duration_hours == 8], accuracy = 0.1)` at 8 hours and `r scales::percent(miss_rate_points$s1_detection_matching_miss_rate[miss_rate_points$ais_message_gap_duration_hours == 18], accuracy = 0.1)` at 18 hours. Weighting the share of AIS-based CO$_2$ emitted in gaps of each length by that miss rate, `r scales::percent(exposed_share[["rise"]], accuracy = 0.1)` of AIS-based CO$_2$ (`r scales::percent(exposed_share[["hold"]], accuracy = 0.1)` if the miss rate is held at its 18-hour value beyond the last simulated gap) is emitted while the vessel, had it been imaged, would have been classed as unmatched. This implies that `r sprintf("%.2f", misclassified_million[["rise"]])` million of the `r signif(n_s1_detections$n_million_s1_detections_unmatched, 3)` million unmatched detections (`r scales::percent(misclassified_share_of_unmatched[["rise"]], accuracy = 0.1)`) are AIS-broadcasting vessels, and hence that about `r scales::percent(misclassified_share_of_unmatched[["rise"]], accuracy = 0.1)` of S1-unmatched CO$_2$ (`r scales::comma(duplicated_dark_mt[["rise"]], accuracy = 1)` million tonnes over `r analysis_start_year`-`r analysis_end_year`, or `r scales::percent(duplicated_share_of_fused[["rise"]], accuracy = 0.1)` of the combined AIS-based + S1-unmatched total) duplicates emissions already counted in the AIS-based estimate. Because the same misclassified detections are also missing from the matched densities the emissions regression is trained on, the fitted emissions per detection are high by a factor of `r sprintf("%.3f", 1 / (1 - exposed_share[["rise"]]))`; folding that in gives an upper end of `r scales::percent(dark_overstatement[["rise"]], accuracy = 0.1)` of S1-unmatched CO$_2$ (`r scales::percent(overstated_share_of_fused[["rise"]], accuracy = 0.1)` of the combined total). This replaces the earlier reasoning that only messages representing more than 12 hours could be affected, which happened to give a similar number (`r scales::percent(1 - emissions_by_message_hour_threshold$fraction_of_total[dplyr::near(emissions_by_message_hour_threshold$threshold_hours, 12)], accuracy = 0.1)`) for the wrong reason: most of the exposure comes from gaps of 2 to 18 hours (Fig. \ref{fig:fig-s1-matching-double-counting}, Table \ref{tab:s1_matching_double_counting_by_gap}, Table \ref{tab:s1_matching_double_counting_summary}).
-
-- In all, we analyze AIS data for over `r scales::comma(signif(n_unique_vessels$n_unique_vessels,3))` AIS-broadcasting vessels, across  `r scales::comma(signif(n_ais_messages$n_billion_ais_messages, 3))`  billion individual timestamped AIS messages which are assigned to `r signif((trip_co2_emissions_by_from_to_countries |> dplyr::filter(from_country_iso3!=to_country_iso3) |> dplyr::pull(n_unique_trips) |> sum())/1e6,3)` million international trips, `r signif((trip_co2_emissions_by_from_to_countries |> dplyr::filter(from_country_iso3==to_country_iso3) |> dplyr::pull(n_unique_trips) |> sum())/1e6,3)` million domestic trips, and `r signif((port_visit_co2_emissions_by_country |> dplyr::pull(n_unique_port_vists) |> sum())/1e6,3)` million port visits that occurred between `r analysis_start_year` and `r analysis_end_year`.
-
-- As a result, we used a dataset containing `r signif(n_s1_detections$n_million_s1_detections,3)` million vessel detections from `r analysis_start_year` to `r analysis_end_year`, of which `r signif(n_s1_detections$n_million_s1_detections_unmatched,3)` million detections were not matched to a broadcasting vessel ('unmatched'). These detections come from across more than `r prettyNum(floor(n_s1_detections$n_thousand_s1_scenes)*1000,big.mark = ",")` individual S1 scenes.
-
-- We were able to use this direct estimation approach for `r dark_emissions_by_area |> dplyr::filter(inside_footprint,s1_imaged) |> dplyr::pull(percent_total)` of the total estimated S1-unmatched CO$_2$ emissions .
-
-- Of the total predicted S1-unmatched CO$_2$ emissions, `r  dark_emissions_by_area |> dplyr::filter(inside_footprint,!s1_imaged) |> dplyr::pull(percent_total)` corresponded to indirect estimations within the S1 footprint, while only  `r  dark_emissions_by_area |> dplyr::filter(!inside_footprint,!s1_imaged) |> dplyr::pull(percent_total)` occurred entirely outside the footprint
-
-- For a validation sample of `r prettyNum(nrow(registered_validation_data), big.mark = ",")` vessels, updating vessel metadata with our random forest models substantially improves main engine model performance: traditional R$^{2}$ rises from `r r2_labels |> dplyr::filter(Model == "IMO report lookup table") |> dplyr::pull(.estimate) |> round(2)` using main engine power and design speed from the IMO lookup table, to `r r2_labels |> dplyr::filter(stringr::str_detect(Model, "ML-derived")) |> dplyr::pull(.estimate) |> round(2)` using our random forest predictions, approaching the performance ceiling of `r r2_labels |> dplyr::filter(Model == "Registered data") |> dplyr::pull(.estimate) |> round(2)` achieved with the metadata recorded in the registered dataset.
-
-- Validating against the EU MRV database, performance peaks at a traditional R$^{2}$ of `r signif(best_performance$rsq_trad, 2)` for vessels whose times at sea in our dataset are within `r scales::percent(best_performance$threshold)` of the MRV-reported values (validation sample of `r prettyNum(best_performance$n_observations, big.mark = ",")` vessel-year observations). Beyond this threshold, performance declines as discrepancies grow between our annual aggregated trip activity and that recorded in the MRV dataset.
-
-
-## Supplementary Information
-
-- Restricting the comparison to vessels explicitly modeled from observed AIS activity, we model `r scales::comma(n_unique_vessels_activity_window$n_unique_vessels)` unique vessels over `r ais_activity_first_year`--`r analysis_end_year` (a wider window, and so a larger fleet, than the `r scales::comma(n_unique_vessels$n_unique_vessels)` vessels emitting during the `r analysis_start_year`--`r analysis_end_year` study period used elsewhere in this paper), an average of `r scales::comma(mean(ais_activity_by_year$n_unique_vessels))` vessels per year, rising from `r scales::comma(ais_activity_in(ais_activity_first_year, "n_unique_vessels"))` in `r ais_activity_first_year` to `r scales::comma(ais_activity_in(analysis_end_year, "n_unique_vessels"))` in `r analysis_end_year`.
-
-- Our `r ais_activity_first_year` dataset holds approximately `r signif(ais_activity_in(ais_activity_first_year, "n_pings") / 1e9, 2)` billion AIS positions after data cleaning. Our own message volume increases to approximately `r round(ais_activity_in(analysis_end_year, "n_pings") / 1e9, 1)` billion positions by `r analysis_end_year`, totaling approximately `r round(sum(ais_activity_by_year$n_pings) / 1e9)` billion positions over the study period (an average of `r round(mean(ais_activity_by_year$n_pings) / 1e9, 1)` billion per year).
-
-- In our inventory, registry-matched vessels likewise produced `r scales::percent(registry_stat(analysis_start_year, TRUE, "share_emissions"))` of AIS-based CO$_{2}$ in `r analysis_start_year` while making up `r scales::percent(registry_stat(analysis_start_year, TRUE, "share_vessels"))` of broadcasting vessels.
-
-- Of the `r round(growth_small_service_passenger$emissions_change)` million tonne increase from service and passenger vessels under `r growth_length_edges[1]` m, `r round(growth_small_service_passenger$from_vessels)` million tonnes came from the change in vessel count.
-
-- AIS positions received increased `r sprintf("%.2f", ais_activity_growth("n_pings"))`-fold (more than doubled) between `r dais_baseline_year` and `r analysis_end_year` while observed distance traveled and AIS-based emissions rose together by only `r scales::percent(ais_activity_growth("distance_travelled_nm") - 1)` and `r scales::percent(ais_activity_growth("emissions_co2_mt") - 1)`, respectively.
-
-- The exception is small fishing vessels: their distance per vessel rose `r scales::percent(growth_small_fishing_distance_change)` between `r analysis_start_year` and `r analysis_end_year`, accounting for `r round(growth_small_fishing$from_distance_per_vessel)` of their `r round(growth_small_fishing$emissions_change)` million tonne increase.
-
-
-## Response to reviewers
-
 ```{r}
-#| label: inline-response-statistics
-# Numbers cited only in the response to reviewers, computed here like every
-# number in the manuscript
+#| label: inline-trend-statistics
+# Year-on-year changes in the S1 match rate and in the two estimates (response
+# to reviewers, R3.10), and the sensitivity of the fused total and its growth to
+# a proportional bias in S1-unmatched emissions (Discussion, and the response to
+# reviewers, R2.1)
 
-# R2.1: how a proportional bias in the emissions assigned to unmatched
-# detections would move the fused total and its growth
+# S1 scenes, detections and the unmatched fraction by year
+s1_by_year <- s1_time_series |>
+  dplyr::mutate(year = lubridate::year(month)) |>
+  dplyr::group_by(year) |>
+  dplyr::summarize(
+    s1_scenes = sum(s1_scenes),
+    n_s1_detections = sum(n_s1_detections),
+    n_s1_detections_unmatched = sum(n_s1_detections_unmatched)
+  ) |>
+  dplyr::mutate(
+    unmatched_fraction = n_s1_detections_unmatched / n_s1_detections
+  )
+s1_year <- function(year_value, column) {
+  s1_by_year[[column]][s1_by_year$year == year_value]
+}
+s1_change <- function(from, to, column) {
+  s1_year(to, column) / s1_year(from, column) - 1
+}
+
+# Annual CO2 by estimate, where "Total" is the fused total
+co2_year <- function(year_value, fleet_name) {
+  annual_emissions$emissions_mt[
+    annual_emissions$year == year_value &
+      annual_emissions$fleet == fleet_name &
+      annual_emissions$pollutant == "co2"
+  ]
+}
+co2_change <- function(from, to, fleet_name) {
+  co2_year(to, fleet_name) / co2_year(from, fleet_name) - 1
+}
+
+# How a proportional bias in the emissions assigned to unmatched detections
+# would move the fused total and its growth
 sensitivity_bias <- 0.2
 co2_fleet_totals <- total_percent_change_by_fleet |>
   dplyr::filter(pollutant == "co2", fleet %in% c("AIS-based", "S1-unmatched"))
@@ -1990,64 +1931,127 @@ fused_growth_scaled <- function(scale) {
 fused_growth_base <- fused_growth_scaled(1)
 fused_growth_bias <- fused_growth_scaled(1 + c(-1, 1) * sensitivity_bias)
 fused_growth_bias_shift_pp <- max(abs(fused_growth_bias - fused_growth_base)) * 100
-
-# R3.2: registry matching of the analysis fleet, and the vessel class
-# composition of the vessels not matched to any registry
-registry_count <- function(type) {
-  fraction_vessels_emissions_by_registry_info$n_unique_vessels[
-    fraction_vessels_emissions_by_registry_info$registry_type == type
-  ]
-}
-n_registry_fleet <- sum(fraction_vessels_emissions_by_registry_info$n_unique_vessels)
-n_registry_matched <- registry_count("imo") + registry_count("other_registry")
-no_registry_classes <- vessels_emissions_by_registry_info_and_class |>
-  dplyr::filter(registry_type == "no_registry")
-# The class extract has to add up to the registry extract it splits
-stopifnot(
-  sum(no_registry_classes$n_unique_vessels) == registry_count("no_registry")
-)
-no_registry_share <- function(classes) {
-  sum(no_registry_classes$n_unique_vessels[
-    no_registry_classes$vessel_class %in% classes
-  ]) /
-    sum(no_registry_classes$n_unique_vessels)
-}
-
-# R3.10: year-on-year changes in the S1 match rate and in the two estimates
-s1_by_year <- s1_time_series |>
-  dplyr::mutate(year = lubridate::year(month)) |>
-  dplyr::group_by(year) |>
-  dplyr::summarize(
-    s1_scenes = sum(s1_scenes),
-    n_s1_detections = sum(n_s1_detections),
-    n_s1_detections_unmatched = sum(n_s1_detections_unmatched)
-  ) |>
-  dplyr::mutate(
-    unmatched_fraction = n_s1_detections_unmatched / n_s1_detections
-  )
-s1_year <- function(year_value, column) {
-  s1_by_year[[column]][s1_by_year$year == year_value]
-}
-s1_change <- function(from, to, column) {
-  s1_year(to, column) / s1_year(from, column) - 1
-}
-co2_year <- function(year_value, fleet_name) {
-  annual_emissions$emissions_mt[
-    annual_emissions$year == year_value &
-      annual_emissions$fleet == fleet_name &
-      annual_emissions$pollutant == "co2"
-  ]
-}
-co2_change <- function(from, to, fleet_name) {
-  co2_year(to, fleet_name) / co2_year(from, fleet_name) - 1
-}
 ```
 
-- R2.1: Because S1-unmatched emissions make up `r scales::percent(s1_share_end)` of our `r analysis_end_year` total, a proportional bias in the emissions we assign to unmatched detections would change our total by only `r scales::percent(s1_share_end)` as much: a `r scales::percent(sensitivity_bias)` bias in either direction would change our `r analysis_end_year` total by about `r scales::percent(sensitivity_bias * s1_share_end, accuracy = 0.1)`, and our `r analysis_start_year`--`r analysis_end_year` growth by at most `r round(fused_growth_bias_shift_pp, 1)` percentage points (to between `r scales::percent(min(fused_growth_bias))` and `r scales::percent(max(fused_growth_bias))`, against our estimate of `r scales::percent(fused_growth_base)`).
+## Abstract
 
-- R3.2: Of the `r scales::comma(n_registry_fleet)` AIS-broadcasting vessels in the current analysis, `r scales::comma(registry_count("imo"))` (`r scales::percent(registry_count("imo") / n_registry_fleet, accuracy = 0.1)`) are matched to the IMO's GISIS, a further `r scales::comma(registry_count("other_registry"))` (`r scales::percent(registry_count("other_registry") / n_registry_fleet, accuracy = 0.1)`) appear in at least one other registry, and therefore `r scales::comma(n_registry_matched)` (`r scales::percent(n_registry_matched / n_registry_fleet)`) are matched in total. The `r scales::comma(registry_count("no_registry"))` vessels that we could not match to any of our included vessel registries are concentrated in several specific vessel class types: `r scales::percent(no_registry_share("passenger"))` are passenger craft, `r scales::percent(no_registry_share(fishing_vessel_classes()))` are fishing vessels, and `r scales::percent(no_registry_share("tug"))` are tugs.
+-  We found that vessels emitted approximately `r signif((total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS-based + S1-unmatched", pollutant == "co2") |> dplyr::pull(end_col))/1e9,3)` billion metric tonnes of CO$_{2}$ in `r analysis_end_year`. In `r edgar_comparison_year`, the most recent year for which EDGAR data are available, marine vessels accounted for `r percent_transportation_emmissions_from_marine_edgar` of global fossil fuel emissions from the transportation sector, and `r percent_global_emissions_from_marine_edgar` of global fossil fuel emissions across all sectors.
 
-- R3.10: The fraction of S1 detections unmatched with AIS-broadcasting vessels changed little from 2017 to 2019 (`r scales::percent(s1_year(2017, "unmatched_fraction"))` and `r scales::percent(s1_year(2019, "unmatched_fraction"))`), and then decreased steadily from 2020 through 2024, from about `r scales::percent(s1_year(2019, "unmatched_fraction"))` to `r scales::percent(s1_year(2024, "unmatched_fraction"))`. From 2022 to 2023 the matched fraction of detections rose by `r scales::percent((1 - s1_year(2023, "unmatched_fraction")) / (1 - s1_year(2022, "unmatched_fraction")) - 1, accuracy = 0.1)` (from `r scales::percent(1 - s1_year(2022, "unmatched_fraction"), accuracy = 0.1)` to `r scales::percent(1 - s1_year(2023, "unmatched_fraction"), accuracy = 0.1)`), while our fused total emissions rose by `r scales::percent(co2_change(2022, 2023, "Total"), accuracy = 0.1)` and S1-unmatched emissions fell by `r scales::percent(-co2_change(2022, 2023, "Non-broadcasting"), accuracy = 0.1)`. From 2021 to 2022, with the loss of Sentinel-1B, the number of S1 scenes fell by `r scales::percent(-s1_change(2021, 2022, "s1_scenes"))` and vessel detections by `r scales::percent(-s1_change(2021, 2022, "n_s1_detections"))`, while S1-unmatched emissions changed by `r scales::percent(co2_change(2021, 2022, "Non-broadcasting"), accuracy = 0.1)`.
+- Current AIS-only approaches underestimate the magnitude of `r analysis_end_year` emissions by `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(ais_underestimation)`. Meanwhile, because AIS coverage has generally been increasing over time, current AIS-only approaches overestimate the increasing emissions trend by `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(trend_overestimation)` (from `r analysis_start_year` to `r analysis_end_year`).
+
+
+## Introduction
+
+- Climate change mitigation requires accurate accounting across sectors; while the transportation sector as a whole was responsible for `r fraction_co2_from_transportation` of all global CO$_{2}$ emissions in `r edgar_comparison_year`, fundamental gaps remain in understanding the contribution by marine vessels. 
+
+- For over  `r scales::comma(signif(n_unique_vessels$n_unique_vessels,3))` AIS-broadcasting vessels, we quantify emissions for
+each vessel using precise latitude/longitude/timestamp information for over `r scales::comma(floor(n_ais_messages$n_billion_ais_messages))` billion individual AIS messages.
+
+- To account for missing emissions from non-broadcasting vessels (also sometimes known as 'dark vessels'), we develop a machine learning framework that leverages `r signif(n_s1_detections$n_million_s1_detections,3)` million vessel detections from across  more than `r prettyNum(floor(n_s1_detections$n_thousand_s1_scenes)*1000,big.mark = ",")` S1 scenes to estimate S1-unmatched emissions at a monthly global 1x1-degree gridded resolution, from `r analysis_start_year` through `r analysis_end_year`, and disaggregated by vessel type (fishing or non-fishing).
+
+
+## Results
+
+-  Using this data fusion approach, we find that total global CO$_{2}$ emissions at sea in `r analysis_end_year` was `r signif((total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS-based + S1-unmatched", pollutant == "co2") |> dplyr::pull(end_col))/1e9,3)` billion MT, with an increase of `r scales::percent(total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS-based + S1-unmatched", pollutant == "co2") |> dplyr::pull(percent_change))` from `r analysis_start_year` to `r analysis_end_year`. If only considering emissions from vessels that broadcast AIS, in line with currently accepted state-of-the-art models, global CO$_{2}$ emissions in `r analysis_end_year` would be only `r signif((total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS-based", pollutant == "co2") |> dplyr::pull(end_col))/1e9,3)` billion MT, with a more pronounced increase from `r analysis_start_year` to `r analysis_end_year` of `r scales::percent(total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS-based", pollutant == "co2") |> dplyr::pull(percent_change))`.   
+
+- Thus using only AIS data from broadcasting vessels underestimates the magnitude of 2025 global CO$_{2}$ emissions by  `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(ais_underestimation)`, and overestimates the increasing trend for `r analysis_start_year`--`r analysis_end_year` by `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(trend_overestimation)`
+
+- Response to reviewers (R3.10), on the S1-unmatched share declining since 2021: the fraction of S1 detections unmatched with AIS-broadcasting vessels changed little from 2017 to 2019 (`r scales::percent(s1_year(2017, "unmatched_fraction"))` and `r scales::percent(s1_year(2019, "unmatched_fraction"))`), and then decreased steadily from 2020 through 2024, from about `r scales::percent(s1_year(2019, "unmatched_fraction"))` to `r scales::percent(s1_year(2024, "unmatched_fraction"))`. From 2022 to 2023 the matched fraction of detections rose by `r scales::percent((1 - s1_year(2023, "unmatched_fraction")) / (1 - s1_year(2022, "unmatched_fraction")) - 1, accuracy = 0.1)` (from `r scales::percent(1 - s1_year(2022, "unmatched_fraction"), accuracy = 0.1)` to `r scales::percent(1 - s1_year(2023, "unmatched_fraction"), accuracy = 0.1)`), while our fused total emissions rose by `r scales::percent(co2_change(2022, 2023, "Total"), accuracy = 0.1)` and S1-unmatched emissions fell by `r scales::percent(-co2_change(2022, 2023, "Non-broadcasting"), accuracy = 0.1)`. From 2021 to 2022, with the loss of Sentinel-1B, the number of S1 scenes fell by `r scales::percent(-s1_change(2021, 2022, "s1_scenes"))` and vessel detections by `r scales::percent(-s1_change(2021, 2022, "n_s1_detections"))`, while S1-unmatched emissions changed by `r scales::percent(co2_change(2021, 2022, "Non-broadcasting"), accuracy = 0.1)`.
+
+- Expressed as a share of each pixel's total emissions rather than as a magnitude, the pattern is sharper still: the S1-unmatched contribution is concentrated mostly in coastal waters, with particularly high concentrations in southeast Asia, the Caribbean, and the Mediterranean. The major open-ocean shipping lanes, where large AIS-broadcasting vessels dominate, are close to zero. The brightest pixels are not, however, where the emissions are: pixels in which more than half of `r analysis_end_year` CO$_{2}$ is S1-unmatched make up `r dark_share_band_pct("over_50", "share_of_pixels")` of ocean pixels but only `r dark_share_band_pct("over_50", "share_of_emissions")` of emissions, while `r dark_share_band_pct(c("5_to_25", "25_to_50"), "share_of_emissions")` of emissions occur in pixels where the S1-unmatched share falls between 5% and 50%.
+
+-   In `r analysis_end_year`,
+    `r dark_emissions_by_fishing |> dplyr::filter(fishing) |> dplyr::pull(percent_dark)`
+    of CO$_{2}$ emissions from fishing vessels were from S1-unmatched detections, and
+    `r dark_emissions_by_fishing |> dplyr::filter(!fishing) |> dplyr::pull(percent_dark)`
+    of CO$_{2}$ emissions from non-fishing vessels were from S1-unmatched detections. For both types of vessels, the S1-unmatched share of emissions has generally been
+    declining since 2021, although it increased slightly for fishing
+    vessels in 2025.
+
+-   Across the entire `r analysis_start_year` to `r analysis_end_year`
+    time series, almost all S1-unmatched emissions (
+    `r dark_emissions_by_area |>   dplyr::filter(inside_footprint & s1_imaged) |>   dplyr::pull(percent_total)`) occurred inside the S1 footprint and in pixel-months that were imaged by S1.
+
+- Our machine learning model for predicting these emissions directly from observed S1 detection density achieves a high out-of-sample predictive performance (traditional R2 = `r all_performance_metrics |> dplyr::filter(metric == "rsq_trad",pollutant == "co2",model=="emissions_regression",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)` and total percent error of `r all_performance_metrics |> dplyr::filter(metric == "aggregate_prediction_percent_error",pollutant == "co2",model=="emissions_regression",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)`% for CO$_2$)    
+
+- Only `r dark_emissions_by_area |>   dplyr::filter(inside_footprint & !s1_imaged) |>   dplyr::pull(percent_total)` of S1-unmatched emissions occurred inside the S1 footprint but in pixel-months that weren’t imaged by S1, requiring us to use a two-stage hurdle framework using both a classification model (F1 Score = `r all_performance_metrics |> dplyr::filter(metric == "f_meas",model=="detections_classification",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)`) and a regression model (traditional
+R2 = `r all_performance_metrics |> dplyr::filter(metric == "rsq_trad",model=="detections_regression",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)`) to predict S1 detection density before predicting emissions (traditional R2 = `r all_performance_metrics |> dplyr::filter(metric == "rsq_trad",pollutant == "co2",model=="emissions_regression",test=="inside_footprint") |> dplyr::pull(estimate) |> signif(2)`). 
+
+- Only `r dark_emissions_by_area |> dplyr::filter(!inside_footprint,!s1_imaged) |> dplyr::pull(percent_total)` of S1-unmatched emissions occurred outside the S1 footprint entirely, since most vessels operating in these open ocean areas use AIS.
+
+- `r all_port_and_trip_emissions_top_3 |> dplyr::filter(type == "Domestic trips") |> dplyr::pull(country) |> glue::glue_collapse(", ", last = ", and ")` had the most CO$_{2}$ emissions during within-country domestic trips in `r analysis_end_year`. 
+
+- `r all_port_and_trip_emissions_top_3 |> dplyr::filter(type == "International trips") |> dplyr::pull(country) |> glue::glue_collapse(", ", last = ", and ")` had the most CO$_{2}$ emissions during international trips that started or ended in these countries in `r analysis_end_year` (where the emissions from each trip are partitioned equally to its departure and arrival country).
+
+- `r all_port_and_trip_emissions_top_3 |> dplyr::filter(type == "Port stays") |> dplyr::pull(country) |> glue::glue_collapse(", ", last = ", and ")` had the most CO$_{2}$ emissions during port stays.
+
+- Of the roughly `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "Total") |> dplyr::pull(n_unique_vessels) |> signif(3) |> prettyNum(big.mark=",")` AIS-broadcasting vessels in our analysis, we matched `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type %in% c("imo","other_registry")) %>% .$n_unique_vessels |> sum() |> signif(3) |> prettyNum(big.mark=",")` (`r (fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type %in% c("imo","other_registry")) %>% .$n_unique_vessels |> sum() / fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type %in% c("Total")) %>% .$n_unique_vessels) |> scales::percent()`) to public registries or proprietary databases, the majority of which (`r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "imo") |> dplyr::pull(n_unique_vessels) |> signif(3) |> prettyNum(big.mark=",")`) were IMO registered.
+
+- Response to reviewers (R3.2): Of the `r scales::comma(registry_count("Total"))` AIS-broadcasting vessels in the current analysis, `r scales::comma(registry_count("imo"))` (`r scales::percent(registry_count("imo") / registry_count("Total"), accuracy = 0.1)`) are matched to the IMO's GISIS, a further `r scales::comma(registry_count("other_registry"))` (`r scales::percent(registry_count("other_registry") / registry_count("Total"), accuracy = 0.1)`) appear in at least one other registry, and therefore `r scales::comma(registry_count("imo") + registry_count("other_registry"))` (`r scales::percent((registry_count("imo") + registry_count("other_registry")) / registry_count("Total"))`) are matched in total. The `r scales::comma(registry_count("no_registry"))` vessels that we could not match to any of our included vessel registries are concentrated in several specific vessel class types: `r scales::percent(no_registry_share("passenger"))` are passenger craft, `r scales::percent(no_registry_share(fishing_vessel_classes()))` are fishing vessels, and `r scales::percent(no_registry_share("tug"))` are tugs.
+
+- Registry coverage is weakest among small vessels: in `r analysis_start_year`, `r scales::percent(growth_unmatched_vessel_share(1), accuracy = 1)` of AIS-broadcasting vessels under `r growth_length_edges[1]` m had no registry match, against `r scales::percent(growth_unmatched_vessel_share(3), accuracy = 1)` of those `r growth_length_edges[2]` m and over. Those small vessels are also the fastest-growing part of our AIS-based inventory, rising from `r scales::percent(growth_small_emissions_share("start"), accuracy = 1)` of AIS-based CO$_{2}$ in `r analysis_start_year` to `r scales::percent(growth_small_emissions_share("end"), accuracy = 1)` in `r analysis_end_year`.
+
+- Because many large vessels are already listed with the IMO, the largest share of our total CO$_2$ emissions comes from these vessels (`r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "imo") |> dplyr::pull(fraction_emissions_co2_mt) |> scales::percent()`); `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "other_registry") |> dplyr::pull(fraction_emissions_co2_mt) |> scales::percent()` come from vessels listed on other registries; and `r fraction_vessels_emissions_by_registry_info_expanded |> dplyr::filter(registry_type == "no_registry") |> dplyr::pull(fraction_emissions_co2_mt) |> scales::percent()` come from vessels not matched to any registry, whose emissions rest entirely on modeled vessel characteristics.
+
+- Using the vessel characteristic values that are derived from our machine learning models, we achieve an out-of-sample model performance of `r r2_labels |> dplyr::filter(stringr::str_detect(Model, "ML-derived")) |> dplyr::pull(.estimate) |> round(2)` traditional R$^{2}$ when comparing our daily vessel-specific CO$_{2}$ emissions estimates against those derived from a proprietary vessel registry dataset of over `r prettyNum(floor(nrow(registered_validation_data) / 1e3) * 1e3, big.mark = ",")` vessel-specific fuel consumption values that were measured during at-sea trials. If we were to instead estimate emissions with our model using only currently available public vessel characteristic data, we would only achieve a predictive performance value of `r r2_labels |> dplyr::filter(Model == "IMO report lookup table") |> dplyr::pull(.estimate) |> round(2)` traditional R$^{2}$. Using a set of over `r prettyNum(floor(best_performance$n_observations / 1e3) * 1e3, big.mark = ",")` matched vessel-specific annual emissions estimates from the MRV database, we found a performance value of `r signif(best_performance$rsq_trad, 2)` traditional R$^{2}$.
+
+- Although vessel activity in the Southern Ocean represents a very small fractions of
+the world’s marine vessel emissions (`r emissions_by_ocean_summary_tbl |> dplyr::filter(ocean=="Southern") |> dplyr::pull(percent_annual_total)`), it represents the part of the world experi-
+encing the highest growth rate of marine vessel emissions (`r emissions_by_ocean_summary_tbl |> dplyr::filter(ocean=="Southern") |> dplyr::pull(percent_emissions_co2_mt_normalized_rounded)`).
+
+- These polar estimates are primarily driven by AIS-broadcasting vessels, with only a
+negligible fraction S1-unmatched (`r emissions_by_ocean_summary_tbl |> dplyr::filter(ocean == "Southern") |> with(percent_or_less_than(emissions_co2_dark_mt / emissions_co2_mt_total))` in the Southern Ocean). 
+
+- Polar regions have extremely limited S1 coverage (only `r emissions_by_ocean_summary_tbl |> dplyr::filter(ocean=="Southern") |> dplyr::pull(fraction_n_imaged)` of
+pixel-months in the Southern Ocean were imaged by S1), meaning that trends there
+may be more susceptible to AIS adoption biases. 
+
+- Looked at more broadly, our total fused marine vessel emissions accounted for roughly `r format_share_range(marine_shares_multisector$share_global)` of all emissions globally in `r multisector_share_year` (according to the CEDS and EDGAR global inventories), and `r format_share_range(marine_shares_multisector$share_transportation)` of all transportation-related CO$_{2}$ emissions.
+
+
+## Discussion
+
+- For non-fishing vessels, the total social cost of CO$_{2}$, CH$_{4}$, and N$_{2}$O emissions in 2021 was `r annual_sc_fishing_non_fishing |> dplyr::filter(fishing == "Non-fishing",year=="Total") |> dplyr::pull(sc_billion_usd) |> round()` billion USD. This represents about `r scales::percent((annual_sc_fishing_non_fishing |> dplyr::filter(fishing == "Non-fishing",year=="Total") |> dplyr::pull(sc_billion_usd))/1e3/6.63)` of the total value of all goods transported by maritime trade (using 6.63 trillion USD as the 2021 value of maritime-traded goods).
+
+- For fishing vessels, the total social cost of CO$_{2}$, CH$_{4}$, and N$_{2}$O emissions in 2022 was `r annual_sc_fishing_non_fishing |> dplyr::filter(fishing == "Fishing",year=="Total") |> dplyr::pull(sc_billion_usd) |> round()` billion USD. This represents about `r scales::percent((annual_sc_fishing_non_fishing |> dplyr::filter(fishing == "Fishing",year=="Total") |> dplyr::pull(sc_billion_usd))/159)` of the total value of all wild capture fisheries (using 159 billion USD as the 2022 value of wild capture fisheries).
+
+- Because S1-unmatched emissions make up `r scales::percent(s1_share_end)` of our `r analysis_end_year` fused emissions total, a proportional bias of this kind would change our total fused emissions by only `r scales::percent(s1_share_end)` as much: a `r scales::percent(sensitivity_bias)` bias in either direction would change our `r analysis_end_year` total by about `r scales::percent(sensitivity_bias * s1_share_end, accuracy = 0.1)`, and our `r analysis_start_year`--`r analysis_end_year` growth by at most `r round(fused_growth_bias_shift_pp, 1)` percentage points (to between `r scales::percent(min(fused_growth_bias))` and `r scales::percent(max(fused_growth_bias))`, against our estimate of `r scales::percent(fused_growth_base)`).
+
+- For our AIS-based results, `r scales::percent(growth_small_share)` of the `r analysis_start_year`--`r analysis_end_year` increase comes from vessels under `r growth_length_edges[1]` m, led by small passenger vessels (`r scales::percent(growth_small_passenger_share)` of the increase) and small fishing vessels (`r scales::percent(growth_small_fishing_share)`), segments that our inventory uniquely captures compared to other inventories and that have grown fastest in both number of vessels and emissions. Most of the rest (`r scales::percent(growth_large_share)`) comes from vessels of `r growth_length_edges[2]` m and over, nearly all of them cargo vessels and tankers.
+
+
+## Methods
+
+- The time between pings is typically small (the mean value is `r round(ping_level_hours_distribution$mean_hours, 3)` hours and the median value is `r round(ping_level_hours_distribution$median_hours, 3)` hours, or about `r round(ping_level_hours_distribution$mean_hours*60)` minutes and `r round(ping_level_hours_distribution$median_hours*60)` minutes respectively), while the maximum value for this across our dataset is `r round(ping_level_hours_distribution$max_hours)` hours (meaning this is the most amount of time over which we will estimate emissions for a single message).
+
+- In all, we analyze AIS data for over `r scales::comma(signif(n_unique_vessels$n_unique_vessels,3))` AIS-broadcasting vessels, across  `r scales::comma(signif(n_ais_messages$n_billion_ais_messages, 3))`  billion individual timestamped AIS messages which are assigned to `r signif((trip_co2_emissions_by_from_to_countries |> dplyr::filter(from_country_iso3!=to_country_iso3) |> dplyr::pull(n_unique_trips) |> sum())/1e6,3)` million international trips, `r signif((trip_co2_emissions_by_from_to_countries |> dplyr::filter(from_country_iso3==to_country_iso3) |> dplyr::pull(n_unique_trips) |> sum())/1e6,3)` million domestic trips, and `r signif((port_visit_co2_emissions_by_country |> dplyr::pull(n_unique_port_vists) |> sum())/1e6,3)` million port visits that occurred between `r analysis_start_year` and `r analysis_end_year`.
+
+- For a validation sample of `r prettyNum(nrow(registered_validation_data), big.mark = ",")` vessels, updating vessel metadata with our random forest models substantially improves main engine model performance: traditional R$^{2}$ rises from `r r2_labels |> dplyr::filter(Model == "IMO report lookup table") |> dplyr::pull(.estimate) |> round(2)` using main engine power and design speed from the IMO lookup table, to `r r2_labels |> dplyr::filter(stringr::str_detect(Model, "ML-derived")) |> dplyr::pull(.estimate) |> round(2)` using our random forest predictions, approaching the performance ceiling of `r r2_labels |> dplyr::filter(Model == "Registered data") |> dplyr::pull(.estimate) |> round(2)` achieved with the metadata recorded in the registered dataset.
+
+- Validating against the EU MRV database, performance peaks at a traditional R$^{2}$ of `r signif(best_performance$rsq_trad, 2)` for vessels whose times at sea in our dataset are within `r scales::percent(best_performance$threshold)` of the MRV-reported values (validation sample of `r prettyNum(best_performance$n_observations, big.mark = ",")` vessel-year observations). Beyond this threshold, performance declines as discrepancies grow between our annual aggregated trip activity and that recorded in the MRV dataset.
+
+- As a result, we used a dataset containing `r signif(n_s1_detections$n_million_s1_detections,3)` million vessel detections from `r analysis_start_year` to `r analysis_end_year`, of which `r signif(n_s1_detections$n_million_s1_detections_unmatched,3)` million detections were not matched to a broadcasting vessel ('unmatched'). These detections come from across more than `r prettyNum(floor(n_s1_detections$n_thousand_s1_scenes)*1000,big.mark = ",")` individual S1 scenes.
+
+- Double counting between the two estimates. The detection-AIS matching considers AIS positions up to 12 hours either side of a detection, but a hold-out experiment by GFW (detections with high-confidence matches as ground truth, AIS positions withheld within a window of the detection) shows that the probability of missing a true match rises gradually with the length of the gap in a vessel's AIS messages rather than switching on at 12 hours: `r scales::percent(miss_rate_points$s1_detection_matching_miss_rate[miss_rate_points$ais_message_gap_duration_hours == 2], accuracy = 0.1)` of true matches are missed at a 2-hour gap, `r scales::percent(miss_rate_points$s1_detection_matching_miss_rate[miss_rate_points$ais_message_gap_duration_hours == 8], accuracy = 0.1)` at 8 hours and `r scales::percent(miss_rate_points$s1_detection_matching_miss_rate[miss_rate_points$ais_message_gap_duration_hours == 18], accuracy = 0.1)` at 18 hours. Weighting the share of AIS-based CO$_2$ emitted in gaps of each length by that miss rate, `r scales::percent(exposed_share[["rise"]], accuracy = 0.1)` of AIS-based CO$_2$ (`r scales::percent(exposed_share[["hold"]], accuracy = 0.1)` if the miss rate is held at its 18-hour value beyond the last simulated gap) is emitted while the vessel, had it been imaged, would have been classed as unmatched. This implies that `r sprintf("%.2f", misclassified_million[["rise"]])` million of the `r signif(n_s1_detections$n_million_s1_detections_unmatched, 3)` million unmatched detections (`r scales::percent(misclassified_share_of_unmatched[["rise"]], accuracy = 0.1)`) are AIS-broadcasting vessels, and hence that about `r scales::percent(misclassified_share_of_unmatched[["rise"]], accuracy = 0.1)` of S1-unmatched CO$_2$ (`r scales::comma(duplicated_dark_mt[["rise"]], accuracy = 1)` million tonnes over `r analysis_start_year`-`r analysis_end_year`, or `r scales::percent(duplicated_share_of_fused[["rise"]], accuracy = 0.1)` of the combined AIS-based + S1-unmatched total) duplicates emissions already counted in the AIS-based estimate. Because the same misclassified detections are also missing from the matched densities the emissions regression is trained on, the fitted emissions per detection are high by a factor of `r sprintf("%.3f", 1 / (1 - exposed_share[["rise"]]))`; folding that in gives an upper end of `r scales::percent(dark_overstatement[["rise"]], accuracy = 0.1)` of S1-unmatched CO$_2$ (`r scales::percent(overstated_share_of_fused[["rise"]], accuracy = 0.1)` of the combined total). This replaces the earlier reasoning that only messages representing more than 12 hours could be affected, which happened to give a similar number (`r scales::percent(1 - emissions_by_message_hour_threshold$fraction_of_total[dplyr::near(emissions_by_message_hour_threshold$threshold_hours, 12)], accuracy = 0.1)`) for the wrong reason: most of the exposure comes from gaps of 2 to 18 hours (Fig. \ref{fig:fig-s1-matching-double-counting}, Table \ref{tab:s1_matching_double_counting_by_gap}, Table \ref{tab:s1_matching_double_counting_summary}).
+
+- We were able to use this direct estimation approach for `r dark_emissions_by_area |> dplyr::filter(inside_footprint,s1_imaged) |> dplyr::pull(percent_total)` of the total estimated S1-unmatched CO$_2$ emissions.
+
+- Of the total predicted S1-unmatched CO$_2$ emissions, `r  dark_emissions_by_area |> dplyr::filter(inside_footprint,!s1_imaged) |> dplyr::pull(percent_total)` corresponded to indirect estimations within the S1 footprint, while only  `r  dark_emissions_by_area |> dplyr::filter(!inside_footprint,!s1_imaged) |> dplyr::pull(percent_total)` occurred entirely outside the footprint
+
+
+## Supplementary Information
+
+- Restricting the comparison to vessels explicitly modeled from observed AIS activity, we model `r scales::comma(n_unique_vessels_activity_window$n_unique_vessels)` unique vessels over `r ais_activity_first_year`--`r analysis_end_year` (a wider window, and so a larger fleet, than the `r scales::comma(n_unique_vessels$n_unique_vessels)` vessels emitting during the `r analysis_start_year`--`r analysis_end_year` study period used elsewhere in this paper), an average of `r scales::comma(mean(ais_activity_by_year$n_unique_vessels))` vessels per year, rising from `r scales::comma(ais_activity_in(ais_activity_first_year, "n_unique_vessels"))` in `r ais_activity_first_year` to `r scales::comma(ais_activity_in(analysis_end_year, "n_unique_vessels"))` in `r analysis_end_year`.
+
+- Our `r ais_activity_first_year` dataset holds approximately `r signif(ais_activity_in(ais_activity_first_year, "n_pings") / 1e9, 2)` billion AIS positions after data cleaning. Our own message volume increases to approximately `r round(ais_activity_in(analysis_end_year, "n_pings") / 1e9, 1)` billion positions by `r analysis_end_year`, totaling approximately `r round(sum(ais_activity_by_year$n_pings) / 1e9)` billion positions over the study period (an average of `r round(mean(ais_activity_by_year$n_pings) / 1e9, 1)` billion per year).
+
+- In our inventory, registry-matched vessels likewise produced `r scales::percent(registry_stat(analysis_start_year, TRUE, "share_emissions"))` of AIS-based CO$_{2}$ in `r analysis_start_year` while making up `r scales::percent(registry_stat(analysis_start_year, TRUE, "share_vessels"))` of broadcasting vessels.
+
+- Of the `r round(growth_small_service_passenger$emissions_change)` million tonne increase from service and passenger vessels under `r growth_length_edges[1]` m, `r round(growth_small_service_passenger$from_vessels)` million tonnes came from the change in vessel count.
+
+- AIS positions received increased `r sprintf("%.2f", ais_activity_growth("n_pings"))`-fold (more than doubled) between `r dais_baseline_year` and `r analysis_end_year` while observed distance traveled and AIS-based emissions rose together by only `r scales::percent(ais_activity_growth("distance_travelled_nm") - 1)` and `r scales::percent(ais_activity_growth("emissions_co2_mt") - 1)`, respectively.
+
+- The exception is small fishing vessels: their distance per vessel rose `r scales::percent(growth_small_fishing_distance_change)` between `r analysis_start_year` and `r analysis_end_year`, accounting for `r round(growth_small_fishing$from_distance_per_vessel)` of their `r round(growth_small_fishing$emissions_change)` million tonne increase.
 
 
 # Results
