@@ -23,9 +23,3 @@ Mean ocean depth,mean_elevation_m,Geographic features ,Yes,Yes,Yes,m,Numeric,Ye
 Mean distance from shore,mean_distance_from_shore_m,Geographic features ,Yes,Yes,Yes,m,Numeric,Yes,No,GFW,\cite{kroodsma2018tracking}
 Mean distance from nearest port,mean_distance_from_port_m,Geographic features ,Yes,Yes,Yes,m,Numeric,Yes,No,GFW,\cite{kroodsma2018tracking}
 Minimum distance to top 20 port,distance_to_top_port_m,Geographic features ,Yes,Yes,Yes,m,Numeric,Yes,No,Lloyd’s List,\cite{LloydsListTopPorts2024}
-Mean wind speed,wind_speed_mean,Weather features,No,Yes,No,m/s,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
-Mean significant wave and swell height,wave_height_mean,Weather features,No,Yes,No,m,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
-Mean wave period,wave_period_mean,Weather features,No,Yes,No,s,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
-Mean sea surface temperature,sst_mean,Weather features,No,Yes,No,K,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
-Mean sea level pressure,mean_sea_level_pressure,Weather features,No,Yes,No,Pa,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
-Total precipitation,total_precipitation,Weather features,No,Yes,No,m,Numeric,Yes,Yes,ERA5,\cite{era5cds2023}
