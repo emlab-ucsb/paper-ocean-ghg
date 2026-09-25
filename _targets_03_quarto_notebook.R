@@ -33,6 +33,13 @@ list(
     command = file.path("data", "gfw", "fraction_vessels_emissions_by_registry_info.csv"),
     read = readr::read_csv(!!.x)
   ),
+  # The same split by vessel class, for the class composition of the vessels
+  # that could not be matched to any registry
+  tar_file_read(
+    name = vessels_emissions_by_registry_info_and_class,
+    command = file.path("data", "gfw", "vessels_emissions_by_registry_info_and_class.csv"),
+    read = readr::read_csv(!!.x)
+  ),
   tar_file_read(
     name = ping_level_hours_distribution,
     command = file.path("data", "gfw", "ping_level_hours_distribution.csv"),

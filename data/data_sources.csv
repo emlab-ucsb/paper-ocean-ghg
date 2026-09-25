@@ -15,7 +15,7 @@ Positions reported by AIS type B,ais_reception_positions_per_day_class_B,AIS rec
 "Proportion of messages, terrestrial AIS receivers",terrestrial_receiver_prop,AIS reception quality,Yes,Yes,Yes,-,Numeric,Yes,Yes,GFW,\cite{kroodsma2018tracking}
 "Proportion of messages, satellite AIS receivers",satellite_receiver_prop,AIS reception quality,Yes,Yes,Yes,-,Numeric,Yes,Yes,GFW,\cite{kroodsma2018tracking}
 Month of year,month,Temporal features,Yes,Yes,Yes,-,Factor,No,Yes,GFW,-
-Post-2020 IMO Sulphur policy,post_2020,Temporal features,No,No,Yes,-,Boolean,No,Yes,IMO,\cite{imo_sulphur_2020}
+Post-2020 IMO sulfur policy,post_2020,Temporal features,No,No,Yes,-,Boolean,No,Yes,IMO,\cite{imo_sulphur_2020}
 Ocean basin,ocean,Geographic features ,Yes,Yes,Yes,-,Factor,Yes,No,GFW,\cite{kroodsma2018tracking}
 Pixel water area,pixel_water_area_km2,Geographic features ,Yes,Yes,Yes,km2,Numeric,Yes,No,GFW,\cite{paolo2024satellite}
 Pixel water fraction,water_fraction,Geographic features ,No,No,Yes,-,Numeric,Yes,No,GFW,\cite{paolo2024satellite}

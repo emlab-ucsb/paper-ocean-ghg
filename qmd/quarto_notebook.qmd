@@ -87,6 +87,7 @@ targets::tar_load(
     "n_unique_vessels_activity_window",
     "n_ais_messages",
     "fraction_vessels_emissions_by_registry_info",
+    "vessels_emissions_by_registry_info_and_class",
     "n_s1_detections",
     "annual_edgar_emissions",
     "oecd_data",
@@ -152,19 +153,21 @@ pollutant_factor_levels <- c(
   "CH[4]",
   "N[2]*O",
   "CO",
-  "NO[X]",
-  "SO[X]",
+  "NO[x]",
+  "SO[x]",
   "PM[2.5]",
   "PM[10]",
   "VOCs"
 )
 
 # Set pollutant levels for tables
-# For tables, we don't use expressions
+# For tables, we don't use expressions. The table code upper-cases the pollutant
+# names it reads from the data, so NOx and SOx have to stay NOX and SOX here.
 pollutant_factor_levels_tables <- pollutant_factor_levels |>
   stringr::str_remove_all("\\[") |>
   stringr::str_remove_all("\\]") |>
-  stringr::str_remove_all("\\*]*")
+  stringr::str_remove_all("\\*]*") |>
+  stringr::str_replace("^(NO|SO)x$", "\\1X")
 
 # Use Okabe-Ito colorblind-friendly colors
 all_data_source_color_palette <- c(
@@ -1852,7 +1855,7 @@ growth_small_emissions_share <- function(which_period) {
 - For over  `r scales::comma(signif(n_unique_vessels$n_unique_vessels,3))` AIS-broadcasting vessels, we quantify emissions for
 each vessel using precise latitude/longitude/timestamp information for over `r scales::comma(floor(n_ais_messages$n_billion_ais_messages))` billion individual AIS messages.
 
-- To account for the vast missing emissions from non-broadcasting vessels (also sometimes known as 'dark vessels'), we develop a machine learning framework that leverages `r signif(n_s1_detections$n_million_s1_detections,3)` million vessel detections from across  more than `r prettyNum(floor(n_s1_detections$n_thousand_s1_scenes)*1000,big.mark = ",")` S1 scenes to estimate S1-unmatched emissions at a monthly global 1x1-degree gridded resolution, from `r analysis_start_year` through `r analysis_end_year`, and disaggregated by vessel type (fishing or non-fishing).
+- To account for missing emissions from non-broadcasting vessels (also sometimes known as 'dark vessels'), we develop a machine learning framework that leverages `r signif(n_s1_detections$n_million_s1_detections,3)` million vessel detections from across  more than `r prettyNum(floor(n_s1_detections$n_thousand_s1_scenes)*1000,big.mark = ",")` S1 scenes to estimate S1-unmatched emissions at a monthly global 1x1-degree gridded resolution, from `r analysis_start_year` through `r analysis_end_year`, and disaggregated by vessel type (fishing or non-fishing).
 
 ## Results
 
@@ -1955,6 +1958,96 @@ may be more susceptible to AIS adoption biases.
 - AIS positions received increased `r sprintf("%.2f", ais_activity_growth("n_pings"))`-fold (more than doubled) between `r dais_baseline_year` and `r analysis_end_year` while observed distance traveled and AIS-based emissions rose together by only `r scales::percent(ais_activity_growth("distance_travelled_nm") - 1)` and `r scales::percent(ais_activity_growth("emissions_co2_mt") - 1)`, respectively.
 
 - The exception is small fishing vessels: their distance per vessel rose `r scales::percent(growth_small_fishing_distance_change)` between `r analysis_start_year` and `r analysis_end_year`, accounting for `r round(growth_small_fishing$from_distance_per_vessel)` of their `r round(growth_small_fishing$emissions_change)` million tonne increase.
+
+
+## Response to reviewers
+
+```{r}
+#| label: inline-response-statistics
+# Numbers cited only in the response to reviewers, computed here like every
+# number in the manuscript
+
+# R2.1: how a proportional bias in the emissions assigned to unmatched
+# detections would move the fused total and its growth
+sensitivity_bias <- 0.2
+co2_fleet_totals <- total_percent_change_by_fleet |>
+  dplyr::filter(pollutant == "co2", fleet %in% c("AIS-based", "S1-unmatched"))
+co2_fleet_total <- function(fleet_name, year_col) {
+  co2_fleet_totals[[year_col]][co2_fleet_totals$fleet == fleet_name]
+}
+s1_share_end <- co2_fleet_total("S1-unmatched", end_col) /
+  (co2_fleet_total("AIS-based", end_col) +
+    co2_fleet_total("S1-unmatched", end_col))
+# Fused growth over the study period with S1-unmatched emissions scaled by the
+# same factor in both years
+fused_growth_scaled <- function(scale) {
+  (co2_fleet_total("AIS-based", end_col) +
+    scale * co2_fleet_total("S1-unmatched", end_col)) /
+    (co2_fleet_total("AIS-based", start_col) +
+      scale * co2_fleet_total("S1-unmatched", start_col)) -
+    1
+}
+fused_growth_base <- fused_growth_scaled(1)
+fused_growth_bias <- fused_growth_scaled(1 + c(-1, 1) * sensitivity_bias)
+fused_growth_bias_shift_pp <- max(abs(fused_growth_bias - fused_growth_base)) * 100
+
+# R3.2: registry matching of the analysis fleet, and the vessel class
+# composition of the vessels not matched to any registry
+registry_count <- function(type) {
+  fraction_vessels_emissions_by_registry_info$n_unique_vessels[
+    fraction_vessels_emissions_by_registry_info$registry_type == type
+  ]
+}
+n_registry_fleet <- sum(fraction_vessels_emissions_by_registry_info$n_unique_vessels)
+n_registry_matched <- registry_count("imo") + registry_count("other_registry")
+no_registry_classes <- vessels_emissions_by_registry_info_and_class |>
+  dplyr::filter(registry_type == "no_registry")
+# The class extract has to add up to the registry extract it splits
+stopifnot(
+  sum(no_registry_classes$n_unique_vessels) == registry_count("no_registry")
+)
+no_registry_share <- function(classes) {
+  sum(no_registry_classes$n_unique_vessels[
+    no_registry_classes$vessel_class %in% classes
+  ]) /
+    sum(no_registry_classes$n_unique_vessels)
+}
+
+# R3.10: year-on-year changes in the S1 match rate and in the two estimates
+s1_by_year <- s1_time_series |>
+  dplyr::mutate(year = lubridate::year(month)) |>
+  dplyr::group_by(year) |>
+  dplyr::summarize(
+    s1_scenes = sum(s1_scenes),
+    n_s1_detections = sum(n_s1_detections),
+    n_s1_detections_unmatched = sum(n_s1_detections_unmatched)
+  ) |>
+  dplyr::mutate(
+    unmatched_fraction = n_s1_detections_unmatched / n_s1_detections
+  )
+s1_year <- function(year_value, column) {
+  s1_by_year[[column]][s1_by_year$year == year_value]
+}
+s1_change <- function(from, to, column) {
+  s1_year(to, column) / s1_year(from, column) - 1
+}
+co2_year <- function(year_value, fleet_name) {
+  annual_emissions$emissions_mt[
+    annual_emissions$year == year_value &
+      annual_emissions$fleet == fleet_name &
+      annual_emissions$pollutant == "co2"
+  ]
+}
+co2_change <- function(from, to, fleet_name) {
+  co2_year(to, fleet_name) / co2_year(from, fleet_name) - 1
+}
+```
+
+- R2.1: Because S1-unmatched emissions make up `r scales::percent(s1_share_end)` of our `r analysis_end_year` total, a proportional bias in the emissions we assign to unmatched detections would change our total by only `r scales::percent(s1_share_end)` as much: a `r scales::percent(sensitivity_bias)` bias in either direction would change our `r analysis_end_year` total by about `r scales::percent(sensitivity_bias * s1_share_end, accuracy = 0.1)`, and our `r analysis_start_year`--`r analysis_end_year` growth by at most `r round(fused_growth_bias_shift_pp, 1)` percentage points (to between `r scales::percent(min(fused_growth_bias))` and `r scales::percent(max(fused_growth_bias))`, against our estimate of `r scales::percent(fused_growth_base)`).
+
+- R3.2: Of the `r scales::comma(n_registry_fleet)` AIS-broadcasting vessels in the current analysis, `r scales::comma(registry_count("imo"))` (`r scales::percent(registry_count("imo") / n_registry_fleet, accuracy = 0.1)`) are matched to the IMO's GISIS, a further `r scales::comma(registry_count("other_registry"))` (`r scales::percent(registry_count("other_registry") / n_registry_fleet, accuracy = 0.1)`) appear in at least one other registry, and therefore `r scales::comma(n_registry_matched)` (`r scales::percent(n_registry_matched / n_registry_fleet)`) are matched in total. The `r scales::comma(registry_count("no_registry"))` vessels that we could not match to any of our included vessel registries are concentrated in several specific vessel class types: `r scales::percent(no_registry_share("passenger"))` are passenger craft, `r scales::percent(no_registry_share(fishing_vessel_classes()))` are fishing vessels, and `r scales::percent(no_registry_share("tug"))` are tugs.
+
+- R3.10: The fraction of S1 detections unmatched with AIS-broadcasting vessels changed little from 2017 to 2019 (`r scales::percent(s1_year(2017, "unmatched_fraction"))` and `r scales::percent(s1_year(2019, "unmatched_fraction"))`), and then decreased steadily from 2020 through 2024, from about `r scales::percent(s1_year(2019, "unmatched_fraction"))` to `r scales::percent(s1_year(2024, "unmatched_fraction"))`. From 2022 to 2023 the matched fraction of detections rose by `r scales::percent((1 - s1_year(2023, "unmatched_fraction")) / (1 - s1_year(2022, "unmatched_fraction")) - 1, accuracy = 0.1)` (from `r scales::percent(1 - s1_year(2022, "unmatched_fraction"), accuracy = 0.1)` to `r scales::percent(1 - s1_year(2023, "unmatched_fraction"), accuracy = 0.1)`), while our fused total emissions rose by `r scales::percent(co2_change(2022, 2023, "Total"), accuracy = 0.1)` and S1-unmatched emissions fell by `r scales::percent(-co2_change(2022, 2023, "Non-broadcasting"), accuracy = 0.1)`. From 2021 to 2022, with the loss of Sentinel-1B, the number of S1 scenes fell by `r scales::percent(-s1_change(2021, 2022, "s1_scenes"))` and vessel detections by `r scales::percent(-s1_change(2021, 2022, "n_s1_detections"))`, while S1-unmatched emissions changed by `r scales::percent(co2_change(2021, 2022, "Non-broadcasting"), accuracy = 0.1)`.
 
 
 # Results
@@ -3460,8 +3553,8 @@ ggplot(
   coord_fixed(ratio = 1, clip = "on") +
   facet_wrap(Model ~ ., nrow = 1, scales = "fixed") +
   labs(
-    x = "Registered CO2 emissions (MT)",
-    y = "Estimated CO2 emissions using our model (MT)"
+    x = expression("Registered" ~ CO[2] ~ "emissions (MT)"),
+    y = expression("Estimated" ~ CO[2] ~ "emissions using our model (MT)")
   ) +
   scale_x_continuous(limits = c(0, 600)) +
   scale_y_continuous(limits = c(0, 600)) +
@@ -3551,7 +3644,7 @@ ggplot(
   scale_y_continuous(limits = c(0, max(filtered_df)), labels = scales::comma) +
   labs(
     x = "Published emissions in the EU MRV database (MT)",
-    y = "Estimated CO2 emissions using our model (MT)"
+    y = expression("Estimated" ~ CO[2] ~ "emissions using our model (MT)")
   ) +
   theme_minimal() +
   theme(
@@ -3750,9 +3843,11 @@ writeLines(
 
 ```{r}
 #| label: fig-s1-coverage-time-series
-#| fig-cap: Monthly statistics of global S1 coverage including total number of S1 scenes, total imaged area summed across all S1 scenes (which counts each revisit to a given area separately), total number of vessel detections, total number of vessel detections that could not be matched to an AIS-broadcasting vessels, and fraction of the total number of vessel detections that could not be matched to an AIS-broadcasting vessels.
+#| fig-cap: "Monthly statistics of global S1 coverage: (a) total number of S1 scenes; (b) total imaged area summed across all S1 scenes (which counts each revisit to a given area separately); (c) total number of vessel detections; (d) total number of vessel detections that could not be matched to an AIS-broadcasting vessel; and (e) fraction of vessel detections that could not be matched to an AIS-broadcasting vessel."
 #| fig-width: 7.5
 #| fig-height: 8
+# The panel letters are part of the facet labels, so each panel carries its
+# letter at the top left like the other multi-panel figures
 s1_time_series |>
   dplyr::mutate(
     month = lubridate::ymd(month),
@@ -3762,19 +3857,19 @@ s1_time_series |>
   tidyr::pivot_longer(-month) |>
   dplyr::mutate(
     name = dplyr::case_when(
+      name == "s1_scenes" ~ "a  Number of S1 scenes",
+      name == "s1_scene_area_km2" ~ "b  Summed footprint area of S1 scenes (km²)",
+      name == "n_s1_detections" ~ "c  Number vessel detections",
       name ==
-        "fraction_detections_unmatched" ~ "Fraction vessel detections unmatched",
-      name == "n_s1_detections" ~ "Number vessel detections",
+        "n_s1_detections_unmatched" ~ "d  Number vessel detections unmatched",
       name ==
-        "n_s1_detections_unmatched" ~ "Number vessel detections unmatched",
-      name == "s1_scene_area_km2" ~ "Summed footprint area of S1 scenes (km^2)",
-      name == "s1_scenes" ~ "Number of S1 scenes"
+        "fraction_detections_unmatched" ~ "e  Fraction vessel detections unmatched"
     ) |>
       forcats::fct_relevel(c(
-        "Number of S1 scenes",
-        "Summed footprint area of S1 scenes (km^2)",
-        "Number vessel detections",
-        "Number vessel detections unmatched"
+        "a  Number of S1 scenes",
+        "b  Summed footprint area of S1 scenes (km²)",
+        "c  Number vessel detections",
+        "d  Number vessel detections unmatched"
       ))
   ) |>
   ggplot(aes(x = month, y = value)) +
@@ -3791,6 +3886,8 @@ s1_time_series |>
     labels = seq(analysis_start_year, analysis_end_year + 1)
   ) +
   theme_plot() +
+  # After theme_plot(), which is a complete theme and would reset it
+  theme(strip.text.x = element_text(hjust = 0)) +
   labs(x = "", y = "")
 ```
 
@@ -3895,7 +3992,14 @@ performance_detections_cls_conf_mat |>
   dplyr::mutate(
     test = stringr::str_replace_all(test, "_", " ") |> stringr::str_to_sentence()
   ) |>
-  dplyr::mutate(prediction = forcats::fct_rev(as.factor(prediction))) |>
+  # TRUE and FALSE are the presence and absence of unmatched detections
+  dplyr::mutate(
+    dplyr::across(
+      c(truth, prediction),
+      ~ factor(.x, levels = c(FALSE, TRUE), labels = c("Absent", "Present"))
+    ),
+    prediction = forcats::fct_rev(prediction)
+  ) |>
   ggplot(aes(x = truth, y = prediction)) +
   geom_tile(aes(fill = count), color = "black") +
   geom_label(aes(label = prettyNum(count, big.mark = ",")), vjust = 1) +
@@ -4026,7 +4130,7 @@ lm_other_gases_tidy_fit_stats_tbl <- lm_other_gases_tidy_fit_stats |>
   ) |>
   knitr::kable(
     format = "latex",
-    caption = "Linear regression fit statistics for the final models trained to estimate emissions of non-CO$_2$ gases from CO$_2$ emissions. The model for each gas is a zero-intercept linear regression with 5 terms: CO$_2$ emissions interacted with each combination of period (pre/post-2020 IMO sulphur policy) and vessel type (fishing/non-fishing), plus CO$_2$ emissions interacted with the log of mean distance from shore.",
+    caption = "Linear regression fit statistics for the final models trained to estimate emissions of non-CO$_2$ gases from CO$_2$ emissions. The model for each gas is a zero-intercept linear regression with 5 terms: CO$_2$ emissions interacted with each combination of period (pre/post-2020 IMO sulfur policy) and vessel type (fishing/non-fishing), plus CO$_2$ emissions interacted with the log of mean distance from shore.",
     label = "lm_other_gases_tidy_fit_stats",
     digits = 3,
     escape = FALSE
@@ -4049,7 +4153,7 @@ writeLines(
 
 ```{r}
 #| label: fig-feature-importance
-#| fig-cap: Feature importance plots for the 1) detections (presence/absence) classification model; 2) detections regression model; and 3) CO$_2$ emissions regression model.
+#| fig-cap: Feature importance for (a) the detections (presence/absence) classification model, (b) the detections regression model, and (c) the CO$_2$ emissions regression model.
 #| fig-height: 10.5
 #| fig-width: 7.5
 
@@ -4065,7 +4169,7 @@ all_varimp_data |>
         model_feature,
         "length_size_bin_"
       ) ~ glue::glue(
-        "S1 detections per km2 (length bin {stringr::str_remove(model_feature, 'length_size_bin_')})"
+        "S1 detections per km² (length bin {stringr::str_remove(model_feature, 'length_size_bin_')})"
       ),
       TRUE ~ model_feature_long
     )
@@ -4084,16 +4188,19 @@ all_varimp_data |>
     model = stringr::str_replace_all(model, "_", " ") |>
       stringr::str_to_sentence()
   ) |>
+  # The facet labels carry the panel letters and the CO2 subscript, and are
+  # parsed as plotmath, so ~ stands for a space. Parsed labels ignore the theme's
+  # bold face, hence bold()
   dplyr::mutate(
-    model = ifelse(
-      model == "Emissions regression",
-      "CO2 emissions regression",
-      model
+    model = dplyr::case_when(
+      model == "Detections classification" ~ "bold(a~~Detections~classification)",
+      model == "Detections regression" ~ "bold(b~~Detections~regression)",
+      model == "Emissions regression" ~ "bold(c~~CO[2]~emissions~regression)"
     ) |>
       forcats::fct_relevel(
-        "Detections classification",
-        "Detections regression",
-        "CO2 emissions regression"
+        "bold(a~~Detections~classification)",
+        "bold(b~~Detections~regression)",
+        "bold(c~~CO[2]~emissions~regression)"
       )
   ) |>
   ggplot(aes(
@@ -4107,7 +4214,8 @@ all_varimp_data |>
   ) +
   theme_plot() +
   tidytext::scale_y_reordered() +
-  facet_wrap(model ~ ., ncol = 1, scales = "free")
+  facet_wrap(model ~ ., ncol = 1, scales = "free", labeller = label_parsed) +
+  theme(strip.text.x = element_text(hjust = 0))
 ```
 
 ## Figure 18
@@ -4170,7 +4278,11 @@ total_spatial_co2_emissions_dark_by_footprint |>
   ) +
   theme_void() +
   facet_wrap(~facet_label, ncol = 1) +
-  theme(legend.position = "none")
+  # theme_void() leaves the strip text no margin, which clips descenders
+  theme(
+    legend.position = "none",
+    strip.text = element_text(margin = margin(t = 4, b = 4))
+  )
 ```
 
 # Supplementary materials: Supplementary figures
@@ -4593,8 +4705,8 @@ pollutant_map_data_all <- total_spatial_emissions_by_pollutant_formatted |>
       pollutant == "CH4" ~ "CH[4]",
       pollutant == "PM2.5" ~ "PM[2.5]",
       pollutant == "PM10" ~ "PM[10]",
-      pollutant == "SOX" ~ "SO[X]",
-      pollutant == "NOX" ~ "NO[X]",
+      pollutant == "SOX" ~ "SO[x]",
+      pollutant == "NOX" ~ "NO[x]",
       TRUE ~ pollutant
     )
   ) |>
@@ -4739,8 +4851,8 @@ pollutant_time_series_data_all <- total_monthly_emissions_by_pollutant |>
       pollutant == "CH4" ~ "CH[4]",
       pollutant == "PM2.5" ~ "PM[2.5]",
       pollutant == "PM10" ~ "PM[10]",
-      pollutant == "SOX" ~ "SO[X]",
-      pollutant == "NOX" ~ "NO[X]",
+      pollutant == "SOX" ~ "SO[x]",
+      pollutant == "NOX" ~ "NO[x]",
       TRUE ~ pollutant
     )
   ) |>
@@ -5499,7 +5611,7 @@ all_inventory_data_kable |>
 
 ```{r}
 #| label: fig-annual-emissions-by-ais-receiver-type
-#| fig-cap: Annual total CO$_{2}$ emissions (metric tonnes) by AIS-broadcasting vessels, AIS pings (i.e., individual vessel timestamped location messages), and number of unique AIS-broadcasting vessels. Trends are disaggregated by AIS receiver type (satellite, terrestrial, and dynamic), and also shown as a total aggregated across receiver types. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.
+#| fig-cap: (a) Annual total CO$_{2}$ emissions (metric tonnes) by AIS-broadcasting vessels, (b) AIS pings (i.e., individual vessel timestamped location messages), and (c) number of unique AIS-broadcasting vessels. Trends are disaggregated by AIS receiver type (satellite, terrestrial, and dynamic), and also shown as a total aggregated across receiver types. A dashed vertical line is shown for 2022, the first year in which dynamic AIS was widely adopted.
 #| fig-width: 7.5
 #| fig-height: 7
 annual_global_emissions_by_receiver_type <- annual_global_emissions_by_receiver_type |>
@@ -5514,11 +5626,13 @@ annual_global_emissions_by_receiver_type <- annual_global_emissions_by_receiver_
   dplyr::mutate(receiver_type = stringr::str_to_sentence(receiver_type)) |>
   dplyr::filter(year <= analysis_end_year)
 
+# The facet labels carry the panel letters, in bold like the other figures'
+# panel letters, and the letters also fix the panel order
 annual_global_emissions_by_receiver_type |>
   dplyr::rename(
-    `CO[2]~emissions~(MT)` = emissions_co2_mt,
-    `Number~unique~vessels` = n_distinct_ssvid,
-    `Number~AIS~messages` = number_pings,
+    `bold(a)~~CO[2]~emissions~(MT)` = emissions_co2_mt,
+    `bold(b)~~Number~AIS~messages` = number_pings,
+    `bold(c)~~Number~unique~vessels` = n_distinct_ssvid,
   ) |>
   tidyr::pivot_longer(cols = -c(year, receiver_type)) |>
   ggplot(aes(x = year, y = value, color = receiver_type)) +
@@ -5539,7 +5653,10 @@ annual_global_emissions_by_receiver_type |>
   ) +
   theme_plot() +
   labs(x = "", y = "", color = "AIS receiver type") +
-  theme(panel.grid.minor.x = element_blank()) +
+  theme(
+    panel.grid.minor.x = element_blank(),
+    strip.text.x = element_text(hjust = 0)
+  ) +
   geom_vline(xintercept = 2022, linetype = 2)
 ```
 
@@ -6156,7 +6273,7 @@ plot_fleet_sankey <- function(
     "Cargo: container" = "Container",
     "Tanker: chemical" = "Chemical",
     "Cargo: ro ro" = "Ro ro cargo",
-    "Tanker: liquefied gas" = "Liquified gas"
+    "Tanker: liquefied gas" = "Liquefied gas"
   ),
   # Below this a band gets no printed share or name: the slab is thinner than
   # the text would be.
@@ -6799,7 +6916,7 @@ plot_fleet_sankey_with_series <- function(
     "share_emissions",
     "emissions_co2_mt",
     function(x) paste0(round(x / 1e6), " Mt"),
-    expression("AIS-broadcasting" ~ CO[2] ~ "emissions"),
+    expression("AIS-based" ~ CO[2] ~ "emissions"),
     show_years = TRUE
   )
 

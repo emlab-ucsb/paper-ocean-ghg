@@ -94,6 +94,23 @@ list(
     ),
     format = "file"
   ),
+  # The same summary split by vessel class, for the class composition of the
+  # vessels that could not be matched to any registry
+  tar_file_read(
+    name = vessels_emissions_by_registry_info_and_class,
+    command = file.path("sql", "vessels_emissions_by_registry_info_and_class.sql"),
+    read = download_gfw_data(
+      bq_billing_project,
+      sql = readr::read_file(!!.x) |>
+        stringr::str_glue(
+          run_version_ais = run_version_ais,
+          analysis_start_year = analysis_start_year,
+          analysis_end_year = analysis_end_year
+        ),
+      file_path = file.path("data", "gfw", "vessels_emissions_by_registry_info_and_class.csv"),
+    ),
+    format = "file"
+  ),
   # Distribution of ping-level hours values (min, mean, max, median)
   tar_file_read(
     name = ping_level_hours_distribution,
