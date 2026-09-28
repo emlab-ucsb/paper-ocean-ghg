@@ -1884,10 +1884,14 @@ s1_by_year <- s1_time_series |>
   dplyr::summarize(
     s1_scenes = sum(s1_scenes),
     n_s1_detections = sum(n_s1_detections),
-    n_s1_detections_unmatched = sum(n_s1_detections_unmatched)
+    n_s1_detections_unmatched = sum(n_s1_detections_unmatched),
+    s1_scene_area_km2 = sum(s1_scene_area_km2)
   ) |>
   dplyr::mutate(
-    unmatched_fraction = n_s1_detections_unmatched / n_s1_detections
+    unmatched_fraction = n_s1_detections_unmatched / n_s1_detections,
+    # Detections per km2 of summed scene area, the same effort measure the
+    # emissions models normalize their detection features by
+    detections_per_km2 = n_s1_detections / s1_scene_area_km2
   )
 s1_year <- function(year_value, column) {
   s1_by_year[[column]][s1_by_year$year == year_value]
@@ -1907,6 +1911,37 @@ co2_year <- function(year_value, fleet_name) {
 co2_change <- function(from, to, fleet_name) {
   co2_year(to, fleet_name) / co2_year(from, fleet_name) - 1
 }
+# Largest departure of annual S1-unmatched emissions from the start year, in
+# either direction (Results, and the response to reviewers, R3.10)
+s1_unmatched_max_departure <- max(abs(sapply(
+  analysis_start_year:analysis_end_year,
+  function(year_value) co2_change(analysis_start_year, year_value, "Non-broadcasting")
+)))
+
+# S1-unmatched emissions from October-November to the following
+# January-February, for every winter in the record. The winter spanning the
+# December 2021 Sentinel-1B loss is set against the others, which carry the
+# same seasonal decline (Methods, and the response to reviewers, R3.6)
+s1_unmatched_by_month <- monthly_aggregated_time_series |>
+  dplyr::mutate(year = lubridate::year(time), month = lubridate::month(time)) |>
+  dplyr::group_by(year, month) |>
+  dplyr::summarize(
+    emissions_mt = sum(emissions_co2_dark_mt),
+    .groups = "drop"
+  )
+s1_unmatched_months <- function(year_value, months) {
+  mean(s1_unmatched_by_month$emissions_mt[
+    s1_unmatched_by_month$year == year_value &
+      s1_unmatched_by_month$month %in% months
+  ])
+}
+winter_years <- (analysis_start_year + 1):analysis_end_year
+winter_s1_unmatched_change <- sapply(winter_years, function(year_value) {
+  s1_unmatched_months(year_value, 1:2) /
+    s1_unmatched_months(year_value - 1, 10:11) - 1
+})
+s1b_loss_winter_change <- winter_s1_unmatched_change[winter_years == 2022]
+other_winter_changes <- winter_s1_unmatched_change[winter_years != 2022]
 
 # How a proportional bias in the emissions assigned to unmatched detections
 # would move the fused total and its growth
@@ -1956,7 +1991,9 @@ each vessel using precise latitude/longitude/timestamp information for over `r s
 
 - Thus using only AIS data from broadcasting vessels underestimates the magnitude of 2025 global CO$_{2}$ emissions by  `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(ais_underestimation)`, and overestimates the increasing trend for `r analysis_start_year`--`r analysis_end_year` by `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(trend_overestimation)`
 
-- Response to reviewers (R3.10), on the S1-unmatched share declining since 2021: the fraction of S1 detections unmatched with AIS-broadcasting vessels changed little from 2017 to 2019 (`r scales::percent(s1_year(2017, "unmatched_fraction"))` and `r scales::percent(s1_year(2019, "unmatched_fraction"))`), and then decreased steadily from 2020 through 2024, from about `r scales::percent(s1_year(2019, "unmatched_fraction"))` to `r scales::percent(s1_year(2024, "unmatched_fraction"))`. From 2022 to 2023 the matched fraction of detections rose by `r scales::percent((1 - s1_year(2023, "unmatched_fraction")) / (1 - s1_year(2022, "unmatched_fraction")) - 1, accuracy = 0.1)` (from `r scales::percent(1 - s1_year(2022, "unmatched_fraction"), accuracy = 0.1)` to `r scales::percent(1 - s1_year(2023, "unmatched_fraction"), accuracy = 0.1)`), while our fused total emissions rose by `r scales::percent(co2_change(2022, 2023, "Total"), accuracy = 0.1)` and S1-unmatched emissions fell by `r scales::percent(-co2_change(2022, 2023, "Non-broadcasting"), accuracy = 0.1)`. From 2021 to 2022, with the loss of Sentinel-1B, the number of S1 scenes fell by `r scales::percent(-s1_change(2021, 2022, "s1_scenes"))` and vessel detections by `r scales::percent(-s1_change(2021, 2022, "n_s1_detections"))`, while S1-unmatched emissions changed by `r scales::percent(co2_change(2021, 2022, "Non-broadcasting"), accuracy = 0.1)`.
+- S1-unmatched emissions, in contrast, stayed within `r scales::percent(ceiling(s1_unmatched_max_departure * 100) / 100)` of their `r analysis_start_year` level in every year. This reflects two opposing trends rather than any assumption in our framework: total vessel activity grew, while the fraction of S1 detections that could not be matched to an AIS-broadcasting vessel fell from `r scales::percent(s1_year(analysis_start_year, "unmatched_fraction"))` in `r analysis_start_year` to `r scales::percent(s1_year(analysis_end_year, "unmatched_fraction"))` in `r analysis_end_year` as vessels adopted AIS and AIS reception improved.
+
+- Response to reviewers (R3.10), on the S1-unmatched share declining since 2021: the fraction of S1 detections unmatched with AIS-broadcasting vessels changed little from 2017 to 2019 (`r scales::percent(s1_year(2017, "unmatched_fraction"))` and `r scales::percent(s1_year(2019, "unmatched_fraction"))`), and then decreased steadily from 2020 through 2024, from about `r scales::percent(s1_year(2019, "unmatched_fraction"))` to `r scales::percent(s1_year(2024, "unmatched_fraction"))`. From 2022 to 2023 the unmatched fraction of detections fell by `r scales::percent(-s1_change(2022, 2023, "unmatched_fraction"), accuracy = 0.1)` (from `r scales::percent(s1_year(2022, "unmatched_fraction"), accuracy = 0.1)` to `r scales::percent(s1_year(2023, "unmatched_fraction"), accuracy = 0.1)`, `r round((s1_year(2022, "unmatched_fraction") - s1_year(2023, "unmatched_fraction")) * 100, 1)` percentage points; equivalently the matched fraction rose by `r scales::percent((1 - s1_year(2023, "unmatched_fraction")) / (1 - s1_year(2022, "unmatched_fraction")) - 1, accuracy = 0.1)`, from `r scales::percent(1 - s1_year(2022, "unmatched_fraction"), accuracy = 0.1)` to `r scales::percent(1 - s1_year(2023, "unmatched_fraction"), accuracy = 0.1)`), while our fused total emissions rose by `r scales::percent(co2_change(2022, 2023, "Total"), accuracy = 0.1)` and S1-unmatched emissions fell by `r scales::percent(-co2_change(2022, 2023, "Non-broadcasting"), accuracy = 0.1)`. From 2021 to 2022, with the loss of Sentinel-1B, the number of S1 scenes fell by `r scales::percent(-s1_change(2021, 2022, "s1_scenes"))` and vessel detections by `r scales::percent(-s1_change(2021, 2022, "n_s1_detections"))`, while detections per km$^2$ of imaged area changed by `r scales::percent(s1_change(2021, 2022, "detections_per_km2"), accuracy = 0.1)` and S1-unmatched emissions changed by `r scales::percent(co2_change(2021, 2022, "Non-broadcasting"), accuracy = 0.1)`.
 
 - Expressed as a share of each pixel's total emissions rather than as a magnitude, the pattern is sharper still: the S1-unmatched contribution is concentrated mostly in coastal waters, with particularly high concentrations in southeast Asia, the Caribbean, and the Mediterranean. The major open-ocean shipping lanes, where large AIS-broadcasting vessels dominate, are close to zero. The brightest pixels are not, however, where the emissions are: pixels in which more than half of `r analysis_end_year` CO$_{2}$ is S1-unmatched make up `r dark_share_band_pct("over_50", "share_of_pixels")` of ocean pixels but only `r dark_share_band_pct("over_50", "share_of_emissions")` of emissions, while `r dark_share_band_pct(c("5_to_25", "25_to_50"), "share_of_emissions")` of emissions occur in pixels where the S1-unmatched share falls between 5% and 50%.
 
@@ -2033,6 +2070,10 @@ may be more susceptible to AIS adoption biases.
 - As a result, we used a dataset containing `r signif(n_s1_detections$n_million_s1_detections,3)` million vessel detections from `r analysis_start_year` to `r analysis_end_year`, of which `r signif(n_s1_detections$n_million_s1_detections_unmatched,3)` million detections were not matched to a broadcasting vessel ('unmatched'). These detections come from across more than `r prettyNum(floor(n_s1_detections$n_thousand_s1_scenes)*1000,big.mark = ",")` individual S1 scenes.
 
 - Double counting between the two estimates. The detection-AIS matching considers AIS positions up to 12 hours either side of a detection, but a hold-out experiment by GFW (detections with high-confidence matches as ground truth, AIS positions withheld within a window of the detection) shows that the probability of missing a true match rises gradually with the length of the gap in a vessel's AIS messages rather than switching on at 12 hours: `r scales::percent(miss_rate_points$s1_detection_matching_miss_rate[miss_rate_points$ais_message_gap_duration_hours == 2], accuracy = 0.1)` of true matches are missed at a 2-hour gap, `r scales::percent(miss_rate_points$s1_detection_matching_miss_rate[miss_rate_points$ais_message_gap_duration_hours == 8], accuracy = 0.1)` at 8 hours and `r scales::percent(miss_rate_points$s1_detection_matching_miss_rate[miss_rate_points$ais_message_gap_duration_hours == 18], accuracy = 0.1)` at 18 hours. Weighting the share of AIS-based CO$_2$ emitted in gaps of each length by that miss rate, `r scales::percent(exposed_share[["rise"]], accuracy = 0.1)` of AIS-based CO$_2$ (`r scales::percent(exposed_share[["hold"]], accuracy = 0.1)` if the miss rate is held at its 18-hour value beyond the last simulated gap) is emitted while the vessel, had it been imaged, would have been classed as unmatched. This implies that `r sprintf("%.2f", misclassified_million[["rise"]])` million of the `r signif(n_s1_detections$n_million_s1_detections_unmatched, 3)` million unmatched detections (`r scales::percent(misclassified_share_of_unmatched[["rise"]], accuracy = 0.1)`) are AIS-broadcasting vessels, and hence that about `r scales::percent(misclassified_share_of_unmatched[["rise"]], accuracy = 0.1)` of S1-unmatched CO$_2$ (`r scales::comma(duplicated_dark_mt[["rise"]], accuracy = 1)` million tonnes over `r analysis_start_year`-`r analysis_end_year`, or `r scales::percent(duplicated_share_of_fused[["rise"]], accuracy = 0.1)` of the combined AIS-based + S1-unmatched total) duplicates emissions already counted in the AIS-based estimate. Because the same misclassified detections are also missing from the matched densities the emissions regression is trained on, the fitted emissions per detection are high by a factor of `r sprintf("%.3f", 1 / (1 - exposed_share[["rise"]]))`; folding that in gives an upper end of `r scales::percent(dark_overstatement[["rise"]], accuracy = 0.1)` of S1-unmatched CO$_2$ (`r scales::percent(overstated_share_of_fused[["rise"]], accuracy = 0.1)` of the combined total). This replaces the earlier reasoning that only messages representing more than 12 hours could be affected, which happened to give a similar number (`r scales::percent(1 - emissions_by_message_hour_threshold$fraction_of_total[dplyr::near(emissions_by_message_hour_threshold$threshold_hours, 12)], accuracy = 0.1)`) for the wrong reason: most of the exposure comes from gaps of 2 to 18 hours (Fig. \ref{fig:fig-s1-matching-double-counting}, Table \ref{tab:s1_matching_double_counting_by_gap}, Table \ref{tab:s1_matching_double_counting_summary}).
+
+- The loss of the Sentinel-1B satellite in December 2021 shows that this normalization works as intended: it cut the number of S1 scenes by `r scales::percent(-s1_change(2021, 2022, "s1_scenes"))` from 2021 to 2022, but vessel detections per unit of imaged area changed by `r scales::percent(s1_change(2021, 2022, "detections_per_km2"), accuracy = 0.1)`.
+
+- Response to reviewers (R3.6): S1-unmatched emissions fell by `r scales::percent(-s1b_loss_winter_change, accuracy = 0.1)` from October--November 2021 to January--February 2022, in line with the seasonal decline of `r scales::percent(-max(other_winter_changes))`--`r scales::percent(-min(other_winter_changes))` over the same months in every other year of the record.
 
 - We were able to use this direct estimation approach for `r dark_emissions_by_area |> dplyr::filter(inside_footprint,s1_imaged) |> dplyr::pull(percent_total)` of the total estimated S1-unmatched CO$_2$ emissions.
 
@@ -7875,6 +7916,52 @@ inventory_comparison_all_sources_kable |>
       "inventory_comparison_all_sources.tex"
     )
   )
+```
+
+```{r}
+#| label: inline-inventory-comparison-statistics
+#| results: asis
+# How our two series sit against the Fourth IMO GHG Study and the other
+# bottom-up inventories early in the study period (Results, Supplementary
+# Note 3, and the response to reviewers, R3 and R3.7). Printed here rather than
+# in the in-line section because inventory_table_data is only built above.
+inventory_value <- function(source_name, year_value) {
+  inventory_table_data$emissions_co2_mt[
+    inventory_table_data$data_source == source_name &
+      inventory_table_data$year == year_value
+  ]
+}
+fused_label <- "GFW (AIS-based + S1-unmatched)"
+ais_label <- "GFW (AIS-based)"
+# Largest gap between our AIS-based series and each other bottom-up inventory
+# in every year they share through 2019
+early_bottom_up_gap <- inventory_table_data |>
+  dplyr::filter(
+    .data$data_source %in% c("STEAM", "SEIM", "MariTEAM", "OECD", "SAVE"),
+    .data$year <= 2019
+  ) |>
+  dplyr::mutate(
+    gap = abs(
+      purrr::map_dbl(.data$year, ~ inventory_value(ais_label, .x)) /
+        .data$emissions_co2_mt - 1
+    )
+  ) |>
+  dplyr::pull(gap) |>
+  max()
+cat(glue::glue(
+  "- Over the first years of the study period, our AIS-based estimates ",
+  "agree closely with STEAM, SEIM, MariTEAM, OECD and SAVE, lying within ",
+  "{scales::percent(ceiling(early_bottom_up_gap * 100) / 100)} of each ",
+  "through 2019, but fall ",
+  "{scales::percent(1 - inventory_value(ais_label, 2017) / inventory_value('IMO', 2017))} ",
+  "below the Fourth IMO GHG Study in 2017. Our fused total matches the ",
+  "Fourth IMO GHG Study in 2017 ",
+  "({signif(inventory_value(fused_label, 2017) / 1e9, 3)} and ",
+  "{signif(inventory_value('IMO', 2017) / 1e9, 3)} billion tonnes of CO$_{{2}}$) ",
+  "and is within ",
+  "{scales::percent(ceiling((inventory_value(fused_label, 2018) / inventory_value('IMO', 2018) - 1) * 100) / 100)} ",
+  "of it in 2018.\n"
+))
 ```
 
 ```{r}

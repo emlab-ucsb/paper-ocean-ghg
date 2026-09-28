@@ -1,135 +1,200 @@
-→ de-duplicating _targets/02_quarto_notebook/meta/meta
-→ reading _targets/02_quarto_notebook/meta/meta
-→ parsing _targets/02_quarto_notebook/meta/meta
+WARNING: ignoring environment value of R_HOME
+→ de-duplicating _targets/03_quarto_notebook/meta/meta
+→ reading _targets/03_quarto_notebook/meta/meta
+→ parsing _targets/03_quarto_notebook/meta/meta
 → noting builders and branches
-→ parsing _targets/02_quarto_notebook/meta/meta
+→ parsing _targets/03_quarto_notebook/meta/meta
 → restricting metadata records
-→ querying 68 local files in _targets/02_quarto_notebook/objects
-→ reading _targets/02_quarto_notebook/meta/process
-→ parsing _targets/02_quarto_notebook/meta/process
-+ data_sources_file dispatched
-✔ data_sources_file completed [1ms, 4.07 kB]
-+ data_sources dispatched
-Rows: 30 Columns: 12
-── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr (12): Model feature, Model feature shorthand, Category, M1, M2, M3, Unit...
-
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-✔ data_sources completed [290ms, 1.58 kB]
+→ querying 108 local files in _targets/03_quarto_notebook/objects
+→ reading _targets/03_quarto_notebook/meta/process
+→ parsing _targets/03_quarto_notebook/meta/process
 + quarto_notebook dispatched
 [31m
 
 processing file: quarto_notebook.qmd
-[39m1/107                                                         
-2/107 [document-setup]                                        
-[31mFailed to query server: Failed to activate service 'org.freedesktop.timedate1': timed out (service_start_timeout=25000ms)
-[39m3/107                                                         
-4/107 [load-data]                                             
-5/107                                                         
-6/107 [setup-graphics]                                        
-7/107                                                         
-8/107 [wrangle-edgar-data]                                    
-9/107                                                         
-10/107 [wrangle-gfw-time-series-emissions-data]                
-11/107                                                         
-12/107 [unnamed-chunk-1]                                       
-13/107                                                         
-14/107 [wrangel-edgar-data]                                    
-15/107                                                         
-16/107 [unnamed-chunk-2]                                       
-17/107                                                         
-18/107 [wrangle-gfw-spatials-emissions-data]                   
-19/107                                                         
-20/107 [unnamed-chunk-3]                                       
-21/107                                                         
-22/107 [social-cost-calculation]                               
-23/107                                                         
-24/107 [unnamed-chunk-4]                                       
-25/107                                                         
-26/107 [unnamed-chunk-5]                                       
-27/107                                                         
-28/107 [unnamed-chunk-6]                                       
-29/107                                                         
-30/107 [unnamed-chunk-7]                                       
-31/107                                                         
-32/107 [unnamed-chunk-8]                                       
-33/107                                                         
-34/107 [unnamed-chunk-9]                                       
-35/107                                                         
-36/107 [fig-emissions-by-data-source-and-maps]                 
-37/107                                                         
-38/107 [unnamed-chunk-10]                                      
-39/107                                                         
-40/107 [unnamed-chunk-11]                                      
-41/107                                                         
-42/107 [fig-spatial-temporal-richness-by-fleet-total-pseudolog]
-43/107                                                         
-44/107 [fig-ais-data-richness]                                 
-45/107                                                         
-46/107 [fig-emissions-marine-ocean-other]                      
-47/107                                                         
-48/107 [fig-registered-data-performance]                       
-49/107                                                         
-50/107 [unnamed-chunk-12]                                      
-51/107                                                         
-52/107 [unnamed-chunk-13]                                      
-53/107                                                         
-54/107 [fig-mrv-performance]                                   
-55/107                                                         
-56/107 [fig-map-fraction-months-imaged]                        
-57/107                                                         
-58/107 [fig-length-bin-distributions]                          
-59/107                                                         
-60/107 [fig-ais-length-power-relationship]                     
-61/107                                                         
-62/107 [unnamed-chunk-14]                                      
-63/107                                                         
-64/107 [fig-s1-coverage-time-series]                           
-65/107                                                         
-66/107 [fig-offshore-outside-footprint-training-testing-map]   
-67/107                                                         
-68/107 [fig-pr-curves]                                         
-69/107                                                         
-70/107 [fig-roc-curves]                                        
-71/107                                                         
-72/107 [fig-conf-mat]                                          
-73/107                                                         
-74/107 [unnamed-chunk-15]                                      
-75/107                                                         
-76/107 [unnamed-chunk-16]                                      
-77/107                                                         
-78/107 [fig-feature-importance]                                
-79/107                                                         
-80/107 [fig-spatial-coverage-footprint]                        
-81/107                                                         
-82/107 [fig-pollutant-maps-qlog10]                             
-83/107                                                         
-84/107 [fig-pollutant-time-series]                             
-85/107                                                         
-86/107 [fig-annual-emissions-by-ocean-and-data-source]         
-87/107                                                         
-88/107 [unnamed-chunk-17]                                      
-89/107                                                         
-90/107 [unnamed-chunk-18]                                      
-91/107                                                         
-92/107 [unnamed-chunk-19]                                      
-93/107                                                         
-94/107 [unnamed-chunk-20]                                      
-95/107                                                         
-96/107 [unnamed-chunk-21]                                      
-97/107                                                         
-98/107 [fig-inventory-comparison]                              
-99/107                                                         
-100/107 [unnamed-chunk-22]                                      
-101/107                                                         
-102/107 [fig-annual-emissions-by-ais-receiver-type]             
-103/107                                                         
-104/107 [fig-annual-emissions-by-ais-receiver-type-top-flags]   
-105/107                                                         
-106/107 [fig-co2-emissions-change-map-by-receiver-type]         
-107/107                                                         
+[39m1/183                                                         
+2/183 [document-setup]                                        
+3/183                                                         
+4/183 [load-data]                                             
+5/183                                                         
+6/183 [setup-graphics]                                        
+7/183                                                         
+8/183 [wrangle-edgar-data]                                    
+9/183                                                         
+10/183 [wrangle-gfw-time-series-emissions-data]                
+11/183                                                         
+12/183 [unnamed-chunk-1]                                       
+13/183                                                         
+14/183 [wrangel-edgar-data]                                    
+15/183                                                         
+16/183 [unnamed-chunk-2]                                       
+17/183                                                         
+18/183 [wrangle-gfw-spatials-emissions-data]                   
+19/183                                                         
+20/183 [unnamed-chunk-3]                                       
+21/183                                                         
+22/183 [social-cost-calculation]                               
+23/183                                                         
+24/183 [unnamed-chunk-4]                                       
+25/183                                                         
+26/183 [unnamed-chunk-5]                                       
+27/183                                                         
+28/183 [unnamed-chunk-6]                                       
+29/183                                                         
+30/183 [s1-matching-double-counting]                           
+31/183                                                         
+32/183 [inline-validation-statistics]                          
+33/183                                                         
+34/183 [inline-registry-and-ais-activity-statistics]           
+35/183                                                         
+36/183 [growth-by-family-and-length]                           
+37/183                                                         
+38/183 [inline-trend-statistics]                               
+39/183                                                         
+40/183 [unnamed-chunk-7]                                       
+41/183                                                         
+42/183 [unnamed-chunk-8]                                       
+43/183                                                         
+44/183 [unnamed-chunk-9]                                       
+45/183                                                         
+46/183 [fig-emissions-by-data-source-and-maps]                 
+47/183                                                         
+48/183 [unnamed-chunk-10]                                      
+49/183                                                         
+50/183 [unnamed-chunk-11]                                      
+51/183                                                         
+52/183 [unnamed-chunk-12]                                      
+53/183                                                         
+54/183 [fig-emissions-time-series-and-maps]                    
+55/183                                                         
+56/183 [fig-ais-data-richness]                                 
+57/183                                                         
+58/183 [fig-emissions-marine-ocean-other]                      
+59/183                                                         
+60/183 [fig-emissions-by-message-hour-threshold]               
+61/183                                                         
+62/183 [unnamed-chunk-13]                                      
+63/183                                                         
+64/183 [fig-s1-matching-double-counting]                       
+65/183                                                         
+66/183 [unnamed-chunk-14]                                      
+67/183                                                         
+68/183 [fig-registered-data-performance]                       
+69/183                                                         
+70/183 [unnamed-chunk-15]                                      
+71/183                                                         
+72/183 [fig-mrv-performance]                                   
+73/183                                                         
+74/183 [fig-map-fraction-months-imaged]                        
+75/183                                                         
+76/183 [fig-length-bin-distributions]                          
+77/183                                                         
+78/183 [fig-ais-length-power-relationship]                     
+79/183                                                         
+80/183 [unnamed-chunk-16]                                      
+81/183                                                         
+82/183 [fig-s1-coverage-time-series]                           
+83/183                                                         
+84/183 [fig-offshore-outside-footprint-training-testing-map]   
+85/183                                                         
+86/183 [fig-pr-curves]                                         
+87/183                                                         
+88/183 [fig-roc-curves]                                        
+89/183                                                         
+90/183 [fig-conf-mat]                                          
+91/183                                                         
+92/183 [unnamed-chunk-17]                                      
+93/183                                                         
+94/183 [unnamed-chunk-18]                                      
+95/183                                                         
+96/183 [fig-feature-importance]                                
+97/183                                                         
+98/183 [fig-spatial-coverage-footprint]                        
+99/183                                                         
+100/183 [unnamed-chunk-19]                                      
+101/183                                                         
+102/183 [unnamed-chunk-20]                                      
+103/183                                                         
+104/183 [unnamed-chunk-21]                                      
+105/183                                                         
+106/183 [fig-spatial-temporal-richness-by-fleet-total-pseudolog]
+107/183                                                         
+108/183 [fig-pollutant-maps-qlog10]                             
+109/183                                                         
+110/183 [fig-pollutant-time-series]                             
+111/183                                                         
+112/183 [fig-emissions-by-country-and-activity-type]            
+113/183                                                         
+114/183 [fig-annual-emissions-by-ocean-and-data-source]         
+115/183                                                         
+116/183 [unnamed-chunk-22]                                      
+117/183                                                         
+118/183 [unnamed-chunk-23]                                      
+119/183                                                         
+120/183 [unnamed-chunk-24]                                      
+121/183                                                         
+122/183 [unnamed-chunk-25]                                      
+123/183                                                         
+124/183 [unnamed-chunk-26]                                      
+125/183                                                         
+126/183 [unnamed-chunk-27]                                      
+127/183                                                         
+128/183 [fig-inventory-comparison]                              
+129/183                                                         
+130/183 [unnamed-chunk-28]                                      
+131/183                                                         
+132/183 [unnamed-chunk-29]                                      
+133/183                                                         
+134/183 [fig-annual-emissions-by-ais-receiver-type]             
+135/183                                                         
+136/183 [fig-annual-emissions-by-ais-receiver-type-top-flags]   
+137/183                                                         
+138/183 [fig-co2-emissions-change-map-by-receiver-type]         
+139/183                                                         
+140/183 [inventories-comparison-helpers]                        
+141/183                                                         
+142/183 [multisector-trend-panel]                               
+143/183                                                         
+144/183 [figS-inventory-comparison-all-sources]                 
+145/183                                                         
+146/183 [unnamed-chunk-30]                                      
+147/183                                                         
+148/183 [inline-inventory-comparison-statistics]                
+149/183                                                         
+150/183 [multisector-shipping-panel]                            
+151/183                                                         
+152/183 [fig-emissions-inventory-comparison]                    
+153/183                                                         
+154/183 [unnamed-chunk-31]                                      
+155/183                                                         
+156/183 [tbl-inventory-growth-comparison]                       
+157/183                                                         
+158/183 [figS-inventory-vessel-counts-by-registry]              
+159/183                                                         
+160/183 [figS-registry-split-comparison]                        
+161/183                                                         
+162/183 [figS-fleet-growth-by-year]                             
+163/183                                                         
+164/183 [figS-growth-timeline-by-family-length]                 
+165/183                                                         
+166/183 [figS-unmatched-fraction-fullperiod]                    
+167/183                                                         
+168/183 [figS-ais-carriage-saturation-by-size]                  
+169/183                                                         
+170/183 [figS-passenger-size-panels]                            
+171/183                                                         
+172/183 [figS-messages-vs-hours-vs-emissions]                   
+173/183                                                         
+174/183 [figS-fleet-sankey-with-series-2025]                    
+175/183                                                         
+176/183 [figS-registry-sankey-with-series-2025]                 
+177/183                                                         
+178/183 [figS-density-denominators-and-bins]                    
+179/183                                                         
+180/183 [figS-density-by-match-status]                          
+181/183                                                         
+182/183 [tabS-inventory-intensity-all-models]                   
+183/183                                                         
 [31moutput file: quarto_notebook.knit.md
 
 [39m[1mpandoc [22m
@@ -153,8 +218,6 @@ processing file: quarto_notebook.qmd
   header-includes:
     - \KOMAoption{captions}{tableheading}
   block-headings: true
-  engines:
-    - path: /opt/positron-server/quarto/share/extension-subtrees/julia-engine/_extensions/julia-engine/julia-engine.js
   title: Quantifying comprehensive marine vessel emissions using data fusion
   author: emLab, UCSB and GFW
   date: last-modified
@@ -166,44 +229,62 @@ processing file: quarto_notebook.qmd
       wrap: 72
   colorlinks: true
   
-[33mWARNING (/opt/positron-server/quarto/share/filters/main.lua:18344) Raw LaTeX table found with non-tbl label: tab:tab-performance-tolerance-table
+[33mWARNING (/Applications/Positron.app/Contents/Resources/app/quarto/share/filters/main.lua:18332) Raw LaTeX table found with non-tbl label: tab:emissions_by_message_hour_threshold
 Won't be able to cross-reference this table using Quarto's native crossref system.
-[39m[33mWARNING (/opt/positron-server/quarto/share/filters/main.lua:18344) Raw LaTeX table found with non-tbl label: tab:data_sources
+[39m[33mWARNING (/Applications/Positron.app/Contents/Resources/app/quarto/share/filters/main.lua:18332) Raw LaTeX table found with non-tbl label: tab:s1_matching_double_counting_by_gap
 Won't be able to cross-reference this table using Quarto's native crossref system.
-[39m[33mWARNING (/opt/positron-server/quarto/share/filters/main.lua:18344) Raw LaTeX table found with non-tbl label: tab:all_performance_metrics_table
+[39m[33mWARNING (/Applications/Positron.app/Contents/Resources/app/quarto/share/filters/main.lua:18332) Raw LaTeX table found with non-tbl label: tab:s1_matching_double_counting_summary
 Won't be able to cross-reference this table using Quarto's native crossref system.
-[39m[33mWARNING (/opt/positron-server/quarto/share/filters/main.lua:18344) Raw LaTeX table found with non-tbl label: tab:lm_other_gases_tidy_fit_stats
+[39m[33mWARNING (/Applications/Positron.app/Contents/Resources/app/quarto/share/filters/main.lua:18332) Raw LaTeX table found with non-tbl label: tab:tab-performance-tolerance-table
 Won't be able to cross-reference this table using Quarto's native crossref system.
-[39m[33mWARNING (/opt/positron-server/quarto/share/filters/main.lua:18344) Raw LaTeX table found with non-tbl label: tab:total_percent_change_by_fleet
+[39m[33mWARNING (/Applications/Positron.app/Contents/Resources/app/quarto/share/filters/main.lua:18332) Raw LaTeX table found with non-tbl label: tab:data_sources
 Won't be able to cross-reference this table using Quarto's native crossref system.
-[39m[33mWARNING (/opt/positron-server/quarto/share/filters/main.lua:18344) Raw LaTeX table found with non-tbl label: tab:pollutant_ais_underestimation_overestimation_summary
+[39m[33mWARNING (/Applications/Positron.app/Contents/Resources/app/quarto/share/filters/main.lua:18332) Raw LaTeX table found with non-tbl label: tab:all_performance_metrics_table
 Won't be able to cross-reference this table using Quarto's native crossref system.
-[39m[33mWARNING (/opt/positron-server/quarto/share/filters/main.lua:18344) Raw LaTeX table found with non-tbl label: tab:emissions_by_ocean_summary_tbl
+[39m[33mWARNING (/Applications/Positron.app/Contents/Resources/app/quarto/share/filters/main.lua:18332) Raw LaTeX table found with non-tbl label: tab:lm_other_gases_tidy_fit_stats
 Won't be able to cross-reference this table using Quarto's native crossref system.
-[39m[33mWARNING (/opt/positron-server/quarto/share/filters/main.lua:18344) Raw LaTeX table found with non-tbl label: tab:emissions_by_data_source_summary_tbl
+[39m[33mWARNING (/Applications/Positron.app/Contents/Resources/app/quarto/share/filters/main.lua:18332) Raw LaTeX table found with non-tbl label: tab:total_percent_change_by_fleet
 Won't be able to cross-reference this table using Quarto's native crossref system.
-[39m[33mWARNING (/opt/positron-server/quarto/share/filters/main.lua:18344) Raw LaTeX table found with non-tbl label: tab:social_cost_summary_tbl
+[39m[33mWARNING (/Applications/Positron.app/Contents/Resources/app/quarto/share/filters/main.lua:18332) Raw LaTeX table found with non-tbl label: tab:growth_share_by_family_length
 Won't be able to cross-reference this table using Quarto's native crossref system.
-[39m[33mWARNING (/opt/positron-server/quarto/share/filters/main.lua:18344) Raw LaTeX table found with non-tbl label: tab:inventory_comparison
+[39m[33mWARNING (/Applications/Positron.app/Contents/Resources/app/quarto/share/filters/main.lua:18332) Raw LaTeX table found with non-tbl label: tab:growth_decomposition_by_family_length
+Won't be able to cross-reference this table using Quarto's native crossref system.
+[39m[33mWARNING (/Applications/Positron.app/Contents/Resources/app/quarto/share/filters/main.lua:18332) Raw LaTeX table found with non-tbl label: tab:pollutant_ais_underestimation_overestimation_summary
+Won't be able to cross-reference this table using Quarto's native crossref system.
+[39m[33mWARNING (/Applications/Positron.app/Contents/Resources/app/quarto/share/filters/main.lua:18332) Raw LaTeX table found with non-tbl label: tab:emissions_by_ocean_summary_tbl
+Won't be able to cross-reference this table using Quarto's native crossref system.
+[39m[33mWARNING (/Applications/Positron.app/Contents/Resources/app/quarto/share/filters/main.lua:18332) Raw LaTeX table found with non-tbl label: tab:social_cost_summary_tbl
+Won't be able to cross-reference this table using Quarto's native crossref system.
+[39m[33mWARNING (/Applications/Positron.app/Contents/Resources/app/quarto/share/filters/main.lua:18332) Raw LaTeX table found with non-tbl label: tab:top_countries_by_activity_type
+Won't be able to cross-reference this table using Quarto's native crossref system.
+[39m[33mWARNING (/Applications/Positron.app/Contents/Resources/app/quarto/share/filters/main.lua:18332) Raw LaTeX table found with non-tbl label: tab:inventory_comparison
+Won't be able to cross-reference this table using Quarto's native crossref system.
+[39m[33mWARNING (/Applications/Positron.app/Contents/Resources/app/quarto/share/filters/main.lua:18332) Raw LaTeX table found with non-tbl label: tab:inventory_comparison_all_sources
+Won't be able to cross-reference this table using Quarto's native crossref system.
+[39m[33mWARNING (/Applications/Positron.app/Contents/Resources/app/quarto/share/filters/main.lua:18332) Raw LaTeX table found with non-tbl label: tab:multisector_shipping_comparison
+Won't be able to cross-reference this table using Quarto's native crossref system.
+[39m[33mWARNING (/Applications/Positron.app/Contents/Resources/app/quarto/share/filters/main.lua:18332) Raw LaTeX table found with non-tbl label: tab:inventory_growth_comparison
+Won't be able to cross-reference this table using Quarto's native crossref system.
+[39m[33mWARNING (/Applications/Positron.app/Contents/Resources/app/quarto/share/filters/main.lua:18332) Raw LaTeX table found with non-tbl label: tab:inventory_growth_comparison
 Won't be able to cross-reference this table using Quarto's native crossref system.
 [39m[1m[34m
 Rendering PDF[39m[22m
 [1m[34mrunning lualatex - 1[39m[22m
-  This is LuaHBTeX, Version 1.18.0 (TeX Live 2024) 
+  This is LuaHBTeX, Version 1.17.0 (TeX Live 2023) 
    restricted system commands enabled.
   
 [1m[34mrunning lualatex - 2[39m[22m
-  This is LuaHBTeX, Version 1.18.0 (TeX Live 2024) 
+  This is LuaHBTeX, Version 1.17.0 (TeX Live 2023) 
    restricted system commands enabled.
   
 [1m[34mrunning lualatex - 3[39m[22m
-  This is LuaHBTeX, Version 1.18.0 (TeX Live 2024) 
+  This is LuaHBTeX, Version 1.17.0 (TeX Live 2023) 
    restricted system commands enabled.
   
 
 Output created: quarto_notebook.pdf
 
-→ 67 targets ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  [19m 36.3s, 3+, 64-]
-✔ quarto_notebook completed [19m 34.3s, 12.08 MB]
-→ 67 targets ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  [19m 36.3s, 3+, 64-]→ de-duplicating _targets/02_quarto_notebook/meta/meta
-→ 67 targets ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  [19m 36.3s, 3+, 64-]✔ ended pipeline [19m 36.5s, 3 completed, 64 skipped]
+→ 105 targets ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  [18m 49.8s, 1+, 104-]
+✔ quarto_notebook completed [18m 49.1s, 16.87 MB]
+→ 105 targets ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  [18m 49.8s, 1+, 104-]→ de-duplicating _targets/03_quarto_notebook/meta/meta
+→ 105 targets ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  [18m 49.8s, 1+, 104-]✔ ended pipeline [18m 50s, 1 completed, 104 skipped]
