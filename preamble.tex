@@ -1,0 +1,53 @@
+% Packages shared by main.tex (manuscript), si.tex (Supplementary Information)
+% and, through main.tex, combined.tex (the single document used for latexdiff).
+%% Included Nature packages
+\usepackage{graphicx}%
+\usepackage{multirow}%
+\usepackage{amsmath,amssymb,amsfonts}%
+\usepackage{amsthm}%
+\usepackage{mathrsfs}%
+\usepackage[title]{appendix}%
+\usepackage{color}%
+\usepackage{textcomp}%
+\usepackage{manyfoot}%
+\usepackage{booktabs}%
+\usepackage{algorithm}%
+\usepackage{algorithmicx}%
+\usepackage{algpseudocode}%
+\usepackage{listings}%
+
+%% Add some additional packages
+\usepackage{float} 
+\usepackage{pdflscape}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{verbatim}
+\usepackage{url}
+% Keeps tables from floating past the text that follows them. The table
+% environment is a float, but sn-jnl.cls wraps its body in threeparttable, so
+% the [H] specifier used for every figure here errors out on tables. A
+% \FloatBarrier after each table gives the same in-source-order placement.
+\usepackage{placeins}
+
+% Make it so figures aren't forced to the bottom of pages
+\raggedbottom
+
+% Cross-references between the manuscript (main.tex) and the Supplementary
+% Information (si.tex), which are compiled as separate documents. xr reads the
+% other document's .aux file, so each must have been compiled at least once;
+% the latexmkrc in the project root makes latexmk (and Overleaf) compile the
+% other document automatically when its .aux is missing or out of date.
+% Labels are unique across the two documents, so no prefix is needed.
+\usepackage{xr}
+\makeatletter
+\newcommand*{\addFileDependency}[1]{%
+  \typeout{(#1)}%
+  \@addtofilelist{#1}%
+  \IfFileExists{#1}{}{\typeout{No file #1.}}%
+}
+\makeatother
+\newcommand*{\myexternaldocument}[1]{%
+  \externaldocument{#1}%
+  \addFileDependency{#1.tex}%
+  \addFileDependency{#1.aux}%
+}

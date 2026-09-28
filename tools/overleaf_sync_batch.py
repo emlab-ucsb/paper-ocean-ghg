@@ -20,8 +20,10 @@ measured in real blob bytes.
 import argparse, os, subprocess, sys
 
 MB = 1024 * 1024
-PAPER_PREFIXES = ("figures/", "tables/")
-PAPER_FILES = {"main.tex", "point_by_point_response_revision_1.tex",
+PAPER_PREFIXES = ("figures/", "tables/", "diff/")
+PAPER_FILES = {"main.tex", "si.tex", "si_content.tex", "preamble.tex",
+               "combined.tex", "main_diff.tex", "latexmkrc",
+               "point_by_point_response_revision_1.tex",
                "bibliography.bib", "sn-jnl.cls", "sn-nature.bst"}
 
 

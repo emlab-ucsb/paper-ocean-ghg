@@ -1,0 +1,16 @@
+% Supplementary Information, compiled as its own document for submission.
+% The content lives in si_content.tex. The main-text figures and Methods
+% sections it cites are read from main.aux (see preamble.tex).
+\documentclass[lineno,pdflatex,sn-nature]{sn-jnl}
+
+\input{preamble}
+\myexternaldocument{main}
+
+\begin{document}
+
+\input{si_content}
+
+% References cited in the Supplementary Information, numbered on their own
+\bibliography{bibliography}
+
+\end{document}

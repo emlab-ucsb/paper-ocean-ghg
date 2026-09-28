@@ -18,6 +18,11 @@ This repository contains the code and data pipeline to reproduce all figures, ta
 paper-ocean-ghg/
 │
 ├── main.tex                          # Manuscript source (Nature journal format)
+├── si.tex / si_content.tex          # Supplementary Information: wrapper / content
+├── preamble.tex                      # Packages and cross-references shared by both
+├── combined.tex                      # Manuscript + SI as one document, for latexdiff
+├── latexmkrc                         # Lets main.tex and si.tex build each other's .aux
+├── diff/, tools/make_diff.sh         # Tracked-changes comparison against the submission
 ├── bibliography.bib                  # BibTeX references
 ├── sn-jnl.cls / sn-nature.bst       # Nature journal LaTeX class and bibliography style
 │

@@ -50,3 +50,6 @@ qmd/quarto_notebook_cache/*
 # its own PDF, so tracking it only pushed ~18 MB of wholesale-rewritten binary
 # through the Overleaf sync on every render. Still written locally by pipeline 03.
 qmd/quarto_notebook.pdf
+
+# Intermediate file written by tools/make_diff.sh
+diff/revised_flat.tex
