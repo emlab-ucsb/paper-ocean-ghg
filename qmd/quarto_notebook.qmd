@@ -1359,9 +1359,14 @@ misclassified_million <- matched_detections_million * exposed_share /
   (1 - exposed_share)
 misclassified_share_of_unmatched <- misclassified_million /
   unmatched_detections_million
-# Including the training-side rescaling of emissions per detection
-dark_overstatement <- (1 + misclassified_share_of_unmatched) /
-  (1 - exposed_share) - 1
+# Share of the S1-unmatched estimate that is spurious, including the
+# training-side rescaling of emissions per detection. The estimate is
+# (unmatched detections) x (fitted emissions per detection); a share m of those
+# detections are broadcasting vessels, and the fitted emissions per detection are
+# high by 1 / (1 - e). So the non-duplicated part is (1 - m)(1 - e) of the
+# estimate, and the spurious share is one minus that.
+dark_overstatement <- 1 - (1 - misclassified_share_of_unmatched) *
+  (1 - exposed_share)
 
 # annual_emissions_all_pollutants is in long form by this point (see
 # wrangle-gfw-time-series-emissions-data): one row per year, fishing,
