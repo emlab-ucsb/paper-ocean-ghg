@@ -10,7 +10,19 @@ Environmental Markets Lab (emLab), UC Santa Barbara & Global Fishing Watch
 
 ## Overview
 
-This repository contains the code and data pipeline to reproduce all figures, tables, and in-text statistics in the manuscript. The analysis quantifies global marine vessel emissions of CO₂ and eight other pollutants (CH₄, N₂O, CO, NOₓ, SOₓ, PM₂.₅, PM₁₀, VOCs) from 2017 through 2025 by fusing AIS vessel tracking data with Sentinel-1 SAR vessel detections.
+This repository contains the code and data needed to reproduce every figure, table, and in-text statistic in the manuscript and its Supplementary Information. The analysis quantifies global marine vessel emissions of CO₂ and eight other pollutants (CH₄, N₂O, CO, NOₓ, SOₓ, PM₂.₅, PM₁₀, VOCs) from 2017 through 2025 by fusing AIS vessel tracking data with Sentinel-1 (S1) SAR vessel detections.
+
+## Where the models live
+
+The two emissions models themselves are maintained in separate repositories. This repository consumes their outputs.
+
+| Repository | What it does | What it needs to run |
+|---|---|---|
+| [`ocean-ghg`](https://github.com/emlab-ucsb/ocean-ghg) | The AIS-based emissions model: vessel characteristics, ping-level emissions for every AIS-broadcasting vessel, port visits and voyages | Authenticated access to Global Fishing Watch data on Google BigQuery (data-use permissions required), and high-performance computing |
+| [`s1_ratios_rf`](https://github.com/pcarbomestre/s1_ratios_rf) | The machine learning models for S1-unmatched emissions: the emissions regression, the detection classification and detection regression models, and their performance tests | The same BigQuery access, and high-performance computing |
+| `paper-ocean-ghg` (this repository) | Pulls aggregated outputs of both models from BigQuery, compares them with published inventories and validation data, and produces the manuscript's figures, tables, and statistics | Nothing beyond R and Quarto: every input is committed |
+
+Pipeline 1 below is the only link to the upstream models: it queries the BigQuery tables they write and saves the results as CSVs in `data/gfw/`. Those CSVs are committed, so you can reproduce the whole manuscript without BigQuery access or either upstream repository.
 
 ## Repository structure
 
@@ -26,7 +38,7 @@ paper-ocean-ghg/
 ├── bibliography.bib                  # BibTeX references
 ├── sn-jnl.cls / sn-nature.bst       # Nature journal LaTeX class and bibliography style
 │
-├── run.r                             # Entry point: runs the full targets pipeline
+├── run.r                             # Entry point: runs pipeline 3 (1 and 2 are optional)
 ├── _targets.yaml                     # Configures three targets pipeline projects
 ├── _targets_01_gfw_data_pull.R       # Pipeline 1: download GFW data from BigQuery
 ├── _targets_02_inventories_comparison.R  # Pipeline 2: download + tidy published inventories
@@ -35,40 +47,17 @@ paper-ocean-ghg/
 ├── r/
 │   └── functions.R                   # Helper functions (BigQuery download, MRV data processing)
 │
-├── sql/                              # BigQuery SQL queries, one per pull
-│   ├── n_unique_vessels.sql          # Count of unique AIS-broadcasting vessels
-│   ├── n_ais_messages.sql            # Count of AIS messages with emissions data
-│   ├── annual_emissions_all_pollutants.sql  # Annual emissions by pollutant and fleet
-│   ├── monthly_aggregated_time_series.sql   # Monthly CO₂ by fleet, fishing, footprint
-│   ├── total_spatial_emissions_by_pollutant.sql  # Spatial 1x1° emissions by pollutant
-│   ├── annual_spatial_co2_emissions_ais_dark_by_fleet.sql  # Spatial CO₂ by fleet
-│   ├── total_spatial_co2_emissions_by_ocean.sql  # CO₂ by ocean basin
-│   ├── total_spatial_co2_emissions_dark_by_footprint.sql  # Dark emissions by S1 coverage
-│   ├── total_monthly_emissions_by_pollutant.sql  # Monthly total emissions all pollutants
-│   ├── annual_global_emissions_by_receiver_type.sql  # Emissions by AIS receiver type
-│   ├── annual_global_emissions_by_receiver_type_and_flag.sql  # By receiver type + flag
-│   ├── annual_spatial_emissions_by_receiver_type.sql  # Spatial by receiver type
-│   ├── port_visit_co2_emissions_by_country.sql  # Port stay emissions by country
-│   ├── trip_co2_emissions_by_from_to_countries.sql  # Trip emissions by origin/destination
-│   ├── fraction_vessels_emissions_by_registry_info.sql  # Vessels by registry status
-│   ├── ping_level_hours_distribution.sql  # AIS ping interval statistics
-│   ├── n_s1_detections.sql           # Count of S1 vessel detections
-│   ├── s1_time_series.sql            # Monthly S1 scene and detection statistics
-│   ├── length_size_bin_distributions.sql  # Vessel length bins for AIS and S1
-│   ├── number_s1_imaged_months_by_pixel.sql  # S1 imaging frequency per pixel
-│   ├── registered_data_validation.sql  # Registered vessel validation data
-│   ├── trip_emissions_for_mrv_validation.sql  # Trip emissions for EU MRV comparison
-│   └── vessel_size_info.sql          # Vessel length and engine power data
+├── sql/                              # BigQuery SQL for pipeline 1, one query per pull (31 files)
 │
 ├── qmd/
 │   └── quarto_notebook.qmd          # Analysis notebook: generates all figures + tables
 │
 ├── data/
-│   ├── gfw/                         # GFW data (downloaded from BigQuery via pipeline 1)
+│   ├── gfw/                         # Outputs of ocean-ghg and s1_ratios_rf, pulled from BigQuery by pipeline 1
 │   │   ├── annual_emissions_all_pollutants.csv
 │   │   ├── monthly_aggregated_time_series.csv
 │   │   ├── total_spatial_emissions_by_pollutant.csv
-│   │   ├── ... (27 CSV files total)
+│   │   ├── ... (41 CSV files total)
 │   │   └── vessel_size_info.csv
 │   ├── IEA_EDGAR_CO2_1970_2024/     # EDGAR v8.0 CO₂ emissions by sector (1970-2024)
 │   │   └── IEA_EDGAR_CO2_1970_2024.xlsx
@@ -78,15 +67,16 @@ paper-ocean-ghg/
 │   │   └── trip_emissions_for_mrv_validation.csv
 │   ├── oecd/                        # OECD experimental maritime transport emissions
 │   │   └── annual_oecd_experimental_data.csv
-│   ├── registered_validation_data/  # Registered vessel validation data (Taiwan, 2014)
+│   ├── registered_validation_data/  # Vessel-level validation data from a proprietary vessel registry
 │   │   └── registered_validation_data.csv
+│   ├── gfw_s1_to_ais_matching_miss_rate/  # GFW hold-out test of S1-AIS matching (double counting)
 │   ├── World_Countries_Generalized_Shapefile/  # ESRI country boundaries for maps
 │   ├── inventories/                 # Tidy inventory series written by pipeline 2
-│   ├── steam/ seim/ icct/ ceds/     # Per-inventory extracts written by pipeline 2
+│   ├── steam/ seim/ icct/ ceds/ edgar/  # Per-inventory extracts written by pipeline 2
 │   └── data_sources.csv            # Model feature metadata table
 │
-├── figures/                         # Output PNG figures (24 total)
-├── tables/                          # Output LaTeX tables (10 total)
+├── figures/                         # Output PNG figures (all generated by the notebook except the Fig. 5 flowchart)
+├── tables/                          # Output LaTeX tables, plus the three Supplementary Data CSVs
 │
 ├── _targets/                        # targets stores -- COMMITTED, see "Working across machines"
 │   ├── 01_gfw_data_pull/            #   metadata + cached objects for pipeline 1
@@ -122,7 +112,7 @@ BigQuery access.
 
 **Script:** `_targets_01_gfw_data_pull.R`
 
-Downloads analysis-ready datasets from Google BigQuery tables maintained by Global Fishing Watch. This pipeline runs the queries in `sql/` and saves results as CSV files in `data/gfw/`. It requires authenticated access to the `emlab-gcp` BigQuery billing project and the `world-fishing-827` GFW data project.
+Downloads analysis-ready datasets from Google BigQuery. The tables it reads are written by the two upstream models, `ocean-ghg` (AIS-based emissions) and `s1_ratios_rf` (S1-unmatched emissions), on Global Fishing Watch's BigQuery project. This pipeline runs the queries in `sql/` and saves results as CSV files in `data/gfw/`. It requires authenticated access to the `emlab-gcp` BigQuery billing project and the `world-fishing-827` GFW data project.
 
 Two targets at the top of the script pin which BigQuery table versions the queries read:
 
@@ -172,7 +162,7 @@ Note that `wf_get_key(service = "ads")` won't find it — `service` refers to an
 
 **Script:** `_targets_03_quarto_notebook.R`
 
-Loads all CSV files from `data/gfw/` and external datasets (EDGAR, OECD, MRV), the tidy inventory CSVs from pipeline 2, then renders `qmd/quarto_notebook.qmd`. The Quarto notebook performs all data wrangling, generates all 24 figures (saved to `figures/`), generates all 10 LaTeX tables (saved to `tables/`), and computes all in-text statistics referenced in the manuscript.
+Loads all CSV files from `data/gfw/` and external datasets (EDGAR, OECD, MRV), the tidy inventory CSVs from pipeline 2, then renders `qmd/quarto_notebook.qmd`. The Quarto notebook performs all data wrangling, generates every data figure (saved to `figures/`) and every generated table (saved to `tables/`), and computes every in-text statistic in the manuscript, the Supplementary Information and the response to reviewers. Its "In-line manuscript statistics" section mirrors the manuscript sentence by sentence, so each reported number can be traced to the code that computes it.
 
 ### Running without BigQuery permissions
 
@@ -194,81 +184,62 @@ To refresh an upstream pipeline, uncomment it in `run.r` and run 01, 02, 03 in o
 
 | Source | Description | Location |
 |--------|-------------|----------|
-| GFW AIS emissions | Vessel-level emissions from AIS tracking data | `data/gfw/` |
-| GFW S1 dark fleet | Non-broadcasting vessel emissions from S1 SAR detections | `data/gfw/` |
-| EDGAR v8.0 | Global CO₂ emissions by sector and country (1970-2024) | `data/IEA_EDGAR_CO2_1970_2024/` |
-| OECD | Experimental maritime transport CO₂ estimates | `data/oecd/` |
-| EU MRV | Published vessel-level emissions from EU monitoring program | `data/MRV/` |
-| Registered data | Validation dataset from proprietary vessel registry | `data/registered_validation_data/` |
-| ESRI Countries | Generalized world country boundaries shapefile | `data/World_Countries_Generalized_Shapefile/` |
+| AIS-based emissions (`ocean-ghg`) | Aggregated emissions of AIS-broadcasting vessels, activity summaries, vessel characteristics, port visits and voyages | `data/gfw/` |
+| S1-unmatched emissions (`s1_ratios_rf`) | Emissions estimated from S1 detections unmatched to AIS, with S1 coverage, detection density and model performance | `data/gfw/` |
+| S1-AIS matching hold-out test | Probability that a detection of a broadcasting vessel is missed by the matching, by AIS gap length | `data/gfw_s1_to_ais_matching_miss_rate/` |
+| Published inventories | STEAM, SEIM, MariTEAM, OECD, SAVE (ICCT), the Fourth IMO GHG Study, EDGAR and CEDS | `data/inventories/`, `data/steam/`, `data/seim/`, `data/icct/`, `data/ceds/`, `data/edgar/`, `data/oecd/` |
+| EDGAR | Global CO₂ emissions by sector (1970–2024) | `data/IEA_EDGAR_CO2_1970_2024/` |
+| EU MRV | Published vessel-level annual emissions from the EU monitoring program (2018–2024) | `data/MRV/` |
+| Registry validation data | Measured main engine fuel consumption from a major proprietary vessel registry, used to validate the AIS-based model | `data/registered_validation_data/` |
+| ESRI Countries | Generalized world country boundaries | `data/World_Countries_Generalized_Shapefile/` |
 
 ## Outputs
 
-### Figures (24 total)
+All figures except Fig. 5 are generated by `qmd/quarto_notebook.qmd` and saved as PNGs in `figures/`. Fig. 5 is a conceptual flowchart of the methods; it contains no data and was drafted with the help of an AI design tool (see [AI disclosure](#ai-disclosure)).
 
-All figures are generated by `qmd/quarto_notebook.qmd` and saved as PNGs in `figures/`.
+### Main text
 
-**Results (Figures 1–4):**
+| Item | File | Description |
+|------|------|-------------|
+| Fig. 1 | `fig-emissions-by-data-source-and-maps` | Annual CO₂ by data source (AIS-based, S1-unmatched, fused), change since 2017, and 2025 maps |
+| Fig. 2 | `fig-emissions-time-series-and-maps` | Monthly CO₂ by data source, S1-unmatched share, and maps of each component |
+| Fig. 3 | `fig-ais-data-richness` | AIS-based CO₂ by vessel class, map by vessel family, and split by activity type |
+| Fig. 4 | `fig-emissions-inventory-comparison` | Our estimates against bottom-up and top-down inventories |
+| Fig. 5 | `fig-framework-flowchart-simpler` | Conceptual flowchart of the methods (not code-generated) |
+| Fig. 6 | `fig-emissions-by-message-hour-threshold` | Cumulative AIS-based CO₂ by the interval each ping represents |
+| Fig. 7 | `fig-registered-data-performance` | Validation against the proprietary registry's measured fuel consumption |
+| Fig. 8 | `fig-mrv-performance` | Validation against EU MRV annual emissions |
+| Fig. 9 | `fig-map-fraction-months-imaged` | Share of months each pixel was imaged by S1 |
+| Fig. 10 | `fig-s1-coverage-time-series` | Monthly S1 scenes, imaged area, detections and unmatched share |
+| Fig. 11 | `fig-s1-matching-double-counting` | Double counting between the AIS-based and S1-unmatched estimates |
+| Fig. 12 | `fig-length-bin-distributions` | Length-bin distributions of AIS vessels and S1 detections |
+| Fig. 13 | `fig-ais-length-power-relationship` | Main engine power against vessel length |
+| Fig. 14 | `fig-offshore-outside-footprint-training-testing-map` | Training/testing pixels for the simulated outside-footprint test |
+| Figs. 15–17 | `fig-pr-curves`, `fig-roc-curves`, `fig-conf-mat` | Detection classification model performance |
+| Fig. 18 | `fig-feature-importance` | Feature importance for the three S1-unmatched models |
+| Fig. 19 | `fig-spatial-coverage-footprint` | S1-unmatched emissions inside and outside the S1 footprint |
+| Table 1 | `emissions_by_message_hour_threshold.tex` | AIS-based CO₂ by ping-interval threshold |
+| Tables 2–3 | written in `main.tex` | Vessel characteristics model performance; characteristic availability by source |
+| Table 4 | `mrv_performance_results.tex` | EU MRV validation by matching tolerance |
+| Tables 5–6 | `s1_matching_double_counting_by_gap.tex`, `s1_matching_double_counting_summary.tex` | Double counting by gap length, and summary |
+| Table 7 | `data_sources.tex` | S1-unmatched model features and data sources |
+| Table 8 | `all_performance_metrics_table.tex` | S1-unmatched model performance |
+| Table 9 | `lm_other_gases_tidy_fit_stats.tex` | Linear models converting CO₂ to other gases |
 
-| Figure | Label | Description |
-|--------|-------|-------------|
-| 1 | `fig-emissions-by-data-source-and-maps` | Annual CO₂ emissions time series by data source with spatial maps |
-| 2 | `fig-spatial-temporal-richness-by-fleet-total-pseudolog` | Monthly CO₂ time series and spatial distribution by fleet and fishing/non-fishing |
-| 3 | `fig-ais-data-richness` | CO₂ emissions by vessel type, country, and activity type |
-| 4 | `fig-emissions-marine-ocean-other` | Emissions by ocean basin and comparison to EDGAR inventories |
+### Supplementary Information
 
-**Methods (Figures 5–17):**
-
-| Figure | Label | Description |
-|--------|-------|-------------|
-| 5 | `fig-framework-flowchart` | Conceptual flowchart for emissions estimation (static PNG, not code-generated) |
-| 6 | `fig-registered-data-performance` | Registered vessel database validation (model vs observed daily CO₂) |
-| 7 | `fig-mrv-performance` | EU MRV validation (model vs published annual CO₂) |
-| 8 | `fig-map-fraction-months-imaged` | S1 imaging coverage map (% months imaged per pixel) |
-| 9 | `fig-length-bin-distributions` | Vessel length bin distributions for AIS and S1 detections |
-| 10 | `fig-ais-length-power-relationship` | Relationship between main engine power and vessel length |
-| 11 | `fig-s1-coverage-time-series` | Monthly S1 scene, detection, and unmatched detection statistics |
-| 12 | `fig-offshore-outside-footprint-training-testing-map` | Training/testing pixel split for simulated outside-footprint tests |
-| 13 | `fig-pr-curves` | Precision-recall curves for detection classification model |
-| 14 | `fig-roc-curves` | ROC curves for detection classification model |
-| 15 | `fig-conf-mat` | Confusion matrices for detection classification model |
-| 16 | `fig-feature-importance` | Feature importance for classification and regression models |
-| 17 | `fig-spatial-coverage-footprint` | Spatial coverage of the non-broadcasting emissions model |
-
-**Supplementary (Figures S1–S7):**
-
-| Figure | Label | Description |
-|--------|-------|-------------|
-| S1 | `fig-pollutant-maps-qlog10` | Spatial maps of 2025 emissions for all pollutants |
-| S2 | `fig-pollutant-time-series` | Monthly time series for all pollutants |
-| S3 | `fig-annual-emissions-by-ocean-and-data-source` | Annual CO₂ by ocean and data source |
-| S4 | `fig-inventory-comparison` | Comparison with other marine CO₂ emission inventories |
-| S5 | `fig-annual-emissions-by-ais-receiver-type` | Annual emissions by AIS receiver type |
-| S6 | `fig-annual-emissions-by-ais-receiver-type-top-flags` | Emissions by AIS receiver type for top 10 flags |
-| S7 | `fig-co2-emissions-change-map-by-receiver-type` | Spatial change in CO₂ by AIS receiver type (2017–2025) |
-
-### Tables (10 total)
-
-LaTeX table files are generated by `qmd/quarto_notebook.qmd` and saved to `tables/` for inclusion in `main.tex`.
-
-**Main text (Tables 1–4):**
-
-| Table | File | Description |
-|-------|------|-------------|
-| 1 | `mrv_performance_results.tex` | EU MRV validation performance metrics |
-| 2 | `data_sources.tex` | Model feature data sources |
-| 3 | `all_performance_metrics_table.tex` | Non-broadcasting model performance metrics |
-| 4 | `lm_other_gases_tidy_fit_stats.tex` | Non-CO₂ linear model coefficients |
-
-**Supplementary (Tables S1–S5):**
-
-| Table | File | Description |
-|-------|------|-------------|
-| S1 | `total_percent_change_by_fleet.tex` | Percent change in emissions by fleet (2017–2025) |
-| S2 | `pollutant_ais_underestimation_overestimation_summary.tex` | AIS underestimation/overestimation summary by pollutant |
-| S3 | `emissions_by_ocean_summary_tbl.tex` | Emissions summary by ocean basin |
-| S4 | `annual_sc_fishing_non_fishing_tbl.tex` | Annual social cost of emissions by fishing/non-fishing |
-| S5 | `inventory_comparison.tex` | Marine CO₂ inventory comparison data |
+| Item | File | Description |
+|------|------|-------------|
+| Supplementary Fig. 1 | `fig-spatial-temporal-richness-by-fleet-total-pseudolog` | Fig. 2 split into fishing and non-fishing vessels |
+| Supplementary Figs. 2–3 | `fig-pollutant-maps-qlog10`, `fig-pollutant-time-series` | Maps and monthly series for every GHG and pollutant |
+| Supplementary Fig. 4 | `fig-emissions-by-country-and-activity-type` | CO₂ by country and activity type |
+| Supplementary Figs. 5–6 | `fig-emissions-marine-ocean-other`, `fig-annual-emissions-by-ocean-and-data-source` | CO₂ by ocean basin |
+| Supplementary Figs. 7–10 | `figS-passenger-size-panels`, `figS-fleet-growth-by-year`, `figS-growth-timeline-by-family-length`, `figS-fleet-sankey-with-series-2025` | Fleet growth and composition by vessel class and length |
+| Supplementary Figs. 11–13 | `fig-annual-emissions-by-ais-receiver-type`, `...-top-flags`, `fig-co2-emissions-change-map-by-receiver-type` | Trends by AIS receiver type (Supplementary Note 1) |
+| Supplementary Figs. 14–16 | `figS-inventory-comparison-all-sources`, `figS-ais-carriage-saturation-by-size`, `figS-density-by-match-status` | Inventory comparison and S1 evidence on AIS carriage (Supplementary Note 3) |
+| Supplementary Tables 1–7 | `total_percent_change_by_fleet.tex`, `growth_share_by_family_length.tex`, `growth_decomposition_by_family_length.tex`, `pollutant_ais_underestimation_overestimation_summary.tex`, `emissions_by_ocean_summary_tbl.tex`, `annual_sc_fishing_non_fishing_tbl.tex`, `top_countries_by_activity_type.tex` | Change by data source, growth by vessel segment, pollutants, oceans, social cost, top countries |
+| Supplementary Tables 8–10 | `inventory_comparison_all_sources.tex`, `multisector_shipping_comparison.tex`, `inventory_growth_comparison.tex` | Inventory comparison (Supplementary Note 3) |
+| Supplementary Data 1–3 | `bottom-up_inventory_comparison_{methods,inputs,outputs}.csv` | Attribute-by-attribute comparison with six bottom-up inventories (Supplementary Note 2) |
 
 ## Reproducing the analysis
 
@@ -460,7 +431,9 @@ parts of the history it touched.
 What that assistance did **not** do is decide anything. The models, the data sources, the
 methodological choices and the conclusions are the authors'. Every number reported in the
 manuscript is computed from the committed data by the code here rather than written by
-hand, and every figure is drawn from that data — none is AI-generated imagery. All code
+hand, and every data figure is drawn from that data. The one exception is Fig. 5, a
+conceptual flowchart of the methods that contains no data, which was drafted with the help
+of an AI design tool (Anthropic's Claude Design) and reviewed and finalized by the authors. All code
 was reviewed and run by the authors, who are responsible for its correctness.
 
 The same disclosure appears in the manuscript under "Use of generative AI", following
@@ -469,4 +442,4 @@ a large language model cannot be an author, and its use must be documented.
 
 ## Licensing
 
-This repo uses the[ Create Commons CC BY 4.0 license](https://creativecommons.org/licenses/by/4.0/deed.en).
+This repository uses the [Creative Commons CC BY 4.0 license](https://creativecommons.org/licenses/by/4.0/deed.en).
