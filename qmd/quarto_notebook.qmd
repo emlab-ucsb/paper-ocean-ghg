@@ -1971,7 +1971,7 @@ fused_growth_bias_shift_pp <- max(abs(fused_growth_bias - fused_growth_base)) * 
 
 -  We found that vessels emitted approximately `r signif((total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS-based + S1-unmatched", pollutant == "co2") |> dplyr::pull(end_col))/1e9,3)` billion metric tonnes of CO$_{2}$ in `r analysis_end_year`. In `r edgar_comparison_year`, the most recent year for which EDGAR data are available, marine vessels accounted for `r percent_transportation_emmissions_from_marine_edgar` of global fossil fuel emissions from the transportation sector, and `r percent_global_emissions_from_marine_edgar` of global fossil fuel emissions across all sectors.
 
-- Current AIS-only approaches underestimate the magnitude of `r analysis_end_year` emissions by `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(ais_underestimation)`. Meanwhile, because AIS coverage has generally been increasing over time, current AIS-only approaches overestimate the increase in emissions from `r analysis_start_year` to `r analysis_end_year` by `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(trend_overestimation)` percentage points (`r scales::percent(total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS-based", pollutant == "co2") |> dplyr::pull(percent_change))` rather than `r scales::percent(total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS-based + S1-unmatched", pollutant == "co2") |> dplyr::pull(percent_change))`).
+- Using AIS data alone underestimates the magnitude of `r analysis_end_year` emissions by `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(ais_underestimation)`. Meanwhile, because AIS coverage has generally been increasing over time, using AIS data alone overestimates the increase in emissions from `r analysis_start_year` to `r analysis_end_year` by `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(trend_overestimation)` percentage points (`r scales::percent(total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS-based", pollutant == "co2") |> dplyr::pull(percent_change))` rather than `r scales::percent(total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS-based + S1-unmatched", pollutant == "co2") |> dplyr::pull(percent_change))`).
 
 
 ## Introduction
@@ -2042,7 +2042,7 @@ negligible fraction S1-unmatched (`r emissions_by_ocean_summary_tbl |> dplyr::fi
 pixel-months in the Southern Ocean were imaged by S1), meaning that trends there
 may be more susceptible to AIS adoption biases. 
 
-- Looked at more broadly, our total fused marine vessel emissions accounted for roughly `r format_share_range(marine_shares_multisector$share_global)` of all emissions globally in `r multisector_share_year` (according to the CEDS and EDGAR global inventories), and `r format_share_range(marine_shares_multisector$share_transportation)` of all transportation-related CO$_{2}$ emissions.
+- Looked at more broadly, our total fused marine vessel emissions accounted for roughly `r format_share_range(marine_shares_multisector$share_global)` of all emissions globally in `r multisector_share_year` (according to the CEDS and EDGAR global inventories), and `r format_share_range(marine_shares_multisector$share_transportation)` of all transportation-related CO$_{2}$ emissions. By `r edgar_comparison_year`, the most recent year for which EDGAR estimates are available, these shares had risen to `r percent_global_emissions_from_marine_edgar` and `r percent_transportation_emmissions_from_marine_edgar`.
 
 
 ## Discussion
@@ -4107,7 +4107,7 @@ all_performance_metrics_table <- all_performance_metrics |>
   knitr::kable(
     format = "latex",
     label = "all_performance_metrics_table",
-    caption = "Summary of dark fleet model performance metrics for the: 1) emissions regression model; 2) detections classification mode; and 3) detections regression model. Performance estimates for each metric are shown for both the inside S1 footprint and outside S1 footprint tests. All metrics are calculated at the unit of observation except for 'Total percent error', which is the percentage error in the total sum of all predictions relative to the total sum of all truth values.",
+    caption = "Summary of S1-unmatched model performance metrics for the: 1) emissions regression model; 2) detections classification model; and 3) detections regression model. Performance estimates for each metric are shown for both the inside S1 footprint and outside S1 footprint tests. All metrics are calculated at the unit of observation except for 'Total percent error', which is the percentage error in the total sum of all predictions relative to the total sum of all truth values.",
     digits = 2
   ) |>
   kableExtra::kable_styling(font_size = 7, latex_options = "hold_position")
