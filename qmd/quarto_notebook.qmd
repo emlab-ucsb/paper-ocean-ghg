@@ -499,17 +499,16 @@ ais_scale_underestimation <- total_percent_change_by_fleet |>
     emissions_mt_end_ais_s1 = `AIS-based + S1-unmatched`
   )
 
-# For each pollutant, estimate how much the start->end year trend in emissions is underestimated by just using AIS
-# As compared to using AIS-based + S1-unmatched
+# For each pollutant, estimate how much the start->end year percent change in emissions is overestimated by just using AIS
+# As compared to using AIS-based + S1-unmatched. Reported as a difference in percentage points rather than a ratio of
+# percent changes: a ratio flips sign for declining pollutants and is easily misread as percentage points
 ais_trend_overestimation <- total_percent_change_by_fleet |>
   dplyr::filter(fleet != "S1-unmatched") |>
   dplyr::select(fleet, pollutant, percent_change) |>
   tidyr::pivot_wider(names_from = "fleet", values_from = percent_change) |>
   dplyr::mutate(
-    trend_overestimation = (`AIS-based` /
-      `AIS-based + S1-unmatched` -
-      1) |>
-      scales::percent(accuracy = 1)
+    trend_overestimation = ((`AIS-based` - `AIS-based + S1-unmatched`) * 100) |>
+      scales::number(accuracy = 0.1)
   ) |>
   dplyr::rename(
     trend_ais = `AIS-based`,
@@ -1972,7 +1971,7 @@ fused_growth_bias_shift_pp <- max(abs(fused_growth_bias - fused_growth_base)) * 
 
 -  We found that vessels emitted approximately `r signif((total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS-based + S1-unmatched", pollutant == "co2") |> dplyr::pull(end_col))/1e9,3)` billion metric tonnes of CO$_{2}$ in `r analysis_end_year`. In `r edgar_comparison_year`, the most recent year for which EDGAR data are available, marine vessels accounted for `r percent_transportation_emmissions_from_marine_edgar` of global fossil fuel emissions from the transportation sector, and `r percent_global_emissions_from_marine_edgar` of global fossil fuel emissions across all sectors.
 
-- Current AIS-only approaches underestimate the magnitude of `r analysis_end_year` emissions by `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(ais_underestimation)`. Meanwhile, because AIS coverage has generally been increasing over time, current AIS-only approaches overestimate the increasing emissions trend by `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(trend_overestimation)` (from `r analysis_start_year` to `r analysis_end_year`).
+- Current AIS-only approaches underestimate the magnitude of `r analysis_end_year` emissions by `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(ais_underestimation)`. Meanwhile, because AIS coverage has generally been increasing over time, current AIS-only approaches overestimate the increase in emissions from `r analysis_start_year` to `r analysis_end_year` by `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(trend_overestimation)` percentage points (`r scales::percent(total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS-based", pollutant == "co2") |> dplyr::pull(percent_change))` rather than `r scales::percent(total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS-based + S1-unmatched", pollutant == "co2") |> dplyr::pull(percent_change))`).
 
 
 ## Introduction
@@ -1989,7 +1988,7 @@ each vessel using precise latitude/longitude/timestamp information for over `r s
 
 -  Using this data fusion approach, we find that total global CO$_{2}$ emissions at sea in `r analysis_end_year` was `r signif((total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS-based + S1-unmatched", pollutant == "co2") |> dplyr::pull(end_col))/1e9,3)` billion MT, with an increase of `r scales::percent(total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS-based + S1-unmatched", pollutant == "co2") |> dplyr::pull(percent_change))` from `r analysis_start_year` to `r analysis_end_year`. If only considering emissions from vessels that broadcast AIS, in line with currently accepted state-of-the-art models, global CO$_{2}$ emissions in `r analysis_end_year` would be only `r signif((total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS-based", pollutant == "co2") |> dplyr::pull(end_col))/1e9,3)` billion MT, with a more pronounced increase from `r analysis_start_year` to `r analysis_end_year` of `r scales::percent(total_percent_change_by_fleet |> dplyr::filter(fleet == "AIS-based", pollutant == "co2") |> dplyr::pull(percent_change))`.   
 
-- Thus using only AIS data from broadcasting vessels underestimates the magnitude of 2025 global CO$_{2}$ emissions by  `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(ais_underestimation)`, and overestimates the increasing trend for `r analysis_start_year`--`r analysis_end_year` by `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(trend_overestimation)`
+- Thus using only AIS data from broadcasting vessels underestimates the magnitude of 2025 global CO$_{2}$ emissions by  `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(ais_underestimation)`, and overestimates the `r analysis_start_year`--`r analysis_end_year` increase by `r pollutant_ais_underestimation_overestimation_summary |>   dplyr::filter(pollutant == "co2") |>   dplyr::pull(trend_overestimation)` percentage points
 
 - S1-unmatched emissions, in contrast, stayed within `r scales::percent(ceiling(s1_unmatched_max_departure * 100) / 100)` of their `r analysis_start_year` level in every year. This reflects two opposing trends rather than any assumption in our framework: total vessel activity grew, while the fraction of S1 detections that could not be matched to an AIS-broadcasting vessel fell from `r scales::percent(s1_year(analysis_start_year, "unmatched_fraction"))` in `r analysis_start_year` to `r scales::percent(s1_year(analysis_end_year, "unmatched_fraction"))` in `r analysis_end_year` as vessels adopted AIS and AIS reception improved.
 
@@ -5349,16 +5348,21 @@ pollutant_ais_underestimation_overestimation_summary_tbl <- pollutant_ais_undere
     pollutant = forcats::fct_relevel(pollutant, pollutant_factor_levels_tables)
   ) |>
   dplyr::arrange(pollutant) |>
+  # escape = FALSE below, for the stacked heads, so the percent signs are escaped here
+  dplyr::mutate(
+    ais_underestimation = stringr::str_replace_all(ais_underestimation, "%", "\\\\%")
+  ) |>
   dplyr::rename(
     Pollutant = pollutant,
-    "Underestimation of {analysis_end_year} emissions" := ais_underestimation,
-    "Overestimation of {analysis_start_year}-{analysis_end_year} emissions trend" := trend_overestimation
+    "{stacked_head('Underestimation of', paste(analysis_end_year, 'emissions'))}" := ais_underestimation,
+    "{stacked_head(paste0('Overestimation of ', analysis_start_year, '-', analysis_end_year), 'percent change (percentage points)')}" := trend_overestimation
   ) |>
   knitr::kable(
     format = "latex",
+    escape = FALSE,
     label = "pollutant_ais_underestimation_overestimation_summary",
     caption = glue::glue(
-      "Underestimation of {analysis_end_year} emissions using only AIS data, and overestimation of {analysis_start_year} to {analysis_end_year} emissions trend using only AIS data, by pollutant."
+      "Underestimation of {analysis_end_year} emissions using only AIS data, and overestimation of the {analysis_start_year} to {analysis_end_year} percent change in emissions using only AIS data, by pollutant. Overestimation is the AIS-based percent change minus the AIS-based + S1-unmatched percent change, in percentage points; positive values mean AIS data alone show faster growth, or a slower decline, than the fused estimate."
     )
   ) |>
   kableExtra::kable_styling(font_size = 8, latex_options = "hold_position")
