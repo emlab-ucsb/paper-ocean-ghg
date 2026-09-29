@@ -1,5 +1,10 @@
 % Latex Nature styling files downloaded from https://www.springernature.com/gp/authors/campaigns/latex-author-support#c17590862
+% combined.tex loads the class itself (Overleaf only offers files with their
+% own \documentclass as a main document), then defines \combinedbuild and
+% inputs this file
+\ifdefined\combinedbuild\else
 \documentclass[lineno,pdflatex,sn-nature]{sn-jnl}
+\fi
 
 \input{preamble}
 % The SI's labels come from si.aux, except in combined.tex, where the SI is

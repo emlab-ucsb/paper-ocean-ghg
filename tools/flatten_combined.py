@@ -28,6 +28,8 @@ def expand(name):
 text = expand("combined.tex")
 switches = [
     ("\\def\\combinedbuild{}\n", ""),
+    ("\\ifdefined\\combinedbuild\\else\n"
+     "\\documentclass[lineno,pdflatex,sn-nature]{sn-jnl}\n\\fi\n", ""),
     ("\\ifdefined\\combinedbuild\\else\\myexternaldocument{si}\\fi\n", ""),
     ("\\ifdefined\\combinedbuild\n\\newpage\n", "\\newpage\n"),
 ]
