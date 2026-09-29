@@ -58,58 +58,43 @@
 
 By incorporating this excellent feedback, we believe our manuscript is significantly stronger as a result.
 
-We are also excited to highlight to the editor and both reviewers that since we first submitted the manuscript for review in March 2026, we have made a number of significant improvements to both the AIS-based and S1-based emissions models. For the AIS-based model, we have improved our vessel characteristic inference algorithms across the board: we now distinguish cargo and tanker sub-types (including chemical and oil tankers), and new predictive models for engine type, year of build and engine speed allow us to assign emissions factors by engine type and IMO NOx Tier. The AIS-based model now validates better against both independent vessel-level datasets, with traditional R$^{2}$ rising from 0.82 to 0.85 against a proprietary database of measured fuel consumption and from 0.81 to 0.84 against EU MRV. For the S1-based models, we now resolve detections into finer length bins (ten for non-fishing and five for fishing vessels, up from four), remove duplicate S1 detections, and assign zero S1-unmatched emissions to imaged pixel-months in which S1 made no unmatched detections. We have also streamlined the S1-based models' features, adding features that describe AIS-broadcasting activity in each pixel-month and removing others, including the ERA5 weather features. Producing these data for the public on an ongoing basis is a central aim of this work, so we have favored parsimonious models that are simpler to maintain and run in production. The streamlined models retain high out-of-sample performance inside the S1 footprint, slightly below that of the submitted versions (traditional R$^{2}$ of 0.94 for the emissions regression, compared with 0.97; an F1 score of 0.72 for the detection classification, compared with 0.76; and traditional R$^{2}$ of 0.68 for the detection regression, compared with 0.71). They also generalize better in our simulated test outside the S1 footprint, most clearly for the detection regression, whose traditional R$^{2}$ rose from 0.27 to 0.45 and whose total percent error fell from 41\% to 16\%. Finally, we have extended the time period covered by our dataset to make our results more timely and globally relevant, expanding coverage that previously ended in 2024 to now include 2025. We have updated all manuscript figures, statistics, tables, and accompanying text to reflect these improved models and expanded temporal coverage.
+We would also like to highlight that since our March 2026 submission, we have improved both components of our data fusion approach and extended our study period through 2025. For the AIS-based model, we now distinguish cargo and tanker sub-types, and new models for engine type, year of build and engine speed let us assign emissions factors by engine type and IMO NOx Tier. The AIS-based model now validates better against both independent vessel-level datasets: traditional R$^{2}$ rose from 0.82 to 0.85 against measured fuel consumption for 16,205 vessels in a major proprietary vessel registry, and from 0.81 to 0.84 against 27,657 vessel-years of EU MRV records. For the S1-unmatched models, we now use finer length bins, remove duplicate S1 detections, and assign zero S1-unmatched emissions to imaged pixel-months with no unmatched detections. We have also streamlined the model features, adding features that describe AIS-broadcasting activity and removing others, including ERA5 weather. Because we aim to produce these data for the public on an ongoing basis, we have favored parsimonious models that are simpler to maintain. Inside the S1 footprint their out-of-sample performance is slightly below that of the submitted versions: traditional R$^{2}$ of 0.94 for the emissions regression, compared with 0.97; an F1 score of 0.72 for the detection classification, compared with 0.76; and traditional R$^{2}$ of 0.68 for the detection regression, compared with 0.71. Outside it they generalize better: in our simulated test, R$^{2}$ for the detection regression rose from 0.27 to 0.45, and its total percent error fell from 41\% to 16\%. All figures, statistics, tables and text have been updated accordingly.
+
+In summary, the major changes in this revision are listed below, with the comments each one addresses in parentheses:
+
+\begin{itemize}[leftmargin=*, itemsep=2pt]
+  \item \textbf{Systematic comparison with other inventories.} We compare our methods, input data, magnitudes and trends against the six global bottom-up, AIS-based shipping inventories (STEAM, SEIM, MariTEAM, OECD, SAVE and the Fourth IMO GHG Study), and our magnitudes and trends against the two top-down inventories (EDGAR and CEDS). The comparison has its own Results paragraph, a new main-text figure (Fig.~4), two Discussion paragraphs, two new Supplementary Notes and three Supplementary Data files (R3.1, R3.4, R3.7).
+  \item \textbf{Clearer terminology for the two components of our data fusion approach.} Throughout the text, figures and tables, these are now labeled `AIS-based' and `S1-unmatched', and `non-broadcasting' is reserved for vessels that do not carry AIS at all (R2.4).
+  \item \textbf{Sensitivity analyses and quantified bias.} A new analysis estimates how often unmatched S1 detections are broadcasting vessels missed during AIS gaps, bounding the resulting double counting at 2.4\% of our fused total. We also report the sensitivity of our results to a $\pm$20\% bias in S1-unmatched emissions (about 3.5\% of the 2025 total, and 2017--2025 growth of 34--37\% against our estimate of 36\%), to the maximum time interval a single AIS position may represent, and to the loss of Sentinel-1B. A simulated test outside the S1 footprint shows how the models perform where S1 does not image. The Discussion now states the direction and size of the bias under each key assumption (R2.1, R2.3, R2.4, R3.4, R3.6).
+  \item \textbf{New vessel characteristics models.} New models predict engine type, year of build and engine speed, so emissions factors can be assigned by engine type and IMO NOx Tier (R2.2).
+  \item \textbf{Expanded documentation of the machine learning models.} Each vessel characteristics model now has its own Methods section covering training data, performance, variable importance, overfitting controls and known biases. A new table reports, for each characteristic, how often it comes from registries or is inferred, and the Methods list every registry and database we used (R2.3, R3.2).
+  \item \textbf{Expanded AIS data description.} The Methods now name our AIS providers and describe the processing pipeline and the treatment of non-vessel AIS signals. A new Supplementary Note examines trends in AIS receiver types, and the Discussion acknowledges our reliance on a single AIS pipeline (R3.3, R3.5).
+  \item \textbf{Expanded S1 sampling and coverage description.} The Introduction now describes the S1 data and defines the S1 footprint. The Methods explain how our framework handles S1's sparse, fixed-time sampling, and use the loss of Sentinel-1B as a test of sensitivity to sampling frequency (R3.6, R3.8, R3.9).
+  \item \textbf{Explained emissions trends.} The Results explain why S1-unmatched emissions are nearly flat, and the Discussion examines how much of our estimated growth reflects expanding AIS carriage rather than rising activity (R3.7, R3.10).
+  \item \textbf{Revised main-text figures.} These comprise a new methods schematic (Fig.~5; R2.5); new maps of S1-unmatched emissions and their share of the total (Fig.~2; R2.6, R3.11); a rebuilt Fig.~3 by vessel family, region and activity type (R3.12, R3.13, R3.14); and the new inventory comparison figure (Fig.~4; R3.1, R3.7).
+  \item \textbf{New supplementary material.} New Supplementary Figures and Tables describe the data (AIS receiver types, S1 detections by vessel length and match status, and emissions for fishing and non-fishing vessels), trends by vessel class and length, and the inventory comparisons (R2.6, R3.3, R3.7, R3.11, R3.13).
+  \item \textbf{Reorganized Discussion.} The Discussion now focuses on policy implications, methodological limitations and directions for future research, rather than a literature review (R3.15).
+\end{itemize}
 
 \reviewer{Response to the Editor}
 
-Before turning to the point-by-point responses to the referee comments, we would first like to highlight that we have fully formatted the manuscript in accordance with the guidelines provided by \textit{Nature Communications}:
+Before turning to the referee comments, we have formatted the manuscript in accordance with the \textit{Nature Communications} guidelines:
 
-\point{E1 --- Manuscript section order}
-
-\response We have reordered the manuscript to follow the required structure. 
-
-\point{E2 --- Supplementary Information as a separate PDF}
-% category: formatting | assignee: Gavin
-% Separate PDF; cover page with title + full author info; items list on page 2;
-% items labeled Supplementary Figure/Table/Note/Discussion/Methods/References.
-\response The Supplementary Information is now a separate PDF. Its cover page gives the title and full author information, and page 2 lists every Supplementary Figure, Table, Note and Data file, each labeled accordingly.
-
-\point{E3 --- Figure labeling}
-
-\response All multi-panel figures have been relabeled using lower case `a', `b', etc, using the same type as the other text in the figure.  All figure lettering is now also lower-case type, with only the first letter capitalized.
-
-
-\point{E4 --- Color-vision-deficiency-safe figure colors}
-
-\response We audited every figure in the manuscript to ensure each one is color-vision-deficiency-safe. Each categorical palette was simulated for deuteranopia, protanopia and tritanopia using the Machado et al. (2009) severity-1.0 model, and every pair of colors within a palette was then measured in CIE $\Delta E_{2000}$. For a categorical key the number that matters is the smallest pairwise distance, since that is the pair a reader is most likely to confuse.
-
-Most of the manuscript already met the standard, because the figures draw their colors from palettes built for this purpose: the Okabe-Ito palette for the data-source series in Figures 1 and 2 and Supplementary Fig. 1; Paul Tol's \emph{Safe} palette for categorical keys; the viridis family (\texttt{magma}, \texttt{mako}) for the gridded emissions maps; and Crameri's \texttt{scico} palettes for the diverging change maps. These are perceptually uniform and color-vision-deficiency-safe by construction, and wherever a figure needed arbitrary colors we have taken them from one of these packages. The training/testing map already used the turquoise-and-red pairing the editor's guidance suggests. 
-
-\point{E5 --- Data Availability section}
-
-\response We have added a Data availability section, placed directly after the Methods.
-
-\point{E6 --- Code Availability section}
-
-\response We have added a Code availability section, placed directly after the Data availability section.
-
-\point{E7 --- Source Data file}
-
-\response All manuscript figures, tables, and summary statistics can be reproduced entirely by the data and code provided in the GitHub repo, Zenodo repo, and Code Ocean repo. We therefore did not produce a separate `Source Data file'.
-
-\point{E8 --- Reporting checklist(s)}
-% category: policy | assignee: Gavin
-% Must be completed in Adobe Reader (not a browser) and uploaded as a
-% Related Manuscript file.
-\response \todo{complete and attach}
-
-\point{E9 --- ORCID for corresponding author(s)}
-% category: admin | assignee: Gavin
-\response \todo{link ORCID(s) in the MTS before acceptance}
-
-\point{E10 --- Author-list change form (if applicable)}
-
-\response The author list has not changed since our original submission.
+\begin{itemize}[leftmargin=*, itemsep=2pt]
+  \item \textbf{Section order.} The manuscript now follows the required structure.
+  \item \textbf{Supplementary Information.} The main text and Supplementary Information are now separate documents, each submitted as its own PDF. The Supplementary Information has a cover page with the title and full author information, and page 2 lists every Supplementary Figure, Table, Note and Data file, each labeled accordingly. For ease of review, the tracked-changes PDF combines the two, as in our original submission.
+  \item \textbf{Figure labeling.} Multi-panel figures are labeled with lower-case `a', `b', etc., in the same type as the other figure text, and all figure lettering is in sentence case.
+  \item \textbf{Color-vision-deficiency-safe colors.} Every figure draws its colors from palettes designed to be color-vision-deficiency-safe (Okabe-Ito, Paul Tol's \emph{Safe}, viridis and \texttt{scico}), and we checked each categorical palette under simulated deuteranopia, protanopia and tritanopia.
+  \item \textbf{Data and Code availability.} Both sections have been added, directly after the Methods.
+  \item \textbf{Source Data.} All figures, tables and summary statistics can be reproduced from the data and code in the GitHub, Zenodo and Code Ocean repositories, so we have not provided a separate Source Data file.
+  % category: policy | assignee: Gavin
+  % Must be completed in Adobe Reader (not a browser) and uploaded as a
+  % Related Manuscript file.
+  \item \textbf{Reporting checklist.} \todo{complete and attach}
+  % category: admin | assignee: Gavin
+  \item \textbf{ORCID.} \todo{link ORCID(s) in the MTS before acceptance}
+  \item \textbf{Author list.} Unchanged since our original submission.
+\end{itemize}
 
 % =====================================================================
 \reviewer{Reviewer \#2}
@@ -184,7 +169,7 @@ technologies. Please clarify the implications of this assumption and discuss how
 future work could incorporate vessel-specific fuel and engine data.
 \end{refquote}
 
-\response Thank you for this clarifying comment. Since the initial submission, we have developed new machine learning models to predict engine type (oil, gas, or turbine), vessel construction year, and engine speed (RPM) for each AIS-broadcasting vessel. This allows us to now more precisely assign emissions factors, including the ability to assign factors for different IMO NOx tiers and engine speeds. When a vessel's engine type cannot be resolved to a single emissions factor, we now use the predicted engine type to narrow the applicable emission factor columns and average across them. Although we attempted to develop a machine learning model to predict fuel type as well, we were unable to achieve reasonable predictive performance using the proprietary vessel registry we had access to. The Discussion now also addresses how future research should be targeted at refining vessel-specific fuel and engine data.
+\response Thank you for this clarifying comment. Since the initial submission, we have developed new machine learning models to predict engine type (oil, gas, or turbine), vessel construction year, and engine speed (RPM) for each AIS-broadcasting vessel. This allows us to now more precisely assign emissions factors, including the ability to assign factors for different IMO NOx tiers and engine speeds. When a vessel's engine type cannot be resolved to a single emissions factor, we now use the predicted engine type to narrow the applicable emission factor columns and average across them. Although we attempted to develop a machine learning model to predict fuel type as well, we were unable to achieve reasonable predictive performance using the major proprietary vessel registry we had access to. The Discussion now also addresses how future research should be targeted at refining vessel-specific fuel and engine data.
 
 \changes We have added this new information to the Methods, in Section \textcolor{red}{4.1.7} (`Emissions model for AIS-broadcasting vessels'), in the following paragraphs:
 
