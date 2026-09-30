@@ -1,7 +1,7 @@
 %DIF 1c1-6
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL diff/submitted/main.tex   Wed Sep 30 07:48:13 2026
-%DIF ADD diff/revised_flat.tex     Wed Sep 30 08:08:04 2026
+%DIF ADD diff/revised_flat.tex     Wed Sep 30 08:26:38 2026
 %DIF < % Latex Nature styling files downloaded from https://www.springernature.com/gp/authors/campaigns/latex-author-support#c17590862
 %DIF -------
 % The revised manuscript and Supplementary Information as a single document, %DIF > 
@@ -509,7 +509,7 @@ Threshold (hours) & Cumulative CO$_2$ (million tonnes) & Share at or below & Sha
 
 \DIFdelbegin \DIFdel{We use vessel characteristics data from }\DIFdelend \DIFaddbegin \DIFadd{Translating AIS vessel activity data into emissions estimates requires information on numerous vessel-specific characteristics including vessel class, main engine power (kW), engine type, gross tonnage, maximum design speed (knots), vessel construction year, and engine operating speed (RPM). A key contribution of this work was therefore to refine and expand }\DIFaddend GFW's vessel \DIFdelbegin \DIFdel{metadata tables}\DIFdelend \DIFaddbegin \DIFadd{characteristics database to include accurate estimates of these attributes for all 775,000 AIS-broadcasting vessels included in our analysis}\DIFaddend . For each vessel, this \DIFdelbegin \DIFdel{includes}\DIFdelend \DIFaddbegin \DIFadd{information comes from}\DIFaddend : (1) official registry information when available \cite{park2023tracking}, or (2) when registry data are unavailable, \DIFdelbegin \DIFdel{algorithm-derived vessel characteristics including vessel class, main engine power, maximum design speed, and gross tonnage \mbox{%DIFAUXCMD
 \cite{kroodsma2018tracking}}\hskip0pt%DIFAUXCMD
-}\DIFdelend \DIFaddbegin \DIFadd{machine learning vessel characteristics models. The only exception to this is the proprietary S\&P Global Market Intelligence's Ships Dataset: due to data usage agreements, vessel characteristics from that particular database could only be used for model training, and could not be used directly by the emissions model or shared externally; vessels whose characteristics are found only in that database therefore use modeled characteristics, although they align very closely with those in the registry. Registry information is aggregated across a range of public and proprietary sources: IMO's GISIS; S\&P Global Market Intelligence's Ships Dataset; the national vessel registries of 19 flag states (the United States, Canada, Australia, Russia, the Republic of Korea, Norway, Indonesia, Iceland, Taiwan, the Faroe Islands, Spain, Panama, Peru, Ecuador, Seychelles, Malaysia, Belize, Papua New Guinea and Madagascar); the EU fleet register and FAO records; and the authorized-vessel lists of thirteen regional fisheries management organizations (ICCAT, IOTC, WCPFC, IATTC, SPRFMO, CCSBT, NEAFC, NPFC, GFCM, NAFO, SIOFA, CCAMLR and SEAFO) \mbox{%DIFAUXCMD
+}\DIFdelend \DIFaddbegin \DIFadd{machine learning vessel characteristics models. The only exception to this is the proprietary S\&P Global Market Intelligence's Ships Dataset: due to data usage agreements, vessel characteristics from that particular database could only be used for model training, and could not be used directly by the emissions model or shared externally; for characteristics found only in that database, we therefore use modeled values, although they align very closely with those in the registry. Registry information is aggregated across a range of public and proprietary sources: IMO's GISIS; S\&P Global Market Intelligence's Ships Dataset; the national vessel registries of 19 flag states (the United States, Canada, Australia, Russia, the Republic of Korea, Norway, Indonesia, Iceland, Taiwan, the Faroe Islands, Spain, Panama, Peru, Ecuador, Seychelles, Malaysia, Belize, Papua New Guinea and Madagascar); the EU fleet register and FAO records; and the authorized-vessel lists of thirteen regional fisheries management organizations (ICCAT, IOTC, WCPFC, IATTC, SPRFMO, CCSBT, NEAFC, NPFC, GFCM, NAFO, SIOFA, CCAMLR and SEAFO) \mbox{%DIFAUXCMD
 \cite{park2023tracking}}\hskip0pt%DIFAUXCMD
 }\DIFaddend .
 
@@ -572,7 +572,7 @@ It should be noted that even when registries exist, vessel characteristics can b
   \centering
   \small
   \caption{\DIFaddFL{Availability of vessel characteristics used in emissions modeling, by source.
-  ``Inferred'' is the percentage of vessels for which the characteristic was not matched to any registry and was therefore inferred by our machine-learning models. ``Public Sources'' is the percentage sourced from any publicly available registry, including that maintained by IMO's GISIS (Global Integrated Shipping Information System). ``Private Sources'' is the percentage for which the characteristic is available from proprietary vessel databases, chiefly S\&P Global Market Intelligence's Ships Dataset and to a smaller extent non-public lists maintained by Global Fishing Watch. Under our data usage agreement, S\&P values are used only to train the machine-learning models, so the emissions model uses inferred values for these vessels.}}\label{tab:characteristic-availability}
+  ``Inferred'' is the percentage of vessels for which the characteristic was not matched to any registry and was therefore inferred by our machine-learning models. ``Public Sources'' is the percentage sourced from any publicly available registry, including that maintained by IMO's GISIS (Global Integrated Shipping Information System). ``Private Sources'' is the percentage for which the characteristic is available from proprietary vessel databases, chiefly S\&P Global Market Intelligence's Ships Dataset and to a smaller extent non-public lists maintained by Global Fishing Watch. Under our data usage agreement, S\&P values are used only to train the machine-learning models, so wherever a characteristic is available only from S\&P, the emissions model uses the inferred value.}}\label{tab:characteristic-availability}
   \begin{tabular}{@{}lrrr@{}}
     \toprule
     Characteristic & Inferred (\%) & Public Sources (\%) & Private Sources (\%) \\
@@ -2544,7 +2544,7 @@ Finally, in \DIFaddbegin \DIFadd{Supplementary }\DIFaddend Fig. \ref{fig:fig-co2
 \cite{fourth2020greenhouse}}\hskip0pt%DIFAUXCMD
 . Of the published inventories, SEIM is the only one besides ours to describe a more involved machine-learning approach to infer missing vessel characteristics, applied after extending commercial registries with open data \mbox{%DIFAUXCMD
 \cite{yiHighresolutionGlobalShipping2025}}\hskip0pt%DIFAUXCMD
-. In our vessel information dataset, characteristics are taken from publicly available official registries consolidated through extensive prior scraping work \mbox{%DIFAUXCMD
+. In our vessel information dataset, characteristics are taken from official registries consolidated through extensive prior scraping work \mbox{%DIFAUXCMD
 \cite{park2023tracking}}\hskip0pt%DIFAUXCMD
 , and where these are unavailable, from inferred characteristics. Building on \mbox{%DIFAUXCMD
 \cite{kroodsma2018tracking}}\hskip0pt%DIFAUXCMD
