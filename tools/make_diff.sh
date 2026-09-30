@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Builds main_diff.tex: the tracked-changes comparison of the March 2026
+# Builds main_diff.tex: the tracked-changes comparison of the original
 # submission against the revised manuscript and Supplementary Information.
 # Compile main_diff.tex on Overleaf (Menu > Main document); the response
 # letter's line numbers refer to its PDF.
 #
-# Old side: diff/submitted/main.tex, the combined main + SI file as uploaded
-# in March, and the tables it \input'd, taken from git at the submitted commit
+# Old side: diff/submitted/main.tex, the combined main + SI file as originally
+# submitted, and the tables it \input'd, taken from git at the submitted commit
 # and written to diff/submitted/tables/.
 # New side: combined.tex flattened by tools/flatten_combined.py into
 # diff/revised_flat.tex, so both sides are one plain document of the same shape.
@@ -14,14 +14,14 @@
 # old version struck out and its new version marked as added, rather than
 # marked up cell by cell, which latexdiff cannot do reliably inside tabular.
 #
-# Usage: tools/make_diff.sh [submitted_commit]   (default 03684ba, 2026-03-16)
+# Usage: tools/make_diff.sh [submitted_commit]   (default v1-submitted, 2026-07-09)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-commit="${1:-03684ba}"
+commit="${1:-v1-submitted}"
 old=diff/submitted/main.tex
 if [ ! -f "$old" ]; then
-  echo "Put the main.tex that was submitted in March at $old" >&2
+  echo "Put the main.tex that was originally submitted at $old" >&2
   exit 1
 fi
 

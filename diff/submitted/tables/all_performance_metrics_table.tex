@@ -1,0 +1,67 @@
+\begin{table}[!h]
+\centering
+\caption{\label{tab:all_performance_metrics_table}Summary of dark fleet model performance metrics for the: 1) emissions regression model; 2) detections classification mode; and 3) detections regression model. Performance estimates for each metric are shown for both the inside S1 footprint and outside S1 footprint tests. All metrics are calculated at the unit of observation except for 'Total percent error', which is the percentage error in the total sum of all predictions relative to the total sum of all truth values.}
+\centering
+\fontsize{7}{9}\selectfont
+\begin{tabular}[t]{l|l|l|r|r}
+\hline
+Model & Pollutant & Metric & Inside footprint & Outside footprint\\
+\hline
+Emissions regression & CO2 & Traditional R² & 0.96 & 0.73\\
+\hline
+Emissions regression & CH4 & Traditional R² & 0.91 & 0.71\\
+\hline
+Emissions regression & N2O & Traditional R² & 0.96 & 0.74\\
+\hline
+Emissions regression & CO & Traditional R² & 0.92 & 0.70\\
+\hline
+Emissions regression & NOX & Traditional R² & 0.89 & 0.65\\
+\hline
+Emissions regression & SOX & Traditional R² & 0.96 & 0.74\\
+\hline
+Emissions regression & PM2.5 & Traditional R² & 0.96 & 0.75\\
+\hline
+Emissions regression & PM10 & Traditional R² & 0.96 & 0.75\\
+\hline
+Emissions regression & VOCs & Traditional R² & 0.95 & 0.75\\
+\hline
+Emissions regression & CO2 & Total percent error & -7.40 & -10.61\\
+\hline
+Emissions regression & CH4 & Total percent error & -12.04 & -12.74\\
+\hline
+Emissions regression & N2O & Total percent error & -7.18 & -8.77\\
+\hline
+Emissions regression & CO & Total percent error & -13.81 & -19.05\\
+\hline
+Emissions regression & NOX & Total percent error & -17.58 & -27.42\\
+\hline
+Emissions regression & SOX & Total percent error & -8.72 & -11.60\\
+\hline
+Emissions regression & PM2.5 & Total percent error & -7.18 & -6.28\\
+\hline
+Emissions regression & PM10 & Total percent error & -7.18 & -6.28\\
+\hline
+Emissions regression & VOCs & Total percent error & -4.02 & 3.46\\
+\hline
+Detections classification & - & Accuracy & 0.92 & 0.95\\
+\hline
+Detections classification & - & F1 score & 0.73 & 0.45\\
+\hline
+Detections classification & - & Precision & 0.73 & 0.47\\
+\hline
+Detections classification & - & Precision-recall AUC & 0.81 & 0.45\\
+\hline
+Detections classification & - & recall & 0.72 & 0.43\\
+\hline
+Detections classification & - & ROC AUC & 0.95 & 0.90\\
+\hline
+Detections classification & - & Sensitivity & 0.72 & 0.43\\
+\hline
+Detections classification & - & Specificity & 0.96 & 0.98\\
+\hline
+Detections regression & - & Traditional R² & 0.70 & 0.21\\
+\hline
+Detections regression & - & Total percent error & 1.18 & 48.50\\
+\hline
+\end{tabular}
+\end{table}
